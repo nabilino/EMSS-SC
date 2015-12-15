@@ -1,0 +1,56 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/about.htm,v 1.15.2.1.4.2.14.2.2.5 2012/08/08 14:19:30 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<script language="javascript" src="servenv.js"></script>
+<SCRIPT language="javascript" src="about.js"></SCRIPT>
+<TITLE>Lawson Portal</TITLE>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css"></link>
+<style type="text/css">
+	BODY
+	{
+		color: #000000;
+		margin: 0px;
+		visibility: hidden;
+		background-image: url('images/INFOR-Logo-2009-RGB-72dpi-300wx59h.png');
+		background-repeat: no-repeat;
+		background-position: center 35px;
+	}
+</style>
+</HEAD>
+<body onload="aboutInit()" onkeydown="aboutKeyDown(event)">
+	<div id="imgDiv" style="position:absolute;width:468px;height:368px;"></div>
+	<div id="bgDiv" style="position:absolute;width:468px;height:368px;">
+		<div id="copyright" style="position:relative;top:185px;width:468px;text-align:center;">
+			<div style="font-size:9pt;font-weight:bold;">Portal</div>
+			<div style="font-size:8pt;">Copyright &copy; 2012 Infor. All rights reserved.</div>
+			<div style="font-size:8pt;">Version: <span id="versionNumber">[version]</span></div>
+		</div>
+		<div id="btns" style="position:relative;top:257px;width:468px;text-align:center;">
+			<input type="button" id="btnClose" value="Close" class="xTToolBarButton"
+				onclick="aboutClose()" title="Close Window"></input>
+		</div>
+	</div>
+</body>
+</html>

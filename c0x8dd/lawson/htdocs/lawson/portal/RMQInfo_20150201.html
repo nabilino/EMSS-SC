@@ -1,0 +1,282 @@
+<html>
+<head>
+<script src="XMLObjTree.js"></script>
+<style type="">
+body {
+	xfont-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-family: "PT Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	border: none collapse;
+}
+th {
+	text-align: left;
+	border-bottom: solid 1px black;
+}
+td {
+	border: 0px;
+	padding: 0px;
+	border-left: solid 1px;
+	margin: 0px;
+
+}
+</style>
+</head>
+
+<script>
+
+function getQueryTb(letter, id, fname)
+{	
+	fname = (fname ? fname : '')
+	id = (id ? id : '')
+	//alert(letter + ":" + id + ":" + fname)
+	var url = "/rmwebapp/RMApiServlet"
+	
+	var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+	+ '<ATTRIBUTES>'
+	+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[ID]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Access]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[AccountingUnitControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[AcgrpCollect]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ActivityList]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Addins]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[AllowJobQueue]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CheckLS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CreateTimeStamp]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[CompanyControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CreatorsId]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[DefValSep]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[Email]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Group]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToExecutives]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToJobCode]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPay]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPersAct]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPosition]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToSSN]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToSuper]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAuthorControl]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRDepartmentControl]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HREmployeeControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ISOLocale]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[IsRunAsEnabled]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ModifiersId]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ModifyTimeStamp]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[Name]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[OLEDBC]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[PortalAdmin]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[PortalRole]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PrimaryGroup]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PrimaryStructure]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[ProcessLevelControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ProductLine]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PSAStandAlone]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Role]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SLDTFUNC]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SLDTOBS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SNotesServer]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ULDTFUNC]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ULDTOBS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[UTZOFFSET]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[WFUser]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[WKDAYEXPR]]></ATTRIBUTE>'
+	+ '</ATTRIBUTES>'
+	//+ '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>'
+	//+ (letter ? '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>' : '')
+	//+ (fname ? '<WHERE><![CDATA[({FirstName}=' + fname + '*)]]></WHERE>' : '')
+	//+ (id ? '<WHERE><![CDATA[({ID}=' + id + '*)]]></WHERE>' : '')
+	//+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+	+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+	+ '<OUTPUTSERVICEATTRS>'
+	+ '<OUTPUTSERVICEATTR serviceName="SSOP"><![CDATA[USER]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_REQUESTER"><![CDATA[REQUESTER]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[COMPANY]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[EMPLOYEE]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[DOMAIN_USER]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[LOGIN]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+	+ '</OUTPUTSERVICEATTRS></TRANSACTION>'
+	
+	var strPDL = portalWnd.oUserProfile.getAttribute("productline")
+	if (strPDL == "PROD901")
+		data = data.replace(/<!appProdline>/g, 'PROD901').replace(/<!LBIService>/g, 'LBIRPT').replace('C0X8DD','C0X8PD')
+	else
+		data = data.replace(/<!appProdline>/g, 'DEV901').replace(/<!LBIService>/g, 'LBIRPT') 
+
+		//alert(data)
+	//return
+	//var url="/servlet/Router/Data/Erp/RMQ1.xml"
+	//var ajax = new ActiveXObject("Microsoft.XMLHTTP");
+	if (window.XMLHttpRequest) {							
+		ajax=new XMLHttpRequest();							
+	} else {																	
+		ajax=new ActiveXObject("Microsoft.XMLHTTP");
+	}																						 
+	ajax.open("POST", url, false)
+	ajax.setRequestHeader("Content-Type", "text/xml");
+	ajax.setRequestHeader("Content-Length", data.length);
+	ajax.send(data)
+	var xotree = new XML.ObjTree();
+	xotree.force_array = [ "ROW"];
+	var resp = ajax.responseText
+	
+	if (typeof resp == "string")
+	{
+		if (window.DOMParser)
+		{
+			parser=new DOMParser();
+			xmlDoc=parser.parseFromString(resp,"text/xml");
+		}
+		else // Internet Explorer
+		{
+			xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+			xmlDoc.async=false;
+			xmlDoc.loadXML(resp);
+		}
+	}
+
+	var tb = document.createElement('tbody')
+	
+	var res = xotree.parseDOM(xmlDoc);
+	trans = res['#document'].TRANSACTION
+	
+	var element = trans.ROWDEF.ELEMENT
+	
+	// Add headers
+	var tr = document.createElement('tr')
+	for (e in element)
+	{
+		var colName = element[e]['-name']
+		var th = document.createElement('th')
+		var tn = document.createTextNode(colName)
+		th.appendChild(tn)
+		tr.appendChild(th)
+	}
+	tb.appendChild(tr)
+
+	var rows = trans.ROWS.ROW
+	
+	// Add Rows
+	for (var r in rows)
+	{
+		var tr = document.createElement('tr')
+		var cols = rows[r].ROWATTR
+		for (var c in cols)
+		{
+			var name = cols[c]['-name']
+			var val = String(cols[c].VALUE)
+			val = val.replace('undefined','-')
+			var td = document.createElement('td')
+			td.title = name
+			//td.onclick = function(event) {event.srcElement.style.width="10px"}
+			var tn = document.createTextNode(val)
+			td.appendChild(tn)
+			tr.appendChild(td)
+		}
+		tb.appendChild(tr)
+	}
+	return tb
+}
+function test01(i, tbl)
+{
+	with ({i: i, tbl: tbl})
+	{
+		var fn = function() {
+			var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			if (i < str.length)
+			{
+				var letter = str.charAt(i)
+				var tb = getQueryTb(letter)
+				tbl.appendChild(tb)
+				test01(i+1, tbl)
+			}
+		}
+	}
+	setTimeout(fn, 100)
+}
+function iterateAlpha(tbl)
+{
+	var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	//var str = "A"; but we do not use this
+	//var tbl = document.createElement('table')
+	//document.body.appendChild(tbl)
+	test01(0, tbl)
+	return
+	for(var i=0; i < 26; i++)
+	{
+		//var nextChar = str.charAt(i);
+		var tb = test01(i, tbl)
+		tbl.appendChild(tb)
+	}
+}
+with({tbl: null})
+var go = function()
+{
+	var uid = document.getElementById("uid").value
+	var name = document.getElementById("name").value
+	var fname = document.getElementById("fname").value
+	//alert(uid + ":" + name + ":" + fname)
+	if (! tbl)
+	{
+		tbl = document.createElement('table')
+		document.body.appendChild(tbl)
+	}
+	if (uid||name||fname)
+	{
+		tbl.appendChild(getQueryTb(name, uid, fname))
+	}
+	else
+	{
+		iterateAlpha(tbl)
+	}
+}
+function loadPage()
+{
+	portalWnd = null, p = parent, c = 0, max = 10;
+	while (!portalWnd && c < max && p)
+	{
+		portalWnd = p.portalWnd
+		p = p.parent
+		c++
+	}
+	
+	var tn = document.createTextNode(portalWnd.oUserProfile.getAttribute("productline"))
+	document.getElementById('pdl').appendChild(tn)
+	//test0()
+	//test2_async()
+	//alert('hi')
+	//test2_async()
+	document.onkeydown=function(){
+		if(window.event.keyCode=='13'){
+			go();
+		}
+	}
+}
+function showData(x)
+{
+	var d = new Date();
+	window.document.body.innerHTML += (d.getTime() + ": " + x + "<br>")
+}
+
+</script>
+<body onload="loadPage()">
+<table>
+<tr>
+<td>ID</td><td>LastName</td><td>FirstName</td>
+</tr>
+<tr>
+<td><input type="text" id="uid"></td>
+<td><input type="text" id="name"></td>
+<td><input type="text" id="fname"></td>
+<td><input type="button" id="go" onclick="go()" value="go"></td>
+<td><div id="pdl"></div></td>
+</tr>
+</table>
+</body>
+</html>

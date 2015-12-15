@@ -1,0 +1,77 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/home.htm,v 1.18.2.6.4.1.14.1.2.2 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Lawson Portal</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="stylesheet" href="portal.css" type="text/css" />
+<script language="javascript" src="servenv.js"></script>
+<script language="javascript" src="home.js"></script>
+<script language="javascript" src="layout.js"></script>
+<script language="javascript">
+function abandonChildren(node)
+{
+	var len = node.childNodes.length
+	var childNode
+	var i
+	var arrRemove=new Array()
+	for (i=0;i<len;i++) {
+		childNode=node.childNodes[i]
+		if (childNode.canHide)
+			arrRemove[arrRemove.length]=childNode
+	}
+	for (i=arrRemove.length-1;i>=0;i--) {
+		node.removeChild(arrRemove[i])
+	}
+}
+function detTarget(e)
+{
+	e = e ? e : window.event;
+	return portalWnd.getEventElement(e);
+}
+function detEvent(e)
+{
+	if (e)
+		return e
+	else if (window.event) { // IE
+		return window.event
+	}
+	return null
+}
+</script>
+</head>
+
+<body tabIndex="-1" onload="homeInit()" onunload="homeUnloadFunc()" onkeydown="handleKeyDown(event)" 
+			style="margin:0px;" onresize="sizeFind();">
+	<div id="lyrContent" style="position:absolute;visibility:hidden;overflow:auto;">
+		<div id="lyrDrag2" style="position:absolute;visibility:hidden;" class="xTDragHighlight"><img src="images/spacer.gif" height="1" width="1" border="0"></div>
+	</div>
+	<div id="lyrExpand" style="position:absolute;visibility:hidden;overflow:auto;"></div>
+	<div id="lyrDrag" style="position:absolute;visibility:hidden;" class="xTDragHighlight"><img src="images/spacer.gif" height="1" width="1" border="0"></div>
+	<iframe tabIndex="-1" id="contentFrame" src="blank.htm" height="100%" width="100%" frameborder="no" 
+			style="top:0px;left:0px;position:absolute;visibility:hidden;display:none;z-index:0">
+	</iframe>
+</body>
+
+</html>

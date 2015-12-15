@@ -1,0 +1,750 @@
+<html>
+<head>
+
+<script src="XMLObjTree.js"></script>
+<style type="">
+table {
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	border: none collapse;
+}
+th {
+	text-align: left;
+	border-bottom: solid 1px black;
+}
+td {
+	border: 0px;
+	padding: 0px;
+	border-left: solid 1px;
+	margin: 0px;
+
+}
+.rowLevel0 {
+	xcolor: #2E74B5;
+}
+.rowLevel1 {
+	
+	background-color: blue;
+}
+.wait, .wait * { cursor: wait !important; }
+
+.hoverable {
+	font-style: italic;
+	color: #2E74B5;
+	cursor: help;
+}
+
+.drillLink {
+	xtext-decoration: underline;
+	cursor: hand;
+	color: #2E74B5;
+}
+.invis {
+	position: absolute;
+	filter:alpha(opacity=1);
+	opacity: 0.1;
+}
+.vis {
+	position: absolute;
+	filter:alpha(opacity=100);
+	opacity: 1.0;
+}
+
+</style>
+</head>
+
+<script>
+
+function hideDiv(div, callback)
+{
+	with ( { i: 128, div: div, h: div.offsetHeight, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h <  ( 4 * interval ) ) // drawing to a close
+			{
+				i = i * 2
+			}
+			else
+				i = i / 2
+		}
+		if ( h - interval > 0 )
+		{
+			h -= interval
+			div.style.height = h + "px"
+			//document.body.appendChild(document.createTextNode("."))
+			setTimeout(fn, i)
+		}
+		else
+		{
+			div.style.height = 1 + "px"
+			callback(div)
+		}
+	}
+		
+	fn()	
+
+}
+function revealDiv(div)
+{
+	var divProps = {}
+	divProps.position = div.style.position
+	divProps.top = div.style.top
+	divProps.left = div.style.left
+	divProps.overflow = div.style.overflow
+	divProps.height = div.style.height
+	
+	div.style.position = 'absolute'
+	div.style.top = 0
+	div.style.left = 0
+	
+	document.body.appendChild(div)
+	var h = div.offsetHeight
+	
+	document.body.removeChild(div)
+	div.style.position = divProps.position
+	div.style.top = divProps.top
+	div.style.left = divProps.left
+	div.style.overflow = 'hidden'
+	//alert(h)
+	
+	with ( { i: 128, div: div, max: h, h: 0, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h > ( max - ( 4 * interval ) ) ) // drawing to a close
+			{
+				i = i * 2 // increase delay
+			}
+			else
+				i = i / 2 // decrease delay
+		}
+		if ( h + interval < max )
+		{
+			h += interval
+			div.style.height = h + "px"
+			setTimeout(fn, i)
+		}
+		else
+			div.style.height = max + "px"
+	}	
+	fn()	
+}
+function zTrim(s)
+{
+	return s.replace(/^ */,'').replace(/^0*/,'');
+}
+function injectSubTable(tr, data)
+{
+	var ntr = document.createElement('tr')
+	var td = document.createElement('td')
+	var td1 = document.createElement('td')
+	td1.colSpan = "99"
+	ntr.appendChild(td)
+	ntr.appendChild(td1)
+	tr.parentNode.insertBefore(ntr, tr.nextSibling)
+	td1.appendChild(data)
+}
+function createField(colNum, rowData, colDefn)
+{
+	var val = String(rowData[colNum])
+	val = val.replace('undefined','-')
+	var td = document.createElement('td')
+	var container = document.createElement('div')
+
+	if (colDefn.type && colDefn.type == 'float')
+			container.style.textAlign = "right"
+	if (colDefn.toScreen) // user defined column filter function
+		val = colDefn.toScreen(val, rowData)
+	if (colDefn.onclick)
+	{
+		with ({ env: {handler: colDefn.onclick, td:td, x: rowData[colNum]} })
+		{
+			var fn = function () { env.handler.call(env, env.x, env.td) }
+		}
+		container.onclick = fn
+		//container.style.cursor = 'hand'
+		container.className = "drillLink"
+	}
+	if (colDefn.onhover)
+	{
+		with ({ env: {handler: colDefn.onhover, td:td, x: rowData[colNum]} })
+		{
+			var fn = function () { env.handler.call(env, env.x, env.td) }
+		}
+		container.onmouseover = fn
+		container.className = "hoverable"
+		//td.style.cursor = 'hand'
+	}
+
+	var tn = document.createTextNode(val)
+	container.appendChild(tn)
+	td.appendChild(container)
+		
+	td.className = 'rowLevel0'
+	return td
+
+}
+function tabulateDME(dme, options)
+{
+	var tb = document.createElement('tbody')
+	var rows = dme.RECORDS.RECORD
+	var thr = document.createElement('tr')
+	var colNames = dme.COLUMNS.COLUMN
+	var colNumByName = {}
+	var colsList = null;
+	
+	if (options && options.colDefns)
+	{
+		for (var i = 0; i < colNames.length; i++) 
+		{
+			colNumByName[colNames[i]['-dbname']] = i;
+			if (options.colDefns[colNames[i]['-dbname']])
+			{
+				if (! colsList)
+					colsList = {}
+				colsList[i] = options.colDefns[colNames[i]['-dbname']]
+			}
+		}
+		for (var c in options.colDefns)
+		{
+			var colNum = colNumByName[c]
+			var th = document.createElement('th')
+			var title = options.colDefns[c].title ? options.colDefns[c].title : colNames[colNum]['-dspname']
+			var tn = document.createTextNode(title)
+			th.appendChild(tn)
+			thr.appendChild(th)			
+		}
+	}
+	else
+	{
+		for (var i = 0; i < colNames.length; i++) // add the table column headings
+		{
+			colNumByName[colNames[i]['-dbname']] = i;
+			if (! colsList)
+				colsList = {}
+			colsList[i] = colNames[i]
+			var th = document.createElement('th')
+			var tn = document.createTextNode(colNames[i]['-dspname'])
+			th.appendChild(tn)
+			thr.appendChild(th)
+		}
+	}
+
+	
+	tb.appendChild(thr)
+	for (var r in rows) // add all the data rows
+	{
+		var cols = rows[r].COLS.COL
+		var tr = document.createElement('tr')
+		
+		//var clickActual = null, clickStart = null
+		
+		if (options && options.onclick) // onclick for the row level
+		{
+			if (options.onclickDataCol >= 0)
+				var data = cols[options.onclickDataCol]
+			else
+				var data = cols
+			with ( {x: data, trl: tr, fn: options.onclick, clicked: false, opened: false} )
+			{
+				var clickStart = function () {
+					var clickActual = function() {
+						opened = fn(x, trl, clicked, opened);
+						clicked = ! clicked;
+						document.body.className = '';
+						trl.style.cursor = 'hand'
+					}
+					trl.style.cursor = 'wait';
+					document.body.className = 'wait';
+					setTimeout(clickActual, 100)
+				} 
+				tr.style.cursor = 'hand'
+				tr.onclick = clickStart
+			}
+		}
+		var colDefns = options.colDefns
+		if (colDefns)
+		{
+			//alert('using colDefns')
+			for (var c in colDefns)
+			{
+				var colNum = colNumByName[c]
+				var td = createField(colNum, cols, colDefns[c])
+				tr.appendChild(td)
+			}
+			tb.appendChild(tr)
+		}
+		else
+		{
+			for (var c in cols) // add each column data field
+			{
+				var td = createField(c, cols, colsList[c])
+				tr.appendChild(td)
+			}
+			tb.appendChild(tr)
+		}
+	}
+	return tb
+}
+function doAjax(query, callBack, data)
+{
+	if (typeof(query) == "object")
+	{
+		var q = query.query
+		var forcedCols = query.forcedCols
+	}
+	else
+	{
+		var q = query
+		var forcedCols = null
+	}
+
+	with ({callback: callBack})
+	var processData = function (data) {
+		var resp = data
+		
+		if (typeof resp == "string")
+		{
+			if (window.DOMParser)
+			{
+				var parser=new DOMParser();
+				var xmlDoc=parser.parseFromString(resp,"text/xml");
+			}
+			else // Internet Explorer
+			{
+				var xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+				xmlDoc.async=false;
+				xmlDoc.loadXML(resp);
+			}
+		}
+		
+		var xotree = new XML.ObjTree();
+		xotree.force_array = forcedCols
+		var res = xotree.parseDOM(xmlDoc);
+		
+		if (callBack)
+			callBack(res['#document'])
+		else
+			return res['#document']
+	}
+
+	if (callBack)
+	{
+		return doXHR(q, processData, data)
+	}
+	else
+	{
+		var res = doXHR(q, null, data)
+		return processData(res)
+	}
+}
+function doXHR(url, callBack, data)
+{
+	if (window.XMLHttpRequest) {							
+		var xhr=new XMLHttpRequest();							
+	} else {																	
+		var xhr=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	
+	xhr.open(data ? "POST" : "GET", url, callBack ? true : false)
+	xhr.setRequestHeader("Content-Type", "text/xml");
+	if (data)
+		xhr.setRequestHeader("Content-Length", data.length);
+	
+	if (callBack)
+	{
+		with ({xhr: xhr, callBack: callBack})
+		var handleReturn = function () {
+			if (xhr.readyState==4) {          
+				callBack(xhr.responseText);
+			}
+		}
+		xhr.onreadystatechange = handleReturn
+		xhr.send(data)
+		return xhr
+	}
+	else
+	{
+		xhr.send(data)
+		return xhr.responseText;
+	}
+}
+</script>
+
+<script>
+
+function expOnClick(x, node) // onclick handler for expense number field
+{
+	if (! this.clickStart)
+		with ({x:x, node:node, clicked: false, opened: false})
+		this.clickStart = function () {
+			var clickActual = function() {
+				opened = getWUData( { value: x, service: "SLEmpExpApp", serviceVar: "EXPENSE_NBR" } , node, clicked, opened);
+				clicked = ! clicked
+				document.body.className = '';
+				node.style.cursor = 'hand';
+			}
+			node.style.cursor = 'wait';
+			document.body.className = 'wait';
+			setTimeout(clickActual, 100)
+		}
+	this.clickStart()
+}
+	//var service = "JobReq Approval"
+	//var serviceVar = "PJR_REQUISITION"
+function jobReqOnClick(x, node) // onclick handler for expense number field
+{
+	var y = ('000000000' + zTrim(x)).slice(-9)
+	//var z = y.slice(-9)
+	//alert('abcdefghijklm'.substr(-4))
+	//alert(x + ":" + y + ":" + z)
+	//alert('jr')
+	if (! this.clickStart)
+		with ({x:y, node:node, clicked: false, opened: false})
+		this.clickStart = function () {
+			var clickActual = function() {
+				opened = getWUData( { value: x, service: "JobReq Approval", serviceVar: "PJR_REQUISITION" }, node, clicked, opened);
+				clicked = ! clicked
+				document.body.className = '';
+				node.style.cursor = 'hand';
+			}
+			node.style.cursor = 'wait';
+			document.body.className = 'wait';
+			setTimeout(clickActual, 100)
+		}
+	this.clickStart()
+}
+with ({ids:{}})
+var getRMData = function(id, node)
+{
+	if (! ids[id])
+	{
+		var url = "/rmwebapp/RMApiServlet"
+		
+		var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+		+ '<ATTRIBUTES>'
+		+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+		+ '</ATTRIBUTES>'
+		+ '<WHERE><![CDATA[({ID}=' + id + ')]]></WHERE>'
+		+ '</TRANSACTION>'
+	
+		var query = {
+			query: "/rmwebapp/RMApiServlet",
+			forcedCols: ['ROW', 'ROWATTR']
+		}
+		with ({node:node, ids: ids, id:id})
+		var fn = function(data) {
+			var objDoc = data
+			var trans = objDoc.TRANSACTION
+			var row = trans.ROWS.ROW
+			var name = (row[0].ROWATTR[0].VALUE + ", " + row[0].ROWATTR[1].VALUE)
+			ids[id] = name
+			node.title = name 
+		}
+		var objDoc = doAjax(query, fn, data)
+		//fn(objDoc)
+		return
+	}
+
+	node.title = ids[id] 
+}
+function getWUData(info, node, clicked, opened)
+{
+	//alert(info)
+	if (node.nodeName == "TD")
+		var tr = node.parentNode
+	else
+		var tr = node
+	
+	if (clicked)
+	{
+		// just remove table
+		if (opened)
+		{
+			if (true ) //portalWnd.oUserProfile.getAttribute("id") == "u0x8im00")
+			{
+				with ({tr:tr})
+				var fn = function () { tr.parentNode.removeChild(tr.nextSibling) }
+				hideDiv(tr.nextSibling.childNodes[1].firstChild, fn)
+				//alert(tr.nextSibling.childNodes[1].firstChild.style.height) //[1].firstChild.nodeName)
+			}
+			else
+			{
+				tr.parentNode.removeChild(tr.nextSibling)
+			}
+			opened = false
+		}
+		return
+	}
+	
+	//var service = "SLEmpExpApp"
+	//var serviceVar = "EXPENSE_NBR"
+	var varVal = info.value
+	var service = info.service
+	var serviceVar = info.serviceVar
+	//var service = "JobReq Approval"
+	//var serviceVar = "PJR_REQUISITION"
+	
+	var q = "PROD=LOGAN&FILE=WFVARIABLE&INDEX=WFVSET1"
+	+ "&FIELD=WORKUNIT;VARIABLE-NAME;VARIABLE-VALUE;WORKUNIT.START-DATE;WORKUNIT.START-TIME;WORKUNIT.SERVICE;"
+	+ "WORKUNIT.WORK-TITLE;WORKUNIT.TASK;WORKUNIT.WF-STATUS"
+	+ "&SELECT=WORKUNIT.SERVICE=" + service
+	+ "%26VARIABLE-NAME=" + serviceVar
+	+ "%26VARIABLE-VALUE=" + varVal
+	+ "&OUT=XML&DELIM=~&MAX=600"
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doAjax(query)
+	var WFWURows = objDoc.DME.RECORDS.RECORD
+		
+	//alert(WFWURows[0].COLS.COL[0])
+	if (! WFWURows)
+		return
+	var WUNum = WFWURows[WFWURows.length -1].COLS.COL[0]
+	//alert(WUNum)
+	//WUNum = 30238
+
+	var q = "PROD=LOGAN&FILE=WFMETRICS&INDEX=WMESET2&KEY=" + WUNum
+	+ "&FIELD=WORKUNIT;PROCESS-ID;END-DATE;END-TIME;STATUS;WF-RM-ID;TASK;ACTIVITY-ID;OPERATION;COMMENT;"
+	+ "START-DATE;DUE-DATE&OUT=XML&MAX=600"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doAjax(query)
+	var WFMetricsRows = objDoc.DME.RECORDS.RECORD
+
+	var fn = function (r0,r1) {var a = r0.COLS.COL[10], b = r1.COLS.COL[10]; return ((a.substr(6,4) + a.substr(0,2) + a.substr(3,2)) > (b.substr(6,4) + b.substr(0,2) + b.substr(3,2))) ? 1 : -1}
+	
+	//var fn = function (r0,r1) {var a = parseInt(r0.COLS.COL[7].substr(2)), b = parseInt(r1.COLS.COL[10].substr(2)); return (a - b) }; 
+	if (! WFMetricsRows)
+		return
+	
+	WFMetricsRows.sort(fn)
+	
+	//alert(WFMetricsRows.length)
+	var s = ''
+	for (var i = 0; i < WFMetricsRows.length; i++)
+	{
+		var cols = WFMetricsRows[i].COLS.COL
+		s += cols[5] + ":" + cols[2] + ":" + cols[5] + ":" + cols[8] + "\n"
+	}
+	var tbl = document.createElement('table')
+	var options = {
+		colDefns: {
+			'WORKUNIT': true,
+			'WF-RM-ID': {
+				title: 'Mgr ID',
+				toScreen: function (x, cols) {
+					if (x == 'bpmsystem')
+						return ''
+					return '[' + x + ']'
+				},
+				//onclick: getRMData,
+				onhover: getRMData
+			},
+			'OPERATION': {
+				title: 'Action',
+				toScreen: function (x, cols) {
+					if (x == 'Reject' && cols[5] == 'bpmsystem')
+						return 'ESCALATED';
+					return x
+				}
+			},
+			'START-DATE': {
+				title: 'Date Stamp'
+			},
+			'DUE-DATE': {
+				title: 'Due By'
+			}
+		}
+	}
+	tbl.appendChild(tabulateDME(objDoc.DME, options))
+	var div = document.createElement('div')
+	div.appendChild(tbl)
+	
+	revealDiv(div)
+	//div.style.height = '50px'
+	
+	injectSubTable(tr, div)
+	return true
+	//alert(s)
+}
+function ICField(val) {
+	var cell = document.createElement('span')
+	var field = document.createElement('span')
+	cell.innerHTML += '&nbsp;'
+	//cell.appendChild(document.createTextNode('&nbsp;'))
+	//cell.style.display = 'inline-block'
+	cell.appendChild(field)
+	field.className = "invis"
+	field.appendChild(document.createTextNode(val))
+	with ({node: field})
+	{
+		var fn = function () {
+		//alert('viv')
+			node.className = "vis"
+		}
+		var fn1 = function () {
+			node.className = "invis"
+		}
+		var fn2 = function () {
+			var n = document.createElement('input')
+			with ( { node: n } )
+			var fn = function (e) {
+			//alert(e + ":" + window.event)
+				if (!e)
+					e = window.event
+				var t = (e.target ? e.target : e.srcElement)
+				//alert(t + ":" + t.value)
+				getQueryTb({employee: t.value})
+			}
+			n.onblur = fn
+			n.setAttribute('value', node.firstChild.nodeValue)
+			var p = node.parentNode
+			p.removeChild(node)
+			p.appendChild(n)
+		}
+	}
+	cell.onmouseover = fn
+	cell.onmouseout = fn1
+	cell.ondblclick = fn2
+	return cell
+}
+
+function getQueryTb(params)
+{	
+	var strPDL = portalWnd.oUserProfile.getAttribute("productline")
+	var strEmployee = zTrim(portalWnd.oUserProfile.getAttribute("employee"))
+	
+	//var eid = ICField(strEmployee)
+	//var eidNode = document.getElementById("EmpNum")
+	//eidNode.appendChild(eid)
+	
+	var fn = null;
+	
+	if (params.employee)
+		strEmployee = params.employee
+		
+	var vendorId = '900000000'.substr(0, 9 - strEmployee.length) + strEmployee 
+	
+	if ( (! params || ! params.info) || params.info == 'expense')
+	{
+		// user data
+		//alert('getQueryTB')
+
+		var q = "PROD=DEV901&FILE=EEEXPENSE"
+		+ "&SELECT=COMPANY%3D1000%26VENDOR%3D" + vendorId
+		+ "&FIELD=COMPANY;VENDOR;EXPENSE-NBR;EXPENSE-TYPE;DESCRIPTION;APPROVAL-CODE;EXPENSE-DATE;"
+		+ "TRAN-EXP-AMT;BASE-EXP-AMT;BASE-TAX-AMT;BASE-EMP-PAID;CHECK-DATE;CHECK-AMT;TRANS-NBR;BANK-INST-CODE;"
+		+ "REC-STATUS,xlt;"
+		+ "&MAX=600&XCOLS=TRUE&XKEYS=TRUE&XRELS=TRUE&XCOUNT=TRUE&XIDA=TRUE&OUT=XML"
+		
+		var options = {
+			onclickx: getWUData,
+			onclickDataCol: 2,
+			colDefns: {
+				'EXPENSE-NBR': {
+					onclick: expOnClick,
+					title: 'Expense'
+				},
+				'DESCRIPTION': {
+					title: 'Description'
+				},
+				'EXPENSE-DATE': {
+					title: 'Date'
+				},
+				'BASE-EMP-PAID': {
+					type: 'float',
+					title: 'Amount'
+				},
+				'REC-STATUS': {
+					title: 'Status'
+				}
+			}
+		}
+		var fn = function (r0,r1) {var a = r0.COLS.COL[6], b = r1.COLS.COL[6]; return ((a.substr(6,4) + a.substr(0,2) + a.substr(3,2)) > (b.substr(6,4) + b.substr(0,2) + b.substr(3,2))) ? -1 : 1}
+	}
+	else if (params.info == 'jobreq')
+	{
+		var q = "PROD=DEV901&FILE=PAJOBREQ&INDEX=PJRSET1"
+		+ "&FIELD=COMPANY;REQUISITION;DESCRIPTION;POSITION;REQUEST-BY;USER-ID"
+		//+ "&SELECT=REQUEST-BY%3D" + strEmployee
+		+ "&OUT=XML&DELIM=~&MAX=40"
+		
+		var options = {
+			onclick: jobReqOnClick,
+			onclickDataCol: 1
+		}
+	}
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	
+	var objDoc = doAjax(query)
+	
+	//sort by date
+	if (fn)
+	{
+		var dataRows = objDoc.DME.RECORDS.RECORD
+		dataRows.sort(fn)
+	}
+	
+	// sort by Activity Number
+	//var fn = function (r0,r1) {var a = parseInt(r0.COLS.COL[7].substr(2)), b = parseInt(r1.COLS.COL[10].substr(2)); return (a - b) }; 
+	//objDoc.DME.RECORDS.RECORD.reverse()
+	var tb = tabulateDME(objDoc.DME, options)
+	
+	return tb
+}
+
+function buildInfoTable(tbl, params)
+{
+	tbl.appendChild(getQueryTb(params))
+}
+
+function loadPage()
+{
+
+	var params = {}; location.search.replace(/([^=&?]+)=([^&]*)/g, function (x) {kvp = x.split('='); params[kvp[0]] = kvp[1]});
+	
+	portalWnd = null, p = parent, c = 0, max = 10;
+	while (!portalWnd && c < max && p)
+	{
+		portalWnd = p.portalWnd
+		p = p.parent
+		c++
+	}
+	var tbl = document.createElement('table')
+	document.body.appendChild(tbl)
+	
+	//params.info='jobreq'
+	buildInfoTable(tbl, params)
+
+}
+function showData(x)
+{
+	var d = new Date();
+	window.document.body.innerHTML += (d.getTime() + ": " + x + "<br>")
+}
+
+</script>
+<body onload="loadPage()">
+
+<img src="data:image/gif;base64,R0lGODlhDAAMAIABAP8AAP///yH5BAEKAAEALAAAAAAMAAwAAAIPhBGpeevmXpy02ouz3qkAADs=" onclick="document.getElementById('EmpNum').className = 'vis';"/>
+<span id="EmpNum"></span>
+
+</body>
+</html>

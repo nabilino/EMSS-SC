@@ -1,0 +1,1062 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/portal.css,v 1.19.2.23.4.14.24.3 2012/08/28 03:54:06 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+
+.anchorActive
+{
+	background-color: transparent;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: underline;
+	padding: 2px;
+	border: 0px;
+	position: absolute;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+.anchorDisabled
+{
+	background-color: transparent;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	padding: 2px;
+	border: 0px;
+	position: absolute;
+	cursor:default;
+	height: 20px;
+}
+.anchorFocus
+{
+	background-color:lightgrey;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: none;
+	padding: 2px;
+	border: 0px;
+	position: absolute;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+.anchorHover
+{
+	background-color:#D4DFF0;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: none;
+	padding: 2px;
+	border: 0px;
+	position: absolute;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+BODY
+{
+	background-color:white;
+    font-family: Tahoma, Arial, sans-serif;
+	font-weight:normal;
+	font-size:10pt;
+	margin: 0px;
+	overflow: hidden;
+	height: 100%;
+	width: 100%;
+}
+div.buttonBorder
+{
+	background:url(images/btnTopGrad.gif) 0% 0% no-repeat;
+	background-color:#ffffff;
+	border:1px solid #999999;
+	margin-left:5px;
+	vertical-align:middle;
+	display:inline;
+	height:20px;
+}
+div.buttonBorder button
+{
+	background:url(images/btnBottomGrad.gif) 100% 100% no-repeat;
+	border-top:1px solid #FFFFFF;
+	border-left:1px solid #FFFFFF;
+	border-right:1px solid #CCCCCC;
+	border-bottom:1px solid #CCCCCC;
+	color:#4f4f4f;
+	font-family: Tahoma, Verdana, Arial, sans-serif;
+	font-size:8pt;
+	font-weight:bold;	
+	overflow:visible;
+	width:100%;
+	height:100%;
+	vertical-align:middle;
+}
+div.buttonBorder button.buttonOver
+{
+	border-top: 1px solid #e3d179;
+	border-bottom: 1px solid #e3d179;
+	background-color: #ffffff;
+}
+div.tabContainer
+{
+	position:absolute;
+	float:left;
+	width:100%;
+	background-color:transparent;
+	font-size:93%;
+	line-height:normal;
+	margin:0;
+	padding:3px 0 0;
+}
+div.tabContainer div
+{
+	float:left;
+	background:url("images/ico_tab_left.gif") no-repeat left top;
+	margin:0;
+	padding:0 0 0 9px;
+}
+div.tabContainer div.activeTab
+{
+	background-image:url("images/ico_tab_left_on.gif");
+	border-width:0px;
+}
+div.tabContainer div.activeTab button
+{
+	background-image:url("images/ico_tab_right_on.gif");
+	color:#333;
+}
+div.tabContainer div.dropTab
+{
+	position:absolute;
+	top:0px;
+	right:0px;
+	background-image:url("images/ico_tab_left.gif");
+	border-width:0;
+	margin-top:3px;
+}
+div.tabContainer div.dropTab button
+{
+	background-image:url("images/ico_tab_right.gif");
+	color:#D4DFF0;
+}
+div.tabContainer button
+{
+	padding:1px 9px 0px 0px;
+	height:22px;
+	border:0px;
+	float:left;
+	font:0.95em Tahoma, Verdana, Arial;
+	background:url("images/ico_tab_right.gif") no-repeat right top;
+	font-weight:bold;
+	color:#666666;
+}
+div.tabContainer button.tabButtonOver
+{
+	color:#333;
+}
+.borderTop
+{
+	border-top: 1px solid lightgrey;
+}
+.borderTopRight
+{
+	border-top: 1px solid lightgrey;
+	border-right: 1px solid lightgrey;
+}
+.borderTopRightBottom
+{
+	border-top: 1px solid lightgrey;
+	border-right: 1px solid lightgrey;
+	border-bottom: 1px solid black;
+}
+.borderTopBottom
+{
+	border-top: 1px solid lightgrey;
+	border-bottom: 1px solid black;
+}
+.ptHomeHeader
+{
+	background-image:url('images/blue_gradient.gif');
+	background-position:right;
+	background-repeat:repeat-y;
+}
+.ptHomeHeaderText
+{
+    padding-left: 5px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+    color: white;
+    font-family: Tahoma, Verdana, Helvetica, Geneva, sans-serif;
+    font-size: 18px;
+    font-weight: bolder;
+    background-color: #6699CC;
+}
+.ptHomeHelpBox
+{
+	background-image:url('images/dotted_line.gif');
+	background-position:left;
+	background-repeat:repeat-y;
+}
+.ptHomeHelpText
+{
+    margin-top: 12px;
+    margin-bottom: 12px;
+    margin-left: 10px;
+    font-size: 12px;
+    color: #2E5B89;
+    font-family: Tahoma, Verdana, Helvetica, Geneva, sans-serif;
+}
+.ptHomeInfo
+{
+	border:1px solid #6699CC;
+	background-color:#FFF7E7;
+}
+.ptHomeInfoHeader
+{
+	background-color: transparent;
+    font-family: Tahoma, Verdana, Helvetica, Geneva, sans-serif;
+	font-size: 14px;
+	font-weight: bold;
+	color: #2E5B89;
+}
+.ptDlgButton
+{
+    background-color: buttonface;
+    border-bottom: 2px solid buttonshadow;
+    border-left: 2px solid buttonhighlight;
+    border-right: 2px solid buttonshadow;
+    border-top: 2px solid buttonhighlight;
+    color: buttontext;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt;
+    height: 20px;
+    width: 60px;
+    overflow: hidden;
+    text-align: center;
+	cursor:default;
+}
+.ptFormTitle
+{
+	font-weight:bold;
+	font-family:Trebuchet MS,Tahoma,Arial,sans-serif;
+	font-size:16px;
+	margin-left:20px;
+}
+.ptGoButton
+{
+	border:0px solid lightgrey;
+	height:18px;
+	width:44px;
+	padding:0px;
+	background-color:transparent;
+	background-image:url('images/ico_go_arrow.gif');
+	background-position:left;
+	background-repeat:no-repeat;
+	color:white;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+}
+.ptRefreshButton
+{
+	border:0px solid lightgrey;
+	height:18px;
+	width:18px;
+	background-color:transparent;
+	background-image:url('images/ico_refresh.gif');
+	background-position:center;
+	background-repeat:no-repeat;
+}
+.ptLogoDiv
+{
+	position:absolute;
+	background-color: white;
+	left:0px;
+	top:0px;
+	display:none;
+}
+.ptLogoutButton
+{
+	padding-right:9px;
+	padding-bottom:2px;
+	color:#999999;
+	background-color:transparent;
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	font-stretch: wider;
+	text-align: center;
+    height: 16px;
+    width: 52px;
+	border: 0px solid transparent;
+	cursor: pointer;
+	cursor: hand;
+}
+.ptNavButtonActive
+{
+	margin:0px;
+	padding-left:3px;
+	padding-right:3px;
+	padding-top:2.5px;
+	color:#ffffff;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:10pt;
+	font-weight:bold;
+	background-color:#6699CC;
+}
+.ptNavButtonContainer
+{
+	color:white;
+	background-color: white;
+	margin-left: 0px;
+	margin-top: 0px;
+	padding: 0px;
+	padding-top: 2px;
+	position:static;
+}
+.ptNavButtonInactive
+{
+	margin:0px;
+	padding-left:3px;
+	padding-right:3px;
+	padding-top:2.5px;
+	color: #666666;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+	font-weight:bold;
+	background-color: #7FB3E5;
+	text-decoration:none;
+}
+.ptSplitterBar
+{
+	visibility: hidden;
+	cursor: col-resize; cursor: move;
+	overflow:hidden;
+	z-index:10;
+	background-image:url('images/splitter_ribbon.gif');
+	background-repeat: repeat-y;
+	position:absolute;
+	top:0px;
+	left:200px;
+	width:4px;
+	height:0px;
+	margin:0px;
+	padding:0px;
+}
+.ptTabButtonActive
+{
+	position: absolute;
+	background-color: #D4DFF0;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	color: buttontext;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 11px;
+	font-weight:bold;
+	height: 22px;
+	padding-top:3px;
+	text-align: center;
+	width: 85px;
+	z-index: 50;
+}
+.ptTabPaneActive
+{
+	background-color: #D4DFF0;
+	border-bottom: 1px solid #999999;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	color: buttontext;
+	display:block;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 11px;
+	overflow: auto;
+ 	padding: 2px;
+	position: absolute;
+	left: 0px;
+	width: 100%;
+	z-index: 30;
+}
+.ptTabPaneInactive
+{
+	display:none;
+}
+.ptFixed
+{
+	font-family: Lucida Console, Monaco, Courier New, Courier;
+}
+.ptToolbar
+{
+	position:absolute;
+	color:white;
+	background-color:white;
+	height:24px;
+	padding-left:4px;
+	overflow:hidden;
+}
+.ptWelcome
+{
+	padding-right:9px;
+	padding-bottom:2px;
+	color:black;
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size:10pt;
+	font-stretch: wider;
+	cursor:default;
+}
+.xTLabel
+{
+    color: black;
+	font-family: Tahoma, Arial, sans-serif;
+    font-size: 9pt;
+}
+.xTLabelForm
+{
+	color: #333333;
+	font-family: Tahoma, Arial, sans-serif;
+    font-size: 9pt;
+	font-weight:bold;
+}
+.xTTextBox
+{
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	background-color: white;
+}
+.xTTextBoxHighlight
+{
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	background-color:lightgrey;
+}
+.xTTextBoxDisabled
+{
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	background-color: white;
+}
+.xTDropDownMenu
+{
+	color: white;
+	cursor:pointer;
+	cursor:hand;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	height: 0px;
+	width: 110px;
+	z-index: 3;
+	background-color: #6699CC;
+}
+.xTDropDownMenuItem
+{
+    width:100%;
+    cursor:pointer;
+	cursor:hand;
+    text-decoration:none;
+    visibility:visible;
+	font-family: Tahoma, Arial, sans-serif;
+    font-size: 8pt;
+    height: 20px;
+    padding-top: 3px;
+    padding-left: 3px;
+    color:#ffffff;
+    background-color: #6699CC;
+}
+.xTDropDownMenuItemHighlight
+{
+    background-color: #90AFC0;
+    color: #ffffff;
+   	cursor:pointer;
+	cursor:hand;
+	font-family: Tahoma, Arial, sans-serif;
+    font-size: 8pt;
+    height: 20px;
+    margin-left: 1px;
+    margin-right: 1px;
+    padding-top: 3px;
+    padding-left: 3px;
+    text-decoration: none;
+    width: 100%;
+}
+.xTNavigation
+{
+	color:#EFEFEF;
+	background-color: #6699CC;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+}
+.xTNavHead
+{
+	border-left: 1px solid #90afc0;
+	border-top: 1px solid #90afc0;
+	border-bottom: 1px solid #666666;
+	border-right: 1px solid #666666;	
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left:4px;
+	background-color: #6699CC;
+	color:#EFEFEF;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:bold;
+	font-size:8pt;
+	width:100%;
+	cursor:pointer;
+	cursor:hand;
+}
+.xTNavHeadHover
+{
+	padding-left:4px;
+	border-left: 1px solid #90AFC0;
+	border-top: 1px solid #90AFC0;
+	border-bottom: 1px solid #666666;
+	border-right: 1px solid #666666;	
+	padding-top: 2px;
+	padding-bottom: 2px;
+	background-color: #9DC0E3;
+	color:black;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:bold;
+	font-size:8pt;
+	width:100%;
+	cursor:pointer;
+	cursor:hand;
+}
+.xTNavBody
+{
+	width:100%;
+	padding-left:5px;
+	left:5;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:normal;
+	font-size:8pt;
+	color:black;
+	background-color:white;
+}
+.xTNavItem
+{
+	border: 1px solid white;
+	border-bottom: 1px solid #DDDDDD;
+	font-family: Lucida Sans Unicode, Tahoma, Verdana, Arial, sans-serif;
+	font-weight:normal;
+	font-size:8pt;
+	text-align:left;
+	left:5;
+	color:black;
+	background-color:white;
+	padding-left:3px;
+}
+.xTNavSelected
+{
+	border: 0px;
+	font-family: Lucida Sans Unicode, Tahoma, Verdana, Arial, sans-serif;
+	font-weight:normal;
+	font-size:8pt;
+	text-align:left;
+	left:5;
+	color:black;
+	background-color:#DDDDDD;
+	margin: 1px;
+	padding-left:5px;
+	padding-bottm:1px;
+}
+.xTNavHover
+{
+	border: 1px solid white;
+	border-bottom: 1px solid #DDDDDD;
+	font-family: Lucida Sans Unicode, Tahoma, Verdana, Arial, sans-serif;
+	font-weight:normal;
+	font-size:8pt;
+	text-align:left;
+	left:5;
+	color:black;
+	background-color:#D4DFF0;
+	padding-left:3px;
+}
+.xTToolButton
+{
+    overflow:visible;
+    background-color: transparent;
+    margin:0;
+    border:0;
+    padding:0;
+    color: #ffffff;
+    cursor:pointer;
+	cursor:hand;
+    font-size: 10pt;
+    font-weight: bold;
+    height: 20px;
+}
+.xTToolButtonHighlight
+{
+    overflow:visible;
+    background-color: transparent;
+    margin:0;
+    border:0;
+    padding:0;
+    color: #ffffff;
+    cursor:pointer;
+	cursor:hand;
+    font-size: 10pt;
+    font-weight: bold;
+    height: 20px;
+}
+.xTToolBarButton
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+	background-color:#6699CC;
+	color: white;
+	padding: 1px;     
+	border-bottom: 1px solid #666666;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #666666;
+	border-top: 1px solid #999999;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	top: 0px;
+}
+.inq
+{
+	background-image: url("images/ico_toolbutton_inq.gif");
+}
+.add 
+{
+	background-image: url("images/ico_toolbutton_add.gif");
+}
+.chg 
+{
+	background-image: url("images/ico_toolbutton_chg.gif");
+}
+.del 
+{
+	background-image: url("images/ico_toolbutton_del.gif");
+}
+.next 
+{
+	background-image: url("images/ico_toolbutton_next.gif");
+}
+.prev
+{
+	background-image: url("images/ico_toolbutton_prev.gif");
+}
+.back
+{
+	background-image: url("images/ico_toolbutton_back.gif");
+}
+.sp_actions
+{
+	background-image: url("images/ico_toolbutton_sp_actions.gif");
+}
+.arrowdn_grey
+{
+	background-image: url("images/ico_arrowdn_grey.gif");
+}
+.separator 
+{
+	background-image:url("images/ico_toolbutton_divider.gif");
+	background-position:center top;
+	background-repeat:no-repeat;
+	width: 2px;
+	height: 18px;
+	margin-left:8px;
+	margin-right:8px;
+}
+.xTToolBarButtonHighlight
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+	background-color: #D4DFF0;
+	color: black;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #999999;
+	border-right: 1px solid black;
+	border-top: 1px solid #999999;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	top: 0px;
+}
+.inqOver
+{
+	background-image: url("images/ico_toolbutton_inq-over.gif");
+}
+.addOver 
+{
+	background-image: url("images/ico_toolbutton_add-over.gif");
+}
+.chgOver 
+{
+	background-image: url("images/ico_toolbutton_chg-over.gif");
+}
+.delOver 
+{
+	background-image: url("images/ico_toolbutton_del-over.gif");
+}
+.nextOver 
+{
+	background-image: url("images/ico_toolbutton_next-over.gif");
+}
+.prevOver 
+{
+	background-image: url("images/ico_toolbutton_prev-over.gif");
+}
+.backOver
+{
+	background-image: url("images/ico_toolbutton_back-over.gif");
+}
+.sp_actionsOver
+{
+	background-image: url("images/ico_toolbutton_sp_actions-over.gif");
+}
+.xTToolBarButtonDisabled
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+	background-color:#E4E9F0;
+	color: black;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid #90afc0;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	height: 20px;
+	top: 0px;
+}
+.xTTableOptions
+{
+    color: #000000;
+    cursor:pointer;
+	cursor:hand;
+}
+.xTIFrame
+{
+	border:0;
+	margin-height:0;
+	margin-width:0;
+}
+.xTCustomHeader
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	font-weight:bold;
+	background-color:#6699CC;
+	color:#ffffff;
+	padding:2px;
+}
+.xTCustomHeaderBtn
+{
+	padding:0;
+	margin:0;
+	margin-left:2px;
+	background-color: transparent;
+	background-position: center center;
+	background-repeat: no-repeat;
+	height: 15px;
+	width: 15px;
+}
+.xTCustomNugglet
+{
+	background-color:#90afc0;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	text-decoration:none;
+	text-align:center;
+	color:000000;
+	width:100%;
+}
+.xTCustomNavlet
+{
+	background-color:#6699CC;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	text-decoration:none;
+	text-align:center;
+	color:#EFEFFF;
+	width:100%;
+}
+.xTCustomNuggletColumn
+{
+	background-color:#6699CC;
+	width:150px;
+	height:15px;
+}
+.xTCustomNavletColumn
+{
+	background-color:#90afc0;
+	width:150px;
+	height:15px;
+}
+.xTCNugColHiLight
+{
+	background-color:#D6DBF7;
+	width:150px;
+	height:15px;
+}
+.xTCNavColHiLight
+{
+	background-color:#4A63A5;
+	width:150px;
+	height:15px;
+}
+.xtFilterLabel
+{
+    background-color: transparent;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:normal;
+	font-size:8pt;
+	color:black;
+    cursor: normal;
+}
+.xTRightHeader
+{
+	padding-top:1px;
+	padding-left:3px;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:bold;
+	font-size:11pt;
+}
+.xTTableColumnHeader
+{
+	font-size: 8pt;
+	padding-left:2px;
+	background-color: #cccccc;
+}
+.xTTableSubItemDiv
+{
+	background-color: #FFFFFF;
+	border-color: #FFFFFF #FFFFFF #FFFFFF #FFFFFF;
+	border-style: solid;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	padding-bottom: 10px;
+}
+.xTTableList
+{
+	width:100%;
+}
+.xTTreeHeader
+{
+	zIndex:100;
+	border-bottom: 1px solid #6699CC;
+}
+.xTTreeTitle
+{
+	padding-top:2px;
+	padding-left:2px;
+	vertical-align:top;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+	font-weight: bold;
+	font-variant: small-caps;
+	color: black;
+	border-bottom: 1px solid #6699CC;
+}
+.xTTreeFind
+{
+	zIndex:100;
+	border-top: 1px solid #FFFFFF;
+	border-left: 1px solid #FFFFFF;
+	border-right: 1px solid #000000;
+	border-bottom: 1px solid #000000;
+	background-color: #6699CC;
+}
+.popBody
+{
+	background-color: white;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+}
+.popContentFrm
+{
+	background-color: #CCCCCC;
+	border:1px solid #999999;
+}
+.popContent
+{
+	background-color: #E6E6E6;
+	border-top:1px solid #999999;
+	border-left:1px solid #999999;
+	border-bottom:1px solid #F1F1F1;
+	border-right:1px solid #F1F1F1;
+}
+.popTitle
+{
+	font-family:Tahoma,Verdana,Arial,sans-serif;
+	font-size:12px;
+	font-weight:bold;
+}
+.tip
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt;
+}
+.tree
+{
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+	scroll:vertical;
+	padding-left:3px;
+	padding-top:3px;
+	display:block;
+	overflow: auto;
+	z-index:1;
+}
+.scrollDiv
+{
+	left: 0px;
+	overflow: auto;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+}
+.xTDragHighlight
+{
+	background-color:#cccccc;
+	border: #666666;
+	border-style: solid;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	padding-left:1px;
+	padding-right:1px;
+	z-index:1000;
+}
+.xTTreeNode
+{
+	background-color:#ffffff;
+	color:#000000;
+	position:relative;
+	cursor:pointer;
+   	cursor:hand;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	text-decoration:none;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	padding-left:2px;
+	padding-right:1px;
+	z-index:0;
+}
+.xTListText
+{
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	color:black;
+	cursor:default;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: white;
+	scrollbar-arrow-color: white;
+}
+
+.xTListTextRow
+{
+ 	background-color:white;
+ 	color:black;
+ 	font-size:9pt;
+ 	font-weight:normal;
+	cursor:hand;
+}
+
+.xTListTextRowSelected
+{
+ 	background-color:#D4DFF0;
+ 	color:black;
+ 	font-size:9pt;
+ 	font-weight:normal;
+	cursor:hand;
+} 
+.xTTreeNodeEdit 
+{
+	border:1px #666666 #666666 #666666 #666666;
+	border-style:solid;
+	background-color:#cccccc;
+	position:relative;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt; 
+}
+.xTNugletHead
+{
+	border-left: 1px solid #90afc0;
+	border-top: 1px solid #90afc0;
+	border-bottom: 1px solid #666666;
+	border-right: 1px solid #666666;	
+	padding-left:4px;
+	background-color: #6699CC;
+	color:#EFEFEF;
+	font-family: Tahoma, Arial, sans-serif;
+	font-weight:bold;
+	font-size:8pt;
+	width:100%;
+	cursor:pointer;
+	cursor:hand;
+}
+.xTNugletBody
+{
+	color:#7392DE;
+	background-color:#D6DBF7;
+}
+.xTNugletResize
+{
+	background-color:#6699CC;
+	width:95%;
+	cursor:default;
+	color:#ffffff;
+	border-left: 1.5px solid #90afc0;
+	border-top: 1.5px solid black;
+	border-bottom: 1.5px solid black;
+}
+.xTColResize
+{
+	cursor:default;
+}
+.leftBarSelect
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:8pt; 
+	font-weight:medium;
+}

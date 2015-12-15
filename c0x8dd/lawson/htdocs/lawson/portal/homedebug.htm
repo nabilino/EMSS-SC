@@ -1,0 +1,49 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/homedebug.htm,v 1.6.2.2.4.4.14.1.2.2 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Portal Debug</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css">
+<script language="javascript" src="servenv.js"></script>
+<script language="javascript" src="homedebug.js"></script>
+</head>
+<body tabIndex="-1" onload="aboutInit()" onunload="aboutUnload()" onkeydown="aboutKeyDown(event)" onresize="aboutOnResize(event)">
+
+	<div id="btnDiv" style="position:absolute;left:10px;top:0px;height:30px;padding:8px;border:1px solid black;">
+		<button id="Profile" class="anchorActive" style="position:relative;width:120px;margin-left:10px;" onclick="switchView('Profile')">Profile Data</button>
+		<button id="PortalConfig" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('PortalConfig')">Portal Config</button>
+		<button id="GlobalVars" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('GlobalVars')">Global Variables</button>
+		<button id="Hotkeys" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('Hotkeys')">User Hotkeys</button>
+		<button id="Versions" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('Versions')">Version Info</button>
+		<button id="Search" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('Search')">Search Results</button>
+		<button id="Bookmarks" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('Bookmarks')">Bookmarks</button>
+		<button id="SSOUser" class="anchorActive" style="position:relative;width:120px;" onclick="switchView('ssoUser')">SSO Info</button>
+	</div>
+
+	<textarea type="text" id="textWindow" wrap="off" border="0" onkeydown="textKeyDown(event)"
+		style="position:absolute;left:10px;top:40px;width:100px;height:100px;font-size:9pt;font-family:courier new;font-weight:normal;border:1px solid black;padding:8px;">
+	</textarea>
+
+</body>
+</html>

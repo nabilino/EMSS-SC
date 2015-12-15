@@ -1,0 +1,104 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/transfer.htm,v 1.9.2.1.18.1.2.2 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<TITLE>netUserpref</TITLE>
+<HEAD>
+<SCRIPT language="javascript" src="servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="transfer.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet"  href="portal.css"/>
+
+</HEAD>
+
+<body tabIndex="-1" onload="initTrans()" onkeydown="transOnKeyDown(event)" onUnload="parent.formUnload()">
+
+<div id="formDiv" style="visibility:hidden;position:absolute;top:30;left:60">
+<table id="formTable" cellspacing="4" border="0" cellpadding="1">
+<tr>
+	<td width="50%">&nbsp;</td>
+	<td width="50%" align="left">
+		<label id="lblForm" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+</tr>
+<tr>
+	<td width="50%" align="right">
+		<label for="texToken" id="lblToken" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+	<td width="50%" align="left">
+		<input type="textbox" id="texToken" class="xTTextBox" style="position:relative;width:100;"></input>
+	</td>
+</tr>
+<tr>
+	<td width="50%" align="right">
+		<label for="texData" id="lblData" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+	<td width="50%" align="left">
+		<input type="textbox" id="texData" class="xTTextBox" style="position:relative;width:100;"></input>
+	</td>
+</tr>
+<tr>
+	<td width="50%" align="right">
+		<label for="texId" id="lblId" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+	<td width="50%" align="left">
+		<input type="textbox" id="texId" class="xTTextBox" style="position:relative;width:100;"></input>
+	</input>
+	</td>
+</tr>
+</table>
+</div>
+
+<div id="pageDiv" style="visibility:hidden;position:absolute;top:30;left:60">
+<table id="pageTable" cellspacing="4" border="0" cellpadding="1">
+<tr>
+	<td>&nbsp;</td>
+	<td align="left">
+		<label  id="lblPage" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+</tr>
+<tr>
+	<td align="right">
+		<label for="pageFile" id="lblFile" class="xTLabelForm" style="position:relative;"></label>
+	</td>
+	<td align="left">
+		<input type="textbox" id="pageFile" class="xTTextBox" style="position:relative;width:300;"></input>
+	</td>
+</tr>
+</table>
+</div>
+
+<div id="scriptDiv" style="visibility:hidden;position:absolute;top:30;left:50">
+<table id="scriptField" cellspacing="4" border="0" cellpadding="1">
+<tr>
+	<td align="right">
+		<label for="scriptBox" id="lblScript" class="xTLabelForm" style="position:relative;">Script</label>
+	</td>
+	<td align="left">
+		<input type="textbox" id="scriptBox" class="xTTextBox" style="margin-left:0px;position:relative;width:500px;"></input>
+	</td>
+</tr>
+</table>
+</div>
+
+</body>
+</html>

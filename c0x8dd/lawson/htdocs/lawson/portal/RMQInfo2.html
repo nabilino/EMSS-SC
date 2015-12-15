@@ -1,0 +1,517 @@
+<html>
+<head>
+<script src="XMLObjTree.js"></script>
+<script type="text/javascript" src="ExcelJS/swfobject.js"></script>
+<script type="text/javascript" src="ExcelJS/downloadify.min.js"></script>
+<script type="text/javascript" src="ExcelJS/excel-builder.dist.min.js"></script>
+
+<script src="ExcelJS/jszip.js"></script>
+<script>
+function doAjax(query, callBack, data)
+{
+	if (typeof(query) == "object")
+	{
+		var q = query.query
+		var forcedCols = query.forcedCols
+	}
+	else
+	{
+		var q = query
+		var forcedCols = null
+	}
+
+	with ({callback: callBack})
+	var processData = function (data) {
+		var resp = data
+		
+		if (typeof resp == "string")
+		{
+			if (window.DOMParser)
+			{
+				var parser=new DOMParser();
+				var xmlDoc=parser.parseFromString(resp,"text/xml");
+			}
+			else // Internet Explorer
+			{
+				var xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+				xmlDoc.async=false;
+				xmlDoc.loadXML(resp);
+			}
+		}
+		
+		var xotree = new XML.ObjTree();
+		xotree.force_array = forcedCols
+		var res = xotree.parseDOM(xmlDoc);
+		
+		if (callBack)
+			callBack(res['#document'])
+		else
+			return res['#document']
+	}
+	if (callBack)
+	{
+		return doXHR(q, processData, data)
+	}
+	else
+	{
+		var res = doXHR(q, null, data)
+		return processData(res)
+	}
+}
+function doXHR(url, callBack, data, noCache)
+{
+	var timestamp = new Date().getTime()
+	var callBackFunc, errorFunc, responseHandler;
+	if (window.XMLHttpRequest) {							
+		var xhr=new XMLHttpRequest();							
+	} else {																	
+		var xhr=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	if (callBack && callBack.callBack)
+	{
+		callBackFunc = callBack.callBack
+		if (callBack.error)
+		{
+			errorFunc = callBack.error
+		}
+		else
+		{
+			errorFunc = function (xhr) { alert("Communications error. Are you logged in?") }
+		}
+		if (callBack.response)
+			responseHandler = callBack.response
+	}
+	else
+	{
+		callBackFunc = callBack
+		errorFunc = function (xhr) { alert("Communications error. Are you logged in?") }
+	}
+	
+	if (url.indexOf('?') > 0 || noCache) // only add to requests with params
+		url += '&timestamp=' + timestamp
+
+	xhr.open(data ? "POST" : "GET", url, callBack ? true : false)
+	xhr.setRequestHeader("Content-Type", "text/xml");
+	if (data)
+		xhr.setRequestHeader("Content-Length", data.length);
+	
+	if (callBackFunc)
+	{
+		with ({xhr: xhr, callBack: callBackFunc, errorFunc: errorFunc})
+		{
+			if (responseHandler)
+				var handleReturn = responseHandler
+			else
+				var handleReturn = function () {
+				if (xhr.readyState==4) {
+					if (xhr.status != 200)
+						errorFunc(xhr)
+					else
+						callBack(xhr.responseText);
+				}
+		}
+		xhr.onreadystatechange = handleReturn
+		xhr.send(data)
+		return xhr
+		}
+	}
+	else
+	{
+		xhr.send(data)
+		return xhr.responseText;
+	}
+}
+
+</script>
+<style type="">
+body {
+	xfont-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-family: "PT Sans","Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	border: none collapse;
+}
+th {
+	text-align: left;
+	border-bottom: solid 1px black;
+}
+td {
+	border: 0px;
+	padding: 0px;
+	border-left: solid 1px;
+	margin: 0px;
+
+}
+</style>
+</head>
+
+<script>
+var globalData = {}
+function getQueryTb(letter, id, fname)
+{	
+	fname = (fname ? fname : '')
+	id = (id ? id : '')
+	//alert(letter + ":" + id + ":" + fname)
+	var url = "/rmwebapp/RMApiServlet"
+	
+	var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+	+ '<ATTRIBUTES>'
+	+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[ID]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Access]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[AccountingUnitControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[AcgrpCollect]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ActivityList]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Addins]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[AllowJobQueue]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CheckLS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CreateTimeStamp]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[CompanyControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[CreatorsId]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[DefValSep]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[Email]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Group]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToExecutives]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToJobCode]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPay]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPersAct]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToPosition]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToSSN]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAccessToSuper]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRAuthorControl]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HRDepartmentControl]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[HREmployeeControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ISOLocale]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[IsRunAsEnabled]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ModifiersId]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ModifyTimeStamp]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[Name]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[OLEDBC]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[PortalAdmin]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[PortalRole]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PrimaryGroup]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PrimaryStructure]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[ProcessLevelControl]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ProductLine]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[PSAStandAlone]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[Role]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SLDTFUNC]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SLDTOBS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[SNotesServer]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ULDTFUNC]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[ULDTOBS]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[UTZOFFSET]]></ATTRIBUTE>'
+	+ '<ATTRIBUTE><![CDATA[WFUser]]></ATTRIBUTE>'
+	//+ '<ATTRIBUTE><![CDATA[WKDAYEXPR]]></ATTRIBUTE>'
+	+ '</ATTRIBUTES>'
+	//+ '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>'
+	//+ (letter ? '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>' : '')
+	//+ (fname ? '<WHERE><![CDATA[({FirstName}=' + fname + '*)]]></WHERE>' : '')
+	//+ (id ? '<WHERE><![CDATA[({ID}=' + id + '*)]]></WHERE>' : '')
+	//+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+	+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+	+ '<OUTPUTSERVICEATTRS>'
+	+ '<OUTPUTSERVICEATTR serviceName="SSOP"><![CDATA[USER]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_REQUESTER"><![CDATA[REQUESTER]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[COMPANY]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[EMPLOYEE]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[DOMAIN_USER]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+	+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[LOGIN]]></OUTPUTSERVICEATTR>'
+	//+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+	+ '</OUTPUTSERVICEATTRS></TRANSACTION>'
+	
+	var strPDL = portalWnd.oUserProfile.getAttribute("productline")
+	if (strPDL == "PROD901")
+		data = data.replace(/<!appProdline>/g, 'PROD901').replace(/<!LBIService>/g, 'LBIRPT').replace('C0X8DD','C0X8PD')
+	else
+		data = data.replace(/<!appProdline>/g, 'DEV901').replace(/<!LBIService>/g, 'LBIRPT') 
+
+	var tb = document.createElement('tbody')
+	var span = document.createElement('span')
+	document.getElementById('progress').appendChild(span)
+	span.appendChild(document.createTextNode(letter))
+	span.style.visibility = 'hidden';
+	
+	var dataArray = []
+	globalData[letter] = dataArray
+	with ({ tb: tb, dataArray: dataArray, progress: span })
+	var fn = function(data) {
+		handleData(data, tb, dataArray, progress)
+	}
+	doAjax(url, fn, data)
+	return tb
+}
+function test01(i, tbl)
+{
+	with ({i: i, tbl: tbl})
+	{
+		var fn = function() {
+			var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			if (i < str.length)
+			{
+				var letter = str.charAt(i)
+				var tb = getQueryTb(letter)
+				tbl.appendChild(tb)
+				test01(i+1, tbl)
+			}
+		}
+	}
+	setTimeout(fn, 100)
+}
+function iterateAlpha(tbl)
+{
+	var str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+	//var str = "A"; but we do not use this
+	//var tbl = document.createElement('table')
+	//document.body.appendChild(tbl)
+	test01(0, tbl)
+	return
+	for(var i=0; i < 26; i++)
+	{
+		//var nextChar = str.charAt(i);
+		var tb = test01(i, tbl)
+		tbl.appendChild(tb)
+	}
+}
+with({tbl: null})
+{
+var handleData = function(data, tb, dataArray, progress)
+{
+	
+	trans = data.TRANSACTION
+	
+	var element = trans.ROWDEF.ELEMENT
+	
+	// Add headers
+	var tr = document.createElement('tr')
+	var da = []
+	for (e in element)
+	{
+		var colName = element[e]['-name']
+		var th = document.createElement('th')
+		var tn = document.createTextNode(colName)
+		da.push(colName)
+		th.appendChild(tn)
+		tr.appendChild(th)
+	}
+	dataArray.push(da)
+	tb.appendChild(tr)
+
+	var rows = trans.ROWS.ROW
+	
+	// Add Rows
+	
+	var fn = function (a,b) {
+		var alv = a.ROWATTR[0].VALUE.toUpperCase()
+		var blv = b.ROWATTR[0].VALUE.toUpperCase()
+		var afv = a.ROWATTR[1].VALUE.toUpperCase()
+		var bfv = b.ROWATTR[1].VALUE.toUpperCase()
+		
+		if ( alv == blv )
+			return afv > bfv ? 1 : -1
+		return alv > blv ? 1 : -1
+	}
+	if (rows)
+	{
+		rows.sort(fn)
+	
+		for (var r in rows)
+		{
+			var tr = document.createElement('tr')
+			var cols = rows[r].ROWATTR
+			var da = []
+			for (var c in cols)
+			{
+				var name = cols[c]['-name']
+				var val = String(cols[c].VALUE)
+				val = val.replace('undefined','-')
+				var td = document.createElement('td')
+				td.title = name
+				//td.onclick = function(event) {event.srcElement.style.width="10px"}
+				var tn = document.createTextNode(val)
+				da.push(val)
+				td.appendChild(tn)
+				tr.appendChild(td)
+			}
+			dataArray.push(da)
+			tb.appendChild(tr)
+		}
+	}
+	progress.style.visibility = 'visible'
+	//tbl.appendChild(tb)
+	//return tb
+}
+
+var go = function()
+{
+	var uid = document.getElementById("uid").value
+	var name = document.getElementById("name").value
+	var fname = document.getElementById("fname").value
+	//alert(uid + ":" + name + ":" + fname)
+	if (! tbl)
+	{
+		tbl = document.createElement('table')
+		document.body.appendChild(tbl)
+	}
+	if (uid||name||fname)
+	{
+		tbl.appendChild(getQueryTb(name, uid, fname))
+	}
+	else
+	{
+		iterateAlpha(tbl)
+	}
+}
+}
+function zPad(s,l)
+{
+	return ( '0000000000' + String(s) ).slice(0 - l)
+}
+function dateStamp()
+{
+	var now = new Date()
+	return zPad(now.getFullYear(), 4) + zPad(now.getMonth() + 1, 2) + zPad(now.getDate(),2) + '-' + zPad(now.getHours(), 2) + zPad(now.getMinutes(), 2) + zPad(now.getSeconds(), 2)
+}
+function loadPage()
+{
+	portalWnd = null, p = parent, c = 0, max = 10;
+	while (!portalWnd && c < max && p)
+	{
+		portalWnd = p.portalWnd
+		p = p.parent
+		c++
+	}
+	
+	var tn = document.createTextNode(portalWnd.oUserProfile.getAttribute("productline"))
+	document.getElementById('pdl').appendChild(tn)
+	//test0()
+	//test2_async()
+	//alert('hi')
+	//test2_async()
+	document.onkeydown=function(){
+		if(window.event.keyCode=='13'){
+			go();
+		}
+	}
+	if('download' in document.createElement('a')){
+		document.getElementById("downloader").onclick = function () { window.open("data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,"+builder.createFile(book))
+		return false
+		}
+		
+	} else {
+		var w = document.getElementById('clickme').offsetWidth
+		var h = document.getElementById('clickme').offsetHeight
+		Downloadify.create('downloader',{
+				filename: function(){
+						return portalWnd.oUserProfile.getAttribute("productline") + "_" + dateStamp() + ".xlsx";
+				},
+				data: function(){ 
+						var i = 0 ; for (var k in globalData) i++
+						if (i)
+						{
+							var book = Excel()
+							return builder.createFile(book);
+						}
+						alert("No data yet")
+						return null
+				},
+//                            onComplete: function(){ alert('Your File Has Been Saved!'); },
+//                            onCancel: function(){ alert('You have cancelled the saving of this file.'); },
+//                            onError: function(){ alert('You must put something in the File Contents or there will be nothing to save!'); },
+				swf: 'ExcelJS/downloadify.swf',
+				downloadImage: 'ExcelJS/blank_png.png',
+				width: w,
+				dataType: 'base64',
+				height: h,
+				transparent: true
+				//append: false
+		});
+	}
+}
+function showData(x)
+{
+	var d = new Date();
+	window.document.body.innerHTML += (d.getTime() + ": " + x + "<br>")
+}
+function Excel()
+{
+	if (typeof console == "undefined")
+		console = null;
+	builder = ExcelBuilder;
+	book = builder.createWorkbook();
+
+    var stylesheet = book.getStyleSheet();
+ 
+    var red = 'FFFF0000';
+    var importantFormatter = stylesheet.createFormat({
+        font: {
+            bold: true,
+            color: red
+        },
+        border: {
+            bottom: {color: red, style: 'thin'},
+            top: {color: red, style: 'thin'},
+            left: {color: red, style: 'thin'},
+            right: {color: red, style: 'thin'}
+        }
+    });
+ 
+    var themeColor = stylesheet.createFormat({
+        font: {
+            bold: true,
+            color: {theme: 3}
+        }
+    });
+	
+	
+	
+	var s = ''
+	for (var i in globalData)
+	{
+		s += i + ":" + globalData[i].length + "\n"
+		var sheet = book.createWorksheet({name: i});
+		var headers = setHeaders(globalData[i][0], themeColor.id)
+		globalData[i][0] = headers
+		sheet.setData(globalData[i]);
+		book.addWorksheet(sheet)
+	}
+	return book
+}
+function setHeaders(row, style)
+{
+	var or = row
+	var nr = []
+	for (var i = 0; i < or.length; i++)
+	{
+		nr.push( {value: or[i], metadata: { style: style } } );
+	}
+	return nr
+}
+</script>
+<body onload="loadPage()">
+<span id="progress"></span>
+<div style="position: relative">
+	<div id="clickme" style="position: absolute; white-space: nowrap;"><span style="text-decoration: underline; color: blue; top: 50%; transform: translateY(-50%);">Export to Excel</span> (only after all tables are displayed)!</div>
+	<div style="position: absolute" id="downloader" download="sample.xlsx"></div>
+	!
+</div>
+<table>
+<tr>
+<td>ID</td><td>LastName</td><td>FirstName</td>
+</tr>
+<tr>
+<td><input type="text" id="uid"></td>
+<td><input type="text" id="name"></td>
+<td><input type="text" id="fname"></td>
+<td><input type="button" id="go" onclick="go()" value="go"></td>
+<td><div id="pdl"></div></td>
+<td>
+</td></tr>
+</table>
+</body>
+</html>

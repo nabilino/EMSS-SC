@@ -1,0 +1,238 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/Attic/sso.htm,v 1.1.2.10.4.4.6.8.2.2 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>SSO Login</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css">
+</head>
+
+<script language="javascript" src="servenv.js"></script>
+<script language="javascript" src="/sso/sso.js"></script>
+<script language="javascript">
+var bbox=null;
+var callBackTimer=null;
+var callBackTime=1000*60*2;	// 2 minutes
+var portalWnd=null;
+var portalObj=null;
+var traceMsg="sso.htm"+document.location.search;
+var traceData="";
+
+//-----------------------------------------------------------------------------
+function onLoadSSOBlackBox()
+{
+	// open in new window? or within portal?
+	if (window.opener && window.opener.lawsonPortal)
+		portalWnd = window.opener;
+	else
+		portalWnd = envFindObjectWindow("lawsonPortal");
+	portalObj = portalWnd.lawsonPortal;
+
+	// Open hidden frame for viewing...
+	if (isTracingOn())
+	{
+		portalWnd.lawTraceMsg("Inside SSO.HTM - Starting Authentication Process");
+		var ssoFrameset = document.getElementById("ssoFrameset");
+		ssoFrameset.rows = "30%,*";
+	}
+
+	// supply standard message
+	var lbl=""
+	if(portalObj.profile)
+		lbl=portalObj.getPhrase("msgLoginRemoteService")+"...\n";
+	else
+		lbl="Logging into remote service...\n"
+	var pageSrc = "<link id='StyleLink' type='text/css' rel='stylesheet' href='portal.css'>"
+				+ "<scr" + "ipt src='servenv.js'></scr" + "ipt>"
+				+ "<body tabIndex='-1' scroll='no' style='display:block;visibility:visible'>"
+				+ "<div id='divMessage' style='position:absolute;top:65px;left:25px;'>"
+				+ "<img type='button' class='selectButton' src='images/ico_arrow_spin.gif' />  "
+				+ "<label id='lblMessage' class='xTLabel' style='font-size:10pt;'>" + lbl + "</label>"
+				+ "</div>"
+				+ "</body>";
+	mainFrm.document.write(pageSrc);
+	// really silly... if servenv.js, can't close until domain gets set
+	setTimeout("closeMainFrm()", 100);
+
+	// capture the original URL
+	var origURL = unescape(document.location.search);
+	if (origURL)
+		origURL = origURL.substr(1);
+	if (!origURL || origURL.substring(0,3).toUpperCase() != "SSO")
+	{
+		urlParseError();
+		return;
+	}
+
+	// parse url
+	var urlAry = origURL.split("|");
+	var svcName = null;
+	origURL="";
+	for (var i=0; i<urlAry.length; i++)
+	{
+		if (urlAry[i].substring(0,4) == "URL=")
+			origURL = urlAry[i].substring(4);
+		else if (urlAry[i].substring(0,12) == "SERVICENAME=")
+			svcName = urlAry[i].substring(12);
+	}
+
+	traceData += "Data passed in\n"
+			  +  "\tURL =\t\t" + origURL + "\n"
+			  +  "\tService Name =\t" + svcName + "\n\n";
+
+	if (origURL == "")
+	{
+		urlParseError();
+		return;
+	}
+
+	var hideFrm = document.getElementById("hideFrm");
+	bbox = new BBoxObject(origURL, svcName, hideFrm);
+
+	var bWaitForLogin = bbox.login();
+	traceData += "BlackBox Object\n"
+			  +  "\tbbox.url =\t\t" + bbox.url + "\n"
+			  +  "\tbbox.serviceName =\t" + bbox.serviceName + "\n"
+			  +  "\tbbox.type =\t\t" + bbox.type + "\n"
+			  +  "\tbbox.callBackTime =\t\t" + bbox.callBackTime  + "\n"
+			  +  "\tbbox.ifrm =\t\t" + bbox.ifrm + ((bbox.ifrm==null)?"":" --> id="+bbox.ifrm.id) + "\n"
+			  +  "\tbbox.waitingForLogin =\t" + bWaitForLogin + "\n\n"
+
+	if (!bWaitForLogin)
+		ssoBlackBoxCallback();
+	else
+	{
+		portalWnd.lawTraceMsg(traceMsg, traceData);
+		traceData = "";
+		if (bbox.type == "greybox")
+			startCallBackTimer();
+		else if (bbox.type == "blackbox" || bbox.type == null)
+			setTimeout("ssoBlackBoxCallback()", bbox.callBackTime*1000);
+	}
+}
+
+//-----------------------------------------------------------------------------
+function closeMainFrm()
+{
+	try
+	{
+		mainFrm.document.close();
+	}
+	catch (e)
+	{}
+}
+
+//-----------------------------------------------------------------------------
+function urlParseError()
+{
+	var msg=portalObj.getPhrase("LBL_URL_PARSE_ERROR")+"\n";
+	traceData += "\n" + msg;
+	portalWnd.lawTraceMsg(traceMsg, traceData);
+	traceData = "";
+	portalWnd.cmnDlg.messageBox(msg,"ok","stop",window);
+}
+
+//-----------------------------------------------------------------------------
+function ssoBlackBoxCallback(inKey)
+{
+	clearCallBackTimer();
+	bbox.addService();
+
+	if (bbox.serviceName != null)
+		traceData += "Login to service " + bbox.serviceName + " succeeded.\n";
+	if (bbox.type == "greybox")
+	{
+		if (inKey)
+			traceData += "A valid key was provided for this greybox.\n";
+		else
+			traceData += "No key was provided for this greybox.\n";
+	}
+
+	var tmpUrl = bbox.url;
+	if (inKey)
+	{
+		if (inKey.substring(0,1) == "?" || inKey.substring(0,1) == "&")
+			inKey = inKey.substring(1);
+		if (tmpUrl.indexOf("?") == -1)
+			tmpUrl += "?";
+		if (tmpUrl.substring(tmpUrl.length-1) != "?")
+			tmpUrl += "&";
+		tmpUrl += inKey;
+	}
+
+	traceData += "Navigating to " + tmpUrl;
+	portalWnd.lawTraceMsg(traceMsg, traceData);
+	traceData = "";
+	
+	// Clear critical section timer stopping other grey box bkmarks to load
+	//	in main content
+	if ((bbox.type == "greybox") && (typeof(this.parent.releaseCriticalSection) == "function"))
+	{
+		this.parent.releaseCriticalSection();
+		this.portalWnd.lawTraceMsg("Exited Critical Section <SSO.HTM>");
+	}
+	//END Clear critical section
+
+	window.navigate(tmpUrl);
+}
+
+//-----------------------------------------------------------------------------
+function ssoBlackBoxFailed()
+{
+	traceData += "Login to service " + bbox.serviceName + " failed.\n";
+			  + (!window.opener) ? "Navigating to Portal Home" : "Closing window";
+	portalWnd.lawTraceMsg(traceMsg, traceData);
+	traceData = "";
+
+	// failed (or cancelled?)
+	if (!window.opener)
+		portalWnd.goHome();
+	else
+		self.close();
+}
+
+//-----------------------------------------------------------------------------
+function startCallBackTimer()
+{
+	callBackTimer = setTimeout("ssoBlackBoxFailed()", callBackTime);
+}
+
+//-----------------------------------------------------------------------------
+function clearCallBackTimer()
+{
+	callBackTimer = null;
+}
+
+//-----------------------------------------------------------------------------
+function isTracingOn()
+{
+	return (typeof(portalWnd.lawTrace) == "object");
+}
+
+</script>
+
+<frameset id="ssoFrameset" rows="100%,*" onload="onLoadSSOBlackBox()" border="0" frameborder="no">
+	<frame id="mainFrm" src="blankdmn.htm">
+	<frame id="hideFrm" src="blankdmn.htm">
+</frameset>
+</html>

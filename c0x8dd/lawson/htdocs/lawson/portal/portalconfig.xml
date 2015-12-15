@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/Attic/portalconfig.xml.template,v 1.1.2.14.6.3.8.8 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<PORTAL_CONFIG version="9.0.0">
+	<SERVICES>
+		<SERVICE id="userprofile" name="IOSprofile" version ="9.0.0" url="/servlet/Profile?_PATH=" />
+<!--		<SERVICE id="userprofile" name="IOSprofile" version="9.0.0" url="/servlet/Profile?_PATH=" /> -->
+<!--		<SERVICE id="userprofile" name="PSAprofile" url="" /> -->
+	</SERVICES>
+	<SCRIPTS id="IOSprofile">
+		<SCRIPT src="forms/magic.js" />
+		<SCRIPT src="forms/formutil.js" />
+		<SCRIPT src="forms/collections.js" />
+		<SCRIPT src="objects/FileManager.js" />
+		<SCRIPT src="objects/FormCache.js" />
+		<SCRIPT src="reports/jobutil.js" />
+	</SCRIPTS>
+	<SETTINGS>
+		<SETTING id="allow_trace" value="1" />
+		<SETTING id="override_browser_check" value="0" />
+		<SETTING id="drill_values" value="25|50|100|200" />
+		<SETTING id="erp_button_order" value="a|c|d|p|i|n" />
+		<SETTING id="hide_framework" value="1" />
+		<SETTING id="logo_src" value="" />
+		<SETTING id="perform_key_check" value="0" />
+		<SETTING id="role_based_options" value="1" />
+		<SETTING id="updates_prompt" value="1" />
+		<SETTING id="use_sso_authentication" value="1" />
+		<SETTING id="secs_to_load" value="5" />
+		<SETTING id="allow_enter_hotkey" value="1" />	
+		<SETTING id="allow_LSR" value="0" />
+	</SETTINGS>
+	<ROLEOPTIONS>
+		<ROLEOPTION id="allow_jobdef" value="1" />
+		<ROLEOPTION id="allow_joblist" value="1" />
+		<ROLEOPTION id="allow_jobschedule" value="1" />
+		<ROLEOPTION id="allow_printfiles" value="1" />
+		<ROLEOPTION id="allow_jobpolling" value="1" />
+		<ROLEOPTION id="use_compact_transaction" value="0" />
+		<ROLEOPTION id="use_form_cache" value="0" />
+	</ROLEOPTIONS>
+	<USEROPTIONS>
+		<USEROPTION id="locale" defval="" reqval="" disable="0" />
+		<USEROPTION id="pdl" defval="" reqval="" disable="0" />
+		<USEROPTION id="printer" defval="" reqval="" disable="0" />
+		<USEROPTION id="separator" defval="0" reqval="" disable="0" />
+		<USEROPTION id="toolbardisplay" defval="2" reqval="" disable="0" />
+		<USEROPTION id="reportformat" defval="2" reqval="" disable="0" />
+		<USEROPTION id="autoselect" defval="0" reqval="" disable="0" />
+		<USEROPTION id="uselist" defval="0" reqval="" disable="0" />
+		<USEROPTION id="explorer" defval="50" reqval="" disable="0" />
+		<USEROPTION id="select" defval="25" reqval="" disable="0" />
+		<USEROPTION id="list" defval="25" reqval="" disable="0" />
+	</USEROPTIONS>
+</PORTAL_CONFIG>

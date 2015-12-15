@@ -1,0 +1,742 @@
+<html>
+<head>
+<script src="XMLObjTree.js"></script>
+<style type="">
+body, div, table {
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	border: none collapse;
+}
+th {
+	text-align: left;
+	border-bottom: solid 1px black;
+}
+td {
+	border: 0px;
+	padding: 0px;
+	border-left: solid 1px;
+	margin: 0px;
+
+}
+.rowLevel0 {
+	color: #2E74B5;
+}
+.rowLevel1 {
+	
+	background-color: blue;
+}
+.wait, .wait * { cursor: wait !important; }
+
+</style>
+</head>
+
+<script>
+
+function hideDiv(div, callback)
+{
+	with ( { i: 128, div: div, h: div.offsetHeight, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h <  ( 4 * interval ) ) // drawing to a close
+			{
+				i = i * 2
+			}
+			else
+				i = i / 2
+		}
+		if ( h - interval > 0 )
+		{
+			h -= interval
+			div.style.height = h + "px"
+			//document.body.appendChild(document.createTextNode("."))
+			setTimeout(fn, i)
+		}
+		else
+		{
+			div.style.height = 1 + "px"
+			callback(div)
+		}
+	}
+		
+	fn()	
+
+}
+function revealDiv(div)
+{
+	var divProps = {}
+	divProps.position = div.style.position
+	divProps.top = div.style.top
+	divProps.left = div.style.left
+	divProps.overflow = div.style.overflow
+	divProps.height = div.style.height
+	
+	div.style.position = 'absolute'
+	div.style.top = 0
+	div.style.left = 0
+	
+	document.body.appendChild(div)
+	var h = div.offsetHeight
+	
+	document.body.removeChild(div)
+	div.style.position = divProps.position
+	div.style.top = divProps.top
+	div.style.left = divProps.left
+	div.style.overflow = 'hidden'
+	//alert(h)
+	
+	with ({i:16, div:div, h: 0, max: h, divProps: divProps})	
+	var fn = function() {
+		//var s = steps[i++]
+		if (h < max)
+		{
+			if ( h > max/2 )
+				i = i / 2
+			else
+				i = i * 2
+
+			if ( (h + i) <= max)
+			{
+				h += i
+				div.style.height = h + "px"
+				setTimeout(fn, 50)
+			}
+			else
+			{
+				div.style.height = divProps.height
+				div.style.overflow = divProps.overflow
+			}
+		}
+	}
+	
+	with ( { i: 128, div: div, max: h, h: 0, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h > ( max - ( 4 * interval ) ) ) // drawing to a close
+			{
+				i = i * 2 // increase delay
+			}
+			else
+				i = i / 2 // decrease delay
+		}
+		if ( h + interval < max )
+		{
+			h += interval
+			div.style.height = h + "px"
+			setTimeout(fn, i)
+		}
+		else
+			div.style.height = max + "px"
+	}
+		
+	fn()	
+
+}
+function zTrim(s)
+{
+	return s.replace(/^ */,'').replace(/^0*/,'');
+}
+function injectSubTable(tr, data)
+{
+	var ntr = document.createElement('tr')
+	var td = document.createElement('td')
+	var td1 = document.createElement('td')
+	td1.colSpan = "99"
+	ntr.appendChild(td)
+	ntr.appendChild(td1)
+	tr.parentNode.insertBefore(ntr, tr.nextSibling)
+	td1.appendChild(data)
+}
+function tabulateDME(dme, options)
+{
+	var tb = document.createElement('tbody')
+	var rows = dme.RECORDS.RECORD
+	var thr = document.createElement('tr')
+	var colNames = dme.COLUMNS.COLUMN
+	var colsList = null;
+	
+	for (var i = 0; i < colNames.length; i++)
+	{
+		if (options && options.colDefns)
+		{
+			if (options.colDefns[colNames[i]['-dbname']])
+			{
+				if (! colsList)
+					colsList = {}
+				colsList[i] = options.colDefns[colNames[i]['-dbname']]
+				//alert('added col ' + i + ":" + colNames[i]['-dbname'])
+				var th = document.createElement('th')
+				if (colsList[i].title)
+					var tn = document.createTextNode(colsList[i].title)
+				else
+					var tn = document.createTextNode(colNames[i]['-dspname'])
+				th.appendChild(tn)
+				thr.appendChild(th)
+			}    
+		}
+		else
+		{
+			var th = document.createElement('th')
+			var tn = document.createTextNode(colNames[i]['-dspname'])
+			th.appendChild(tn)
+			thr.appendChild(th)
+		}
+	}
+	tb.appendChild(thr)
+	for (var r in rows)
+	{
+		var cols = rows[r].COLS.COL
+		var tr = document.createElement('tr')
+		
+		//var clickActual = null, clickStart = null
+		
+		if (options && options.onclick)
+		{
+			if (options.onclickDataCol >= 0)
+				var data = cols[options.onclickDataCol]
+			else
+				var data = cols
+			with ( {x: data, trl: tr, fn: options.onclick, clicked: false, opened: false} )
+			{
+				var clickStart = function () {
+					var clickActual = function() {
+						opened = fn(x, trl, clicked, opened);
+						clicked = ! clicked;
+						document.body.className = '';
+						trl.style.cursor = 'hand'
+					}
+					trl.style.cursor = 'wait';
+					document.body.className = 'wait';
+					setTimeout(clickActual, 100)
+				} 
+				tr.style.cursor = 'hand'
+				tr.onclick = clickStart
+			}
+		}
+
+		for (var c in cols)
+		{
+			if (colsList && ! colsList[c])
+				continue
+			
+			var val = String(cols[c])
+			val = val.replace('undefined','-')
+			var td = document.createElement('td')
+			if (colsList)
+			{
+				if (colsList[c].type && colsList[c].type == 'float')
+					td.style.textAlign = "right"
+				if (colsList[c].toScreen)
+					val = colsList[c].toScreen(val, cols)
+				if (colsList[c].onclick)
+				{
+					with ({fn: colsList[c].onclick, tdl:td, x: cols[c], clicked: false, opened: false})
+					{
+						var clickStart = function () {
+							var clickActual = function() {
+								opened = fn(x, tdl, clicked, opened);
+								clicked = ! clicked
+								document.body.className = '';
+								tdl.style.cursor = 'hand';
+							}
+							tdl.style.cursor = 'wait';
+							document.body.className = 'wait';
+							setTimeout(clickActual, 100)
+						} 
+					}
+					td.onclick = clickStart
+					td.style.cursor = 'hand'
+				}
+				if (colsList[c].onhover)
+				{
+					with ({fn: colsList[c].onhover, tdl:td, x: cols[c], hovered: false, opened: false})
+					{
+						var hoverStart = function () { fn(x, tdl, hovered, opened) }
+					}
+					td.onmouseover = hoverStart
+					//td.style.cursor = 'hand'
+				}
+			}
+				
+			td.className = 'rowLevel0'
+			var tn = document.createTextNode(val)
+			td.appendChild(tn)
+			tr.appendChild(td)
+		}
+		tb.appendChild(tr)
+	}
+	return tb
+}
+function doQuery(query, callBack, data)
+{
+	//alert('doQuery')
+	if (typeof(query) == "object")
+	{
+		var q = query.query
+		var forcedCols = query.forcedCols
+	}
+	else
+	{
+		var q = query
+		var forcedCols = null
+	}
+	if (window.XMLHttpRequest) {							
+		ajax=new XMLHttpRequest();							
+	} else {																	
+		ajax=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+		
+	var url = q
+	
+	ajax.open(data ? "POST" : "GET", url, false)
+	ajax.setRequestHeader("Content-Type", "text/xml");
+	//ajax.setRequestHeader("Content-Length", data.length);
+	ajax.send(data)
+	var xotree = new XML.ObjTree();
+	xotree.force_array = forcedCols
+	var resp = ajax.responseText
+	
+	if (typeof resp == "string")
+	{
+		if (window.DOMParser)
+		{
+			parser=new DOMParser();
+			xmlDoc=parser.parseFromString(resp,"text/xml");
+		}
+		else // Internet Explorer
+		{
+			xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+			xmlDoc.async=false;
+			xmlDoc.loadXML(resp);
+		}
+	}
+	var res = xotree.parseDOM(xmlDoc);
+	return res['#document']
+	//var rows = res['#document'].DME.RECORDS.RECORD
+}
+</script>
+
+<script>
+
+with ({ids:{}})
+var getRMData = function(id, node)
+{
+	if (! ids[id])
+	{
+		var url = "/rmwebapp/RMApiServlet"
+		
+		var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+		+ '<ATTRIBUTES>'
+		+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ID]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Access]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[AccountingUnitControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[AcgrpCollect]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ActivityList]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Addins]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[AllowJobQueue]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[CheckLS]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[CreateTimeStamp]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[CompanyControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[CreatorsId]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[DefValSep]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Email]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Group]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToExecutives]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToJobCode]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToPay]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToPersAct]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToPosition]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToSSN]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAccessToSuper]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRAuthorControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HRDepartmentControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[HREmployeeControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ISOLocale]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[IsRunAsEnabled]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ModifiersId]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ModifyTimeStamp]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Name]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[OLEDBC]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[PortalAdmin]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[PortalRole]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[PrimaryGroup]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[PrimaryStructure]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ProcessLevelControl]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ProductLine]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[PSAStandAlone]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[Role]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[SLDTFUNC]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[SLDTOBS]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[SNotesServer]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ULDTFUNC]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[ULDTOBS]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[UTZOFFSET]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[WFUser]]></ATTRIBUTE>'
+		//+ '<ATTRIBUTE><![CDATA[WKDAYEXPR]]></ATTRIBUTE>'
+		+ '</ATTRIBUTES>'
+		//+ '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>'
+		//+ (letter ? '<WHERE><![CDATA[({LastName}=' + letter + '*)]]></WHERE>' : '')
+		//+ (fname ? '<WHERE><![CDATA[({FirstName}=' + fname + '*)]]></WHERE>' : '')
+		//+ (id ? '<WHERE><![CDATA[({ID}=' + id + '*)]]></WHERE>' : '')
+		+ '<WHERE><![CDATA[({ID}=' + id + ')]]></WHERE>'
+		//+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+		//+ '<WHERE><![CDATA[(&({FirstName}=' + fname + '*)({LastName}=' + letter + '*)({ID}=' + id + '*))]]></WHERE>'
+		//+ '<OUTPUTSERVICEATTRS>'
+		//+ '<OUTPUTSERVICEATTR serviceName="SSOP"><![CDATA[USER]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_REQUESTER"><![CDATA[REQUESTER]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[COMPANY]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="<!appProdline>_EMPLOYEE"><![CDATA[EMPLOYEE]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[DOMAIN_USER]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="<!LBIService>"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[LOGIN]]></OUTPUTSERVICEATTR>'
+		//+ '<OUTPUTSERVICEATTR serviceName="C0X8DD"><![CDATA[PASSWORD]]></OUTPUTSERVICEATTR>'
+		//+ '</OUTPUTSERVICEATTRS>'
+		+ '</TRANSACTION>'
+	
+		var query = {
+			query: "/rmwebapp/RMApiServlet",
+			forcedCols: ['ROW', 'ROWATTR']
+		}
+		var objDoc = doQuery(query, null, data)
+		var trans = objDoc.TRANSACTION
+	
+		var row = trans.ROWS.ROW
+		//alert(row)
+		ids[id] = (row[0].ROWATTR[0].VALUE + ", " + row[0].ROWATTR[1].VALUE)
+	}
+	
+	node.title = ids[id] 
+}
+function getWUData(info, tr, clicked, opened)
+{
+	//alert(info)
+	tr = tr.parentNode
+	
+	if (clicked)
+	{
+		// just remove table
+		if (opened)
+		{
+			if (true ) //portalWnd.oUserProfile.getAttribute("id") == "u0x8im00")
+			{
+				with ({tr:tr})
+				var fn = function () { tr.parentNode.removeChild(tr.nextSibling) }
+				hideDiv(tr.nextSibling.childNodes[1].firstChild, fn)
+				//alert(tr.nextSibling.childNodes[1].firstChild.style.height) //[1].firstChild.nodeName)
+			}
+			else
+			{
+				tr.parentNode.removeChild(tr.nextSibling)
+			}
+			opened = false
+		}
+		return
+	}
+	
+	var service = "SLEmpExpApp"
+	var serviceVar = "EXPENSE_NBR"
+	var varVal = info //"TEST L6 3"
+	//var service = "JobReq Approval"
+	//var serviceVar = "PJR_REQUISITION"
+	
+	var q = "PROD=LOGAN&FILE=WFVARIABLE&INDEX=WFVSET1"
+	+ "&FIELD=WORKUNIT;VARIABLE-NAME;VARIABLE-VALUE;WORKUNIT.START-DATE;WORKUNIT.START-TIME;WORKUNIT.SERVICE;"
+	+ "WORKUNIT.WORK-TITLE;WORKUNIT.TASK;WORKUNIT.WF-STATUS"
+	+ "&SELECT=WORKUNIT.SERVICE=" + service
+	+ "%26VARIABLE-NAME=" + serviceVar
+	+ "%26VARIABLE-VALUE=" + varVal
+	+ "&OUT=XML&DELIM=~&MAX=600"
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doQuery(query)
+	var WFWURows = objDoc.DME.RECORDS.RECORD
+		
+	//alert(WFWURows[0].COLS.COL[0])
+	if (! WFWURows)
+		return
+	var WUNum = WFWURows[0].COLS.COL[0]
+	//alert(WUNum)
+	WUNum = 30238
+
+	var q = "PROD=LOGAN&FILE=WFMETRICS&INDEX=WMESET2&KEY=" + WUNum
+	+ "&FIELD=WORKUNIT;PROCESS-ID;END-DATE;END-TIME;STATUS;WF-RM-ID;TASK;ACTIVITY-ID;OPERATION;COMMENT;"
+	+ "START-DATE;DUE-DATE&OUT=XML&MAX=600"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doQuery(query)
+	var WFMetricsRows = objDoc.DME.RECORDS.RECORD
+
+	var fn = function (r0,r1) {var a = r0.COLS.COL[10], b = r1.COLS.COL[10]; return ((a.substr(6,4) + a.substr(0,2) + a.substr(3,2)) > (b.substr(6,4) + b.substr(0,2) + b.substr(3,2))) ? 1 : -1}
+	WFMetricsRows.sort(fn)
+	
+	//alert(WFMetricsRows.length)
+	var s = ''
+	for (var i = 0; i < WFMetricsRows.length; i++)
+	{
+		var cols = WFMetricsRows[i].COLS.COL
+		s += cols[5] + ":" + cols[2] + ":" + cols[5] + ":" + cols[8] + "\n"
+	}
+	var tbl = document.createElement('table')
+	var options = {
+		colDefns: {
+			'WORKUNIT': true,
+			'WF-RM-ID': {
+				toScreen: function (x, cols) {
+					if (x == 'bpmsystem')
+						return ''
+					return x
+				},
+				//onclick: getRMData,
+				onhover: getRMData
+			},
+			'OPERATION': {
+				toScreen: function (x, cols) {
+					if (x == 'Reject' && cols[5] == 'bpmsystem')
+						return 'ESCALATED';
+					return x
+				}
+			},
+			'START-DATE': true,
+			'DUE-DATE': true
+		}
+	}
+	tbl.appendChild(tabulateDME(objDoc.DME, options))
+	var div = document.createElement('div')
+	div.appendChild(tbl)
+	
+	revealDiv(div)
+	//div.style.height = '50px'
+	
+	injectSubTable(tr, div)
+	return true
+	//alert(s)
+}
+function getQueryTb(params)
+{	
+	var strPDL = portalWnd.oUserProfile.getAttribute("productline")
+	var strEmployee = portalWnd.oUserProfile.getAttribute("employee")
+	
+	if ( (! params || ! params.info) || params.info == 'expense')
+	{
+		// user data
+		//alert('getQueryTB')
+
+		var q = "PROD=DEV901&FILE=EEEXPENSE"
+		+ "&SELECT=COMPANY%3D1000%26VENDOR%3D900110097"
+		+ "&FIELD=COMPANY;VENDOR;EXPENSE-NBR;EXPENSE-TYPE;DESCRIPTION;APPROVAL-CODE;EXPENSE-DATE;"
+		+ "TRAN-EXP-AMT;BASE-EXP-AMT;BASE-TAX-AMT;BASE-EMP-PAID;CHECK-DATE;CHECK-AMT;TRANS-NBR;BANK-INST-CODE;"
+		+ "REC-STATUS,xlt;"
+		+ "&MAX=600&XCOLS=TRUE&XKEYS=TRUE&XRELS=TRUE&XCOUNT=TRUE&XIDA=TRUE&OUT=XML"
+		
+		var options = {
+			onclickx: getWUData,
+			onclickDataCol: 2,
+			colDefns: {
+				'EXPENSE-NBR': {
+					onclick: getWUData
+				},
+				'EXPENSE-DATE': true,
+				'DESCRIPTION': true,
+				'REC-STATUS': true,
+				'BASE-EMP-PAID': {
+					type: 'float',
+					title: 'Amount'
+				}
+			}
+		}
+	}
+	else if (params.info == 'jobreq')
+	{
+		var q = "PROD=DEV901&FILE=PAJOBREQ&INDEX=PJRSET1"
+		+ "&FIELD=COMPANY;REQUISITION;DESCRIPTION;POSITION;REQUEST-BY;USER-ID"
+		//+ "&SELECT=REQUEST-BY%3D" + strEmployee
+		+ "&OUT=XML&DELIM=~&MAX=40"
+		
+		var options = {
+			onclick: getWUData,
+			onclickDataCol: 1
+		}
+	}
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doQuery(query)
+	//objDoc.DME.RECORDS.RECORD.reverse()
+	var tb = tabulateDME(objDoc.DME, options)
+	
+	return tb
+}
+
+function ongoing()
+{
+	// WF WU Data
+	var service = "SLEmpExpApp"
+	var serviceVar = "EXPENSE_NBR"
+	//var service = "JobReq Approval"
+	//var serviceVar = "PJR_REQUISITION"
+	
+	var q = "PROD=LOGAN&FILE=WFVARIABLE&INDEX=WFVSET1"
+	+ "&FIELD=WORKUNIT;VARIABLE-NAME;VARIABLE-VALUE;WORKUNIT.START-DATE;WORKUNIT.START-TIME;WORKUNIT.SERVICE;"
+	+ "WORKUNIT.WORK-TITLE;WORKUNIT.TASK;WORKUNIT.WF-STATUS"
+	+ "&SELECT=WORKUNIT.SERVICE=" + service
+	+ "%26VARIABLE-NAME=" + serviceVar
+	+ "%26VARIABLE-VALUE=" + "TEST L6 3"
+	+ "&OUT=XML&DELIM=~&MAX=600"
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doQuery(query)
+	var WFWURows = objDoc.DME.RECORDS.RECORD
+	
+	// WFMetrics Data
+	
+	var q = "PROD=LOGAN&FILE=WFMETRICS&INDEX=WMESET1&KEY="
+	+ "&FIELD=WORKUNIT;PROCESS-ID;END-DATE;END-TIME;STATUS;WF-RM-ID;TASK;ACTIVITY-ID;OPERATION;COMMENT;"
+	+ "START-DATE;DUE-DATE&OUT=XML&MAX=600"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doQuery(query)
+	var WFMetricsRows = objDoc.DME.RECORDS.RECORD
+	
+	// All data retrieved - now correlate.
+	
+	var itemData = {}
+	var correlateCol = 2 // expense nbr
+	
+	for (var r in empDataRows)
+	{
+		var cols = empDataRows[r].COLS.COL
+		var itemNum = zTrim(cols[correlateCol])
+		itemData[itemNum] = { itemData: cols }
+	}
+	
+	var WFData = {}
+	var wfCorrelateCol = 2;
+	var wuCol = 0;
+	for (var w in WFWURows)
+	{
+		var cols = WFWURows[w].COLS.COL
+		var itemNum = zTrim(cols[wfCorrelateCol])
+		var wu = zTrim(cols[wuCol])
+		if (itemData[itemNum])
+		{
+			itemData[itemNum].wu = cols
+			WFData[wu] = itemData[itemNum]
+		}
+	}
+	
+	for (var m in WFMetricsRows)
+	{
+		var cols = WFMetricsRows[m].COLS.COL
+		var wu = zTrim(cols[wuCol])
+		if (WFData[wu])
+		{
+			if (! WFData[wu].metrics)
+			{
+				WFData[wu].metrics = []
+			}
+			WFData[wu].metrics.push(cols)
+		}
+	}
+	
+	// Now build the table
+	
+	
+	var tb = document.createElement('tbody')
+	
+	for (var r in itemData)
+	{
+		var tr = document.createElement('tr')
+		var cols = itemData[r].itemData
+		for (var c in cols)
+		{
+			//var name = cols[c]['-name']
+			
+			var val = String(cols[c])
+			val = val.replace('undefined','-')
+			var td = document.createElement('td')
+			td.className = 'rowLevel0'
+			//td.title = name
+			//td.onclick = function(event) {event.srcElement.style.width="10px"}
+			var tn = document.createTextNode(val)
+			td.appendChild(tn)
+			tr.appendChild(td)
+		}
+		tb.appendChild(tr)
+		
+		var metricsData = itemData[r].metrics
+		if (metricsData)
+		{
+			for (var e = 0 ; e < metricsData.length; e++)
+			{
+				var tr = document.createElement('tr')
+				tr.appendChild(document.createElement('td'))
+				for (var c1 = 0 ; c1 < metricsData[e].length; c1++)
+				{
+					var val = String(metricsData[e][c1])
+					var td = document.createElement('td')
+					td.className = 'rowLevel1'
+					var tn = document.createTextNode(val?val:'')
+					td.appendChild(tn)
+					tr.appendChild(td)
+				}
+				tb.appendChild(tr)
+			}
+		}
+	}
+	
+	return tb
+}
+function buildInfoTable(tbl, params)
+{
+	tbl.appendChild(getQueryTb(params))
+}
+
+function loadPage()
+{
+
+	var params = {}; location.search.replace(/([^=&?]+)=([^&]*)/g, function (x) {kvp = x.split('='); params[kvp[0]] = kvp[1]});
+	
+	portalWnd = null, p = parent, c = 0, max = 10;
+	while (!portalWnd && c < max && p)
+	{
+		portalWnd = p.portalWnd
+		p = p.parent
+		c++
+	}
+	var tbl = document.createElement('table')
+	document.body.appendChild(tbl)
+	buildInfoTable(tbl, params)
+
+}
+function showData(x)
+{
+	var d = new Date();
+	window.document.body.innerHTML += (d.getTime() + ": " + x + "<br>")
+}
+
+</script>
+<body onload="loadPage()">
+
+</body>
+</html>

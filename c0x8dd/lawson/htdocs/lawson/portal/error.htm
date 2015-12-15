@@ -1,0 +1,73 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/Attic/error.htm,v 1.1.2.5.4.1.14.1.2.3 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Portal</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css">
+</head>
+<script language="javascript">
+//-----------------------------------------------------------------------------
+// if passed a message, replace the default
+function onErrorLoad()
+{
+	var msg=unescape(document.location.search);
+	if (msg) msg=msg.substr(1);
+	if (!msg) return;
+
+	// unescape and substitute a <br> for any \n
+	msg=unescape(msg).replace(/%n/g,"<br>");
+	document.getElementById("lblError").innerHTML=msg;
+}
+</script>
+
+<body onload="onErrorLoad()" tabIndex="-1" scroll="no" style="display:block;visibility:visible">
+
+	<!-- logo and title container -->
+	<div id="divLogo" style="position:absolute;left:0px;top:0px;">
+		<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="center">
+				<img id="imgLogo" alt="Portal Logo" style="margin-top:5px;margin-left:2px;" src="images/logo.gif"></img>
+			</td>
+			<td valign="center" style="padding-top:8px;">
+				<span id="formTitle" style="margin-left:20px;font-weight:bold;font-family:Trebuchet MS,Tahoma,Arial,sans-serif;font-size:16px;">&nbsp;</span>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<!-- main header divider -->
+	<img src="images/portal_topdivider.gif" style="position:absolute;top:42px;left:0px;height:3px;width:100%;">
+
+	<!-- error -->
+	<div id="divError" style="position:absolute;top:65px;left:25px;">
+		<label id="lblError" class="xTLabel" style="font-size:10pt;">
+			The Portal cannot load because it cannot initialize the single sign-on component.
+			<br>
+			System Administrator: please make sure your servlet container is running properly and/or SSO is installed.
+		</label>
+	</div>
+
+</body>
+</html>

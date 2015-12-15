@@ -1,0 +1,180 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/hotkeys.htm,v 1.14.2.2.4.1.14.1.2.2 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Portal Hotkeys Help</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css">
+<link id="StyleLink" type="text/css" rel="stylesheet" href="dialogs/dlg.css"></link>
+<script language="javascript" src="servenv.js"></script>
+
+<script language="javascript">
+var portalWnd=null;
+var portalObj=null;
+
+function initHelp()
+{
+	try {
+		portalWnd=window.opener;
+		portalObj=portalWnd.lawsonPortal;
+	} catch (e) { return; }
+
+	// get reference to hotkeys mgr object
+	var keyMgr = portalObj.keyMgr
+	var abtTitle=window.document.getElementById("abtTitle");
+	abtTitle.innerHTML = window.document.title;
+
+	var strHTML="<div id='scrollDiv' class='scrollDiv' style='position:absolute;top:0px;left:0px;'>";
+	strHTML+="<div id='tableDiv' style='position:absolute;top:0px;left:0px;'>";
+	strHTML+="<table border='0' cellspacing='0' cellpadding='0' ";
+	strHTML+="style='table-layout:fixed;width:100%;";
+	strHTML+="margin-bottom:10px;border:1px solid lightgrey;'>\n";
+
+	// now process each portal hotkey node in storage object
+	for (ds in keyMgr.storage)
+	{
+		var set=keyMgr.storage[ds]
+		if (typeof(set) != "object") continue;
+
+		var keyNodes=null
+		strHTML+="<tr>\n"
+		strHTML+="<td class=\"xtNavHead\" colspan=\"2\" style=\"text-align:left\">"
+		if (portalObj.xsltSupport)
+		{
+			strHTML+=set.document.documentElement.getAttribute("labelid")+"</td></tr>\n"
+			keyNodes=set.document.selectNodes("//EVENT")
+		}
+		else
+		{
+			// Netscape work around
+			var tmpDS=new portalWnd.DataStorage(set.getDataString(true),portalWnd)
+			var root=tmpDS.getNodeByName("EVENTS")
+			var lbl=root.getAttribute("labelid")
+			strHTML+=lbl+"</td></tr>\n"
+			keyNodes=tmpDS.document.getElementsByTagName("EVENT")
+		}
+
+		for (var i = 0; i < keyNodes.length; i++)
+		{
+			strHTML+="<tr>\n"
+			strHTML+="<td valign=\"top\" class=\"xTNavItem\" style=\"text-align:left\">"
+			strHTML+=keyNodes[i].getAttribute("labelid")+"</td>\n"
+			var key=""
+			if (keyNodes[i].getAttribute("ctrl") == "1")
+				key+="Ctrl+"
+			if (keyNodes[i].getAttribute("alt") == "1")
+				key+="Alt+"
+			if (keyNodes[i].getAttribute("shift") == "1")
+				key+="Shift+"
+			var code=keyNodes[i].getAttribute("code")
+			key+=keyMgr.getKeyCodeString(code)
+
+			strHTML+="<td valign=\"top\" class=\"xTNavItem\" style=\"text-align:left\">"+key+"</td>\n"
+			strHTML+="</tr>\n"
+		}
+		strHTML+="<td class=\"evenrow\" colspan=\"2\" style=\"text-align:left\">&nbsp;</td>\n"
+		strHTML+="</tr>\n"
+	}
+	strHTML+="</table></div></div>\n"
+
+	document.getElementById("listDiv").innerHTML=strHTML
+	document.getElementById("btnClose").focus()
+	window.setTimeout("aboutOnResize()",5);
+}
+//-----------------------------------------------------------------------------
+function aboutOnResize()
+{
+	var scrHeight=(portalWnd.oBrowser.isIE 
+		? window.document.body.offsetHeight
+		: window.innerHeight-2);
+	var scrWidth=(portalWnd.oBrowser.isIE 
+		? window.document.body.offsetWidth
+		: window.innerWidth-2);
+
+	var abtTitle=window.document.getElementById("abtTitle");
+
+	var abtContentFrm=window.document.getElementById("abtContentFrm");
+	abtContentFrm.style.top=10;
+	abtContentFrm.style.left=10;
+	abtContentFrm.style.height=scrHeight-20;
+	abtContentFrm.style.width=scrWidth-20;
+
+	var abtContent=window.document.getElementById("abtContent");
+	abtContent.style.top=25;
+	abtContent.style.left=15;
+	abtContent.style.height=abtContentFrm.offsetHeight-40;
+	abtContent.style.width=abtContentFrm.offsetWidth-30;
+
+	var abtButtons=window.document.getElementById("abtButtons");
+	abtButtons.style.top=abtContent.offsetHeight-30;
+	abtButtons.style.left=0;
+	abtButtons.style.width="100%";
+	abtButtons.style.textAlign="right";
+
+	var listDiv=window.document.getElementById("listDiv");
+	listDiv.style.width=abtContent.offsetWidth-20;
+	listDiv.style.height=abtContent.offsetHeight-50;
+
+	var scrollDiv=window.document.getElementById("scrollDiv");
+	scrollDiv.style.top=0;
+	scrollDiv.style.left=0;
+	scrollDiv.style.width=listDiv.offsetWidth;
+	scrollDiv.style.height=listDiv.offsetHeight;
+
+	var tableDiv=window.document.getElementById("tableDiv");
+	tableDiv.style.top=0;
+	tableDiv.style.left=0;
+	tableDiv.style.width=scrollDiv.offsetWidth - 
+				(scrollDiv.scrollHeight <= scrollDiv.offsetHeight ? 2 : 20);
+	tableDiv.style.height=scrollDiv.offsetHeight;
+}
+function hlpKeyDown(e)
+{
+	var evt = (e ? e : window.event);
+	if (evt.keyCode == 27)	// Esc
+		aboutClose()
+}
+function aboutClose()
+{
+	window.close();
+}
+</script>
+</head>
+
+<body onload="initHelp()" onkeydown="hlpKeyDown(event)" onresize="aboutOnResize()" class="popBody">
+
+	<div id="abtContentFrm" class="popContentFrm" style="position:absolute;top:10px;left:10px;">
+		<label id="abtTitle" class="popTitle" style="position:absolute;top:5px;left:25px;">&nbsp;</label>
+		<div id="abtContent" class="popContent" style="position:absolute;top:25px;left:15px;background-color:white;">
+			<div id="listDiv" class="xtListText" style="position:absolute;top:10px;left:10px;">
+			</div>
+			<div id="abtButtons" style="position:absolute;top:0;left:0;">
+				<input type="button" id="btnClose" class="dlgButton" onclick="aboutClose()" 
+					value="Close" title="Close Window" style="width:75px;margin-right:10px;">
+				</input>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,87 @@
+a:link { color: #2E74B5;}
+a:visited { color: #2E74B5;}
+a:link:hover {color: #ED7D31;}
+
+.myBCPage {
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+}
+.myBCTableContainer td{
+	padding-right: 10px;
+}
+.myBCTableContainer .myBCTableContainer {
+	width:100%;
+	xmin-width: 450px;
+	xmin-height: 200px;
+	xmargin-bottom: 30px;
+}
+.myBCTableContainer td {
+	margin-left: 10px;
+	margin-right: 10px;
+}
+.myBCTableContainer th { 
+	border-bottom: solid 2px;
+	border-color: Gainsboro ;
+}
+
+.myBCRowContainer {
+	display: table-row;
+	
+}
+.myBCContainer {
+	xdisplay: table-cell;
+	xmin-width: 200px;
+	xmin-height: 125px;
+	vertical-align: top;
+	xmax-width: 200px;
+	xword-wrap:break-word;
+}
+
+.myBCContainer div {
+	max-width: 550px;
+	xmin-height: 100px;
+}
+.myBCRowContainer .myBCTitle {
+	font-size: 20pt;
+}
+
+.myBCRowHeader {
+	border-bottom: solid 2px;
+}
+
+.myBCTitle {
+	font-family: Arial, Verdana;
+	font-size:	20pt;
+	xcolor: #80c0ff;
+	color: #002C77;
+	xmargin-bottom: 10px;
+	xpadding-bottom: 100px;
+	xcolor: #2E74B5; /* MS Title color */
+}
+.myBRRowName {
+	color: #2E74B5;
+}
+li {
+	padding-bottom: 2px;
+	xmargin-left: 0px;
+	color: #2E74B5;
+}
+li > span {
+	color: black;
+}
+.myBCContainer th {
+	text-align: left;
+	font-weight: normal;
+}
+ul {
+	/* both padding-left and margin-left are required for consistant rendering in IE and NS */
+	padding-left: 10px;
+	margin-left: 10px;
+	
+	/* both padding-top and margin-top are required for consistant rendering in IE and NS */
+	margin-top: 1px;
+	padding-top: 1px;
+	
+	margin-bottom: 2px;
+}
+

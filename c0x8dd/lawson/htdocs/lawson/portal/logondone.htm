@@ -1,0 +1,213 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/logondone.htm,v 1.2.2.16.4.6.12.1.2.4 2012/08/08 12:37:20 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Logon Done</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+
+<script src="servenv.js"></script>
+
+<script>
+//-----------------------------------------------------------------------------
+function onloadLogonDone()
+{
+	// this method may be fired inappropriately on reload!
+	if (envFindObjectWindow("lawsonPortal") == null)
+		return;
+
+	try {
+		// get the userprofile service name
+		var serviceName=parent.oPortalConfig.getServiceName("userprofile");
+		if (!serviceName)
+		{
+			serviceNameError();
+			return;
+		}
+
+		// found a service name
+		serviceName=serviceName.toLowerCase();
+		switch (serviceName)
+		{
+		case "iosprofile":
+			if (doIOSProfileCall())
+				parent.lawPortalFinishInitialization(serviceName);
+			break;
+		case "psaprofile":
+			if (doPSAStandaloneCall())
+				parent.lawPortalFinishInitialization(serviceName);
+			break;
+		default:
+			serviceNameError();
+			break;
+		}
+		return;
+
+	} catch (e) { 
+		var msg = "The Portal cannot load due to ";
+		msg += (e.description=="Permission denied" ? "a 'permission denied'" : "an unknown");
+		msg += " error.\nThe browser will be redirected to a fully qualified server and domain path."
+		alert(msg);
+		parent.location=window.location.href.replace("logondone","index");
+	}
+}
+
+//-----------------------------------------------------------------------------
+function serviceNameError()
+{
+	parent.displayErrorPage(parent,"The Portal cannot load because it was unable " +
+		"to retrieve the userprofile service name.%nSystem Administrator: please " +
+		"verify that userprofile service specified in 'portalconfig.xml.'%n");
+}
+
+//-----------------------------------------------------------------------------
+// in an IOS environment: call the profile servlet
+// returns true if successful or false if any errors
+function doIOSProfileCall()
+{
+	var bFatalError=false;
+	var msg="The Portal cannot load because the Profile service returned an error:%n";
+
+	try {
+		// make profile call and check return status
+		var iosURL=parent.oPortalConfig.getServiceURL("userprofile");
+		if (!iosURL)
+		{
+			parent.displayErrorPage(parent, "The Portal cannot load because the " +
+					"IOS Profile service URL is not specified in portalconfig.xml.");
+			return false;
+		}
+		if (iosURL.indexOf("?_PATH=") == iosURL.length-7 )
+			iosURL += (parent.lawsonPortal.path + "&_NOCACHE=" + (new Date().getTime()));
+		parent.lawsonPortal.profile = parent.httpRequest(iosURL,null,"","",false);
+		if (parent.lawsonPortal.profile == null)
+		{
+			parent.displayErrorPage(parent, "The Portal cannot load because the " +
+					"Profile service returned an invalid xml response.");
+			return false;
+		}
+
+		// check for status: httpRequest failure
+		var errStat = parent.lawsonPortal.profile.status;
+		if (errStat)
+		{
+			// if we get a 404, we can assume trying to load the status messages will also fail.
+			var strMsg=(errStat == 404
+				? "Status 404: The server has not found anything matching the requested URI (Uniform Resource Identifier)."
+				: parent.getHttpStatusMsg(errStat));
+			parent.displayErrorPage(parent,"The Portal cannot load because it was " +
+				"unable to complete Profile service request.%n" + strMsg);
+			return false;
+		}
+
+		// any servlet error messages?
+		var errors = parent.lawsonPortal.profile.getElementsByTagName("ERROR");
+		var lenErrors = (errors && errors.length ? errors.length : 0);
+		if (!lenErrors)
+			return true;
+
+		// error nodes detected: are they fatal?
+		for (var i = 0; i < lenErrors; i++)
+		{
+			// level=0 is a warning; level=1 is serious error
+			if (errors[i].getAttribute("level")!="0")
+			{
+				bFatalError=true;
+				var msgNode=errors[i].getElementsByTagName("MSG");
+				msgNode = (msgNode && msgNode.length > 0 ? msgNode[0] : null);
+				msg += (msgNode 
+					? msgNode.firstChild.nodeValue+"%n"
+					: "(No message provided for error condition.)%n" );
+			}
+		}
+		
+	} catch (e) {
+		bFatalError=true;
+		msg+=e.description;
+	}
+
+	if (bFatalError)
+	{
+		msg=msg.replace(/\#/g,"%23");
+		parent.displayErrorPage(parent,msg);
+	}
+	return (!bFatalError);
+}
+
+//-----------------------------------------------------------------------------
+// in a PSA Standalone environment: call the ?? service
+// returns true if successful or false if any errors
+function doPSAStandaloneCall()
+{
+	var psaURL="";
+	if (parent.oPortalConfig.getSetting("use_sso_authentication","1") == "1")
+	{
+		// authenticate with SSO
+		ifrm = document.createElement("IFRAME");
+		ifrm.style.visibility = "hidden";
+		ifrm.style.display = "block";
+		ifrm.style.width = "0px";
+		ifrm.style.height = "0px";
+		ifrm.style.border = "0px";
+		ifrm.src = "blank.htm";
+		ifrm=document.body.appendChild(ifrm);
+
+		psaURL=parent.oPortalConfig.getServiceURL("userprofile");
+		ifrm.src="sso.htm?SSO|URL=" + 
+			escape(psaURL+"?FORMID=A4PORTALAUTHEN&FTYPE=D") + 
+			"|SERVICENAME=PSA";
+		// don't call 'finish' here; called from PSA on successful login
+		return false;
+	}
+
+	// no SSO authentication
+	var msg="The Portal cannot load because the Profile service returned an error:%n";
+	psaURL=parent.oPortalConfig.getServiceURL("userprofile");
+	parent.lawsonPortal.profile = parent.httpRequest(psaURL,null,"","",false);
+	if (parent.lawsonPortal.profile == null)
+	{
+		msg+="the xml response was not valid."
+		parent.displayErrorPage(parent, msg);
+		return false;
+	}
+
+	// check for status: httpRequest failure
+	var errStat = parent.lawsonPortal.profile.status;
+	if (errStat)
+	{
+		var strMsg=(errStat == 404
+			? "Status 404: The server has not found anything matching the requested URI (Uniform Resource Identifier)."
+			: "Server reported an HTTP communications error: status="+errStat+".");
+		msg += strMsg;
+		parent.displayErrorPage(parent, msg);
+		return false;
+	}
+	return true;
+}
+
+</script>
+</head>
+
+<body onload="onloadLogonDone()">
+</body>
+</html>

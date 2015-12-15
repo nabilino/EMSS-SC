@@ -1,0 +1,156 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/index.htm,v 1.39.2.12.4.7.14.1.2.3.2.1 2013/09/11 04:41:07 jquito Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.692 2013-12-12 04:00:00 -->
+<head>
+	<title>Lawson portal</title>
+	<script language="javascript" src="/sso/sso.js"></script>
+	<script language="javascript" src="servenv.js"></script>
+	<script language="javascript" src="globals.js"></script>
+	<script language="javascript" src="portal.js"></script>
+	<script language="javascript" src="common.js"></script>
+	<script language="javascript" src="edits.js"></script>
+	<script language="javascript" src="objects/PortalConfig.js"></script>
+	<script language="javascript" src="objects/EnvConfig.js"></script>
+	<script language="javascript" src="objects/CommonDialog.js"></script>
+	<script language="javascript" src="objects/ErrorObject.js"></script>
+	<script language="javascript" src="objects/FilterObject.js"></script>
+	<script language="javascript" src="objects/DME.js"></script>
+	<script language="javascript" src="objects/HotkeysManager.js"></script>
+	<script language="javascript" src="objects/ValueStorage.js"></script>
+	<script language="javascript" src="objects/PortalRole.js"></script>
+	<script language="javascript" src="objects/UserProfile.js"></script>
+	<script language="javascript" src="objects/PrintManager.js"></script>
+	<script language="javascript" src="objects/SortArray.js"></script>
+	<script language="javascript" src="json2.js"></script> 
+	<script language="javascript" src="lwsn-lsf-client.js"></script>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="portal.css">
+</head>
+
+<body onload="portalOnLoad()" onunload="portalUnload()" tabIndex="-1" scroll="no" onkeydown="onPortalKeyDown(event)" 
+		onresize="sizePortalStuff()" onhelp="onPortalHelp(event)" style="display:block;visibility:hidden">
+
+	<!-- logo and title container -->	
+	<div id="divLogo" class="ptLogoDiv">
+		<table cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="center">
+				<a onselectstart="cmnBlockSelect(event)">
+					<img id="imgLogo" alt="Portal Logo" style="margin-top:5px;margin-left:2px;" src="images/logo.gif"></img>
+				</a>
+			</td>
+			<td valign="center" style="padding-top:8px;">
+				<span id="formTitle" class="ptFormTitle" onselectstart="cmnBlockSelect(event)">&nbsp;</span>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<!-- menu bar -->
+	<div id="menuBar" class="xTNavigation"
+		style="display:none;position:absolute;top:18px;right:0;width:236;height:24px;margin:0px;padding:0px;text-align:right;">
+		<img src="images/tab_smear.gif" style="position:absolute;top:0;left:0;"></img>
+		<span id="searchDiv" style="margin:0px;border:0;padding:0;visibility:hidden;display:none;">
+			<input type="text" id="findText" class="xTTextBox" style="width:100px;margin:0;padding-left:4px;color:gray;border:1px solid gray;" 
+				onkeydown="prtlOnSearchKeyDown(event)" value="Search..." 
+				onfocus="prtlOnSearchFocus(event,this)" onblur="prtlOnSearchBlur(event,this)">
+			</input>
+			<button id="LAWMENUBTNSEARCH2" class="xTToolButton" onclick="doFind()" title="Search Lawson Applications"
+				onmouseover="srchBtnMouseOver(event)" onmouseout="srchBtnMouseOut(event)" menuId="lawson" 
+				style="width:22;background-image:url('images/ico_search.gif');background-position:center;background-repeat:no-repeat;margin-left:3px;margin-top:2px;">&nbsp;
+			</button>
+			<button id="LAWMENUBTNSEARCH" class="xTToolButton" onclick="showDrop(this)" title="Search Links Menu"
+				onmouseover="srchBtnMouseOver(event)" onmouseout="srchBtnMouseOut(event)"
+				style="width:10px;background-image:url('images/ico_arrowdn.gif');background-position:center;background-repeat:no-repeat;margin-top:2px;">&nbsp;
+			</button>
+		</span>
+		<button id="LAWMENUBTNPREF" class="xTToolButton" onclick="showDrop(this)" title="Preferences Menu"
+				onmouseover="srchBtnMouseOver(event)" onmouseout="srchBtnMouseOut(event)"
+				style="visibility:hidden;width:20px;background-image:url('images/ico_preferences.gif');background-position:center;background-repeat:no-repeat;margin-left:2px;margin-top:2px;">&nbsp;
+		</button>
+		<button id="LAWMENUBTNHELP" class="xTToolButton" onclick="showDrop(this)" title="Help Menu"
+				onmouseover="srchBtnMouseOver(event)" onmouseout="srchBtnMouseOut(event)"
+				style="visibility:hidden;width:20px;background-image:url('images/ico_help.gif');background-position:center;background-repeat:no-repeat;margin-left:4px;margin-right:4px;margin-top:2px;">&nbsp;
+		</button>
+	</div>
+
+	<!-- welcome and logout (positioned here for tabbing order) -->
+	<span id="divWel" class="ptWelcome" style="position:absolute;display:none;top:0;right:80;" nowrap="true" onselectstart="cmnBlockSelect(event)">&nbsp;</span>
+	<input type="button" id="btnLogout" class="ptLogoutButton" style="display:none;position:absolute;top:0;right:4;" onclick="portalLogout(event)" 
+		onmouseover="logoutBtnOver(event,this)" onmouseout="logoutBtnOut(event,this)" onfocus="logoutBtnOver(event,this)" onblur="logoutBtnOut(event,this)"
+		value="[logout]" />
+
+	<!-- main header divider -->
+	<img id="topDivider" src="images/portal_topdivider.gif" style="display:none;position:absolute;top:42px;left:0px;height:3px;width:100%;">
+
+	<!-- left bar navigation area (seed width of div to default width of tabObj)-->
+	<div id="leftLinks" class="xTNavigation" style="display:none;position:absolute;top:45px;left:0px;overflow:hidden;width:200px;">
+		<div id="divLeftTabs" align="left" class="ptNavButtonContainer" onselectstart="cmnBlockSelect(event)">
+			<!-- do not unwrap this code! (introduces additional spacing) -->
+			<NOBR>
+			<span collapseState="0" id="divLeftTop1" text="dt1" style="cursor:pointer;cursor:hand;z-index:5" onclick="lawsonPortal.tabArea.switchActiveLeftPaneById('dt1')" ondblclick="lawsonPortal.tabArea.tabs['HOME'].expand_collapseNavlets()"><img src="images/edge3lt.gif" style="position:relative;margin-left:1px;height:18px;top:3px;"/><span id="dt1" pane="divLeft1" class="ptNavButtonActive">&nbsp</span><img src="images/edge3rt.gif" style="position:relative;margin-right:1px;height:18px;top:3px"/></span><span collapseState="0" id="divLeftTop3" text="dt3" style="visibility:hidden;display:none;cursor:pointer;cursor:hand;z-index:4" onclick="lawsonPortal.tabArea.switchActiveLeftPaneById('dt3')" ondblclick="lawsonPortal.tabArea.tabs['MENU'].expand_collapseNavlets()"><img src="images/edge5lt.gif" style="position:relative;margin-left:1px;height:18px;top:3px"/><span id="dt3" pane="divLeft3" class="ptNavButtonInactive">&nbsp</span><img src="images/edge5rt.gif" style="position:relative;margin-right:1px;height:18px;top:3px"/></span><span collapseState="0" id="divLeftTop2" text="dt2" style="visibility:hidden;display:none;cursor:pointer;cursor:hand;z-index:4" onclick="lawsonPortal.tabArea.switchActiveLeftPaneById('dt2')" ondblclick="lawsonPortal.tabArea.tabs['PAGE'].expand_collapseNavlets()"><img src="images/edge5lt.gif" style="position:relative;margin-left:1px;height:18px;top:3px"/><span id="dt2" pane="divLeft2" class="ptNavButtonInactive">&nbsp</span><img src="images/edge5rt.gif" style="position:relative;margin-right:1px;height:18px;top:3px"/></span>
+			</NOBR>
+		</div>
+		<div style="position:relative;height:5px;overflow:hidden"></div>
+		<div id="divLeftPanes" style="position:relative;overflow:visible;">
+			<div button="divLeftTop1" id="divLeft1" align="center" class="xTNavigation" style="overflow:auto;padding:0px;margin:0px;position:absolute;">
+				<img id="glowHOME" src="images/ico_navhead_glow.gif" style="position:absolute;display:none;top:0px;left:0px;margin:0px;"/>
+			</div>
+			<div button="divLeftTop2" id="divLeft2" align="center" class="xTNavigation" style="overflow:auto;padding:0px;margin:0px;position:absolute;visibility:hidden;display:none">
+				<img id="glowPAGE" src="images/ico_navhead_glow.gif" style="position:absolute;display:none;top:0px;left:0px;margin:0px;"/>
+			</div>
+			<div button="divLeftTop3" id="divLeft3" align="center" class="xTNavigation" style="overflow:auto;padding:0px;margin:0px;position:absolute;visibility:hidden;display:none">
+				<img id="glowMENU" src="images/ico_navhead_glow.gif" style="position:absolute;display:none;top:0px;left:0px;margin:0px;"/>
+			</div>
+		</div>
+	</div>
+
+	<!-- splitter bar (seed width of div to default width of tabObj) -->
+	<div id="splitBar" class="ptSplitterBar" onmousedown="dragStart(event)" ondblclick="prtlExpandCollapseNavigation()"></div>
+	<img id="rightGrip" src="images/ico_collapse_left.gif" style="display:none;position:absolute;left:200px;top:0px;cursor:hand;z-index:2000;margin:0px;" onclick="prtlExpandCollapseNavigation()" title="Click to collapse"/>
+	<img id="leftGrip" src="images/ico_collapse_right.gif" style="display:none;position:absolute;left:200px;top:0px;cursor:hand;z-index:2000;margin:0px;margin-right:3px;" onclick="prtlExpandCollapseNavigation()" title="Click to expand"/>
+
+	<!-- toolbar container -->
+	<div id="lawtoolbar" class="ptToolbar" style="display:none;top:55px;left:200px;"></div>
+
+	<!-- NOTE: the order of the following 3 iframes is significant -->
+	<!-- main content frame -->
+	<iframe id="content" tabIndex="-1" frameborder="no" src="blank.htm" 
+		style="margin:0px;visibility:hidden;border:0px;position:absolute;top:0px;">
+	</iframe>
+
+	<!-- drill/select container -->
+	<DIV id="drlContainer" class="xTNavigation"  onmousedown="mdragStart(event)"
+				style="cursor:move;visibility:hidden;display:none;z-index:100;position:absolute;top:0px">
+		<iframe id="drill" tabIndex="-1" src="blank.htm" frameborder="no" 
+				style="z-index:99;border:0px" onresize="typeof(drlResize)=='function'?drlResize():'';">
+		</iframe>
+	</DIV>
+
+	<!-- drop down menu container -->
+	<iframe id="disMenu" tabIndex="-1" src="menu.htm" scrolling="no" frameborder="0" 
+		style="z-index:2001;height:0px;position:absolute;display:block;visibility:hidden;border:0px;">
+	</iframe>
+
+</body>
+</html>

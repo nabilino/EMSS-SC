@@ -1,0 +1,1162 @@
+<html>
+<head>
+
+<script src="XMLObjTree.js"></script>
+<style type="">
+table {
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	xborder: none collapse;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+th {
+	text-align: left;
+	color: #2E74B5;
+	border-bottom: solid 1px #2E74B5;
+	padding: 4px;
+}
+td {
+	border: 0px;
+	padding: 4px;
+	xborder-left: solid 1px;
+	margin: 0px;
+
+}
+.rowLevel0 {
+	xcolor: #2E74B5;
+}
+.rowLevel1 {
+	
+	background-color: blue;
+}
+.wait, .wait * { cursor: wait !important; }
+
+.hoverable {
+	font-style: italic;
+	color: #2E74B5;
+	cursor: help;
+}
+
+.drillLink {
+	xtext-decoration: underline;
+	cursor: hand;
+	color: #2E74B5;
+}
+.invis {
+	position: absolute;
+	filter:alpha(opacity=1);
+	opacity: 0.1;
+}
+.vis {
+	position: absolute;
+	filter:alpha(opacity=100);
+	opacity: 1.0;
+}
+tr.opened {
+	background-color: #eeeeee;
+}
+table.subtable {
+	xborder-left: #2E74B5 solid 1px;
+	xborder-bottom: #2E74B5 solid 1px;
+	xborder-top: #2E74B5 solid 1px;
+	xborder-right: #2E74B5 solid 1px;
+}
+table.subtable td {
+	xborder-left: none;
+	border: none collapse;
+	padding: none;
+}
+
+
+</style>
+</head>
+
+<script>
+function scrollIntoViewIfOutOfView(el) {
+	var topOfPage = window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop;
+	var heightOfPage = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+	var elY = 0;
+	var elH = 0;
+	if (document.layers) { // NS4
+		elY = el.y;
+		elH = el.height;
+	}
+	else {
+		for(var p=el; p&&p.tagName!='BODY'; p=p.offsetParent){
+		elY += p.offsetTop;
+	}
+		elH = el.offsetHeight;
+	}
+	if ((topOfPage + heightOfPage) < (elY + elH)) {
+		el.scrollIntoView(false);
+	}
+	else if (elY < topOfPage) {
+		el.scrollIntoView(true);
+	}
+}
+function getCookie(cname) {
+    var name = cname + "=";
+    var ca = document.cookie.split(';');
+    for(var i=0; i<ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0)==' ') c = c.substring(1);
+        if (c.indexOf(name) == 0) return c.substring(name.length,c.length);
+    }
+    return "";
+} 
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays*24*60*60*1000));
+    var expires = "expires="+d.toUTCString();
+    document.cookie = cname + "=" + cvalue + "; " + expires;
+} 
+function hideDiv(div, callback)
+{
+	with ( { i: 128, div: div, h: div.offsetHeight, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h <  ( 4 * interval ) ) // drawing to a close
+			{
+				i = i * 2
+			}
+			else
+				i = i / 2
+		}
+		if ( h - interval > 0 )
+		{
+			h -= interval
+			div.style.height = h + "px"
+			setTimeout(fn, i)
+		}
+		else
+		{
+			div.style.height = 1 + "px"
+			callback(div)
+		}
+	}
+		
+	fn()	
+
+}
+function revealDiv(div)
+{
+	var divProps = {}
+	divProps.position = div.style.position
+	divProps.top = div.style.top
+	divProps.left = div.style.left
+	divProps.overflow = div.style.overflow
+	divProps.height = div.style.height
+	
+	div.style.position = 'absolute'
+	div.style.top = 0
+	div.style.left = 0
+	
+	document.body.appendChild(div)
+	var h = div.offsetHeight
+	
+	document.body.removeChild(div)
+	div.style.position = divProps.position
+	div.style.top = divProps.top
+	div.style.left = divProps.left
+	div.style.overflow = 'hidden'
+	//alert(h)
+	
+	with ( { i: 128, div: div, max: h, h: 0, interval: 50 } )
+	var fn = function () {
+		if (i > 8)
+		{
+			if ( h > ( max - ( 4 * interval ) ) ) // drawing to a close
+			{
+				i = i * 2 // increase delay
+			}
+			else
+				i = i / 2 // decrease delay
+		}
+		if ( h + interval < max )
+		{
+			h += interval
+			div.style.height = h + "px"
+			setTimeout(fn, i)
+		}
+		else
+			div.style.height = max + "px"
+	}	
+	fn()	
+}
+function zTrim(s)
+{
+	return s.replace(/^ */,'').replace(/^0*/,'');
+}
+function injectSubTable(tr, data)
+{
+	var ntr = document.createElement('tr')
+	var td = document.createElement('td')
+	var td1 = document.createElement('td')
+	td1.colSpan = "99"
+	ntr.appendChild(td)
+	ntr.appendChild(td1)
+	tr.parentNode.insertBefore(ntr, tr.nextSibling)
+	tr.className = 'opened'
+	td1.appendChild(data)
+}
+function removeSubTable(tr)
+{
+	tr.parentNode.removeChild(tr.nextSibling)
+	tr.className = ''
+}
+function createField(colNum, rowData, colDefn, row)
+{
+	var val = String(rowData[colNum])
+	val = val.replace('undefined','-')
+	var td = document.createElement('td')
+	var container = document.createElement('div')
+	td.appendChild(container)
+
+	if (colDefn.type && colDefn.type == 'float')
+			container.style.textAlign = "right"
+	if (colDefn.toScreen) // user defined column filter function
+	{
+		var env = {container: container}
+		val = colDefn.toScreen.call(env, val, rowData)
+	}
+	if (colDefn.onclick)
+	{
+		with ({ env: {handler: colDefn.onclick, td:td, x: rowData[colNum], rowData: rowData, row: row} })
+		{
+			var fn = function () { env.handler.call(env, env.x, env.td) }
+		}
+		container.onclick = fn
+		container.className = "drillLink"
+	}
+	if (colDefn.onhover)
+	{
+		with ({ env: {handler: colDefn.onhover, td:td, x: rowData[colNum], rowData: rowData, row: row} })
+		{
+			var fn = function () { env.handler.call(env, env.x, env.td) }
+		}
+		container.onmouseover = fn
+		container.className = "hoverable"
+	}
+
+	var tn = document.createTextNode(val)
+	container.appendChild(tn)
+	//td.appendChild(container)
+		
+	td.className = 'rowLevel0'
+	return td
+
+}
+function tabulateDME(dme, options)
+{
+	var tb = document.createElement('tbody')
+	var rows = dme.RECORDS.RECORD
+	var thr = document.createElement('tr')
+	var colNames = dme.COLUMNS.COLUMN
+	var colNumByName = {}
+	var colsList = null;
+	
+	if (options && options.colDefns)
+	{
+		for (var i = 0; i < colNames.length; i++) 
+		{
+			colNumByName[colNames[i]['-dbname']] = i;
+			if (options.colDefns[colNames[i]['-dbname']])
+			{
+				if (! colsList)
+					colsList = {}
+				colsList[i] = options.colDefns[colNames[i]['-dbname']]
+			}
+		}
+		for (var c in options.colDefns)
+		{
+			var colNum = colNumByName[c]
+			var th = document.createElement('th')
+			var title = options.colDefns[c].title ? options.colDefns[c].title : colNames[colNum]['-dspname']
+			var tn = document.createTextNode(title)
+			th.appendChild(tn)
+			thr.appendChild(th)			
+		}
+	}
+	else
+	{
+		for (var i = 0; i < colNames.length; i++) // add the table column headings
+		{
+			colNumByName[colNames[i]['-dbname']] = i;
+			if (! colsList)
+				colsList = {}
+			colsList[i] = colNames[i]
+			var th = document.createElement('th')
+			var tn = document.createTextNode(colNames[i]['-dspname'])
+			th.appendChild(tn)
+			thr.appendChild(th)
+		}
+	}
+
+	
+	tb.appendChild(thr)
+	for (var r in rows) // add all the data rows
+	{
+		var cols = rows[r].COLS.COL
+		var tr = document.createElement('tr')
+		
+		if (options && options.onclick) // onclick for the row level
+		{
+			if (options.onclickDataCol >= 0)
+				var data = cols[options.onclickDataCol]
+			else
+				var data = cols
+			with ( {x: data, trl: tr, fn: options.onclick, clicked: false, opened: false} )
+			{
+				var clickStart = function () {
+					var clickActual = function() {
+						opened = fn(x, trl, clicked, opened);
+						clicked = ! clicked;
+						document.body.className = '';
+						trl.style.cursor = 'hand'
+					}
+					trl.style.cursor = 'wait';
+					document.body.className = 'wait';
+					setTimeout(clickActual, 100)
+				} 
+				tr.style.cursor = 'hand'
+				tr.onclick = clickStart
+			}
+		}
+		var colDefns = options.colDefns
+		if (colDefns)
+		{
+			for (var c in colDefns)
+			{
+				var colNum = colNumByName[c]
+				var td = createField(colNum, cols, colDefns[c], rows[r])
+				tr.appendChild(td)
+			}
+			tb.appendChild(tr)
+		}
+		else
+		{
+			for (var c in cols) // add each column data field
+			{
+				var td = createField(c, cols, colsList[c], rows[r])
+				tr.appendChild(td)
+			}
+			tb.appendChild(tr)
+		}
+	}
+	return tb
+}
+function doAjax(query, callBack, data)
+{
+	if (typeof(query) == "object")
+	{
+		var q = query.query
+		var forcedCols = query.forcedCols
+	}
+	else
+	{
+		var q = query
+		var forcedCols = null
+	}
+
+	with ({callback: callBack})
+	var processData = function (data) {
+		var resp = data
+		
+		if (typeof resp == "string")
+		{
+			if (window.DOMParser)
+			{
+				var parser=new DOMParser();
+				var xmlDoc=parser.parseFromString(resp,"text/xml");
+			}
+			else // Internet Explorer
+			{
+				var xmlDoc=new ActiveXObject("Microsoft.XMLDOM");
+				xmlDoc.async=false;
+				xmlDoc.loadXML(resp);
+			}
+		}
+		
+		var xotree = new XML.ObjTree();
+		xotree.force_array = forcedCols
+		var res = xotree.parseDOM(xmlDoc);
+		
+		if (callBack)
+			callBack(res['#document'])
+		else
+			return res['#document']
+	}
+	if (callBack)
+	{
+		return doXHR(q, processData, data)
+	}
+	else
+	{
+		var res = doXHR(q, null, data)
+		return processData(res)
+	}
+}
+function doXHR(url, callBack, data, noCache)
+{
+	var timestamp = new Date().getTime()
+	var callBackFunc, errorFunc, responseHandler;
+	if (window.XMLHttpRequest) {							
+		var xhr=new XMLHttpRequest();							
+	} else {																	
+		var xhr=new ActiveXObject("Microsoft.XMLHTTP");
+	}
+	if (callBack && callBack.callBack)
+	{
+		callBackFunc = callBack.callBack
+		if (callBack.error)
+		{
+			errorFunc = callBack.error
+		}
+		else
+		{
+			errorFunc = function (xhr) { alert("Communications error. Are you logged in?") }
+		}
+		if (callBack.response)
+			responseHandler = callBack.response
+	}
+	else
+	{
+		callBackFunc = callBack
+		errorFunc = function (xhr) { alert("Communications error. Are you logged in?") }
+	}
+	
+	if (url.indexOf('?') > 0 || noCache) // only add to requests with params
+		url += '&timestamp=' + timestamp
+
+	xhr.open(data ? "POST" : "GET", url, callBack ? true : false)
+	xhr.setRequestHeader("Content-Type", "text/xml");
+	if (data)
+		xhr.setRequestHeader("Content-Length", data.length);
+	
+	if (callBackFunc)
+	{
+		with ({xhr: xhr, callBack: callBackFunc, errorFunc: errorFunc})
+		{
+			if (responseHandler)
+				var handleReturn = responseHandler
+			else
+				var handleReturn = function () {
+				if (xhr.readyState==4) {
+					if (xhr.status != 200)
+						errorFunc(xhr)
+					else
+						callBack(xhr.responseText);
+				}
+		}
+		xhr.onreadystatechange = handleReturn
+		xhr.send(data)
+		return xhr
+		}
+	}
+	else
+	{
+		xhr.send(data)
+		return xhr.responseText;
+	}
+}
+</script>
+
+<script>
+
+function expOnClick(x, node) // onclick handler for expense number field
+{
+	if (! this.clickStart)
+		with ({x:x, node:node, clicked: false, opened: false})
+		this.clickStart = function () {
+			var clickActual = function() {
+				opened = getWUData( { value: x, service: "SLEmpExpApp", serviceVar: "EXPENSE_NBR" } , node, clicked, opened);
+				clicked = ! clicked
+				document.body.className = '';
+				node.style.cursor = 'hand';
+			}
+			node.style.cursor = 'wait';
+			document.body.className = 'wait';
+			setTimeout(clickActual, 100)
+		}
+	this.clickStart()
+}
+function jobReqOnClick(x, node) // onclick handler for jobreq number field
+{
+	var y = ('000000000' + zTrim(this.rowData[1])).slice(-9)
+	if (! this.clickStart)
+		with ({x:y, node:node, clicked: false, opened: false})
+		this.clickStart = function () {
+			var clickActual = function() {
+				opened = getWUData( { value: x, service: "JobReq Approval", serviceVar: "PJR_REQUISITION" }, node, clicked, opened);
+				clicked = ! clicked
+				document.body.className = '';
+				node.style.cursor = 'hand';
+			}
+			node.style.cursor = 'wait';
+			document.body.className = 'wait';
+			setTimeout(clickActual, 100)
+		}
+	this.clickStart()
+}
+with ({ids:{}})
+var getRMData = function(id, callBack)
+{
+	var appProdline = portalWnd.oUserProfile.getAttribute("productline")
+	var idList = (typeof id == "string" ? [id] : id)
+	//var whereString = "<![CDATA[(|"+xx+")]]>"
+	var clauseString = ""
+	
+	for (var i = 0; i < idList.length; i++)
+	{
+		if (typeof ids[idList[i]] == "undefined" || ids[idList[i]] == null )
+		{
+			clauseString += "({ID}=" + idList[i] + ")"
+		}
+	}
+	if (clauseString)
+	{
+		var whereString = "<![CDATA[(|" + clauseString + ")]]>"
+		var url = "/rmwebapp/RMApiServlet"
+		
+		var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+		+ '<ATTRIBUTES>'
+		+ '<ATTRIBUTE><![CDATA[ID]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+		+ '</ATTRIBUTES>'
+		+ '<WHERE>' + whereString + '</WHERE>'
+		+ '<OUTPUTSERVICEATTRS>'
+		+ '<OUTPUTSERVICEATTR serviceName="'+appProdline+'_EMPLOYEE"><![CDATA[COMPANY]]></OUTPUTSERVICEATTR>'
+		+ '<OUTPUTSERVICEATTR serviceName="'+appProdline+'_EMPLOYEE"><![CDATA[EMPLOYEE]]></OUTPUTSERVICEATTR>'
+		+ '</OUTPUTSERVICEATTRS>'
+		+ '</TRANSACTION>'
+	
+		var query = {
+			query: "/rmwebapp/RMApiServlet",
+			forcedCols: ['ROW', 'ROWATTR']
+		}
+		with ({callBack: callBack, ids: ids, id:id, idList: idList})
+		var fn = function(data) {
+			var objDoc = data
+			var trans = objDoc.TRANSACTION
+			var row = trans.ROWS.ROW
+			var names = {}
+			//alert(row.length)
+			for (var r =0; row && r < row.length; r++)
+			{
+				//var name = (row[r].ROWATTR[1].VALUE + ", " + row[r].ROWATTR[2].VALUE)
+				var name = (row[r].ROWATTR[1].VALUE + ", " + row[r].ROWATTR[2].VALUE + ' (' + row[r].ROWATTR[3].VALUE + '_' + row[r].ROWATTR[4].VALUE + ')')
+
+				var ID = row[r].ROWATTR[0].VALUE
+				//alert(ID + ":" + name)
+				ids[ID] = name
+			}
+			var idReturn = {}
+			for (var i = 0; i < idList.length; i++)
+			{
+				if (typeof ids[idList[i]] == "undefined" || ids[idList[i]] == null)
+					ids[idList[i]] = ""
+				idReturn[idList[i]] = ids[idList[i]]
+				//alert(idList[i] + ":" +  ids[idList[i]])
+			}
+			
+			//alert(idList.length)
+			//return (typeof id == "string" ? ids[id] : idReturn)
+			if (callBack)
+				callBack(typeof id == "string" ? ids[id] : idReturn)
+			else
+				return (typeof id == "string" ? ids[id] : idReturn)
+			//ids[id] = name
+			//node.title = name 
+		}
+		if (callBack)
+		{
+			var objDoc = doAjax(query, callBack, data)
+			return objDoc
+		}
+		else
+		{
+			var objDoc = doAjax(query, null, data)
+			return fn(objDoc)
+		}
+		//fn(objDoc)
+	}
+	var idReturn = {}
+	for (var i = 0; i < idList.length; i++)
+	{
+		if (typeof ids[idList[i]] == "undefined" || ids[idList[i]] == null)
+			ids[idList[i]] = ""
+		idReturn[idList[i]] = ids[idList[i]]
+		//alert(idList[i] + ":" +  ids[idList[i]])
+	}
+	return (typeof id == "string" ? ids[id] : idReturn)
+
+}
+function getWUData(info, node, clicked, opened)
+{
+	//alert(info)
+	if (node.nodeName == "TD")
+		var tr = node.parentNode
+	else
+		var tr = node
+	
+	if (clicked)
+	{
+		// just remove table
+		if (opened)
+		{
+			if (false ) //portalWnd.oUserProfile.getAttribute("id") == "u0x8im00")
+			{
+				with ({tr:tr})
+				var fn = function () { tr.parentNode.removeChild(tr.nextSibling); tr.className = '' }
+				hideDiv(tr.nextSibling.childNodes[1].firstChild, fn)
+			}
+			else
+			{
+				removeSubTable(tr)
+			}
+			opened = false
+		}
+		return
+	}
+	
+	//var service = "SLEmpExpApp"
+	//var serviceVar = "EXPENSE_NBR"
+	var varVal = info.value
+	var service = info.service
+	var serviceVar = info.serviceVar
+	//var service = "JobReq Approval"
+	//var serviceVar = "PJR_REQUISITION"
+	
+	var q = "PROD=LOGAN&FILE=WFVARIABLE&INDEX=WFVSET1"
+	+ "&FIELD=WORKUNIT;VARIABLE-NAME;VARIABLE-VALUE;WORKUNIT.START-DATE;WORKUNIT.START-TIME;WORKUNIT.SERVICE;"
+	+ "WORKUNIT.WORK-TITLE;WORKUNIT.TASK;WORKUNIT.WF-STATUS"
+	+ "&SELECT=WORKUNIT.SERVICE=" + service
+	+ "%26VARIABLE-NAME=" + serviceVar
+	+ "%26VARIABLE-VALUE=" + varVal
+	+ "&OUT=XML&DELIM=~&MAX=600"
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doAjax(query)
+	var WFWURows = objDoc.DME.RECORDS.RECORD
+		
+	if (! WFWURows)
+		return
+	var WUNum = WFWURows[WFWURows.length -1].COLS.COL[0]
+	//WUNum = 30238
+
+	//PROD=LOGAN&FILE=WFWUQUEUE&INDEX=WWQSET1&KEY=36696&
+	//FIELD=WFQUETASK.TASK;WFQUETASK.STATUS;WFMETRICS.COMMENT;WFMETRICS.OPERATION;WFMETRICS.WF-RM-ID;
+	//WFMETRICS.WORKUNIT;PROCESS-ID;ACTIVITY-ID;WORK-DESC;LIST-MESSAGE;TOTAL-USER;TOTAL-USER-ACT;
+	//ACTION-TAKEN;ACTION-LIST;WFMETRICS.DUE-DATE;WFMETRICS.END-DATE;WFMETRICS.END-TIME;WFMETRICS.START-DATE&
+	//OUT=CSV&DELIM=~&MAX=100
+	var q = "PROD=LOGAN&FILE=WFMETRICS&INDEX=WMESET2&KEY=" + WUNum
+	+ "&FIELD=WORKUNIT;PROCESS-ID;END-DATE;END-TIME;STATUS;WF-RM-ID;TASK;ACTIVITY-ID;OPERATION;COMMENT;"
+	+ "START-DATE;DUE-DATE&OUT=XML&MAX=600"
+
+	var q = "PROD=LOGAN&FILE=WFWUQUEUE&INDEX=WWQSET1&KEY=" + WUNum 
+	+ "&FIELD=WFQUETASK.TASK;WFQUETASK.STATUS;WFMETRICS.COMMENT;WFMETRICS.OPERATION;WFMETRICS.WF-RM-ID;" //4
+	+ "WORKUNIT;PROCESS-ID;ACTIVITY-ID;WORK-DESC;LIST-MESSAGE;TOTAL-USER;TOTAL-USER-ACT;" //11
+	+ "ACTION-TAKEN;ACTION-LIST;WFMETRICS.DUE-DATE;WFMETRICS.END-DATE;WFMETRICS.END-TIME;WFMETRICS.START-DATE;" //17
+	+ "WFQUETASK.START-DATE;WFQUETASK.DUE-DATE"
+	//+ "&SELECT=WFMETRICS.END-TIME%21%3D"
+	+ "&OUT=XML&MAX=100"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	var objDoc = doAjax(query)
+	var WFMetricsRows = objDoc.DME.RECORDS.RECORD
+
+	// Sort col 10 by Date
+	//var fn = function (r0,r1) {var a = r0.COLS.COL[10], b = r1.COLS.COL[10]; return ((a.substr(6,4) + a.substr(0,2) + a.substr(3,2)) > (b.substr(6,4) + b.substr(0,2) + b.substr(3,2))) ? 1 : -1}
+	
+	// sort col 7 (eg. 'UA147')by removing the first two alpha chars and then sort by number
+	var fn = function (r0,r1) {var a = parseInt(r0.COLS.COL[7].substr(2)), b = parseInt(r1.COLS.COL[7].substr(2)); return (a - b) }; 
+	
+	if (! WFMetricsRows)
+		return
+	
+	WFMetricsRows.sort(fn)
+
+	var ids = []
+	var s = ''
+	for (var r = 0; r < WFMetricsRows.length; r++)
+	{
+		var id = WFMetricsRows[r].COLS.COL[4]
+		if (id)
+			ids.push(id)
+		s += ',' + WFMetricsRows[r].COLS.COL[15]
+		if(WFMetricsRows[r].COLS.COL[15] == "") // no end-date
+		{
+			var relrecs = WFMetricsRows[r].RELRECS[0].RELREC
+			s += ',' + relrecs.length
+			for (var rr = 0; rr < relrecs.length; rr++)
+			{
+				if (relrecs[rr].COLS.COL[2] == 'bpmsystem')
+					WFMetricsRows[r].COLS.COL[16] = relrecs[rr].COLS.COL[4] + ' ' + relrecs[rr].COLS.COL[5]
+			}
+		}
+	}
+	alert(s)
+	//alert(ids.join('.'))
+	var rmData = getRMData(ids)
+	
+	//var rows = WFMetricsRows
+	//for (var r = 0; r < rows.length; r++)
+	//{
+	//	var name = rmData[rows[r].COLS.COL[4]]
+	//	if (name)
+	//		rows[r].COLS.COL[4] += ", [" + name + ']'
+	//}
+
+	
+	
+	
+	
+	
+	var s = ''
+	for (var i = 0; i < WFMetricsRows.length; i++)
+	{
+		var cols = WFMetricsRows[i].COLS.COL
+		s += cols[5] + ":" + cols[2] + ":" + cols[5] + ":" + cols[8] + "\n"
+	}
+	var tbl = document.createElement('table')
+	tbl.className = 'subtable'
+	var options = {
+		colDefns: {
+			'WORKUNIT': true,
+			'WF-RM-ID': {
+				title: 'Mgr ID',
+				toScreen: function (x, cols) {
+					if (x == 'bpmsystem')
+						return ''
+					return '[' + x + ']'
+				},
+				//onclick: getRMData,
+				onhover: getRMData
+			},
+			'OPERATION': {
+				title: 'Action',
+				toScreen: function (x, cols) {
+					if (x == 'Reject' && cols[5] == 'bpmsystem')
+						return 'ESCALATED';
+					return x
+				}
+			},
+			'START-DATE': {
+				title: 'Date Stamp'
+			},
+			'DUE-DATE': {
+				title: 'Due By'
+			},
+			'ACTIVITY-ID': {
+			}
+		}
+	}
+	var options = {
+		colDefns: {
+			'WORKUNIT': true,
+			'WFMETRICS.WF-RM-ID': {
+				title: 'Mgr ID',
+				toScreen: function (x, cols) {
+					if (x == 'bpmsystem')
+						return ''
+					if (x == "")
+						return '[' + cols[0] + ']'
+					//return '[' + x + ']' + ( cols[0] ? '(' + cols[0] + ')' : '')
+					var name = getRMData(x)
+					if (name)
+						x = name
+					return x + ( cols[0] ? '(' + cols[0] + ')' : '')
+					//return x
+				},
+				//onclick: getRMData,
+				onhover: function(id, node) { node.title = id}
+			},
+			'WFMETRICS.OPERATION': {
+				title: 'Action',
+				toScreen: function (x, cols) {
+					if (x == 'Reject' && cols[5] == 'bpmsystem')
+						return 'ESCALATED';
+					return x
+				}
+			},
+			'WFMETRICS.END-DATE': {
+				title: 'End Date',
+				toScreen: function (x, cols) {
+					if (x == "")
+						return cols[18]
+					return x + ' ' + cols[16]
+				}
+			},
+			'WFMETRICS.DUE-DATE': {
+				title: 'Due By',
+				toScreen: function (x, cols) {
+					//this.container.scrollIntoView();
+					if (x == "")
+						return ( cols[19] ? cols[19] : '-');
+					return x
+				}
+			},
+			'ACTIVITY-ID': {
+			}
+		},
+		processData: function(dme) {
+			alert('p')
+			var dataRows = dme.RECORDS.RECORD
+			
+			if (! dataRows)
+				return dme
+			for (var r = 0; r < dataRows.length; r++)
+			{
+				//var id = dataRows[r].COLS.COL[5]
+				dataRows[r].COLS.COL[7] += '-'
+			}
+			//alert(ids.join('.'))
+			//var rmData = getRMData(ids)
+
+			return dme
+		}
+	}
+	tbl.appendChild(tabulateDME(objDoc.DME, options))
+	var div = document.createElement('div')
+	div.appendChild(tbl)
+	//revealDiv(div)
+	
+	injectSubTable(tr, div)
+	if (tr.nextSibling)
+	{
+		//alert('found')
+		if (tr.nextSibling.nextSibling)
+			scrollIntoViewIfOutOfView(tr.nextSibling.nextSibling)
+		else
+			scrollIntoViewIfOutOfView(tr.nextSibling);
+	}
+		
+	return true
+	//alert(s)
+}
+function ICField(val) {
+	var cell = document.createElement('span')
+	var field = document.createElement('span')
+	cell.innerHTML += '&nbsp;'
+	cell.appendChild(field)
+	field.className = "invis"
+	field.appendChild(document.createTextNode(val))
+	with ({node: field, input: null})
+	{
+		var fn = function () {
+			node.className = "vis"
+		}
+		var fn1 = function () {
+			node.className = "invis"
+		}
+		var fn2 = function () {
+			if (! input)
+			{
+				input = document.createElement('input')
+				with ( { node: input } )
+				var fn = function (e) {
+					node.parentNode.className = "invis"
+					if (!e)
+						e = window.event
+					var t = (e.target ? e.target : e.srcElement)
+					reloadPage({employee: t.value})
+				}
+				input.onblur = fn
+				input.onmouseout = function () {this.blur()}
+				var value = node.firstChild.nodeValue
+				input.setAttribute('value', value)
+				var p = node.parentNode
+				node.removeChild(node.firstChild)
+				node.appendChild(input)
+				input.focus()
+				
+				if (input.setSelectionRange)
+					input.setSelectionRange(value.length, value.length)
+				else
+				{
+					var range = input.createTextRange();
+					range.collapse(true);
+					range.moveEnd('character', value.length);
+					range.moveStart('character', value.length);
+					range.select();
+				}
+			}
+			else
+			{
+				var txtNode = document.createTextNode(input.value)
+				node.removeChild(node.firstChild)
+				node.appendChild(txtNode)
+				input = null
+			}
+		}
+	}
+	cell.onmouseover = fn
+	cell.onmouseout = fn1
+	cell.ondblclick = fn2
+	return cell
+}
+
+function parseParams(params)
+{	
+	var o = new Object(params)
+	o.strPDL = portalWnd.oUserProfile.getAttribute("productline")
+	o.strEmployee = zTrim(portalWnd.oUserProfile.getAttribute("employee"))
+	o.strEmployee = zTrim(portalWnd.oUserProfile.getAttribute("employee"))
+	o.strUID = zTrim(portalWnd.oUserProfile.getAttribute("lawsonuserlogin"))
+	var fn = null;
+	var ee = getCookie('employee')
+
+	if (ee)
+		o.strEmployee = ee
+		
+	if (params.employee)
+		o.strEmployee = params.employee
+		
+	o.vendorId = '900000000'.substr(0, 9 - o.strEmployee.length) + o.strEmployee 
+	
+	return o
+}
+function buildQuery(vars)
+{
+	if ( (! vars || ! vars.info) || vars.info == 'expense')
+	{
+
+		var q = "PROD="+vars.strPDL+"&FILE=EEEXPENSE"
+		+ "&SELECT=COMPANY%3D1000%26VENDOR%3D" + vars.vendorId
+		+ "&FIELD=COMPANY;VENDOR;EXPENSE-NBR;EXPENSE-TYPE;DESCRIPTION;APPROVAL-CODE;EXPENSE-DATE;"
+		+ "TRAN-EXP-AMT;BASE-EXP-AMT;BASE-TAX-AMT;BASE-EMP-PAID;CHECK-DATE;CHECK-AMT;TRANS-NBR;BANK-INST-CODE;"
+		+ "REC-STATUS,xlt;"
+		+ "&MAX=600&XCOLS=TRUE&XKEYS=TRUE&XRELS=TRUE&XCOUNT=TRUE&XIDA=TRUE&OUT=XML"
+		
+		var options = {
+			onclickx: getWUData,
+			onclickDataCol: 2,
+			colDefns: {
+				'EXPENSE-NBR': {
+					onclick: expOnClick,
+					title: 'Expense'
+				},
+				'DESCRIPTION': {
+					title: 'Description'
+				},
+				'EXPENSE-DATE': {
+					title: 'Date'
+				},
+				'BASE-EMP-PAID': {
+					type: 'float',
+					title: 'Amount'
+				},
+				'REC-STATUS': {
+					title: 'Status'
+				}
+			}
+		}
+		var fn = function (r0,r1) {var a = r0.COLS.COL[6], b = r1.COLS.COL[6]; return ((a.substr(6,4) + a.substr(0,2) + a.substr(3,2)) > (b.substr(6,4) + b.substr(0,2) + b.substr(3,2))) ? -1 : 1}
+	}
+	else if (vars.info == 'jobreq')
+	{
+		var q = "PROD="+vars.strPDL+"&FILE=PAJOBREQ&INDEX=PJRSET6"
+		+ "&FIELD=COMPANY;REQUISITION;DESCRIPTION;POSITION;REQUEST-BY;USER-ID;REQ-STATUS;REQUEST-DATE;" //7
+		+ "DATE-NEEDED;OPEN-DATE;CLOSED-DATE;REQUEST-BY.FULL-NAME;REQUEST-BY.PROCESS-LEVEL;REQUEST-BY.DEPARTMENT;" //13
+		+ "POSITION.DEPARTMENT;" //14
+		+ "POSITION.JOB-CODE;POSITION.LOCAT-CODE;POSITION.PROCESS-LEVEL;POSITION.SUPERVISOR;SUPERVISOR.FULL-NAME;"// 19
+		+ "PROCESS-LEVEL;COMMENTS.CMT-TEXT;BUDGETED-FLAG"
+		+ (vars.strEmployee ? "&SELECT=REQUEST-BY%3D" + vars.strEmployee : "")
+		+ (vars.strUID ? "&SELECT=USER-ID%3D" + vars.strUID : "")
+		+ "&OUT=XML&XRELS=FALSE&DELIM=~&MAX=100"
+		
+		var options = {
+			//onclick: jobReqOnClick,
+			//onclickDataCol: 1,
+			colDefns: {
+				COMPANY: {
+				},
+				REQUISITION: {
+					onclick: function() {
+						var url = "/lawson/portal/?_tkn=pa42.1&_HK=_DATAPARAM~~PJR-COMPANY~" + this.rowData[0]
+						+ "~~PJR-REQUISITION~" + this.rowData[1]+"~~"
+						window.open(url)
+					},
+					onhover: function(x, node) {
+						node.title = 'PL: ' + this.rowData[20] + ' (Emp PL: ' + this.rowData[12] + ' / Budgeted: ' + this.rowData[22] + ')'// + ' (PL: ' + this.rowData[12] + '/Dept: ' + this.rowData[13] + ')'
+					}
+				},
+				DESCRIPTION: {
+					onhover: function(x, node) {
+						var title = ''
+						for (var i = 0; i <= 9; i++)
+						{
+							title += this.row.RELRECS[1].RELREC[i].COLS.COL + '\n'
+						}
+						node.title = title;
+					}
+				},
+				POSITION: {
+					onhover: function(x, node) {
+					//var x = this.rowData[14],s=''; for (var k in x) {s += k + ", "} alert(s)
+					//alert(.join(','))
+						node.title = 'Dept: ' + this.rowData[14]
+							+ '\nJob: ' + this.rowData[15]
+							+ '\nLoc: ' + this.rowData[16]
+							+ '\nPL: ' + this.rowData[17]
+							+ '\nSuper: ' + this.rowData[18] + ' {' + this.rowData[19] + ')'
+					}
+				},
+				'REQUEST-BY': {
+					onhover: function(x, node) {
+						node.title = this.rowData[11] + ' (PL: ' + this.rowData[12] + '/Dept: ' + this.rowData[13] + ')'
+					}
+				},
+				'USER-ID': {
+					toScreen: function (x, cols){
+						var name = getRMData(x) 
+						return (name ? name : x)
+					},
+					onhover: function(x, node) {
+						node.title = x
+					}
+				},
+				'REQUEST-DATE': {
+					onhover: function(x, node) {
+						node.title = 'Date: ' + this.rowData[7]
+						+ '\nNeeded: ' + this.rowData[8]
+						+ '\nOpen: ' + this.rowData[9]
+						//+ '\nClosed: ' +  + this.rowData[10]
+					}
+				},
+				'REQ-STATUS': {
+					onclick: jobReqOnClick,
+					title: 'Status'
+				}
+
+			},
+			processData: function(dme) {
+				var dataRows = dme.RECORDS.RECORD
+				var ids = []
+				if (! dataRows)
+					return dme
+				for (var r = 0; r < dataRows.length; r++)
+				{
+					var id = dataRows[r].COLS.COL[5]
+					if (id)
+						ids.push(id)
+				}
+				//alert(ids.join('.'))
+				var rmData = getRMData(ids)
+
+				return dme
+			}
+			// /lawson/portal/?_tkn=pa42.1&_HK=_DATAPARAM~~EMP-COMPANY~1000
+		}
+	}
+	
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+	
+	return { query: query, options: options, fn: fn }
+}
+function buildTable(tblDefn)
+{
+	var objDoc = doAjax(tblDefn.query)
+	
+	if (tblDefn.fn)
+	{
+		var dataRows = objDoc.DME.RECORDS.RECORD
+		dataRows.sort(tblDefn.fn)
+	}
+	if (tblDefn.options.processData)
+		objDoc.DME = tblDefn.options.processData(objDoc.DME)
+	var tb = tabulateDME(objDoc.DME, tblDefn.options)
+	
+	return tb
+}
+
+function getPortal()
+{
+	portalWnd = null, p = window, c = 0, max = 10;
+	while (!portalWnd && !!p && c < 20 )
+	{
+		portalWnd = p.portalWnd
+		p = p.parent
+		c++
+	}
+	//alert(portalWnd + ":" + !!p + ":" + c)
+	return portalWnd
+}
+with ( {options: null} )
+{
+	var loadPage = function()
+	{
+	
+		var params = {}; location.search.replace(/([^=&?]+)=([^&]*)/g, function (x) {kvp = x.split('='); params[kvp[0]] = kvp[1]});
+		
+		portalWnd = getPortal();
+		
+		options = parseParams(params)
+
+		if (params['id'] == 'all')
+		{
+			options.strEmployee = ''
+			options.strUID = ''
+		}
+		else if (params['id'] == 'employee')
+			options.strUID = ''
+		else
+			options.strEmployee = ''
+		var queryDefn = buildQuery(options)
+		var tb = buildTable(queryDefn)
+		
+		var eid = ICField(options.strEmployee)
+		var eidNode = document.getElementById("EmpNum")
+		eidNode.appendChild(eid)
+		
+		
+		var tbl = document.createElement('table')
+		document.getElementById('tbl').appendChild(tbl)
+		
+		tbl.appendChild(tb)
+	
+	}
+	var reloadPage = function(keys)
+	{
+		options.strEmployee = keys.employee;
+		options.vendorId = '900000000'.substr(0, 9 - options.strEmployee.length) + options.strEmployee
+		
+		setCookie('employee', options.strEmployee, 1);
+		var tblDiv = document.getElementById('tbl')
+		if (tblDiv.firstChild)
+			tblDiv.removeChild(tblDiv.firstChild)
+		
+		var queryDefn = buildQuery(options)
+		var tb = buildTable(queryDefn)
+
+		var tbl = document.createElement('table')
+		tbl.appendChild(tb)
+		tblDiv.appendChild(tbl)
+
+	}
+}
+
+</script>
+<body onload="loadPage()">
+
+<!-- <img src="data:image/gif;base64,R0lGODlhDAAMAIABAP8AAP///yH5BAEKAAEALAAAAAAMAAwAAAIPhBGpeevmXpy02ouz3qkAADs=" onclick="document.getElementById('EmpNum').className = 'vis';"/> -->
+<span id="EmpNum"></span>
+<div id="tbl"></div>
+</body>
+</html>
