@@ -1,0 +1,133 @@
+#!/usr/local/bin/perl
+use warnings;
+use strict;
+use Time::Local;
+use Data::Dumper 'Dumper';
+use CGI qw(:standard);
+use CGI::Carp 'fatalsToBrowser';
+require "/opt/aspx/lib/ldaplib.pl";
+require "/opt/aspx/lib/mynetaspxlib.pl";
+
+&setLawEnv();
+
+if ( not exists $ENV{LAWENVNAME} ) {
+   $ENV{SERVER_NAME} =~ /^law(..)\.(....)/
+      or die 'Unable to determine ENV name';
+   $ENV{LAWENVNAME} = $2 . $1;
+}
+my $custenv = $ENV{LAWENVNAME};
+my $env_lc = lc $ENV{LAWENVNAME};
+my $env_uc = uc $env_lc;
+my $cust_lc = substr $env_lc, 0, 4;
+my $cust_uc = uc $cust_lc;
+my $auth_ldap = &auth_ldap_connect( $cust_lc ) or die 'Auth LDAP connect fail';
+
+my $user;
+my $cgi = new CGI;
+if ( $#ARGV >= 0 ) {
+   $user = $ARGV[0];
+} elsif ( $cgi->param('keywords') ) {
+   $user = $ENV{REMOTE_USER};
+} else {
+   $user = $cgi->param('user');
+}
+print header;
+if ( not defined $user ) { warn "No user specified"; print "ok"; exit 0; }
+
+my $entry = &user_entry( $auth_ldap, $cust_lc, $user );
+if ( not defined $entry ) { print 'ok'; exit 0; }
+print accountStatus( $entry );
+exit;
+
+sub accountStatus {
+   my ( $entry ) = @_;
+   my $status;
+   if ( $status = &isLocked( $entry ) ) { return $status }
+   if ( $status = &isExpiredOrMustChange( $entry ) ) { return $status }
+   return 'ok';
+}
+
+sub isLocked() {
+   my ( $entry ) = @_;
+   my $unlockTime = $entry->get_value( 'accountUnlockTime' ) or return;
+   if ( $unlockTime eq '19700101000000Z' ) { return 'locked'; }
+   $unlockTime =~ /^(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/ or return;
+   my ( $year ,$mon ,$mday ,$hour ,$min ,$sec ) = ($1,$2,$3,$4,$5,$6);
+   $unlockTime = timegm($sec,$min,$hour,$mday,($mon - 1),$year) or return;
+   if (  $unlockTime > time() ) { return ($unlockTime - time()) . ' seconds'; }
+   return;
+}
+
+sub isExpiredOrMustChange() {
+   my ( $entry ) = @_;
+   my $timeExpired = $entry->get_value( 'passwordExpirationTime' ) or return;
+   if (  $timeExpired eq '19700101000000Z' ) { return 'mustChange'; }
+   # 20090827225751Z
+   $timeExpired =~ /^(\d{4})(\d\d)(\d\d)(\d\d)(\d\d)(\d\d)/ or return;
+   my ( $year ,$mon ,$mday ,$hour ,$min ,$sec ) = ($1,$2,$3,$4,$5,$6);
+   $timeExpired = timelocal($sec,$min,$hour,$mday,($mon - 1),$year) or return;
+#print $timeExpired . "\n" . time() . "\n";
+   #my $now = time();
+   if (  $timeExpired < time() ) { return 'expired'; }
+   return;
+}
+
+sub auth_ldap_connect() {
+   my ( $cust ) = @_;
+   my $adm_pw = qx(/opt/aspx/bin/getsec ios ${cust}adm);
+   chomp $adm_pw;
+   my $auth_ldap = Net::LDAP->new( 'ldapmaster', port => '389' ) or return;
+   my $mesg = $auth_ldap->bind(
+      dn=>"uid=${cust}adm,ou=people,dc=${cust},dc=netaspx,dc=com",
+      password=>$adm_pw
+   );
+   if ( defined $auth_ldap ) {
+      return $auth_ldap;
+   } else {
+      return;
+   }
+}
+
+sub user_entry() {
+  my ( $ldap, $cust, $user ) = @_;
+  my $search = $ldap->search(
+     base   => "uid=${user},ou=People,dc=${cust},dc=netaspx,dc=com",
+     scope  => "base",
+     filter => "(objectclass=*)",
+     attrs => ['passwordExpirationTime', 'accountUnlockTime']
+  );
+  return $search->entry(0);
+}
+
+
+
+sub setLawEnv() {
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    set importanant lawson environment variables
+</pre>
+
+=end html
+
+=cut
+
+  use Cwd;
+  my $dir = getcwd;
+
+  my @dir = split(/\//,$dir);
+
+  #my $idx=0;
+  #foreach(@dir) {
+  #  print "$idx $_<br>";
+  #  $idx++;
+  #}
+
+  $ENV{LAWDIR} = "/" . $dir[1] . "/" . $dir[2] . "/" . $dir[3] . "/";
+  $ENV{LAWENVNAME} = $dir[2];
+
+}
+

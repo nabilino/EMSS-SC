@@ -1,0 +1,554 @@
+#!/usr/local/bin/perl -w
+
+#--------- Beg POD header ----------
+
+=head1 ASP File Upload CGI
+
+fileUpload.aspxcgi
+
+=head2  Purpose
+
+=begin html
+
+<pre>
+Process multipart/formdata file uploads 
+$GENDIR/cgi-bin CGI http posts & gets are processed by Websphere which compromises multipart formdata characters
+$LAWDIR/htdocs/aspxcgi http posts & gets are processed by IHS which preserves multipart form data characters
+CONFIG:
+$FindBin directive must be modified for each customer environment
+uploadFile() must be modified to the correct upload file parameter is used
+redirect() must be modified so the correct name value pairs are returned to the calling CGI
+</pre>
+
+=end html
+
+=head2  Location
+
+$LAWIR/htdocs/aspx
+
+=head2  Usage
+
+<a href="/aspx/fileUpload.aspxcgi">
+
+=head2  Audit Log
+
+$LAWDIR/tmp/fileUpload_<datestamp>.log
+
+=head2  Version
+
+1.00
+
+=head2  Author
+
+Robert Nevinger robert.nevinger@velocity.cc
+
+=head2 License & Copyright
+
+Copyright (c) 2013 Velocity Technology Services herein "VTS". 3rd party use must be licensed by VTS
+
+=head2 TODO
+
+Please see addtional TODO statements in functions
+
+=cut
+
+#--------- End POD header ----------
+
+=head1 Functions
+
+=cut
+
+use strict;
+use warnings;
+
+print "Content-type: text/html\n\n";
+
+use CGI qw(:standard);
+use CGI::Carp qw(fatalsToBrowser);
+
+# CONFIG
+# FinBin used to locate local; CPAN and custom modules by directory
+# directories must be space delimited
+use lib qw($FindBin::Bin . /opt/aspx/lib /law/c0x8dc/gen/cgi-bin );
+
+use CGI::Carp qw(fatalsToBrowser);
+our $CGI = new CGI;
+our $UPLOADFILE = undef;
+
+if(&authenticated()) {
+  &setLawEnvName();
+  &openLog();
+  #&printEnv();
+  &printCGIKeys();
+  &uploadFile();
+  &closeLog();
+  if ($ENV{HTTP_REFERER} =~ "smadduser") {
+    &redirectAddUser();
+  }
+  elsif ($ENV{HTTP_REFERER} =~ "velviewmaint") {
+    &redirectDbViews();
+  }
+  else {
+    dienice("$ENV{HTTP_REFERER} not defined");
+  }
+}
+
+sub closeLog() {
+
+=head2 openLog()
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    close transaction log $LAWDIR/tmp/veladduser.log
+</pre>
+
+=end html
+
+=cut
+
+  my $dtStamp = `date +"%Y%m%d %H:%M:%S"`;
+  chomp $dtStamp;
+  print LOG "\n";
+  print LOG "****** END $dtStamp*****\n\n";
+  close LOG;
+
+}
+
+
+sub openLog() {
+
+=head2 openLog()
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    open transaction log $LAWDIR/tmp/veladduser.log
+</pre>
+
+=end html
+
+=cut
+
+
+  my $dtStamp = `date +"%Y%m%d %H:%M:%S"`;
+  chomp $dtStamp;
+
+  my $dateStamp = `date +"%Y%m%d"`;
+  chomp $dateStamp;
+
+  my $logFile= $ENV{LAWDIR} . "/tmp/fileUpload_$dateStamp.log";
+
+
+  # open new log file with each run
+  eval {
+      open(LOG,">>$logFile") or die("Cannot open LOG file: $logFile");
+  };
+
+  # catch eval
+  if($@) {
+    &dienice($@);
+    exit;
+  }
+
+  # set file permissions
+  chmod 0755, $logFile;
+
+  print LOG "****** BEGIN transaction log $dtStamp*****\n\n";
+
+}
+
+
+sub setLawEnvName () {
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    set the env based on the cwd
+</pre>
+
+=end html
+
+=cut
+
+  use Cwd;
+  my $dir = getcwd;
+
+  my @dir = split(/\//,$dir);
+
+  $ENV{LAWENVNAME} = $dir[2];
+
+}
+
+sub printCGIKeys() {
+
+=head2 printCGIKeys()
+
+=begin html
+
+<pre>
+Author:     rnevinger
+Purpose:    log CGI keys
+</pre>
+
+=end html
+
+=cut
+
+  print LOG "Begin printCGIKeys() \n";
+
+  use Data::Dumper;
+
+  print LOG "CGI keys \n";
+
+  # CGI->Vars returns a hash
+  my %vars = $CGI->Vars();
+  my @keys = keys %vars;
+
+  #my @keys = $CGI->param;
+
+  foreach(sort (@keys)) {
+    #print "Key:  $_ ==> Value: " . $vars{$_} . " <br>";
+    print LOG "Key:  $_ ==> Value: " . $vars{$_} . " \n";
+  }
+
+  print LOG "End printCGIKeys() \n";
+
+}
+
+sub authenticated() {
+
+=head2 authenticated()
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    read HTTP_COOKIE for C_LWSN
+</pre>
+
+=end html
+
+=cut
+
+  if($ENV{'HTTP_COOKIE'}) {
+    my @cookie = split(/\;/,$ENV{'HTTP_COOKIE'});
+    foreach(@cookie) {
+
+      my($name, $value) = split(/\=/,$_);
+      if($name =~ m/C.LWSN/) {
+        return 1;
+      }
+    }
+
+  }
+  
+}
+
+sub printEnv {
+
+=head2 printEnv()
+
+=begin html
+
+<pre>
+Author:     rnevinger
+Purpose:    reports ENV hash key/values to screen
+Returns:    html
+Revision:
+</pre>
+
+=end html
+
+=cut
+
+  foreach(sort (keys %ENV)) {
+    print LOG "$_==>$ENV{$_}<br>\n";
+  }
+
+}
+
+sub redirectAddUser() {
+
+=head2 redirectAddUser()
+
+=begin html
+
+<pre>
+  Author:       Robert Nevinger
+  Date:         1.2014
+  Purpose:      http redirect to veladduser.cgi
+</pre>
+
+=end html
+
+=cut
+
+  # read cgi parameters defined on calling form
+  my $action = undef;
+  my $authentication = $CGI->param("authentication");
+  my $httpReferer = "https://" . $ENV{HTTP_HOST} . "/cgi-lawson/veladduser.cgi";
+
+  if (defined $CGI->param( "loadusers" )) {
+    $action = $CGI->param("loadusers");
+  }
+  elsif (defined $CGI->param( "disableusers" )) {
+    $action = $CGI->param("disableusers");
+  }
+  elsif (defined $CGI->param( "deleteusers" )) {
+    $action = $CGI->param("deleteusers");
+  }
+
+  print qq~
+  <html>
+  <head>
+
+  <script>
+  function redirect() {
+
+    var uploadFile = "$UPLOADFILE";
+
+    // read div tags DOM getElementById
+    var WaitImage = document.getElementById("WaitImage");
+    var Message = document.getElementById("Message");
+
+    if(WaitImage.style.display == "none") {
+      // display divs
+      WaitImage.style.display = "block";
+      Message.style.display = "block";
+      Message.innerHTML = "loading " + uploadFile;
+    }
+    else {
+      // hide divs
+      WaitImage.style.display = "none";
+      Message.style.display = "none";
+    }
+
+    // submit form
+    document.getElementById("adduser").submit();
+
+  }
+
+  </script>
+  </head>
+
+  <body onload="redirect();">
+
+  <form id="adduser" name="adduser" action="$httpReferer" method=POST>
+  <input type=hidden name="action" id="action" value="$action">
+  <input type=hidden name="authentication" id="authentication" value="$authentication">
+  <input type=hidden name="uploadFile" id="uploadFile" value="$UPLOADFILE">
+  </form>
+
+  <div id="WaitImage" style="display: none;" align=center>
+  <img src="/lawson/images/animate/stopwtch.gif"></img>
+  </div>
+  <div id="Message" style="display: none;" align=center>
+  </div>
+
+  </body>
+  </html>
+  ~;
+
+}
+
+sub redirectDbViews() {
+
+=head2 redirectDbViews()
+
+=begin html
+
+<pre>
+  Author:       Robert Nevinger
+  Date:         1.2014
+  Purpose:      http redirect to velviewmaint.cgi
+</pre>
+
+=end html
+
+=cut
+
+  # read cgi parameters defined on calling form
+  my $action = $CGI->param("action");
+  my $productLine = $CGI->param("pline");
+  my $httpReferer = $ENV{HTTP_REFERER};
+
+  print qq~
+  <html>
+  <head>
+
+  <script>
+  function redirect() {
+
+    var uploadFile = "$UPLOADFILE";
+
+    // read div tags DOM getElementById
+    var WaitImage = document.getElementById("WaitImage");
+    var Message = document.getElementById("Message");
+
+    if(WaitImage.style.display == "none") {
+      // display divs
+      WaitImage.style.display = "block";
+      Message.style.display = "block";
+      Message.innerHTML = "validating " + uploadFile + " SQL syntax";
+    }
+    else {
+      // hide divs
+      WaitImage.style.display = "none";
+      Message.style.display = "none";
+    }
+
+    // submit form
+    document.getElementById("dbviews").submit();
+
+
+  }
+
+  </script>
+  </head>
+
+  <body onload="redirect();">
+  <form id="dbviews" name="dbviews" action="$httpReferer" method=POST>
+  <input type=hidden name="action" id="action" value="$action">
+  <input type=hidden name="productLine" id="productLine" value="$productLine">
+  <input type=hidden name="uploadFile" id="uploadFile" value="$UPLOADFILE">
+  <input type=hidden name="httpReferer" id="httpReferer" value="$httpReferer">
+  </form>
+  <div id="WaitImage" style="display: none;" align=center>
+  <img src="/lawson/images/animate/stopwtch.gif"></img>
+  </div>
+  <div id="Message" style="display: none;" align=center>
+  </div>
+
+  </body>
+  </html>
+  ~;
+
+}
+
+
+
+sub uploadFile() {
+
+=head2 uploadFile()
+
+=begin html
+
+<pre>
+  Author:       Robert Nevinger
+  Date:         1.2014
+  Purpose:      read file from httpd post and write to file system
+</pre>
+
+=end html
+
+=cut
+
+  print LOG "Begin uploadFile()\n";
+
+  my $localFile = undef;
+
+  if ($ENV{HTTP_REFERER} =~ "smadduser") {
+
+    if (defined $CGI->param( "loadusers" )) {
+      $localFile = $CGI->param("LoadCsv");
+    }
+    if (defined $CGI->param( "disableusers" )) {
+      $localFile = $CGI->param("DisableCsv");
+    }
+    if (defined $CGI->param( "deleteusers" )) {
+      $localFile = $CGI->param("DeleteCsv");
+    }
+
+  }
+  elsif ($ENV{HTTP_REFERER} =~ "velviewmaint") {
+    $localFile = $CGI->param("localfile");
+  }
+
+  if(! $localFile) {
+    my $utility = $ENV{HTTP_REFERER};
+    print LOG "Error fileUpload->uploadFile()  $utility upload attribute not defined\n";
+    &dienice("Error fileUpload->uploadFile()  $utility upload attribute not defined.  Contact Velocity Technical Support");
+  }
+
+  my @nameArray = undef;
+  my $fileName = undef;
+  my $fileOut = undef;
+
+  if($localFile =~ m/\\/) {
+    @nameArray = split(/\\/,$localFile);
+    $fileName = pop @nameArray;
+    $fileOut = $ENV{LAWDIR} . "/tmp/" . $fileName;
+    $UPLOADFILE = $fileName;
+  }
+  else {
+    $fileOut = $ENV{LAWDIR} . "/tmp/" . $localFile;
+    $UPLOADFILE = $localFile;
+  }
+
+  my $buffer;
+  my $i = 0;
+
+  eval {
+    open(FILEOUT, ">$fileOut") or die("Error fileUpload->uploadFile($fileOut) $!");
+    print LOG "opened $fileOut\n";
+    while( read($localFile, $buffer, 16384) ) {
+      # strip DOS carriage returns
+      $buffer =~ s/\r//g;
+      print FILEOUT $buffer;
+    }
+  };
+  if($@) {
+    &dienice("$@");
+  }
+
+  close FILEOUT;
+
+  if(-s $fileOut) {
+    chmod 0755, $fileOut;
+    print LOG "uploaded $localFile to $fileOut\n";
+    print LOG "End uploadFile()\n";
+    return;
+  }
+  else {
+    print LOG "$fileOut appears to be empty, please reload file\n";
+    print LOG "End uploadFile()\n";
+    &dienice("$fileOut appears to be empty, please reload file");
+  }
+
+}
+
+
+sub dienice {
+
+=head2 dienice()
+
+=begin html
+
+<pre>
+Author:     rnevinger
+Purpose:    prints error message
+</pre>
+
+=end html
+
+=cut
+
+  my($errmsg) = @_;
+  print qq~
+  <img src="/lawson/smnet/images/error.gif">&nbsp;$errmsg <BR><BR>
+  <input name="back" value="Back" type="button" onClick="history.go(-1)"/>
+  </body></html>
+~;
+
+  exit;
+
+}
+

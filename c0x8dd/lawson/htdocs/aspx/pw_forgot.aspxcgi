@@ -1,0 +1,517 @@
+#!/usr/local/bin/perl
+use strict;
+use warnings;
+use CGI ':standard';
+use CGI::Carp 'fatalsToBrowser';
+use Digest::SHA1;
+use MIME::Base64;
+use Data::Dumper;
+require "/opt/aspx/lib/ldaplib.pl";
+require "/opt/aspx/lib/mynetaspxlib.pl";
+
+#Changed number of questions to present from 3 to 2 - 03-15-2010
+############## CONFIG ################
+my $pw_min_length = 8;
+my $pw_max_length = 8;
+my $pw_min_numeric = 1;
+my $pw_min_special = 1;
+my $pw_min_upper = 0;
+my $pw_min_lower = 0;
+my $customer_name = "St. Lukes Health System";
+my $customer_phone = "208-381-HELP (4357)"; 
+my $num_questions_to_present = 2;
+my $pw_rule_description =
+   "Password must be $pw_max_length characters,"
+    . " including at least one number or -_=?!\$^().";
+my $title = "Forgot Password";
+my $accountActivateTitle = "Activate Account";
+my %linkNames = (
+   'activate' => "Create Account"
+   , 'forgot' => "Forgot Password"
+);
+######################################
+
+print header;
+&setLawEnv();
+#&printEnv();
+#exit;
+
+if ( not defined $ENV{LAWDIR} ) { $ENV{LAWDIR} = $ENV{DOCUMENT_ROOT} . '/..' }
+open STDERR, ">> $ENV{LAWDIR}/tmp/pw_forgot.log"
+   or die "Problem opening pw_forgot log";
+print STDERR '*****' . localtime() . "*****\n";
+if ( not defined $ENV{LAWENVNAME} ) {
+   $ENV{SERVER_NAME}=~ /^law(..)\.(....)/ or die 'Unable to determine ENV name';
+   $ENV{LAWENVNAME} = $2 . $1;
+}
+my $env_lc = lc $ENV{LAWENVNAME};
+my $cust_lc = lc ( substr $env_lc,0,4 );
+my $env_uc = uc $env_lc;
+my $cust_uc = uc $cust_lc;
+
+my $cgi = new CGI;
+my $username = $cgi->param('username') || '';
+my $linkType = $cgi->param('linkType') || '';
+my @f_answers = ();
+my @f_questions = ();
+foreach ( $cgi->param ) {
+   if ( /^answer(\d+)$/ ) { $f_answers[$1] = lc $cgi->param($_) }
+   if ( /^question(\d+)$/ ) { $f_questions[$1] = $cgi->param($_) }
+}
+my $passwd1   = $cgi->param('passwd1');
+my $passwd2   = $cgi->param('passwd2');
+my $user_exists = 0;
+my @name       = ();
+
+my $mesg       = '';
+my $message    = $pw_rule_description;
+
+&head_Html();
+
+my $auth_ldap  = &auth_ldap_connect( $cust_lc )
+   or die "Cannot connect to LDAP!:$!\n";
+my $user_entry = &user_entry( $auth_ldap, $cust_lc, $username );
+if ( not defined $user_entry ) { 
+      &message_only_Html( qq(No user found: $username<BR><BR>Please enter a valid user in the User name field and click "Forgot Password" again.) );
+   exit;
+}
+my $l_questions = &getLDAPQuestions( $user_entry );
+#print STDERR Dumper( $l_questions );
+my $accountActivate = &accountActivate( $user_entry );
+if ( $accountActivate ) { $title = $accountActivateTitle }
+if ( not defined $l_questions ) { 
+      &message_only_Html( "No answers were found for the security questions for your Lawson username ($username).  Please call the $customer_name Help Desk at $customer_phone for assistance with resetting your password." );
+   exit;
+}
+
+# Process forms
+if ( not defined $passwd1 and $#f_answers < 0 ) { # Initial questions
+   $message = "";
+   my @l_questions = keys %$l_questions;
+   for ( my $i = $#l_questions; $i >= $num_questions_to_present; $i-- ) {
+      foreach ( 0..int( rand( $#l_questions + 1 ) ) ) {  # Shuffle
+         push @l_questions, shift @l_questions;
+      }
+      shift @l_questions;  # Pop one off
+   }
+   &pw_forgot_questions_Html(
+      $username, \@l_questions, \@f_answers, $title, $message
+   );
+} elsif ( not defined $passwd1 ) {  # Answers submitted
+   $message = "";
+   if ( &check_answers( \@f_questions, \@f_answers, $l_questions) ) {
+      $message = $pw_rule_description;
+      &pw_forgot_pw_change_Html( $username, \@f_questions, \@f_answers, $message );
+   } else {
+      $message="One or more answer(s) was incorrect.  Please check your answer(s) and resubmit.  If this error persists, please call the $customer_name Help Desk at $customer_phone.";
+      &pw_forgot_questions_Html(
+         $username, \@f_questions, \@f_answers, $title, $message
+      );
+   }
+   #  Process answers
+} else { # Password submitted (recheck answers for security)
+   if ( &check_answers( \@f_questions, \@f_answers, $l_questions) ) {
+      if ($passwd1 eq $passwd2) {
+         if ( length($passwd1) >= $pw_min_length and length($passwd1) <= $pw_max_length ) {
+            print STDERR "Numeric: ".&num_occurrences( $passwd1, '\d' ) . "\n";
+            print STDERR "Upper: ".&num_occurrences( $passwd1, '[A-Z]' ) . "\n";
+            if (
+               (&num_occurrences( $passwd1, '\d' )) >= $pw_min_numeric
+			   or  &num_occurrences( $passwd1, '[-_=?!$^().]' ) >= $pw_min_special
+               and &num_occurrences( $passwd1, '[A-Z]' ) >= $pw_min_upper
+            ){
+               if ( $passwd1 !~ /^\s+$/ ) { # All white space
+                  $user_entry->replace(
+                      #'userPassword' => &password_ssha($passwd1) #SSHA
+                      'userPassword' => &encryptPassword($passwd1) #CRYPT
+                  );
+                  if ( $accountActivate ) { $user_entry->delete( 'aspxpwforgot' ) }
+                  $mesg = $user_entry->update( $auth_ldap ) or die $mesg->error;                  $message = "Password has been changed successfully.Please wait one minute before using your new Lawson password.";
+                  &message_only_Html( $message );
+                  exit;
+               } else {
+                  $message = q(Password can not consist of only spaces.<br>)
+                     . $pw_rule_description;
+               }
+            } else {
+               $message = q(Password doesn't meet requirements.<br>)
+                  . $pw_rule_description;
+            }
+         }
+      } else {
+            $message = "Password mismatch. Please try again."
+      }
+      &pw_forgot_pw_change_Html( $username, \@f_questions, \@f_answers, $message );
+   } else {
+      $message="One or more answers is incorrect.  Please check your answers and resubmit.";
+      &pw_forgot_questions_Html(
+         $username, \@f_questions, \@f_answers, $title, $message
+      );
+   }
+}
+
+&tail_Html();
+$auth_ldap->unbind();
+
+exit 0;
+
+sub check_answers() {
+   my ( $f_questions, $f_answers, $l_questions ) = @_;
+   my $rv = 0;
+   foreach my $i ( 0..$#$f_answers ) {
+      if ( $$f_answers[$i] =~ /^(\d\d?)\/(\d\d?)\/(\d\d\d\d)$/ ) {  # date
+         $$f_answers[$i] = sprintf '%02s/%02s/%s', $1, $2, $3;
+      }
+      if ( &encryptCompare($$f_answers[$i], $$l_questions{$$f_questions[$i]}) ){
+         $rv = 1;
+      } else {
+         return 0;
+      }
+   }
+   return $rv;
+}
+
+sub encryptCompare() {
+   my ( $plain, $encrypt ) = @_;
+   if ( $encrypt =~ /^{(\w*)}(.*)/ ) {
+      my $type = $1;
+      my $hashed = $1;
+      if ( $type eq 'CRYPT' ) {
+         if ( crypt( $plain, $hashed ) eq $hashed ) { return 1 }
+      } elsif ( $type eq 'SSHA' ) {
+         if ( &encryptSSHA( $plain, $encrypt ) eq $encrypt ) { return 1 }
+      }
+   } else {
+      warn "Unknown encryption type in $encrypt";
+      return;
+   }
+   return 0;
+}
+
+sub getLDAPQuestions() {
+   my ( $user_entry ) = @_;
+   my @q = $user_entry->get_value( 'aspxpwforgot' ) or return;
+   my %questions;
+   foreach ( @q ) {
+      /^(.*):(.*)$/;
+      $questions{"$1"} = $2;
+   }
+   return \%questions;
+}
+
+sub accountActivate() {
+   my ( $user_entry ) = @_;
+   my $p = $user_entry->get_value( 'userPassword' ) or return 0;
+   if ( $p eq '{CRYPT}accountActivate' ) {
+      return 1;
+   }
+   return 0;
+}
+
+sub pw_forgot_questions_Html {
+   my ($username, $questions, $answers, $title, $message) = @_;
+   if ( not defined $message ) { $message = "" }
+   foreach my $i ( 0..$#$questions ) {
+      if ( not exists $$answers[$i] ) { $$answers[$i] = "" }
+   }
+   print <<EOF;
+</HEAD>
+<BODY>
+   <CENTER>
+      <FORM name="pw_forgot_frm" action="/aspx/pw_forgot.aspxcgi" method="post">
+         <input type="hidden" id="username" name="username" value="$username">
+EOF
+   foreach my $i ( 0..$#$questions ) {
+      print qq(<input type="hidden" id="question${i}" name="question${i}" value="$$questions[$i]">);
+   }
+   print <<EOF;
+      <TABLE>
+         <TR><TH colspan=2><BR><BR>$title<BR><BR></TH></TR>
+         <TR>
+            <TD><B>Userid:</B></TD>
+            <TD>$username</TD>
+         </TR>
+      </TABLE>
+      <TABLE>
+EOF
+   foreach my $i ( 0..$#$questions ) {
+      $$questions[$i] =~ s/:.*//;
+      print <<EOF;
+         <TR>
+            <TD><B>$$questions[$i]</B></TD>
+         </TR>
+         <TR>
+            <TD><B>Answer:</B><input type="text box" id="answer${i}" name="answer${i}" size="60" value="$$answers[$i]"></TD>
+         </TR>
+EOF
+   }
+   print <<EOF;
+         <TR><TD></TD></TR>
+         <TR>
+            <TD>
+               <CENTER>
+                <input type="submit" style="background-color: white; outline-color: blue" name="pw_change" value="Submit" onClick="return pwd_validator();">
+               </CENTER>
+            </TD>
+         </TR>
+      </TABLE>
+</FORM>
+<hr color:"#1569C7">
+<TABLE align="center"><TR><TD>$message</TD></TR></TABLE>
+</CENTER>
+EOF
+}
+
+sub message_only_Html() {
+   my ( $message ) = @_;
+   print <<EOF;
+</HEAD>
+<BODY>
+   <CENTER><TABLE align="center">
+      <TR><TH><BR><BR>$message</TH></TR>
+   </TABLE></CENTER>
+   <BR><BR>
+   <CENTER><FORM>
+      <INPUT TYPE="BUTTON" VALUE="Close Window" onClick="window.close(self)">
+   </FORM></CENTER>
+</BODY>
+</HTML>
+EOF
+}
+
+sub pw_forgot_pw_change_Html() {
+   my ($username, $questions, $answers, $message) = @_;
+   if ( not defined $message ) {
+      $message = "";
+   }
+   &pwCheckJavascript;
+   print <<EOF;
+</HEAD>
+<BODY>
+<center>
+<form name="pw_forgot_frm" action="/aspx/pw_forgot.aspxcgi" method="post">
+   <input type="hidden" id="username" name="username" value="$username">
+EOF
+   foreach my $i ( 0..$#$answers ) {
+      print qq(<input type="hidden" id="question${i}" name="question${i}" value="$$questions[$i]">);
+      print qq(<input type="hidden" id="answer${i}" name="answer${i}" value="$$answers[$i]">);
+   }
+   print <<EOF;
+<table>
+<tr><th colspan=2><BR><BR>Set Your Password<BR><BR></th></tr>
+<tr><td><b>Userid: $username</b></td></tr>
+<tr>
+   <td><b>New Password:</b></td> 
+   <td><input type="password" id="pwd1" name="passwd1" size="17" value=''></td>
+</tr>
+<tr>
+   <td><b>Confirm New Password:</b></td>
+   <td><input type="password" id="pwd2" name="passwd2" size="17" value=''></td>
+</tr>
+<tr>
+   <td>
+   </td>
+   <td>
+      <center>
+          <input type="submit" style="background-color: white; outline-color: blue" name="pw_forgot" value="Submit" onClick="return pwd_validator();">
+      </center>
+   </td>
+</tr>
+</table>
+</form>
+<hr color:"#1569C7">
+<table align="center"><tr><td>$message</td></tr></table>
+</center>
+EOF
+}
+
+sub head_Html{
+   my ( @with_js ) = @_;
+print <<EOF;
+<HTML>
+   <HEAD><TITLE>Forgot Password</TITLE>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="/sso/pwchange.css"/>
+EOF
+}
+
+sub tail_Html {
+print <<EOF;
+</body>
+</html>
+EOF
+}
+
+sub auth_ldap_connect()  {
+
+   my $cust_lc = shift;
+
+   my $adm_pw    = qx(/opt/aspx/bin/getsec ios ${cust_lc}adm);
+
+   #print "${cust_lc}adm $adm_pw<br>";
+
+   my $auth_ldap = undef;
+   my $mesg = undef;
+
+   eval {
+     $auth_ldap = Net::LDAP->new('ldapmaster', port=>'389') or die "invalid ladp repository";
+   };
+   # catch eval
+   if($@) {
+    print "$@";
+    exit;
+   }
+
+   $mesg = $auth_ldap->bind(
+      dn=>"uid=${cust_lc}adm,ou=people,dc=${cust_lc},dc=netaspx,dc=com", password=>$adm_pw );
+
+   if($mesg->code) {
+     print "Return Code: "  . $mesg->code . "<br>";
+     print "Error: "  . $mesg->error . "<br>";
+     exit;
+   }
+
+   if ( defined $auth_ldap ){
+      return $auth_ldap;
+   } else {
+      return 0;
+   }
+}
+
+sub user_entry() {
+   my ( $ldap,$cust_lc, $user ) = @_;
+   my $search = $ldap->search(
+      base => "uid=${user},ou=people,dc=${cust_lc},dc=netaspx,dc=com",
+      scope => "base",
+      filter => "(objectclass=*)",
+      attrs  => ['*']
+   );
+   return $search->entry(0); 
+}
+
+sub pwCheckJavascript() {
+print <<EOF;
+<script language="javascript" type="text/javascript">
+function pwd_validator() {
+   var pwd1 = document.pw_forgot_frm.passwd.value;
+   var pwd2 = document.pw_forgot_frm.passwd1.value;
+   var obj  = document.pw_forgot_frm.passwd;
+   var obj1 = document.pw_forgot_frm.passwd1;
+   if (pwd1 != pwd2){
+      alert("Passwords do not match. Please verify the passwords and Try Again. Thank You.");
+      obj.focus();
+      return false;
+   }
+   if (pwd1 != '' &&  pwd1 == pwd2){
+      if(pwd1.length >= 6 && pwd2.length <= 8){
+         var cnt = pwd1.match(/[0-9]/g);
+         if (cnt < 1){
+            alert ("Password should contain at least 1 numbers.");
+            document.pw_forgot_frm.passwd.value='';
+            pwd2='';
+            obj.focus();
+            return false;
+         }else{
+            return true;
+         }
+      }else{
+         alert("Password should have minimum 6 characters in length");
+         return false;
+      }
+   }
+}
+</script>
+EOF
+}
+
+sub num_occurrences() {
+   my ( $string, $regex ) = @_;
+   my $count = 0;
+   $count++ while eval $string =~ /$regex/g;  
+   return $count;
+}
+
+sub encryptSSHA() {
+   my ( $pass, $salt ) = @_;
+   my ($hashedPasswd);
+   if ( not $salt ) {
+      $salt = &genSalt(8);
+   } else {
+      $salt =~ s/^{SSHA}//;
+      if ( length $salt > 20 ) {
+         $salt = decode_base64($salt);
+         $salt = substr $salt,20;
+      }
+   }
+   my $ctx = Digest::SHA1->new;
+   $ctx->add($pass);
+   $ctx->add($salt);
+   $hashedPasswd = '{SSHA}' . encode_base64($ctx->digest . $salt,'');
+   return($hashedPasswd);
+}
+
+
+sub genSalt() {  # Good for CRYPT or SSHA
+   my ( $bytes ) = @_;
+   if ( not defined $bytes or $bytes < 1 ) { return }
+   my $salt = '';
+   foreach ( 1..$bytes ) {
+      $salt .= (0..9,'a'..'z','A'..'Z','/')[rand 63]; # '_','=' not for crypt
+   }
+   return($salt);
+}
+
+sub setLawEnv() {
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    set importanant lawson environment variables
+</pre>
+
+=end html
+
+=cut
+
+  use Cwd;
+  my $dir = getcwd;
+
+  my @dir = split(/\//,$dir);
+
+  #my $idx=0;
+  #foreach(@dir) {
+  #  print "$idx $_<br>";
+  #  $idx++;
+  #}
+
+  $ENV{LAWDIR} = "/" . $dir[1] . "/" . $dir[2] . "/" . $dir[3] . "/";
+  $ENV{LAWENVNAME} = $dir[2];
+
+}
+
+sub printEnv {
+
+=head2 printEnv()
+
+=begin html
+
+<pre>
+Author:     rnevinger
+Purpose:    reports ENV hash key/values to screen
+Returns:    html
+Revision:
+</pre>
+
+=end html
+
+=cut
+
+  foreach(sort (keys %ENV)) {
+    #print LOG "$_==>$ENV{$_}<br>\n";
+    print "$_==>$ENV{$_}<br>\n";
+  }
+
+}
+
+

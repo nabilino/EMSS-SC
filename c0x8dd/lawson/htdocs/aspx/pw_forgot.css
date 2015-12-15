@@ -1,0 +1,33 @@
+/*
+ * Author rnevinger
+ *
+*/
+
+
+a:hover {color:red;}   /* Mouse-over link */
+
+.pwForgotLink {
+  font-size:  8pt;
+  color: blue;
+  text-decoration:  none !important;
+}
+
+
+.button {
+	background-color: #6699CC;
+	font-family: Arial, Tahoma;
+	font-size: 10pt;
+	font-weight: bold;
+	color:  white;
+	text-align: center;
+	padding: 0px;
+	border-top:  1px solid  #C1CDCD;
+	border-right:  1px solid  #C1CDCD;
+	border-left:  1px solid  #C1CDCD;
+	border-bottom:  1px solid  black;
+	margin:  0px;
+	cursor:  pointer;
+	cursor:  hand;
+	height:  20;
+	top:  0;
+}

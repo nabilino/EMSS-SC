@@ -1,0 +1,510 @@
+#!/usr/local/bin/perl
+use strict;
+use warnings;
+
+# CONFIG
+# FinBin used to locate local; CPAN and custom modules by directory
+# directories must be space delimited
+use lib qw($FindBin::Bin . /opt/aspx/lib );
+
+use CGI ':standard';
+use CGI::Carp 'fatalsToBrowser';
+use Data::Dumper;
+use Digest::SHA1;
+use MIME::Base64;
+use Net::LDAP;
+
+our $DEBUG=0;
+print header;
+&setLawEnv;
+#&printEnv();
+
+############## CONFIG ################
+my $ldapServer = 'ldapmaster.msp.netaspx.com';
+my $pw_min_length = 8;
+my $pw_max_length = 8;
+my $pw_min_numeric = 1;
+my $pw_min_special = 1;
+my $pw_min_upper = 0;
+my $pw_min_lower = 0;
+#my $pw_rule_description = "Password must be a minimum of $pw_min_length characters in length";
+my $pw_rule_description = 
+  "Password must be $pw_max_length characters,"
+    . " including at least one number or -_=?!\$^().";
+
+######################################
+
+if ( not defined $ENV{LAWDIR} ) { $ENV{LAWDIR} = $ENV{DOCUMENT_ROOT} . '/..' }
+open STDERR, ">> $ENV{LAWDIR}/tmp/pw_change.log"
+   or die "Problem opening pw_change log";
+print STDERR '*****' . localtime() . "*****\n";
+if ( not defined $ENV{LAWENVNAME} ) {
+   $ENV{SERVER_NAME}=~ /^law(..)\.(....)/ or die 'Unable to determine ENV name';
+   $ENV{LAWENVNAME} = $2 . $1;
+}
+my $env_lc = lc $ENV{LAWENVNAME};
+my $cust_lc  = lc ( substr $env_lc,0,4 );
+my $env_uc     = uc $env_lc;
+my $cust_uc  = uc $cust_lc;
+
+my $cgi        = new CGI;
+print STDERR Dumper( $cgi->param );
+
+# initialize scalars to avoid uncesseary log error
+my $username     = undef;
+my $pwdstatus     = undef;
+my $curr_passwd   = undef;
+my $passwd1   = undef;
+my $passwd2   = undef;
+my $pw_change   = undef;
+my $pw_expired   = undef;
+
+
+$username     = $cgi->param('username') || '';
+$pwdstatus     = $cgi->param('pwdstatus') || '';
+if ( $username eq '' and exists $ENV{REMOTE_USER} ) {
+   $username = $ENV{REMOTE_USER};
+}
+$curr_passwd   = $cgi->param('curr_pwd');
+$passwd1   = $cgi->param('passwd1');
+$passwd2   = $cgi->param('passwd2');
+$pw_change   = $cgi->param('pw_change');
+$pw_expired   = $cgi->param('pw_change');
+
+my $user_exists= 0;
+my @name       = ();
+
+my $mesg       = '';
+my $message    = $pw_rule_description;
+my $expireStatus = '';
+
+my ($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = gmtime(time + (90 * 24 * 60 * 60));
+my $passwdExpTime = sprintf "%04d%02d%02d%02d%02d%02dZ", ($year+1900),($mon+1),$mday,$hour,$min,$sec;
+
+&head_Html();
+
+if ( $pw_change eq "Submit" ) {
+   if ($passwd1 ne $passwd2) {
+      $message = "The confirmation password does not match the new password.  Please try again.";
+      $passwd1 = '';
+      $passwd2 = '';
+   } elsif ( length($passwd1) < $pw_min_length or length($passwd1) > $pw_max_length ) {
+      $message = "Password should be $pw_min_length to $pw_max_length characters in length. Try again.";
+   } elsif (
+      #(&num_occurrences( $passwd1, '\d' )) < $pw_min_numeric
+      #or &num_occurrences( $passwd1, '[A-Z]' ) < $pw_min_upper
+            (&num_occurrences( $passwd1, '\d' )) < $pw_min_numeric
+         and  &num_occurrences( $passwd1, '[-_=?!$^().]' ) < $pw_min_special
+               #and &num_occurrences( $passwd1, '[A-Z]' ) >= $pw_min_upper
+   ) {
+      $message = q(<B>Password doesn't meet requirements.</B><br>) . $pw_rule_description;
+   } else {
+      my $ldap = Net::LDAP->new( $ldapServer ) or die "LDAP server unreachable";
+      my $authStatus = &authUser( $ldap, $cust_lc, $username, $curr_passwd );
+      if ( $authStatus eq 'ok' ) {
+         $mesg = $ldap->modify(
+            "uid=${username},ou=people,dc=${cust_lc},dc=netaspx,dc=com",
+            #replace => { userpassword => $passwd1, passwordExpirationTime => $passwdExpTime }
+            replace => { userpassword => $passwd1 }
+         );
+         if ( $mesg->code ) {
+            #if ($mesg->error eq 'password in history'){
+            #  $message = 'An error occurred trying to set the password: Password must be different then previous 2 passwords.';
+            #} else {
+              $message = 'An error occurred trying to set the password: ' . $mesg->error;
+            #}          
+         #   $message = 'An error occurred trying to set the password: ' . 'Invalid password';
+         } else {
+            &success_message_Html;
+            exit 0;
+         }
+     # } elsif ($authStatus eq 'password expired!') {  
+     #       my $expireStatus = &unexpireAccount($ldap, $cust_lc, $username) ;
+     #       if ( $expireStatus ne 'ok' )
+     #       {
+     #          $message = 'An error occurred trying to set the password by Admin (password expire): ' . $expireStatus;
+     #       } else {
+     #          &success_message_Html;
+     #          exit 0;
+        
+     #       }
+          
+      } else {
+         $message = "Password change attempt failed: " . $authStatus;
+         $curr_passwd = '';
+      }
+   }
+}
+
+&pw_change_Html( $username, $curr_passwd, $passwd1, $passwd2, $message );
+&tail_Html();
+
+exit 0;
+
+sub success_message_Html(){
+    $message = "Password has been successfully changed.Please wait one minute before using your new Lawson password.";
+    $curr_passwd = '';
+    $passwd1 = '';
+    $passwd2 = '';
+    &ASP_Logger("pw_change.aspxcgi","Change Password","$username password changed");
+    &message_only_Html( $message );
+}
+
+sub authUser  {
+   my ( $ldap, $cust, $user, $pw ) = @_;
+   my $mesg = $ldap->bind( dn=>"uid=${user},ou=People,dc=${cust},dc=netaspx,dc=com", password=>$pw );
+   if ( $mesg->code ) {
+         &LDAPerror( "Bind 1", $mesg );
+         return $mesg->error;
+   }
+   return 'ok';
+}
+
+sub unexpireAccount {
+   my ( $ldap, $cust, $user ) = @_;
+   $cust = lc $cust;
+   my $adminDN = "uid=${cust}adm,ou=People,dc=${cust},dc=netaspx,dc=com";
+   my $adminPW = qx(/opt/aspx/bin/getsec IOS ${cust}adm); chomp $adminPW;
+   my $admldap = Net::LDAP->new( 'ldapmaster' ) or return;
+   my $mesg = $admldap->bind( dn=>$adminDN, password=>$adminPW );
+   if ( $mesg->code ) { &LDAPerror( "${cust}adm bind", $mesg ); return; }
+   $mesg = $admldap->modify(
+      "uid=${user},ou=People,dc=${cust},dc=netaspx,dc=com",
+            replace => { userpassword => $passwd1 }
+      #replace => { passwordExpirationTime => $passwdExpTime }
+   );
+   $admldap->unbind;
+   if ( $mesg->code ) { &LDAPerror( "Expiration time modify", $mesg ); return $mesg; }
+   return "ok";
+}
+
+sub message_only_Html() {
+   my ( $message ) = @_;
+   print <<EOF;
+   <CENTER><TABLE align="center">
+      <TR><TH><BR><BR>$message</TH></TR>
+   </TABLE></CENTER>
+   <BR><BR>
+   <CENTER><FORM>
+      <INPUT TYPE="BUTTON" VALUE="Close Window" onClick="window.close(self);">
+   </FORM></CENTER>
+</BODY>
+</HTML>
+EOF
+}
+
+sub pw_change_Html {
+   my ($username, $curr_passwd, $passwd1, $passwd2, $message) = @_;
+   print <<EOF;
+<center>
+<form name="pw_change_frm" action="/aspx/pw_change.aspxcgi" method="post">
+<table>
+<tr><th colspan=2><BR><BR>Change Password<BR><BR></th></tr>
+<tr>
+   <td><b>Userid:</b></td>
+   <td><input type="text box" name="username" id="username" size=17 value="$username" readonly="readonly"></td>
+   <td><input type="hidden" name="pwdstatus" size=17 value="$pwdstatus"></td>
+</tr>
+<tr>
+   <td><b>Current Password:</b></td> 
+   <td><input type="password" id="curr_pwd" name="curr_pwd" size="17" value="$curr_passwd"></td>
+</tr>
+<tr>
+   <td><b>New Password:</b></td> 
+   <td><input type="password" id="pwd1" name="passwd1" size="17" value='$passwd1'></td>
+</tr>
+<tr>
+   <td><b>Confirm New Password:</b></td>
+   <td><input type="password" id="pwd2" name="passwd2" size="17" value='$passwd2'></td>
+</tr>
+<tr>
+   <td>
+   </td>
+   <td>
+      <center>
+          <input type="submit" style="background-color: white; outline-color: blue" name="pw_change" value="Submit" onClick="return pwd_validator();">
+      </center>
+   </td>
+</tr>
+</table>
+</form>
+<hr color:"#1569C7">
+<table align="center"><tr><td>$message</td></tr></table>
+</center>
+EOF
+}
+
+sub head_Html{
+print <<EOF;
+<html>
+   <head><title>Password Change</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="/sso/pwchange.css"/>
+<script src="/sso/sso.js"></script>
+<script src="/sso/localize.js"></script>
+<script language="javascript" type="text/javascript">
+EOF
+&javaScript();
+print <<EOF;
+</script>
+</head>
+<body onload="validateUserName();">
+EOF
+}
+
+sub tail_Html {
+print <<EOF;
+</body>
+</html>
+EOF
+}
+
+sub clear_Contents {
+   $username      = '';
+   $passwd1    = '';
+   $passwd2    = ''; 
+   @name        = ();
+   $user_exists = '';
+}
+
+sub javaScript {
+print <<EOF;
+window.onload = function() {
+   window.focus();
+   document.forms[0].curr_pwd.focus();
+}
+function pwd_validator() {
+   var pwd1 = document.pw_change_frm.passwd1;
+   var pwd2 = document.pw_change_frm.passwd2;
+   if (pwd1.value != pwd2.value){
+      alert("Passwords do not match. Please try again.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+   if (pwd1.value.length < $pw_min_length ) {
+      alert("Password should have a minimum $pw_min_length characters. Please pick a longer password.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+   if (pwd1.value.length > $pw_max_length ) {
+      alert("Password should have a maximum $pw_max_length characters. Please pick a shorter password.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+   //var ncnt = pwd1.value.match(/[0-9]/g);
+   var ncnt = pwd1.value.match(/[0-9]/g).length;
+   /*
+   if (cnt < $pw_min_numeric ){
+      alert ("Password should contain at least $pw_min_numeric number(s). Please pick a different password.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+   cnt = pwd1.value.match(/[A-Z]/g);
+   */
+   var scnt = pwd1.value.match(/[-_=?!$^().]/g);
+   /*
+   if (cnt < $pw_min_upper ){
+      alert ("Password should contain at least $pw_min_upper upper case letter(s). Please pick a different password.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+  */
+   if (ncnt < $pw_min_numeric && scnt < $pw_min_special ){
+      alert ("Password should contain at least $pw_min_numeric number(s) or $pw_min_special special -_=?!\$^(). characters. Please pick a different password.");
+      pwd1.value = "";
+      pwd2.value = "";
+      pwd1.focus();
+      return false;
+   }
+   return true;
+}
+function validateUserName() {
+
+  //alert("validateUserName()");
+  var username = document.getElementById("username").value;
+  if(username.length == 0) {
+
+    // define profile servlet
+    var profileServlet = "https://" + location.hostname + "/servlet/Profile";;
+    //alert(profileServlet);
+
+    // execute servlet
+    var profile = SSORequest(profileServlet);
+
+    // read xml attributes
+    var xmlNodes = profile.getElementsByTagName("ATTR");
+
+    for (var i=0; i<xmlNodes.length; i++) {
+
+     switch(xmlNodes[i].getAttribute("name")) {
+       case "id":
+         value = xmlNodes[i].getAttribute("value");
+         document.getElementById("username").value = value;
+       break;
+      }
+
+    }
+
+  }
+
+}
+
+EOF
+}
+
+sub num_occurrences() {
+   my ( $string, $regex ) = @_;
+   my $count = 0;
+   $count++ while eval $string =~ /$regex/g;  
+   return $count;
+}
+
+sub password_ssha {
+   my $pass=$_[0];
+   my ($hashedPasswd,$salt);
+   $salt = &get_salt8;
+   my $ctx = Digest::SHA1->new;
+   $ctx->add($pass);
+   $ctx->add($salt);
+   $hashedPasswd = '{SSHA}' . encode_base64($ctx->digest . $salt,'');
+   return($hashedPasswd);
+}
+
+sub get_salt8 {
+   my $salt = join '', ('a'..'z')[
+      rand 26,rand 26,rand 26,rand 26,rand 26,rand 26,rand 26,rand 26
+   ];
+   return($salt);
+}
+
+sub LDAPerror() {
+   my ($from, $mesg) = @_;
+   print STDERR "LDAP error from '$from':";
+   print STDERR "\n\tcode: ",       $mesg->code;
+   print STDERR "\n\terror_name: ", $mesg->error_name;
+   print STDERR "\n\terror_text:",   $mesg->error_text;
+   print STDERR "\n\tmesg_id: ",    $mesg->mesg_id;
+   print STDERR "\n\tdn: ",         $mesg->dn;
+   print STDERR "\n\terror:",       $mesg->error;
+   print STDERR "\n\n";
+}
+
+sub setLawEnv() {
+
+=begin html
+
+<pre>
+  Author:     Robert Nevinger
+  Date:  1.2014
+  Purpose:    set importanant lawson environment variables
+</pre>
+
+=end html
+
+=cut
+
+  use Cwd;
+  my $dir = getcwd;
+
+  my @dir = split(/\//,$dir);
+
+  #my $idx=0;
+  #foreach(@dir) {
+  #  print "$idx $_<br>";
+  #  $idx++;
+  #}
+
+  $ENV{LAWDIR} = "/" . $dir[1] . "/" . $dir[2] . "/" . $dir[3] . "/";
+  $ENV{LAWENVNAME} = $dir[2];
+
+}
+
+
+
+sub ASP_Logger {
+
+=head2 ASP_Logger()
+
+=begin html
+
+<pre>
+Author:     Siemens
+Purpose:    Log activity performed by the Velocity ASP scripts.
+Arguments:   Calling log, function, and description.
+Returns:    $LAWDIR/system/velasp.log
+Syntax:     $VelCommonLibObject->ASP_Logger();
+Revision:
+Siemens
+Note: After function was initially developed,
+it was decided to write all logs to the /$hhrr/$envir/apps/system/smsasp.log file.
+The $printlog parameter will continue to be passed, but will no longer be used (Charm #607).
+rnevinger remove length limit on printmsg.  losing SQL in log
+</pre>
+
+=end html
+
+=cut
+
+  my $printlog = lc(substr($_[0],0,3));
+  my $printfunc = substr($_[1],0,25);
+  #my $printmsg = substr($_[2],0,80);
+  my $utility  = $_[0];
+  my $printmsg = $_[2];
+
+  my @shortmonths = qw( Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+  my ( $sec, $min, $hr, $mday, $mon, $year, $wday, $yday, $isdst ) = localtime(time);
+  my $longyr = $year + 1900;
+  my $fixmo  = $mon + 1;
+  my $tz = $isdst == 1 ? "EDT" : "EST";
+
+  my $printtime = sprintf("%3s %02d %04d %02d:%02d:%02d $tz",  $shortmonths[$mon], $mday, $longyr, $hr, $min, $sec);
+  my $printuser = substr($ENV{'REMOTE_USER'},0,12);
+
+  my $hhrr = $ENV{'HHRR'};
+  my $envir = $ENV{'ENVIR'};
+
+  open(OUTF,">>/$ENV{LAWDIR}/tmp/velasp.log");
+  #flock(OUTF, LOCK_EX);
+  if($utility) {
+    printf OUTF "%-26s %-12s %-25s %-25s %-80s\n", $printtime,$printuser,$utility,$printfunc,$printmsg;
+  }
+   else {
+    printf OUTF "%-26s %-12s %-25s %-80s\n", $printtime,$printuser,$printfunc,$printmsg;
+  }
+  close(OUTF);
+
+}
+
+
+sub printEnv {
+
+=head2 printEnv()
+
+=begin html
+
+<pre>
+Author:     rnevinger
+Purpose:    reports ENV hash key/values to screen
+Returns:    html
+Revision:
+</pre>
+
+=end html
+
+=cut
+
+  foreach(sort (keys %ENV)) {
+    #print LOG "$_==>$ENV{$_}<br>\n";
+    print "$_==>$ENV{$_}<br>\n";
+  }
+
+}
