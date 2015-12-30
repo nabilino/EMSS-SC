@@ -1,0 +1,58 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+<head>
+<title>Lawson Standard Reports</title>
+
+<script src="/lawson/javascript/loganenv.js"></script>
+<SCRIPT LANGUAGE="JAVASCRIPT">
+
+function gainFocus()
+{
+        this.focus();
+}
+
+function add_CGIExt()
+{
+		var newloc = "/cgi-lawson/joblist"
+		if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+			newloc += CGIExt
+		newloc += "?"
+		window.joblist.location = newloc
+}
+
+LoadTimer = setTimeout("add_CGIExt()",3000)
+
+var theblank = (window.location.protocol=='http:')?"about:blank":"/lawson/dot.htm" //dpb 07-25-01
+var fram = ''
+	fram +='<FRAMESET COLS="20%,*" border=1>'
+	     + '<FRAMESET rows="50,*" name="jobset" border=0 onLoad="add_CGIExt()">'
+	     + '<FRAME SRC="/lawson/jobdef/jobhdr.htm" marginheight=0 marginwidth=0 scrolling=no bordersize=1 name="jobhdr">'
+		 + '<FRAME SRC="'+theblank+'"  name="joblist" bordersize=1 scrolling=auto>'
+		 + '</FRAMESET>'
+		 + '<FRAME SRC= maroon.htm name="jobschd" bordersize=1 scrolling=auto marginheight=0>'
+		 + '</FRAMESET>'
+
+window.document.write(fram)
+window.document.close()
+
+</SCRIPT>
+
+<!--
+<FRAMESET COLS="20%,*" border=1>
+        <FRAMESET rows="50,*" name="jobset" border=0 onLoad="add_CGIExt()">
+                <FRAME SRC="/lawson/jobdef/jobhdr.htm" marginheight=0 marginwidth=0 scrolling=no bordersize=1 name="jobhdr">
+                <FRAME SRC="about:blank" name="joblist" bordersize=1 scrolling=auto>
+        </FRAMESET>
+        <FRAME SRC=maroon.htm name="jobschd" bordersize=1 scrolling=auto marginheight=0>
+</FRAMESET>
+-->
+</head>
+<body onLoad="gainFocus()">
+</body>
+
+</html>

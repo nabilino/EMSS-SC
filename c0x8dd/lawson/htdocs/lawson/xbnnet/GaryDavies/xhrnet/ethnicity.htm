@@ -1,0 +1,374 @@
+<html>
+<head>
+<title>Ethnicity</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var updatetype = "";
+var EmpInfo = new Object();
+var EthnicityData;
+
+function OpenEthnicity()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitEthnicity()'|desiredEdit='EM'");
+}
+
+function InitEthnicity()
+{
+	stylePage();
+	document.title = getSeaPhrase("ETHNICITY","ESS");
+	setTaskHeader("header",getSeaPhrase("ETHNICITY","ESS"),"Personal");
+	StoreDateRoutines();
+	GetEmployee();
+}
+
+function GetEmployee()
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+
+	var dmeObj = new DMEObject(authUser.prodline, "paemployee");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.field = "employee.work-country;eeo-class;ethnicity.description";
+	dmeObj.key = parseInt(authUser.company,10) + "=" + parseInt(authUser.employee,10);
+	dmeObj.func = "GetEthnicityData()";
+	dmeObj.otmmax = "1";
+	dmeObj.max = "1";
+  	DME(dmeObj,"jsreturn");
+}
+
+function GetEthnicityData()
+{
+	EmpInfo = self.jsreturn.record[0];
+	EthnicityData = new Array();
+
+	if (!emssObjInstance.emssObj.filterSelect)
+	{
+		var dmeObj = new DMEObject(authUser.prodline,"HRCTRYCODE");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "ctcset1";
+			dmeObj.field = "hrctry-code;description";
+			dmeObj.key = "ET";
+			if (EmpInfo.employee_work_country)
+				dmeObj.key += "=" + EmpInfo.employee_work_country;
+			dmeObj.cond = "active";
+			dmeObj.max = "600";
+			dmeObj.func = "StoreEthnicityData()";
+		DME(dmeObj,"jsreturn");
+	}
+	else
+		DrawEthnicityScreen();
+}
+
+function StoreEthnicityData()
+{
+	EthnicityData = EthnicityData.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	EthnicityData = EthnicityData.sort(sortByDescription);
+	DrawEthnicityScreen();
+}
+
+function DrawEthnicitySelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+
+	for (var i=0; i<EthnicityData.length; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + EthnicityData[i].hrctry_code + "'";
+		if (EthnicityData[i].hrctry_code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + EthnicityData[i].description;
+	}
+
+	return codeselect.join("");
+}
+
+function DrawEthnicityScreen()
+{
+	var ethnicityCode = EmpInfo.eeo_class;
+
+	var sb = new Array();
+
+	sb[sb.length] = '<form name="ethnicityform">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+	+ '<tr><td class="plaintablerowheaderborderbottom" style="padding-top:5px">'+getSeaPhrase("ETHNICITY","ESS")+'</td>'
+	+ '<td class="plaintablecell" style="text-align:left:padding-top:5px" nowrap>';
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		sb[sb.length] = '<input type="text" name="ethnicity" id="ethnicity" class="inputbox" size="4" maxlength="4" '
+		+ 'value="' + ethnicityCode + '" onkeyup="parent.MAIN.document.getElementById(\'xlt_ethnicity\').innerHTML=\'\';"/>'
+		+ '<a href="" onclick="parent.openDmeFieldFilter(\'ethnicity\');return false">'
+		+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">'
+		+ '</a>'
+		+ '<span style="text-align:left;width:200px" class="fieldlabel" id="xlt_ethnicity">' + EmpInfo.ethnicity_description + '</span>';
+	}
+	else
+	{
+		sb[sb.length] = '<select name="ethnicity">'
+		+ DrawEthnicitySelect(ethnicityCode)
+		+ '</select>';
+	}
+
+	sb[sb.length] = '</td></tr>'
+	+ '<tr><td>&nbsp;</td><td class="plaintablecell">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessEthnicity();return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CancelEthnicity();return false","margin-top:10px")
+	+ '</td></tr>'
+	+ '</table>'
+	+ '</form>';
+
+	try
+	{
+		self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAILS","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = sb.join("");
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		document.getElementById("MAIN").style.visibility = "visible";
+		self.MAIN.document.forms["ethnicityform"].elements["ethnicity"].focus();
+	}
+	catch(e) {}
+	removeWaitAlert();
+}
+
+function CancelEthnicity()
+{
+	self.location = "/lawson/xhrnet/ui/logo.htm";
+}
+
+function ProcessEthnicity()
+{
+	var formObj = self.MAIN.document.forms["ethnicityform"];
+
+	for (var i=0; i<formObj.elements.length; i++)
+	{
+		if (NonSpace(formObj.elements[i].value) == 0)
+		{
+			formObj.elements[i].value = " ";
+		}	
+	}
+
+	var agsObj 			= new AGSObject(authUser.prodline, "HR11.1");
+	agsObj.event		= "CHANGE";
+	agsObj.rtn 			= "MESSAGE";
+	agsObj.longNames	= "ALL";
+	agsObj.tds 			= false;
+	agsObj.field 		= "FC=C"
+		  				+ "&EFFECT-DATE=" + formjsDate(fmttoday)
+	      				+ "&EMP-COMPANY=" + parseInt(authUser.company,10)
+		  				+ "&EMP-EMPLOYEE=" + parseInt(authUser.employee,10)
+		  				+ "&PEM-EEO-CLASS=" + escape(formObj.elements["ethnicity"].value,1)
+		  				+ "&XMIT-HREMP-BLOCK=1000000000"
+		  				+ "&XMIT-REQDED=1";
+	agsObj.func = "parent.DisplayMessage()";
+	agsObj.debug = false;
+	updatetype = "EEO";
+
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+
+	for (var i=0; i<formObj.elements.length; i++)
+	{
+		if (NonSpace(formObj.elements[i].value) == 0)
+		{
+			formObj.elements[i].value = "";
+		}	
+	}
+
+	AGS(agsObj,"jsreturn");
+}
+
+function DisplayMessage()
+{
+	removeWaitAlert();
+	var msg = self.lawheader.gmsg;
+	var msgnbr = parseInt(self.lawheader.gmsgnbr,10);
+
+	if (msgnbr != 0)
+	{
+		if (msgnbr == 50 || msgnbr == 141)
+		{
+			msg = getSeaPhrase("REQUIRE_ADDITIONAL_INFO_CONTACT_HR","ESS");
+		}
+		seaAlert(msg);
+	}
+	else
+	{
+		msg = getSeaPhrase("CHANGE_COMPLETE_NO_CONTINUE","ESS");
+		seaAlert(msg);
+		GetEmployee();
+	}
+}
+
+function sortByDescription(obj1, obj2)
+{
+	if (obj1.description < obj2.description)
+		return -1;
+	else if (obj1.description > obj2.description)
+		return 1;
+	else
+		return 0;
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			var keyStr = "ET";
+			if (EmpInfo && EmpInfo.employee_work_country)
+				keyStr += "=" + EmpInfo.employee_work_country;
+			dmeFilter.addFilterField("hrctry-code", 4, getSeaPhrase("ETHNICITY","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"hrctrycode",
+				"ctcset1",
+				"hrctry-code;description",
+				keyStr,
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+		var keyStr = "ET";
+		if (EmpInfo && EmpInfo.employee_work_country)
+			keyStr += "=" + EmpInfo.employee_work_country;
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"hrctrycode",
+			"ctcset1",
+			"hrctry-code;description",
+			keyStr,
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	var formDescElm;
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			formElm.value = selRec.hrctry_code;
+			try { self.MAIN.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description; } catch(e) {}
+			break;
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	}
+	catch(e)
+	{}
+	formElm.focus();
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	var fld = [self.MAIN, formElm];
+	return fld;
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px"  styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("ETHNICITY","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.hrctry_code) ? tmpObj.hrctry_code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		if (typeof(parent.removeWaitAlert) != "undefined")
+			parent.removeWaitAlert();
+		removeWaitAlert();
+	} catch(e) {}
+}
+/* Filter Select logic - end */
+</script>
+</head>
+<body onload="OpenEthnicity()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;height:300px;left:0px;top:32px;width:500px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" src="/lawson/xhrnet/errmsg.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/ethnicity.htm,v 1.1.2.9 2011/07/01 21:27:03 brentd Exp $ -->

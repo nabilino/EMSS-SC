@@ -1,0 +1,501 @@
+<html>
+<head>
+<title>Phone Book</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var company;
+var employee;
+var prodline;
+var first_name_str = " ";
+var last_name_str = " ";
+var process_level_str = " ";
+var process_level_index = 0;
+var ProcessLevels = new Array();
+var SearchRecs = new Array();
+var RECS_PER_PAGE = 200;
+var LASTNAME = false;
+var FIRSTNAME = false;
+var PROCLEVEL = false;
+var PATHFIND = false;
+var sortProperty;
+
+function OpenPhoneBook()
+{
+	clearTimeout(timer);
+	authenticate("frameNm='jsreturn'|funcNm='user=authUser;GetProcessLevels()'|desiredEdit='EM'");
+}
+
+function GetProcessLevels()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	document.title = getSeaPhrase("PHONE_BOOK","ESS");
+	setTaskHeader("header",getSeaPhrase("PHONE_BOOK","ESS"),"Employment");
+
+	company = user.company
+	employee = user.employee
+	prodline = user.prodline
+	ProcessLevels = new Array()
+
+	var dmeObj = new DMEObject(prodline, "prsystem")
+	dmeObj.out = "JAVASCRIPT"
+	dmeObj.index = "prsset1"
+	dmeObj.field = "process-level;name"
+	dmeObj.key = parseInt(company,10) + ""
+	dmeObj.cond = "active-pl"
+	dmeObj.func = "StoreProcessLevels()"
+	dmeObj.max = "600"
+	dmeObj.debug = false;
+	DME(dmeObj, "jsreturn")
+}
+
+function StoreProcessLevels()
+{
+	ProcessLevels = ProcessLevels.concat(self.jsreturn.record)
+
+	if (self.jsreturn.Next != "")
+		self.jsreturn.location.replace(self.jsreturn.Next)
+	else
+		GetSearchScreen()
+}
+
+function GetSearchScreen()
+{
+	process_level_str = (process_level_index)?process_level_str:" ";
+	var SearchForm = '<table id="criteriaTbl" border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="width:35%;text-align:right">'+getSeaPhrase("DEP_34","ESS")+'</td>'
+		+ '<td class="plaintablecell" style="width:65%" nowrap>'
+		+ '<input class="inputbox" type="text" id="FirstName" maxlength="15" value="'+first_name_str+'" onfocus="this.select()"></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="width:35%;text-align:right">'+getSeaPhrase("DEP_38","ESS")+'</td>'
+		+ '<td class="plaintablecell" style="width:65%" nowrap>'
+		+ '<input class="inputbox" type="text" id="LastName" maxlength="15" value="'+last_name_str+'" onfocus="this.select()"></td>'
+		+ '</tr>'
+	    + '<tr>'
+    	+ '<td class="plaintablerowheaderborderbottom" style="width:35%;text-align:right">'+getSeaPhrase("JOB_PROFILE_3","ESS")+'</td>'
+		+ '<td class="plaintablecell" style="width:65%" nowrap>'
+		+ '<select class="inputbox" id="Proc">'+BuildProcSelect(process_level_str)+'</select></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td>&nbsp;</td>'
+		+ '<td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("SEARCH","ESS"),"parent.LoadInfo();return false")
+	    + uiButton(getSeaPhrase("CLEAR","ESS"),"parent.ClearSearch();return false")
+		+ '</td>'
+		+ '</tr>'
+		+ '</table>'
+		+ '<div id="searchResults" class="dataDiv"></div>';
+
+	self.searchFrame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EMPLOYEE_SEARCH","ESS");
+	self.searchFrame.document.getElementById("paneBody").innerHTML = SearchForm;
+	self.searchFrame.stylePage();
+	fitToScreen();
+	self.document.getElementById("searchFrame").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function ClearSearch()
+{
+	first_name_str = " "
+	last_name_str = " "
+	process_level_str = " "
+	process_level_index = 0
+	self.searchFrame.document.getElementById("FirstName").value = " ";
+	self.searchFrame.document.getElementById("LastName").value = " ";
+	self.searchFrame.document.getElementById("Proc").selectedIndex = 0;
+	self.searchFrame.document.getElementById("searchResults").innerHTML = "";
+}
+
+function LoadInfo()
+{
+	var obj = self.searchFrame.document.getElementById("Proc");
+	process_level_index = obj.selectedIndex;
+	process_level_str = obj.options.item(process_level_index).value;
+	obj = self.searchFrame.document.getElementById("LastName");
+	obj.value = stripPadding(obj.value);
+	last_name_str = obj.value;
+	obj = self.searchFrame.document.getElementById("FirstName");
+	obj.value = stripPadding(obj.value);
+	first_name_str = obj.value;
+
+	LASTNAME = (NonSpace(last_name_str))?true:false;
+	FIRSTNAME = (NonSpace(first_name_str))?true:false;
+	PROCLEVEL = (NonSpace(process_level_str) || process_level_index)?true:false;
+	PATHFIND = (PROCLEVEL && (LASTNAME || !FIRSTNAME))?true:false;
+
+	clearRequiredField(self.searchFrame.document.getElementById("FirstName"));
+
+	if (!LASTNAME && !FIRSTNAME && !PROCLEVEL) {
+		setRequiredField(self.searchFrame.document.getElementById("FirstName"));
+    	seaAlert(getSeaPhrase("SEARCH_EMPLOYEE_NEED_INFO","ESS"))
+    	obj = self.searchFrame.document.getElementById("FirstName");
+    	obj.focus();
+    	obj.select();
+    	return;
+	} else {
+		DisplayExt();
+	}
+}
+
+function DisplayExt()
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	SearchRecs = new Array();
+	if (PATHFIND) {
+		var dmeObj = new DMEObject(prodline, "pathfind")
+		dmeObj.out = "JAVASCRIPT"
+		dmeObj.index = "ptfset5"
+		dmeObj.field = "employee.label-name-1;employee.last-name;department.name;"
+					+ "employee.email-address;location.description;pa-employee.wk-phone-nbr;"
+					+ "pa-employee.wk-phone-ext;pa-employee.wk-phone-cntry"
+		dmeObj.key = parseInt(company,10) + "=" + 14 + "=" + escape(process_level_str,1)
+		// perform case insensitive substring match rather than exact match
+		if (LASTNAME)
+			dmeObj.select = "last-name^~" + last_name_str;
+		if (FIRSTNAME) {
+			if (LASTNAME)
+				dmeObj.select += "&first-name^~" + first_name_str;
+			else
+				dmeObj.select = "first-name^~" + first_name_str;
+		}
+		dmeObj.cond = "act-employee"
+		dmeObj.max = RECS_PER_PAGE + ""
+		dmeObj.debug = false
+		dmeObj.func = "DspPhoneBook(true)"
+	} else if (PROCLEVEL && FIRSTNAME) {
+		var dmeObj = new DMEObject(prodline, "employee")
+		dmeObj.out = "JAVASCRIPT"
+		dmeObj.index = "empset7";
+		dmeObj.field = "label-name-1;last-name;department.name;"
+				      + "email-address;location.description;"
+					  + "paemployee.wk-phone-nbr;paemployee.wk-phone-ext;"
+					  + "paemployee.wk-phone-cntry"
+		dmeObj.key = parseInt(company,10) + "=" + escape(process_level_str,1)
+		dmeObj.select = "first-name^~" + first_name_str;
+		dmeObj.cond = "act-employee"
+		dmeObj.max = RECS_PER_PAGE + ""
+		dmeObj.debug = false
+		dmeObj.func = "DspPhoneBook(true)"
+	} else {
+		var dmeObj = new DMEObject(prodline, "employee")
+		dmeObj.out = "JAVASCRIPT"
+		dmeObj.index = "empset6";
+		dmeObj.field = "label-name-1;last-name;department.name;"
+				      + "email-address;location.description;"
+					  + "paemployee.wk-phone-nbr;paemployee.wk-phone-ext;"
+					  + "paemployee.wk-phone-cntry"
+		dmeObj.key = parseInt(company,10) + ""
+		if (FIRSTNAME && !LASTNAME)	{
+			dmeObj.select = "first-name^~" + first_name_str;
+		} else if (LASTNAME) {
+			dmeObj.select = "last-name^~" + last_name_str;
+			if (FIRSTNAME)
+				dmeObj.select += "&first-name^~" + first_name_str;
+		}
+		dmeObj.cond = "act-employee"
+		dmeObj.max = RECS_PER_PAGE + ""
+		dmeObj.debug = false
+		dmeObj.func = "DspPhoneBook(true)"
+	}
+	DME(dmeObj, "jsreturn")
+}
+
+function DspPhoneBook(storerecs,onsort,property)
+{
+	var searchResults = self.searchFrame.document.getElementById("searchResults");
+	searchResults.style.visibility = "hidden";
+	var html = "";
+	if (storerecs)
+		SearchRecs = self.jsreturn.record
+
+	if(SearchRecs.length == 0) {
+		html += '<p class="fieldlabelbold" style="text-align:center">'+getSeaPhrase("NO_MATCHES_FOUND","ESS")+'</p>'
+		html += '<div align="center" style="padding-top:5px;padding-bottom:5px">'
+		html += uiButton(getSeaPhrase("START_OVER","ESS"),"parent.ClearSearch();return false")
+		html += '</div>'
+	} else {
+		html += '<table id="phoneresultsTbl" class="plaintableborder" cellspacing="0" width="100%" styler="list">'
+		html += '<tr>'
+		html += '<th class="plaintableheaderborder" style="width:25%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">'
+		html += '<a class="columnsort" href="" target="HIDDEN" '
+		if (PATHFIND)
+			html += 'onclick="parent.SortEmployee(\'employee_last_name\');return false"'
+		else
+			html += 'onclick="parent.SortEmployee(\'last_name\');return false"'
+		html += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_LAST_NAME","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		html += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("NAME","ESS")
+		html += '</a>'
+		html += '</th>'
+		html += '<th class="plaintableheaderborder" style="width:25%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">'
+		html += '<a class="columnsort" href="" target="HIDDEN" onclick="parent.SortEmployee(\'department_name\');return false"'
+		html += ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_8","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		html += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("JOB_PROFILE_4","ESS")
+		html += '</a>'
+		html += '</th>'
+		html += '<th class="plaintableheaderborder" style="width:25%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">'
+		html += '<a class="columnsort" href="" target="HIDDEN" onclick="parent.SortEmployee(\'location_description\');return false"'
+		html += ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_10","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		html += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("JOB_PROFILE_6","ESS")
+		html += '</a>'
+		html += '</th>'
+		html += '<th class="plaintableheaderborder" style="width:12%">'+getSeaPhrase("PHONE","ESS")+'</th>'
+		html += '<th class="plaintableheaderborder" style="width:6%">'+getSeaPhrase("EXTENSION","ESS")+'</th>'
+		html += '<th class="plaintableheaderborder" style="width:6%">'+getSeaPhrase("PHONE_COUNTRY","ESS")+'</th>'
+		html += '</tr>'
+		html += GetPhoneTable(SearchRecs,PATHFIND)
+		html += '</table>'
+
+		html += '<div align="center" style="padding-top:5px;padding-bottom:5px">'
+		html += uiButton(getSeaPhrase("START_OVER","ESS"),"parent.ClearSearch();return false");
+	  	if (self.jsreturn.Prev != "") {
+			html += uiButton(getSeaPhrase("PREVIOUS","ESS"),
+				"parent.jsreturn.location.replace(parent.jsreturn.Prev);return false");
+		}
+		if (self.jsreturn.NbrRecs == parseInt(RECS_PER_PAGE,10) && self.jsreturn.Next != "") {
+			html += uiButton(getSeaPhrase("NEXT","ESS"),
+				"parent.jsreturn.location.replace(parent.jsreturn.Next);return false");
+		}
+		html += '</div>'
+	}
+
+	searchResults.innerHTML = uiTable(getSeaPhrase("RESULTS","ESS"), html);
+	self.searchFrame.stylePage();
+	if (searchResults.style.height == "")
+	{
+		fitToScreen();
+	}
+	if (onsort)
+	{
+		self.searchFrame.styleSortArrow("phoneresultsTbl", property);
+	}
+	searchResults.style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function GetPhoneTable(Records, FromPathfind)
+{
+	var PhoneTable = ''
+	if (FromPathfind) {
+		for (var i=0; i<Records.length; i++) {
+ 			var PhoneRec = Records[i]
+    		PhoneTable += '<tr>'
+			+ '<td class="plaintablecellborder" nowrap>'
+			if (NonSpace(PhoneRec.employee_email_address)>0) {
+				PhoneTable += '<a target="HIDDEN" href="mailto:' + PhoneRec.employee_email_address + '"'
+   				+ ' onmouseover="window.status=\''+getSeaPhrase("EMAIL_TO","ESS").replace(/\'/g,"\\'")+' '
+   				+ PhoneRec.employee_email_address
+   				+ '\';return true" onmouseout="window.status=\'\';return true">'
+   				+ PhoneRec.employee_label_name_1
+   				+ '</a>'
+   			}
+   			else {
+   				PhoneTable += PhoneRec.employee_label_name_1
+   			}
+   			PhoneTable += '</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.department_name + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.location_description + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.pa_employee_wk_phone_nbr + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.pa_employee_wk_phone_ext + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.pa_employee_wk_phone_cntry + '&nbsp;</td>'
+			+ '</tr>'
+  		}
+	} else {
+		for (var i=0; i<Records.length; i++) {
+ 			var PhoneRec = Records[i]
+    		PhoneTable += '<tr>'
+   			+ '<td class="plaintablecellborder" nowrap>'
+   			if (NonSpace(PhoneRec.email_address)>0) {
+   				PhoneTable += '<a target="HIDDEN" href="mailto:' + PhoneRec.email_address + '"'
+   				+ ' onmouseover="window.status=\''+getSeaPhrase("EMAIL_TO","ESS").replace(/\'/g,"\\'")+' '
+   				+ PhoneRec.email_address
+   				+ '\';return true" onmouseout="window.status=\'\';return true">'
+   				+  PhoneRec.label_name_1
+   				+ '&nbsp;</a>'
+   			}
+   			else {
+   				PhoneTable += PhoneRec.label_name_1
+   			}
+   			PhoneTable += '</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.department_name + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.location_description + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.paemployee_wk_phone_nbr + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.paemployee_wk_phone_ext + '&nbsp;</td>'
+			+ '<td class="plaintablecellborder" nowrap>' + PhoneRec.paemployee_wk_phone_cntry + '&nbsp;</td>'
+			+ '</tr>'
+  		}
+	}
+	return PhoneTable
+}
+
+function stripPadding(str)
+{
+	str = String(str);
+	var i=0;
+	while (str.charAt(i) == " ")
+	{
+		i++;
+	}
+	var j=str.length-1;
+	while (str.charAt(j) == " ")
+	{
+		j--;
+	}
+	return (str.substring(i,j+1));
+}
+
+function BuildProcSelect(code)
+{
+	var procselect = '<option value="">'
+	var pco = new Object();
+
+	for (var i=0; i<ProcessLevels.length; i++)
+	{
+		pco = ProcessLevels[i]
+        procselect += '<option value="' + pco.process_level + '"'
+
+		if (code == pco.process_level)
+		    procselect += ' selected>'
+		else
+		    procselect += '>'
+		procselect += pco.name
+	}
+
+	return procselect
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function SortEmployee(property)
+{
+	sortProperty = property;
+	SearchRecs.sort(sortByProperty);
+	DspPhoneBook(true,true,property);
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.searchFrame.onresize && self.searchFrame.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.searchFrame.onresize = null;
+	}
+
+	var searchFrame = document.getElementById("searchFrame");
+	var paneHeader = self.searchFrame.document.getElementById("paneHeader");
+	var paneBody = self.searchFrame.document.getElementById("paneBody");
+	var paneBodyBorder = self.searchFrame.document.getElementById("paneBodyBorder");
+	var paneBorder = self.searchFrame.document.getElementById("paneBorder");
+	var searchResults = self.searchFrame.document.getElementById("searchResults");
+	var criteriaTbl = self.searchFrame.document.getElementById("criteriaTbl");
+	var winHeight = 464;
+	var winWidth = 803;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentWidth = (window.styler && window.styler.showLDS) ? winWidth - 32 : winWidth - 15;
+
+	if (winHeight - 10 > 0)
+	{
+		searchFrame.style.width = (winWidth - 10) + "px";
+	}
+	if (winHeight - 57 > 0)
+	{
+		searchFrame.style.height = (winHeight - 57) + "px";
+		paneBorder.style.height = (winHeight - 57) + "px";
+	}
+	if (winHeight - 15 > 0)
+	{
+		paneBorder.style.width = (winWidth - 15) + "px";
+	}
+	if (winHeight - paneHeader.clientHeight - 67 > 0)
+	{
+		paneBodyBorder.style.height = (winHeight - paneHeader.clientHeight - 67) + "px";
+	}
+	if (winHeight - paneHeader.clientHeight - 72 > 0)
+	{
+		paneBody.style.height = (winHeight - paneHeader.clientHeight - 72) + "px";
+	}
+	searchResults.style.overflow = "visible";
+	if (contentWidth > 0)
+	{
+		paneBody.style.width = (contentWidth - 2) + "px";
+		paneBodyBorder.style.width = (contentWidth - 2) + "px";
+		if (searchResults)
+		{
+			searchResults.style.width = (contentWidth - 22) + "px";
+		}
+	}
+	if (searchResults && (winHeight - paneHeader.clientHeight - criteriaTbl.clientHeight - 82) > 0)
+	{
+		searchResults.style.height = (winHeight - paneHeader.clientHeight - criteriaTbl.clientHeight - 82) + "px";
+	}
+}
+
+var timer = setTimeout("OpenPhoneBook()",3000)
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenPhoneBook()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="searchFrame" name="searchFrame" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/phonebook.htm,v 1.12.2.15 2011/05/04 21:10:10 brentd Exp $ -->

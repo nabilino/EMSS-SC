@@ -1,0 +1,181 @@
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+BODY
+{
+    MARGIN: 0px;
+    COLOR: black;
+    FONT-FAMILY: Tahoma, Arial;
+    BACKGROUND-COLOR: white
+}
+.TABLE_TITLE
+{
+    PADDING-LEFT: 5px;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 10pt;
+    COLOR: black;
+    PADDING-TOP: 5px;
+    FONT-FAMILY: Tahoma, Arial;
+    HEIGHT: 25px;
+    BACKGROUND-COLOR: white;
+    TEXT-ALIGN: left;
+    FONT-VARIANT: small-caps
+}
+.TABLE_CELL
+{
+    BORDER-RIGHT: silver 1px;
+    BORDER-TOP: 1px;
+    VISIBILITY: visible;
+    PADDING-BOTTOM: 2px;
+    BORDER-LEFT: lightgrey 1px solid;
+    BORDER-BOTTOM: 1px
+}
+.TABLE_LABEL
+{
+    PADDING-RIGHT: 4px;
+    PADDING-LEFT: 4px;
+    FONT-WEIGHT: bold;
+    FONT-SIZE: 9pt;
+    VISIBILITY: visible;
+    OVERFLOW: hidden;
+    COLOR: black;
+    FONT-FAMILY: Tahoma, Arial
+    CURSOR: default
+}
+.TABLE_HEADER_TABLE
+{
+    BORDER-RIGHT: #6699cc 1px;
+    BORDER-TOP: #6699cc 1px solid;
+    VISIBILITY: visible;
+    MARGIN: 5px 5px 0px;
+    BORDER-LEFT: #6699cc 1px;
+    CURSOR: default;
+    BORDER-BOTTOM: gray 2px solid;
+    POSITION: relative
+}
+.TABLE_CONTENT_TABLE
+{
+    BORDER-RIGHT: #6699cc 1px;
+    BORDER-TOP: #6699cc 1px;
+    VISIBILITY: visible;
+    MARGIN: 0px 5px 5px;
+    BORDER-LEFT: #6699cc 1px;
+    BORDER-BOTTOM: #6699cc 1px solid;
+    POSITION: relative
+}
+.TABLE_SPLITBAR
+{
+    BORDER-RIGHT: #d4dff0 thin inset;
+    Z-INDEX: 2000;
+    WIDTH: 1px;
+    POSITION: absolute
+}
+.TABLE_CHECKBOX_SHOW
+{
+    VISIBILITY: visible;
+    CURSOR: hand;
+    TEXT-ALIGN: right
+}
+.TABLE_CHECKBOX_HIDE
+{
+    DISPLAY: none;
+    VISIBILITY: hidden;
+    TEXT-ALIGN: right
+}
+.TABLE_ROW
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    CURSOR: hand;
+    COLOR: black;
+    FONT-FAMILY: Arial, Helvetica, sans-serif;
+    HEIGHT: 20px
+}
+.TABLE_ROW_HIGHLIGHT
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    CURSOR: hand;
+    COLOR: black;
+    FONT-FAMILY: Tahoma, Arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: #d4dff0
+}
+.TABLE_ROW_SELECTED
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    CURSOR: hand;
+    COLOR: black;
+    FONT-FAMILY: Tahoma, Arial;
+    HEIGHT: 20px;
+    BACKGROUND-COLOR: lightgrey
+}
+.TABLE_ROW_HIDE
+{
+    DISPLAY: none;
+    VISIBILITY: hidden
+}
+.TABLE_CELL_HIDE
+{
+    DISPLAY: none;
+    VISIBILITY: hidden
+}
+.TABLE_DATA
+{
+    PADDING-RIGHT: 4px;
+    PADDING-LEFT: 4px;
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    VISIBILITY: visible;
+    OVERFLOW: hidden;
+    CURSOR: hand;
+    FONT-FAMILY: Tahoma, Arial
+}
+.TABLE_DATA_HIGHLIGHT
+{
+    FONT-WEIGHT: normal;
+    FONT-SIZE: 8pt;
+    OVERFLOW: hidden;
+    CURSOR: hand;
+    COLOR: blue;
+    FONT-STYLE: oblique;
+    FONT-FAMILY: Tahoma, Arial
+}
+.TABLE_ROW_SELECT_IMAGE_ON
+{
+    BACKGROUND-POSITION: left center;
+    BACKGROUND-IMAGE: url(../images/a4right.gif);
+    COLOR: white;
+    BACKGROUND-REPEAT: no-repeat;
+    BACKGROUND-COLOR: white
+}
+.TABLE_ROW_SELECT_IMAGE_OFF
+{
+    COLOR: white;
+    BACKGROUND-COLOR: white
+}
+.TABLE_CONTENT
+{
+    SCROLLBAR-FACE-COLOR: #6699cc;
+    SCROLLBAR-HIGHLIGHT-COLOR: #6699cc;
+    SCROLLBAR-ARROW-COLOR: white;
+    SCROLLBAR-TRACK-COLOR: #90afc0
+}

@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Applicant Certifications</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/xhrnet/statesuscan.js"></script>
+<script src="/lawson/xhrnet/qualifications.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var searchStr = (window.location.search)?unescape(window.location.search):"";
+var applicant = "0";
+var Empcodes = new Array();
+var Source = new Array();
+var Currency = new Array();
+var Certifications = new Array();
+var stateProvFilter = "state";
+
+if (searchStr)
+	applicant = getVarFromString("number",searchStr);
+
+function StartAppCertification()
+{
+	stylePage();
+	setWinTitle(getSeaPhrase("APPLICANT_CERTIFICATIONS","ESS"));
+	var nextFunc = function()
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+			GoToListScreen();
+		else
+			GetPcodesSelect(authUser.prodline,"SS","StorePcodes()","Active");
+	};
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function StorePcodes()
+{
+	Source = PcodesInfo;
+	CalledPcodesInfo = false;
+	PcodesInfo = new Array();
+	// Get the active record qualification list (look for web-available).
+	GetPcodesSelect(authUser.prodline,"CE","StoreMorePcodes()","Active","web-available=3");
+}
+
+function StoreMorePcodes()
+{
+	Certifications = PcodesInfo;
+	GetCurrencyList();
+}
+
+function GetCurrencyList()
+{
+	var dmeObj = new DMEObject(authUser.prodline, "CUCODES");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.field = "currency-code;description";
+	dmeObj.max = "600";
+	dmeObj.debug = false;
+	dmeObj.sortasc = "description";
+	dmeObj.func = "GetCurrencyList_Finished()";
+	DME(dmeObj,"jsreturn");
+}
+
+function GetCurrencyList_Finished()
+{
+	var dmeObj = new Object();
+	for (var i=0; i<self.jsreturn.NbrRecs; i++) 
+	{
+		dmeObj = self.jsreturn.record[i];
+		Currency[Currency.length] = new CodeDescObject(dmeObj.currency_code,dmeObj.description);
+	}
+	if (self.jsreturn.Next != "")
+		self.jsreturn.location.replace(self.jsreturn.Next)
+	else
+		GrabStates("GoToListScreen()");
+}
+
+function GoToListScreen(Refresh)
+{
+	Empcodes = new Array();
+  	var dmeObj = new DMEObject(authUser.prodline, "EMPCODES");
+   	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "epcset1";
+	dmeObj.field = "type;code;description;per-rating;date-acquired;renew-date;renewal-code;"
+	+ "renewal-code,xlt;skill-source;date-returned;seq-nbr;hr-code.description;skill-source.description;"
+	+ "verified-flag;state;lic-number;currency-code;cost;currency.description";
+	dmeObj.key = authUser.company+"=CE=1="+parseInt(applicant,10);
+	dmeObj.func = (Refresh)?"Empcodes_Finished(true)":"Empcodes_Finished(false)";
+	dmeObj.max = "600";
+   	DME(dmeObj, "jsreturn");
+}
+
+function sortByDescription(obj1, obj2)
+{
+	var name1 = obj1.hr_code_description;
+	var name2 = obj2.hr_code_description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function Empcodes_Finished(Refresh)
+{
+	Empcodes = Empcodes.concat(self.jsreturn.record);
+	if (self.jsreturn.Next != "")
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	else 
+	{
+		Empcodes.sort(sortByDescription);
+		CertificationListScreen(Refresh);
+	}
+}
+
+function CertificationListScreen(Refresh)
+{
+	// Clear the right-hand-side detail frame.
+	ClearDetailScreen();
+	// Draw the list body content.  This is the table of employee qualifications.
+	var CertificationContent = '<table id="quallist" border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+	for (var i=0; i<Empcodes.length; i++)
+	{
+		var tip = Empcodes[i].hr_code_description+' - '+getSeaPhrase("EDIT_DTL_FOR","SEA");
+		CertificationContent += '<tr><td style="text-align:left" nowrap><a href="javascript:;" onclick="parent.QualificationClicked('+i+');return false;" title="'+tip+'">'+Empcodes[i].hr_code_description.replace(/\'/g,"\\'")+'<span class="offscreen"> - '+getSeaPhrase("EDIT_DTL_FOR","SEA")+'</span></a></td></tr>'
+	}
+	CertificationContent += '</table><div style="width:100%;text-align:center">'
+	if (searchStr)
+	{
+		CertificationContent += uiButton(getSeaPhrase("ADD","ESS"),"parent.AddCertification();return false",false,"addbtn");
+		CertificationContent += uiButton(getSeaPhrase("BACK","ESS"),"parent.CloseCertifications();return false","margin-left:5px","closebtn");
+	}
+	else
+		CertificationContent += uiButton(getSeaPhrase("ADD","ESS"),"parent.AddCertification();return false",false,"addbtn");
+	CertificationContent += '</div>'
+	// Draw the list header content.  This is the "Competency" label.
+	self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INIT_APP_23","ESS");
+	self.left.document.getElementById("paneBody").style.overflow = "hidden";
+	if (Empcodes.length == 0)
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-left:10px;padding-top:10px">'+getSeaPhrase("QUAL_1","ESS")+'</div><p/>'+CertificationContent
+	else
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;position:relative;padding-left:10px;padding-top:10px">'+getSeaPhrase("QUAL_0","ESS")+'</div><p/><div style="padding-left:35px">'+CertificationContent+'</div>'
+	self.left.stylePage();
+	document.getElementById("left").style.visibility = "visible";
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]));
+	if (Refresh)
+		UpdateComplete();
+	fitToScreen();
+}
+
+function CloseCertifications()
+{
+	parent.backToLinks();
+}
+
+function AddCertification()
+{
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), DrawAddDetailContent);
+	else
+		DrawAddDetailContent();
+}
+
+function DrawAddDetailContent()
+{
+	var toolTip;
+	var CertificationContent = '<form name="qualificationform">'
+	+ '<input type="hidden" name="qualification" value="">'
+	+ '<input type="hidden" name="type" value="">'
+	+ '<input type="hidden" name="seqnbr" value="0">'
+	+ '<input type="hidden" name="applicant" value="'+parseInt(applicant,10)+'">'
+	+ '<input type="hidden" name="fc" value="A">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+	+ '<tr><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="code">'+getSeaPhrase("QUAL_4","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("certification");
+		CertificationContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="code" name="code" fieldnm="certification" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'certification\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'certification\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'+uiRequiredIcon()
+		+ '<span id="certificationDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CertificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="code" name="code" onchange="parent.FillQualification(this.form);">'+BuildSelect("",Certifications)+'</select>'+uiRequiredIcon()+'</td></tr>'
+	CertificationContent += '<tr><td class="fieldlabelboldlite"><label for="state">'+getSeaPhrase("QUAL_14","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("state");
+		CertificationContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="state" name="state" fieldnm="state" value="" size="2" maxlength="2" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'state\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'state\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="stateDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CertificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="state" name="state">'+BuildStateSelect("")+'</select></td></tr>'
+	CertificationContent += '<tr><td class="fieldlabelboldlite"><label for="licnumber">'+getSeaPhrase("QUAL_15","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="licnumber" name="licnumber" size="15" maxlength="20" value=""></td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+	CertificationContent += '<tr><td class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+	CertificationContent += '<tr><td class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_12","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect("")+'</select></td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("skillsource");
+		CertificationContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="skillsourceDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CertificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect("",Source)+'</select></td></tr>'
+	//+ '<tr><td class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo("")+'</select></td></tr>'
+	CertificationContent += '<tr><td class="fieldlabelboldlite"><label for="cost">'+getSeaPhrase("COST","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="cost" name="cost" value="" size="14" maxlength="14"></td></tr>'
+	+ '<tr><td class="fieldlabelboldliteunderline"><label for="currencycode">'+getSeaPhrase("QUAL_16","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("currencycode");
+		CertificationContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="currencycode" name="currencycode" fieldnm="currencycode" value="" size="5" maxlength="5" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'currencycode\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'currencycode\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="currencycodeDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CertificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="currencycode" name="currencycode">'+BuildSelect("",Currency)+'</select></td></tr>'
+	CertificationContent += '<tr><td>&nbsp;</td><td class="plaintablecellleft">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick(-1,\'A\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-left:5px")
+	+ '</td></tr></table></form>'
+	// Draw the detail header content.  This is the "Certification Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = CertificationContent;
+	self.right.stylePage();
+	document.getElementById("right").style.visibility = "visible";
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	HideListButtons();
+	fitToScreen();
+}
+
+function QualificationClicked(Index)
+{
+	var qualTbl = self.left.document.getElementById("quallist");
+	for (var i=0; i<qualTbl.rows.length; i++)
+	{
+		if (i == Index)
+			qualTbl.rows[i].className = "tablerowhighlight";
+		else
+			qualTbl.rows[i].className = "";
+	}
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){DrawCertDetailScreen(Index);});
+	else
+		DrawCertDetailScreen(Index);
+}
+
+function DrawCertDetailScreen(Index)
+{
+	var toolTip;
+	var crtObj = Empcodes[Index];
+	var CertificationHtml = '<form name="qualificationform">'
+   	+ '<input type="hidden" name="code" value="'+crtObj.code+'">'
+	+ '<input type="hidden" name="type" value="'+crtObj.type+'">'
+	+ '<input type="hidden" name="seqnbr" value="'+parseInt(crtObj.seq_nbr,10)+'">'
+	+ '<input type="hidden" name="applicant" value="'+parseInt(applicant,10)+'">'
+	+ '<input type="hidden" name="fc" value="C">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_93","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("QUAL_28","ESS")+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="fieldlabel" style="text-align:left" nowrap>'+crtObj.hr_code_description+'</td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="state">'+getSeaPhrase("QUAL_14","ESS")+'</label></th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("state");
+		CertificationHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="state" name="state" fieldnm="state" value="'+crtObj.state+'" size="2" maxlength="2" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'state\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'state\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="stateDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CertificationHtml += '<td class="plaintablecell" nowrap><select class="inputbox" id="state" name="state">'+BuildStateSelect(crtObj.state)+'</select></td></tr>'
+	CertificationHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label for="licnumber">'+getSeaPhrase("QUAL_15","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="licnumber" name="licnumber" size="15" maxlength="20" value="'+crtObj.lic_number+'"></td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+	CertificationHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="'+crtObj.date_acquired+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+	CertificationHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_12","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="'+crtObj.renew_date+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect(crtObj.renewal_code)+'</select></td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("skillsource");
+		CertificationHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="'+crtObj.skill_source+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="skillsourceDesc" style="text-align:left;width:200px" class="fieldlabel">'+crtObj.skill_source_description+'</span></td></tr>'
+	}
+	else
+		CertificationHtml += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect(crtObj.skill_source,Source)+'</select></td></tr>'
+	//+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo(crtObj.co_sponsored)+'</select></td></tr>'
+	CertificationHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label for="cost">'+getSeaPhrase("COST","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="cost" name="cost" size="14" maxlength="14" value="'+parseFloat(crtObj.cost)+'"></td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldliteunderline"><label for="currencycode">'+getSeaPhrase("QUAL_16","ESS")+'</label></th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("currencycode");
+		CertificationHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="currencycode" name="currencycode" fieldnm="currencycode" value="'+crtObj.currency_code+'" size="5" maxlength="5" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'currencycode\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'currencycode\')" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="currencycodeDesc" style="text-align:left;width:200px" class="fieldlabel">'+crtObj.currency_description+'</span></td></tr>'
+	}
+	else
+		CertificationHtml += '<td class="plaintablecell" nowrap><select class="inputbox" id="currencycode" name="currencycode">'+BuildSelect(crtObj.currency_code,Currency)+'</select></td></tr>'
+	CertificationHtml += '<tr><th scope="row">&nbsp;</th><td class="plaintablecellleft">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick("+Index+",\'C\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-left:5px")
+	+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteQualification_OnClick("+Index+");return false","margin-top:10px;margin-left:15px")
+	+ '</td></tr></table></form>'
+	// Draw the detail header content.  This is the "Competency Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = CertificationHtml;
+	self.right.stylePage();
+	document.getElementById("right").style.visibility = "visible";
+	HideListButtons();
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	fitToScreen();
+}
+
+function UpdateQualification_OnClick(Index, fc)
+{	
+	var qualForm = self.right.document.qualificationform;
+	clearRequiredField(qualForm.dateacquired);
+	clearRequiredField(qualForm.renewdate);
+	if (typeof(qualForm.datereturned) != "undefined" && qualForm.datereturned != null)
+		clearRequiredField(qualForm.datereturned);
+	if (typeof(qualForm.qualification) != "undefined" && qualForm.qualification != null) // Edits for "Add" screen
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			clearRequiredField(qualForm.code);
+			if (NonSpace(qualForm.code.value) == 0)
+			{
+				setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+				return;
+			}
+		}
+		else
+		{
+			clearRequiredField(self.right.document.getElementById("code"));
+			if (qualForm.code.selectedIndex == 0)
+			{
+				setRequiredField(self.right.document.getElementById("code"), getSeaPhrase("QUAL_33","ESS"), qualForm.code);
+				return;
+			}
+		}
+	}
+	else // Edits for "Update" screen
+	{
+		clearRequiredField(qualForm.code);
+		if (NonSpace(qualForm.code.value) == 0)
+		{
+			setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+			return;
+		}
+	}
+	if (NonSpace(qualForm.dateacquired.value) && !ValidDate(qualForm.dateacquired))
+		return;
+	if (NonSpace(qualForm.renewdate.value) && !ValidDate(qualForm.renewdate))
+		return;
+	if (typeof(qualForm.datereturned) != "undefined" && qualForm.datereturned != null && NonSpace(qualForm.datereturned.value) && !ValidDate(qualForm.datereturned))
+		return;
+	// Update this certification record.
+	var nextFunc = function() { Do_Crt_Call(qualForm, "PA36.1", fc, false, false, true, false); };
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function Do_PA36_1_Crt_Call_Finished()
+{
+	DisplayMessage();
+}
+
+function DeleteQualification_OnClick(Index)
+{
+	var crtObj = Empcodes[Index];
+	crtObj.fc = "D";
+	crtObj.applicant = parseInt(applicant,10);
+	// Delete this certification record.
+	var nextFunc = function() { Do_Crt_Call(crtObj, "PA36.1", "D", "file", false, true, false); };
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function HideListButtons()
+{
+	try 
+	{
+		self.left.document.getElementById("addbtn").style.visibility = "hidden";
+		self.left.document.getElementById("closebtn").style.visibility = "hidden";
+	}
+	catch(e) {}
+}
+
+function ShowListButtons()
+{
+	try 
+	{
+		self.left.document.getElementById("addbtn").style.visibility = "visible";
+		self.left.document.getElementById("closebtn").style.visibility = "visible";
+	}
+	catch(e) {}
+}
+
+function ClearDetailScreen()
+{
+	document.getElementById("right").style.visibility = "hidden";
+	try 
+	{
+		var qualTbl = self.left.document.getElementById("quallist");
+		for (var i=0; i<qualTbl.rows.length; i++)
+			qualTbl.rows[i].className = "";
+	}
+	catch(e) {}
+	ShowListButtons();
+}
+
+function DisplayMessage()
+{
+	var msgnbr = parseInt(self.lawheader.gmsgnbr);
+   	if (msgnbr == 0)
+      	GoToListScreen(true);
+   	else
+   	{
+   		if (searchStr)
+   			parent.removeWaitAlert();		
+   		parent.seaAlert(self.lawheader.gmsg, null, null, "error");
+   	}	
+}
+
+function FillQualification(formobj)
+{
+	if (typeof(formobj.qualification) != "undefined" && formobj.qualification != null)  // Store new certification info for "Add" screen
+	{
+		clearRequiredField(formobj.code);
+		if (formobj.code.selectedIndex == 0) 
+		{
+			setRequiredField(formobj.code, getSeaPhrase("SELECT_CERTIFICATION","ESS"));
+			return;
+		}
+		formobj.qualification.value = Certifications[formobj.code.selectedIndex-1].description;
+		formobj.type.value = Certifications[formobj.code.selectedIndex-1].type;
+	}
+	else // Fill new competency info for "Change" screen
+	{
+		clearRequiredField(formobj.codes);
+		if (formobj.codes.selectedIndex == 0) 
+		{
+			setRequiredField(formobj.codes, getSeaPhrase("SELECT_CERTIFICATION","ESS"));
+			return;
+		}
+		formobj.code.value = Certifications[formobj.codes.selectedIndex-1].code;
+		formobj.type.value = Certifications[formobj.codes.selectedIndex-1].type;
+	}
+}
+
+function ReturnDate(dte)
+{
+	self.right.document.forms["qualificationform"].elements[date_fld_name].value = dte;
+}
+
+function UpdateComplete()
+{
+	parent.seaPageMessage(getSeaPhrase("UPDATE_COMPLETE","ESS"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+}
+
+function LoadAppCertification()
+{
+   	authenticate("frameNm='jsreturn'|funcNm='StartAppCertification()'|desiredEdit='EM'");
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnChange(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "state": // state/province
+		case "province":
+			var filterForm = dmeFilter.getFilterForm();
+			var selObj = filterForm.elements["filterField"];
+			var filterField = selObj.options[selObj.selectedIndex].value;
+			if ((filterField == "state") || (filterField == "province")) 
+			{
+				stateProvFilter = filterField;
+				filterForm.elements["filterBtn"].onclick();
+			}
+		break;
+	}
+}
+
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "certification":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_4","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"CE",
+				"act-web-cert",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "skillsource":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_6","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"SS",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "state":
+			dmeFilter.addFilterField("state", 2, getSeaPhrase("STATE_ONLY","ESS"), true);
+			dmeFilter.addFilterField("province", 2, getSeaPhrase("PROVINCE","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "currencycode":
+			dmeFilter.addFilterField("currency-code", 5, getSeaPhrase("QUAL_16","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cucodes",
+				"cucset1",
+				"currency-code;description",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "certification":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"CE",
+			"act-web-cert",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "skillsource":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"SS",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "state":
+		if (stateProvFilter == "state") 
+		{
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		} 
+		else 
+		{
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prprovince",
+				"ppvset1",
+				"province;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		}
+		break;
+		case "currencycode":
+			dmeFilter.addFilterField("currency-code", 5, getSeaPhrase("QUAL_16","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cucodes",
+				"cucset1",
+				"currency-code;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm;
+	switch (fieldNm.toLowerCase())
+	{
+		case "certification":
+			formElm = self.right.document.qualificationform.qualification;
+			self.right.document.qualificationform.code.value = selRec.code;
+			self.right.document.qualificationform.qualification.value = selRec.description;
+			self.right.document.getElementById("certificationDesc").innerHTML = selRec.description;
+			break;
+		case "skillsource":
+			formElm = self.right.document.qualificationform.skillsource;
+			self.right.document.qualificationform.skillsource.value = selRec.code;
+			self.right.document.getElementById("skillsourceDesc").innerHTML = selRec.description;
+			break;
+		case "state":
+			formElm = self.right.document.qualificationform.state;
+			if (stateProvFilter == "state")
+				self.right.document.qualificationform.state.value = selRec.state;
+			else
+				self.right.document.qualificationform.state.value = selRec.province;
+			self.right.document.getElementById("stateDesc").innerHTML = selRec.description;
+			break;
+		case "currencycode":
+			formElm = self.right.document.qualificationform.currencycode;
+			self.right.document.qualificationform.currencycode.value = selRec.currency_code;
+			self.right.document.getElementById("currencycodeDesc").innerHTML = selRec.description;
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var fld = [null, null, null];
+	try
+	{
+		switch (fieldNm.toLowerCase())
+		{
+			case "certification":
+				fld = [self.right, self.right.document.qualificationform.code, getSeaPhrase("QUAL_4","ESS")];
+				break;
+			case "skillsource":
+				fld = [self.right, self.right.document.qualificationform.skillsource, getSeaPhrase("QUAL_6","ESS")];
+				break;
+			case "state":
+				fld = [self.right, self.right.document.qualificationform.state, getSeaPhrase("STATE_ONLY","ESS")];
+				break;
+			case "currencycode":
+				fld = [self.right, self.right.document.qualificationform.currencycode, getSeaPhrase("QUAL_16","ESS")];
+				break;
+			default: break;
+		}
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	switch (fieldNm.toLowerCase())
+	{
+		case "certification":
+			self.right.document.qualificationform.code.value = "";
+			self.right.document.qualificationform.qualification.value = "";
+			self.right.document.getElementById("certificationDesc").innerHTML = "";
+			break;
+		case "skillsource":
+			self.right.document.qualificationform.skillsource.value = "";
+			self.right.document.getElementById("skillsourceDesc").innerHTML = "";
+			break;
+		case "state":
+			self.right.document.qualificationform.state.value = "";
+			self.right.document.getElementById("stateDesc").innerHTML = "";
+			break;
+		case "currencycode":
+			self.right.document.qualificationform.currencycode.value = "";
+			self.right.document.getElementById("currencycodeDesc").innerHTML = "";
+			break;
+		default: break;
+	}	
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm)
+	{
+		case "certification":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_4","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "skillsource":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_6","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "state":
+			if (stateProvFilter == "state") 
+			{
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+				selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+				selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("STATE_ONLY","ESS")+'</th>'
+				selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.state) ? tmpObj.state : '&nbsp;'
+					selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</a></td></tr>'
+				}
+			} 
+			else 
+			{
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+				selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+				selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("PROVINCE","ESS")+'</th>'
+				selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.province) ? tmpObj.province : '&nbsp;'
+					selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</a></td></tr>'
+				}
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "currencycode":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_16","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.currency_code) ? tmpObj.currency_code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.50) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;				
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	leftFrame.style.width = parseInt(winWidth*.50) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.left.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.left.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+	rightFrame.style.left = parseInt(winWidth*.50) + "px";
+	rightFrame.style.width = parseInt(winWidth*.50) + "px";
+	rightFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.right.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.right.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="LoadAppCertification()" onresize="fitToScreen()">
+	<iframe id="left" name="left" title="Main Content" level="2" tabindex="0" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:0px;height:464px;left:0%;width:375px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" title="Secondary Content" level="3" tabindex="0" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;top:0px;height:464px;left:375px;width:410px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/applicantcert.htm,v 1.9.2.64.2.1 2014/03/26 13:33:16 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

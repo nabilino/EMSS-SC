@@ -1,0 +1,124 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/preferences/DrillTab.htm,v 1.2.2.2.4.1.14.1.2.3 2012/08/08 12:37:27 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<!-- the drill tab HTML -->
+<table border="0" width="95%" cellpadding="0" cellspacing="8" style="margin:10px;">
+	<tr>
+		<td colspan="4">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblDrillRecords" class="xTLabelForm" 
+					style="position:relative;text-align:left;">Number of records to get
+			</label>
+	    </td>
+		<td>&nbsp;</td>
+		<td>
+			<label id="lblDrillNewWindow" for="txtDrillNewWindow" class="xTLabelForm" 
+					style="position:relative;text-align:left;">Open in new window
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" width="100px">
+			<label id="lblDrillExplorer" for="selExplorerRecs" class="xTLabel" 
+					style="position:relative;">Drill Explorer
+			</label>
+		</td>
+		<td align="left" width="100px">
+			<select id="selExplorerRecs" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabDrill'].onSelectionChange(this)"></select>
+		</td>
+		<td width="50px">&nbsp;</td>
+		<td align="left">
+			<input type="checkbox" id="cbxDrillOpen"
+				onclick="window.tabMgr.tabs['tabDrill'].onClickCbx(event,this)">
+			</input>
+			<label id="lblDrillExplorer2" for="cbxDrillOpen" class="xTLabel" 
+					style="position:relative;">Drill Explorer
+			</label>
+		</td>
+	<tr>
+		<td align="right">
+			<label id="lblSelect" for="selSelectRecs" class="xTLabel" 
+					style="position:relative;">Select
+			</label>
+		</td>
+		<td align="left">
+			<select id="selSelectRecs" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabDrill'].onSelectionChange(this)"></select>
+		</td>
+		<td>&nbsp;</td>
+		<td align="left">
+			<input type="checkbox" id="cbxSelectOpen"
+				onclick="window.tabMgr.tabs['tabDrill'].onClickCbx(event,this)">
+			</input>
+			<label id="lblSelect2" for="cbxSelectOpen" class="xTLabel" 
+					style="position:relative;">Select
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label id="lblList" for="selListRecs" class="xTLabel" 
+					style="position:relative;">List
+			</label>
+		</td>
+		<td align="left">
+			<select id="selListRecs" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabDrill'].onSelectionChange(this)"></select>
+		</td>
+		<td>&nbsp;</td>
+		<td align="left">
+			<input type="checkbox" id="cbxAttachOpen"
+				onclick="window.tabMgr.tabs['tabDrill'].onClickCbx(event,this)">
+			</input>
+			<label id="lblAttachments" for="cbxAttachOpen" class="xTLabel" 
+					style="position:relative;">Attachments
+			</label>
+		</td>
+	</tr>
+	<tr>&nbsp;</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblOtherOptions" for="txtOtherOptions" class="xTLabelForm" 
+					style="position:relative;text-align:left;">Other Options
+			</label>
+		</td>		
+	</tr>
+	
+	<tr>
+		<td align="right" width="100px">
+			<label id="lblOtherOptions" for="selOtherOptions" class="xTLabel" 
+					style="position:relative;">Search Option
+			</label>
+		</td>
+		<td align="left" width="100px">
+			<select id="selOtherOptions" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabDrill'].onSelectionChange(this)">
+			</select>
+		</td>
+	<tr>
+
+</table>

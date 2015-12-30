@@ -1,0 +1,53 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+var head=""
+var bod=""
+var flexflag=0
+var empflag=0
+var compflag=0
+
+function startProgram()
+{
+	var html = "";
+	html += parent.header()
+
+	html += '<p>'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.setBenefit();return false","margin-top:10px")
+	html += uiButton(getSeaPhrase("CANCEL","BEN"),"parent.parent.document.getElementById('main').src='"+parent.parent.baseurl+"availplans.htm';return false","margin-top:10px")
+	html += '</p>'
+
+	parent.parent.removeWaitAlert();
+	if (typeof(parent.parent.parent.removeWaitAlert) != "undefined") {
+		parent.parent.parent.removeWaitAlert();
+	}
+	document.getElementById("paneBody").innerHTML = html
+	document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8]+'</span>';
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_12.htm,v 1.11.2.8 2009/04/09 15:09:34 brentd Exp $ -->

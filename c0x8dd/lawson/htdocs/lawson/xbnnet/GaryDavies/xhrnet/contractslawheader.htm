@@ -1,0 +1,300 @@
+<html>
+<head>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script>
+var allContractRecords;
+var baseContractRecords;
+var suppContractRecords;
+var contractBalances;
+var contractYear;
+var functionCode;
+var rowNbr;
+var colNbr;
+
+function ContractObject(year)
+{
+	this.contractYear = (year) ? year : null;
+	this.position = null;
+	this.positionDescription = null;
+	this.workSchedule = null;
+	this.assignmentType = null;
+	this.assignmentPayCode = null;
+}
+
+function ContractBalancesObject()
+{
+	this.ytdPaidWages = null;
+	this.ytdPaidUnits = null;
+	this.ytdDockedWages = null;
+	this.ytdDockedUnits = null;
+	this.remainingWageBalance = null;
+	this.remainingUnitBalance = null;
+	this.reserveWageBalance = null;
+	this.reserveUnitBalance = null;
+	this.unitsWorked = null;
+	this.unitsRemain = null;
+}
+
+function init(initBalances)
+{
+	if (initBalances)
+	{
+		contractYear = null;
+		allContractRecords = new Array();
+		baseContractRecords = new Array();
+		suppContractRecords = new Array();
+	}
+
+	contractBalances = new ContractBalancesObject();
+	functionCode = null;
+}
+
+function mergeContractRecords()
+{
+	var len1 = (typeof(baseContractRecords) != "undefined") ? baseContractRecords.length : 0;
+	var len2 = (typeof(suppContractRecords) != "undefined") ? suppContractRecords.length : 0;
+	var len3;
+	var rowObj, colObj;
+	var i, j;
+
+	allContractRecords = new Array();
+
+	for (var i=0; i<len1; i++)
+	{
+		rowObj = baseContractRecords[i];
+		len3 = (typeof(rowObj) != "undefined") ? rowObj.length : 0;
+
+		for (var j=0; j<len3; j++)
+		{
+			colObj = rowObj[j];
+
+			if (colObj.position != null && colObj.position != "")
+			{
+				allContractRecords[allContractRecords.length] = colObj;
+			}
+		}
+	}
+
+	for (var i=0; i<len2; i++)
+	{
+		rowObj = suppContractRecords[i];
+		len3 = (typeof(rowObj) != "undefined") ? rowObj.length : 0;
+
+		for (var j=0; j<len3; j++)
+		{
+			colObj = rowObj[j];
+
+			if (colObj.position != null && colObj.position != "")
+			{
+				allContractRecords[allContractRecords.length] = colObj;
+			}
+		}
+	}
+}
+
+function moveTrailingSign(amt)
+{
+	var retAmt = amt;
+	var sign = retAmt.charAt(retAmt.length-1);
+
+	var j = 0;
+	while (retAmt.charAt(j) == " ")
+		j++;
+
+	retAmt = retAmt.substring(j,retAmt.length);
+
+	if (sign == "+" || sign == "-")
+	{
+		if (sign == "-")
+			retAmt = "-"+retAmt.substring(0,retAmt.length-1);
+		else
+			retAmt = retAmt.substring(0,retAmt.length-1);
+	}
+	return retAmt;
+}
+
+// Handle the AGS transaction field data.
+function V(fldnbr, fldval)
+{
+	if (fldnbr == "FC")
+	{
+		functionCode = fldval;
+	}
+	else if (functionCode && functionCode == "I")
+	{
+		getContractAssignmentData(fldnbr, fldval);
+	}
+	else if (functionCode && functionCode == "X")
+	{
+		getContractAssignmentBalances(fldnbr, fldval);
+	}
+}
+
+function getContractAssignmentData(fldnbr, fldval)
+{
+	if (fldnbr.indexOf("CCT-CONTRACT-YEAR") == 0)
+	{
+		contractYear = fldval;
+	}
+	else if (fldnbr.indexOf("BASE-SELECTION") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(15, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(14));
+		if (colNbr == 1)
+		{
+			baseContractRecords[rowNbr-1] = new Array();
+		}
+		baseContractRecords[rowNbr-1][colNbr-1] = new ContractObject(contractYear);
+	}
+	else if (fldnbr.indexOf("CWA-SELECTION") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(14, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(13));
+		if (colNbr == 1)
+		{
+			suppContractRecords[rowNbr-1] = new Array();
+		}
+		suppContractRecords[rowNbr-1][colNbr-1] = new ContractObject(contractYear);
+	}
+	else if (fldnbr.indexOf("BASE-POSITION") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(14, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(13));
+		if (baseContractRecords[rowNbr-1] && baseContractRecords[rowNbr-1][colNbr-1])
+		{
+			baseContractRecords[rowNbr-1][colNbr-1].position = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("CWA-POSITION") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(13, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(12));
+		if (suppContractRecords[rowNbr-1] && suppContractRecords[rowNbr-1][colNbr-1])
+		{
+			suppContractRecords[rowNbr-1][colNbr-1].position = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("BASE-WORK-SCHED") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(16, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(15));
+		if (baseContractRecords[rowNbr-1] && baseContractRecords[rowNbr-1][colNbr-1])
+		{
+			baseContractRecords[rowNbr-1][colNbr-1].workSchedule = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("CWA-WORK-SCHED") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(15, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(14));
+		if (suppContractRecords[rowNbr-1] && suppContractRecords[rowNbr-1][colNbr-1])
+		{
+			suppContractRecords[rowNbr-1][colNbr-1].workSchedule = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("BASE-POS-DESC") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(14, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(13));
+		if (baseContractRecords[rowNbr-1] && baseContractRecords[rowNbr-1][colNbr-1])
+		{
+			baseContractRecords[rowNbr-1][colNbr-1].positionDescription = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("CWA-POS-DESC") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(13, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(12));
+		if (suppContractRecords[rowNbr-1] && suppContractRecords[rowNbr-1][colNbr-1])
+		{
+			suppContractRecords[rowNbr-1][colNbr-1].positionDescription = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("BASE-ASG-TYPE") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(14, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(13));
+		if (baseContractRecords[rowNbr-1] && baseContractRecords[rowNbr-1][colNbr-1])
+		{
+			baseContractRecords[rowNbr-1][colNbr-1].assignmentType = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("CWA-ASG-TYPE") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(13, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(12));
+		if (suppContractRecords[rowNbr-1] && suppContractRecords[rowNbr-1][colNbr-1])
+		{
+			suppContractRecords[rowNbr-1][colNbr-1].assignmentType = fldval;
+		}
+	}
+	else if (fldnbr.indexOf("CWA-ASG-PAY-CODE") == 0)
+	{
+		rowNbr = Number(fldnbr.substring(17, fldnbr.length));
+		colNbr = Number(fldnbr.charAt(16));
+		if (suppContractRecords[rowNbr-1] && suppContractRecords[rowNbr-1][colNbr-1])
+		{
+			suppContractRecords[rowNbr-1][colNbr-1].assignmentPayCode = fldval;
+		}
+	}
+}
+
+function getContractAssignmentBalances(fldnbr, fldval)
+{
+	if (fldnbr == "TOT-YTD-PAID-WAGES")
+	{
+		if (typeof(contractBalances) == "undefined")
+		{
+			contractBalances = new ContractBalancesObject();
+		}
+
+		contractBalances.ytdPaidWages = fldval;
+	}
+	else if (fldnbr == "TOT-YTD-PAID-UNITS")
+	{
+		contractBalances.ytdPaidUnits = fldval;
+	}
+	else if (fldnbr == "TOT-YTD-DOCKED-WAGES")
+	{
+		contractBalances.ytdDockedWages = fldval;
+	}
+	else if (fldnbr == "TOT-YTD-DOCKED-UNITS")
+	{
+		contractBalances.ytdDockedUnits = fldval;
+	}
+	else if (fldnbr == "TOT-WAGE-BALANCE")
+	{
+		contractBalances.remainingWageBalance = fldval;
+	}
+	else if (fldnbr == "TOT-REMAIN-UNITS-BAL")
+	{
+		contractBalances.remainingUnitBalance = fldval;
+	}
+	else if (fldnbr == "TOT-RESERVE-BAL")
+	{
+		contractBalances.reserveWageBalance = fldval;
+	}
+	else if (fldnbr == "TOT-RESERVE-UNITS")
+	{
+		contractBalances.reserveUnitBalance = fldval;
+	}
+	else if (fldnbr == "TOT-UNITS-WORKED")
+	{
+		contractBalances.unitsWorked = fldval;
+	}
+	else if (fldnbr == "TOT-UNITS-REMAIN")
+	{
+		contractBalances.unitsRemain = fldval;
+	}
+}
+
+// Handle the AGS transaction return message.
+function DataReturned(fldnbr, msgnbr, msg)
+{
+}
+</script>
+</head>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/contractslawheader.htm,v 1.1.2.1 2009/06/11 18:18:15 brentd Exp $ -->

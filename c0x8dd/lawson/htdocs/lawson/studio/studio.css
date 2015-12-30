@@ -1,0 +1,497 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/studio.css,v 1.2.34.2 2012/08/08 12:48:51 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */
+Body
+{
+	background-color: window;
+	font-family: Tahoma, Arial;
+	margin: 0px;
+	overflow: hidden;
+}
+.dsImage
+{
+	height:16px;
+	width:16px;
+}
+.dsMenuDock
+{
+	position:absolute;
+	top:0;
+	left:0;
+	width:100%;
+	height:20px;
+	background-color:threedface;
+	border-bottom:1px solid threedshadow;
+}
+.dsWorkSpace
+{
+	background-color:window;
+	border:1px inset inactiveborder;
+}
+.dsViewFrame
+{
+	margin:0px;
+	border:0px;
+	width:0%;
+	height:0%;
+	zIndex:0;
+	visibility:hidden;
+}
+.dsViewButton
+{
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	background-color:buttonface;
+	color:buttontext;
+	border:1px;
+	border-style:solid;
+	border-color:buttonface;
+	cursor:default;
+}
+.dsViewFrameActive
+{
+	margin:0px;
+	width:100%;
+	height:100%;
+	zIndex:99;
+	border:1px inset activeborder;
+	visibility:visible;
+}
+.dsViewButtonActive
+{
+	font-family: Tahoma, Arial;
+	font-size: 8pt;
+	font-weight: bold;
+	background-color: buttonface;
+	color: buttontext;
+	border-color: threedshadow threedhighlight threedhighlight threedshadow;
+	border-width: 1px;
+	border-style: solid;
+	cursor:default;
+}
+.dsViewButtonDisabled
+{
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	background-color:buttonface;
+	color:inactivecaption;
+	border:1px;
+	border-style:solid;
+	border-color:buttonface;
+	filter:progid:DXImageTransform.Microsoft.BasicImage(opacity=.4);
+}
+.dsViewButtonHover
+{
+	font-family: Tahoma, Arial;
+	font-size: 8pt;
+	background-color: buttonface;
+	color: buttontext;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	cursor:default;
+}
+.dsButtonBar
+{
+	background-color: threedface;
+	color: buttontext;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	cursor:default;
+}
+.dsBlueButton
+{
+	background-color: #003366;
+	color: white;
+	font-family: Tahoma, Arial;
+	font-size: 11px;
+	font-weight: bold;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid #90afc0;
+	text-align: center;
+	margin:1px;
+	height: 20;
+	cursor:default;
+}
+.dsDlgButton
+{
+    background-color: buttonface;
+    border-bottom: buttonshadow 2px solid;
+    border-left: buttonhighlight 2px solid;
+    border-right: buttonshadow 2px solid;
+    border-top: buttonhighlight 2px solid;
+    color: buttontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+    height: 20px;
+    width: 60px;
+    overflow: hidden;
+    text-align: center;
+	cursor:default;
+}
+.dsListText
+{
+	font-family: Verdana, Tahoma, Arial;
+	font-size: 8pt;
+	color:black;
+	cursor:default;
+}
+.dsListTextBlur
+{
+	font-family: Verdana, Tahoma, Arial;
+	font-size: 8pt;
+	background-color:inactivecaptiontext;
+	color:black;
+	cursor: default;
+}
+.dsListTextHighlight
+{
+	font-family: Verdana, Tahoma, Arial;
+	font-size: 8pt;
+	background-color:highlight;
+	color:highlighttext;
+	cursor:default;
+}
+.dsControlGroup
+{
+	background-color:inactivecaption;
+	border: 1px inset inactiveborder;
+	color:inactivecaptiontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:center;
+	cursor:default;
+}
+.dsActiveControlGroup
+{
+	background-color:activecaption;
+	border: 1px inset activeborder;
+	color:captiontext;
+	color: captiontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:center;
+	cursor:default;
+}
+.dsActiveControlGroupBtn
+{
+	background-color:buttonface;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	color:captiontext;
+	color: buttontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	font-weight:bold;
+	text-align:center;
+	cursor:default;
+}
+.dsControlGroupBtn
+{
+	background-color:buttonface;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	color:captiontext;
+	color: buttontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:center;
+	cursor:default;
+}
+.dsWindowTitle
+{
+	background-color:activecaption;
+	color:captiontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	font-weight:bold;
+	cursor:default;
+}
+.dsWindowButton
+{
+	font-family: Tahoma, Arial;
+	font-size: 8pt;
+	background-color: buttonface;
+	color: buttontext;
+    border-color: threedhighlight threeddarkshadow threeddarkshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+}
+.dsControl
+{
+	background-color:buttonface;
+	color:buttontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:left;
+	border:1px solid buttonface;
+	padding-left:24px;
+	height:20px;
+}
+.dsActiveControl
+{
+	background-color:buttonface;
+	color:buttontext;
+	border-top:1px solid buttonshadow;
+	border-left:1px solid buttonshadow;
+	border-bottom:1px solid buttonhighlight;
+	border-right:1px solid buttonhighlight;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:left;
+	padding-left:24px;
+	height:20px;
+}
+.dsHoverControl
+{
+	background-color:buttonface;
+	color:buttontext;
+    border-color:threedhighlight threedshadow threedshadow threedhighlight;
+    border-width:1px;
+    border-style:solid;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	text-align:left;
+	padding-left:24px;
+	height:20px;
+}
+.dsProperty
+{
+	background-color:window;
+	color:windowtext;
+	cursor:default;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+}
+.dsLabel
+{
+    color: black;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 8pt;
+    text-align: right;
+}
+.dsButton
+{
+	background-color:buttonface;
+	color:buttontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	cursor:default;
+}
+.dsMenu
+{
+	color:menutext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	border:1px solid threedface;
+	padding-left:6px;
+	padding-right:6px;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuDisabled
+{
+	color:inactivecaption;
+	font-family: Tahoma, Arial;
+	font-size:8pt;	
+	border:1px solid threedface;
+	padding-left:6px;
+	padding-right:6px;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuMouseOver
+{
+	color:menutext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	border:1px outset;
+	padding-left:6px;
+	padding-right:6px;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuMouseDown
+{
+	color:menutext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	padding-left:6px;
+	padding-right:6px;
+	border:1px inset;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuItemMouseOver
+{
+	background-color:highlight;
+	color:highlighttext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	border:1px solid threedface;
+	padding-left:6px;
+	padding-right:6px;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuItemMouseOverDisabled
+{
+	background-color:highlight;
+	color:inactivecaptiontext;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	border:1px solid threedface;
+	padding-left:6px;
+	padding-right:6px;
+	cursor:default;
+	white-space:nowrap;
+}
+.dsMenuPop
+{
+	background-color:threedface;
+	border-left:1px solid threedhighlight;
+	border-top:1px solid threedhighlight;
+	border-bottom:1px solid threedshadow;
+	border-right:1px solid threedshadow;
+	white-space:nowrap;
+}
+.dsTabArea
+{
+    position: absolute;
+	border: 1px dashed black;
+	cursor: move;
+}
+.dsTabButtonActive
+{
+    position: absolute;
+    background-color: buttonface;
+    border-left: buttonhighlight 1px solid;
+    border-right: buttonshadow 2px solid;
+    border-right: buttonshadow 2px solid;
+    border-top: buttonhighlight 2px solid;
+    color: black;
+    font-family: Tahoma, Arial;
+    font-size: 11px;
+    height: 22px;
+    padding-top: 3px;
+    text-align: center;
+    width: 85px;
+}
+.dsTabButtonInactive
+{
+    border-left: buttonhighlight 1px solid;
+    border-right: buttonshadow 1px solid;
+    border-top: buttonhighlight 1px solid;
+    color: black;
+    font-family: Tahoma, Arial;
+    font-size: 11px;
+    height: 20px;
+    padding-top: 3px;
+    position: absolute;
+    text-align: center;
+    width: 85px;
+}
+
+
+.dsTabPaneActive
+{
+    background-color: buttonface;
+    border-bottom: buttonshadow 1px solid;
+    border-left: buttonhighlight 1px solid;
+    border-right: buttonshadow 1px solid;
+    border-top: buttonhighlight 1px solid;
+    color: buttontext;
+    display: block;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 11px;
+    height: 100%;
+    left: 0px;
+    overflow: hidden;
+    padding-bottom: 2px;
+    padding-left: 2px;
+    padding-right: 2px;
+    padding-top: 2px;
+    position: absolute;
+    width: 100%;
+}
+.dsTabPaneInactive
+{
+    display: none;
+    height: 100%;
+    left: 0px;
+    position: absolute;
+    width: 100%;
+}
+.dsTextBox
+{
+    background-color: white;
+    border: white 2px solid;
+	border-style:inset;
+    color: black;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 8pt;
+    height: 20px;
+    position: absolute;
+    highlightcolor: blue
+}
+.dsAboutFilter
+{
+	background-color:#336699;
+	border:4px solid grey;
+	border-style:outset;
+	height:220px;
+	width:390px;
+	top:expression((document.body.clientHeight-this.clientHeight)/2);
+	left:expression((document.body.clientWidth-this.clientWidth)/2);
+	filter:progid:DXImageTransform.Microsoft.DropShadow(OffX=5, OffY=5, Color='gray', Positive='true') 
+	       progid:DXImageTransform.Microsoft.Gradient(enabled='true',startColorstr=#336699, endColorstr=white);
+}
+.dsListTextInverted
+{
+	font-family: Verdana, Tahoma, Arial;
+	font-size: 8pt;
+	background-color:black;
+	color:white;
+	cursor:default;
+}
+.dsTableHeader
+{
+	background-color:threedface;
+	font-family:Tahoma, Arial;
+	font-weight:normal;
+	font-size:9pt;
+	margin:0px;
+	height:17px;
+	border-right:1px inset threedshadow;
+	border-bottom:1px inset buttonshadow;
+}
+.dsPref
+{
+	behavior:url(#default#userdata);
+}

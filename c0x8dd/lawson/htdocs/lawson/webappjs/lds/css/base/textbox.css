@@ -1,0 +1,77 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/textbox.css,v 1.5.2.5.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Text boxes --- */
+/* used for InputSelectElement, InputCalendarElement, InputTextElement, and SelectComboBoxElement */
+.inputBoxLeftSideStyler
+{
+  background : transparent url("../../images/02_input_field_box-1.png") no-repeat center left;
+  vertical-align : middle;
+  margin-top : 1px;
+  margin-bottom : 1px;
+  height : 19px;
+  width : 6px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+.inputBoxRightSideStyler
+{
+  background : transparent url("../../images/02_input_field_box-3.png") no-repeat center right;
+  vertical-align : middle;
+  margin-top : 1px;
+  margin-bottom : 1px;
+  height : 19px;
+  width : 6px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+.inputBoxStyler
+{
+  border : none;
+  background : transparent url("../../images/02_input_field_box-2.png") repeat-x center center;
+  vertical-align : middle;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;  
+  height : 19px;
+  margin : 0px 0px 0px 0px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  -webkit-appearance : none;
+  -webkit-border-radius : 0px;
+}
+.inputBoxWrapper
+{
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  color : #000000;
+  white-space : nowrap;
+  display : -moz-inline-stack;
+  display : inline-block;  
+}
+.inputBoxError
+{
+  border : 2px solid #52882a !important;
+  display : inline-block;	
+}	

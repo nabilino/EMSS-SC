@@ -1,0 +1,184 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/msgs.xml,v 1.2.4.2.4.3.16.2 2012/08/08 12:48:51 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<TRANSLATE>
+	<PHRASE id="lblAcross">Across</PHRASE>
+	<PHRASE id="lblAction">Action</PHRASE>
+	<PHRASE id="lblAllObjects">All Objects</PHRASE>
+	<PHRASE id="lblAllowTransfer">Allow Xfer</PHRASE>
+	<PHRASE id="lblAlt">Alt</PHRASE>
+	<PHRASE id="lblApply">Apply</PHRASE>
+	<PHRASE id="lblAuto">Auto</PHRASE>
+	<PHRASE id="lblBatch">Batch</PHRASE>
+	<PHRASE id="lblBehavior">Behavior</PHRASE>
+	<PHRASE id="lblBorder">Border</PHRASE>
+	<PHRASE id="lblBrowser">Browser</PHRASE>
+	<PHRASE id="lblButton">Button</PHRASE>
+	<PHRASE id="lblCenter">Center</PHRASE>
+	<PHRASE id="lblCheckbox">Checkbox</PHRASE>
+	<PHRASE id="lblChildObject">Child Object</PHRASE>
+	<PHRASE id="lblClass">Class</PHRASE>
+	<PHRASE id="lblColor">Color</PHRASE>
+	<PHRASE id="lblColumns">Columns</PHRASE>
+	<PHRASE id="lblDataField">Data Field</PHRASE>
+	<PHRASE id="lblDataObjects">Data Objects</PHRASE>
+	<PHRASE id="lblDataSource">Data Source</PHRASE>
+	<PHRASE id="lblDataSrc">Data Src</PHRASE>
+	<PHRASE id="lblDataValue">Data Value</PHRASE>
+	<PHRASE id="lblDateControl">Date Control</PHRASE>
+	<PHRASE id="lblDateSize">Date Size</PHRASE>
+	<PHRASE id="lblDefault">Default</PHRASE>
+	<PHRASE id="lblDesign">Design</PHRASE>
+	<PHRASE id="lblDetailArea">Detail Area</PHRASE>
+	<PHRASE id="lblEditable">Editable</PHRASE>
+	<PHRASE id="lblEvents">Events</PHRASE>
+	<PHRASE id="lblFieldGroup">Field Group</PHRASE>
+	<PHRASE id="lblFieldNbr">Field Nbr</PHRASE>
+	<PHRASE id="lblFieldSize">Field Size</PHRASE>
+	<PHRASE id="lblFlowChart">FlowChart</PHRASE>
+	<PHRASE id="lblFont">Font</PHRASE>
+	<PHRASE id="lblFor">For</PHRASE>
+	<PHRASE id="form">Form</PHRASE>
+	<PHRASE id="lblFormActions">Form Actions</PHRASE>
+	<PHRASE id="lblFormId">Form Id</PHRASE>
+	<PHRASE id="lblFormTransfers">Form Transfers</PHRASE>
+	<PHRASE id="lblFunctions">Functions</PHRASE>
+	<PHRASE id="lblGeneral">General</PHRASE>
+	<PHRASE id="lblGridX">Grid Width</PHRASE>
+	<PHRASE id="lblGridY">Grid Height</PHRASE>
+	<PHRASE id="lblGroup">Group</PHRASE>
+	<PHRASE id="lblGroupId">(Group)</PHRASE>
+	<PHRASE id="lblHeaderSize">Header Size</PHRASE>
+	<PHRASE id="lblHeight">Height</PHRASE>
+	<PHRASE id="lblHidden">Hidden</PHRASE>
+	<PHRASE id="lblHorizontal">Horizontal</PHRASE>
+	<PHRASE id="lblImage">Image</PHRASE>
+	<PHRASE id="lblInclude">Include</PHRASE>
+	<PHRASE id="lblInitialFC">Initial FC</PHRASE>
+	<PHRASE id="lblJustify">Justify</PHRASE>
+	<PHRASE id="lblLabel">Label</PHRASE>
+	<PHRASE id="lblLawForm">Lawson Form Objects</PHRASE>
+	<PHRASE id="lblLayout">Layout</PHRASE>
+	<PHRASE id="lblLeft">Left</PHRASE>
+	<PHRASE id="lblLine">Line</PHRASE>
+	<PHRASE id="lblListbox">Listbox</PHRASE>
+	<PHRASE id="lblMembers">Members</PHRASE>
+	<PHRASE id="lblMoreProperties">More Properties</PHRASE>
+	<PHRASE id="lblName">Name</PHRASE>
+	<PHRASE id="lblNo">No</PHRASE>
+	<PHRASE id="lblNone">None</PHRASE>
+	<PHRASE id="lblObject">Object</PHRASE>
+	<PHRASE id="lblObjects">Objects</PHRASE>
+	<PHRASE id="lblOnline">Online</PHRASE>
+	<PHRASE id="lblOptionGroup">Option Group</PHRASE>
+	<PHRASE id="lblOverflow">Overflow</PHRASE>
+	<PHRASE id="lblParentObject">Parent Object</PHRASE>
+	<PHRASE id="lblPreview">Preview</PHRASE>
+	<PHRASE id="lblRadioButton">Radio Button</PHRASE>
+	<PHRASE id="lblRangebox">Rangebox</PHRASE>
+	<PHRASE id="lblReadonly">Readonly</PHRASE>
+	<PHRASE id="lblRectangle">Rectangle</PHRASE>
+	<PHRASE id="lblReset">Reset</PHRASE>
+	<PHRASE id="lblRight">Right</PHRASE>
+	<PHRASE id="lblRows">Rows</PHRASE>
+	<PHRASE id="lblRowCount">Row Count</PHRASE>
+	<PHRASE id="lblRowSpan">Row Span</PHRASE>
+	<PHRASE id="lblScript">Script</PHRASE>
+	<PHRASE id="lblScroll">Scroll</PHRASE>
+	<PHRASE id="lblSection">(Section)</PHRASE>
+	<PHRASE id="lblSelectable">Selectable</PHRASE>
+	<PHRASE id="lblServiceList">Service List</PHRASE>
+	<PHRASE id="lblSize">Size</PHRASE>
+	<PHRASE id="lblSource">Source</PHRASE>
+	<PHRASE id="lblTabArea">Tab Area</PHRASE>
+	<PHRASE id="lblTabPage">(Tab Page)</PHRASE>
+	<PHRASE id="lblText">Text</PHRASE>
+	<PHRASE id="lblTextarea">Text Area</PHRASE>
+	<PHRASE id="lblTextbox">Textbox</PHRASE>
+	<PHRASE id="lblTitle">Title</PHRASE>
+	<PHRASE id="lblToolbar">Toolbar</PHRASE>
+	<PHRASE id="lblTooltip">Tooltip</PHRASE>
+	<PHRASE id="lblTop">Top</PHRASE>
+	<PHRASE id="lblTransaction">Transaction</PHRASE>
+	<PHRASE id="lblType">Type</PHRASE>
+	<PHRASE id="lblUIDesigner">User Interface Designer</PHRASE>
+	<PHRASE id="lblUIToolBox">UI Toolbox</PHRASE>
+	<PHRASE id="lblVertical">Vertical</PHRASE>
+	<PHRASE id="lblVisible">Visible</PHRASE>
+	<PHRASE id="lblWidth">Width</PHRASE>
+	<PHRASE id="lblWordWrap">Word Wrap</PHRASE>
+	<PHRASE id="lblWorkflow">Work Flow</PHRASE>
+	<PHRASE id="lblWorkflowEnabled">Work Flow Enabled</PHRASE>
+	<PHRASE id="lblWorkflowTrigger">Work Flow Trigger</PHRASE>
+	<PHRASE id="lblYes">Yes</PHRASE>
+	<PHRASE id="LBL_ABOUTUIDESIGNER">About UI Designer</PHRASE>
+	<PHRASE id="LBL_APPLYCHANGES">Apply Changes</PHRASE>
+	<PHRASE id="LBL_BRINGTOFRONT">Bring to Front</PHRASE>
+	<PHRASE id="LBL_DELETE_DOCUMENT">Delete Remote</PHRASE>
+	<PHRASE id="LBL_DESELECTALL">Deselect All</PHRASE>
+	<PHRASE id="LBL_DESIGN">Design</PHRASE>
+	<PHRASE id="LBL_INCLUDE">Include</PHRASE>
+	<PHRASE id="LBL_MIGRATEFORMS">Migrate Forms</PHRASE>
+	<PHRASE id="LBL_REFRESH">Refresh</PHRASE>
+	<PHRASE id="LBL_RELOAD">Reload Document</PHRASE>
+	<PHRASE id="LBL_SCRIPT">Script</PHRASE>
+	<PHRASE id="LBL_SENDTOBACK">Send to Back</PHRASE>
+	<PHRASE id="LBL_TABORDER">Tab Order</PHRASE>
+	<PHRASE id="MSG_APPLY_GROUP_TO_ALL_RADIOS">Apply this name to all members of button group?</PHRASE>
+	<PHRASE id="MSG_DUPLICATE_ID_NOT_ALLOWED">Name already assigned. Please choose another name.</PHRASE>
+	<PHRASE id="MSG_OK_OR_CANCEL">Click OK to apply changes to active document or Cancel to discard changes.</PHRASE>
+	<PHRASE id="MSG_SCRIPT_MODIFIED">Script has been modified. Save changes?</PHRASE>
+	<PHRASE id="MSG_SOURCE_MODIFIED">Source has been modified. Save changes?</PHRASE>
+	<PHRASE id="MSG_SCRIPTING_OCX_NOT_FOUND_SAVE">Script is saved without syntax error checking.%n%A script control component is not found.%n%Please refer to the documentation for download instructions.</PHRASE>
+	<PHRASE id="MSG_INVALID_SERVER_RESPONSE">The web server returned an invalid response.</PHRASE>
+	<PHRASE id="MSG_INVALID_XML_FORMAT">The XML document supplied has an invalid format.%n%Partial contents:</PHRASE>
+	<PHRASE id="MSG_DSM_LOAD_FAILURE">The Data Sources Manager failed to load.%n%Unable to initialize XML document.</PHRASE>
+	<PHRASE id="MSG_FORMID_NOT_UNIQUE">Form ID is not unique for token:</PHRASE>
+	<PHRASE id="MSG_DOC_IS_MODIFIED">Document has been modified.</PHRASE>
+	<PHRASE id="MSG_DELETE_MAY_NOT_UNDO">You have asked to delete a control which may be time%n%consuming and is not completely undo-able:</PHRASE>
+	<PHRASE id="MSG_OK_TO_CONTINUE">OK to continue?</PHRASE>
+	<PHRASE id="MSG_CONTROLS_CONVERTED1">The following control names were converted to all lower case:%n%</PHRASE>
+	<PHRASE id="MSG_CONTROLS_CONVERTED1b">A total of 999 control names (including the following) were converted to all lower case:%n%</PHRASE>
+	<PHRASE id="MSG_CONTROLS_CONVERTED2">%n%This conversion may cause custom script associated%n%with this form not to execute properly.</PHRASE>
+	<PHRASE id="MSG_CONTROLS_CONVERTED3">%n%%n%Do you wish to have associated script converted also?%n%%n%</PHRASE>
+	<PHRASE id="TITLE_INCLUDE">Show the Include files dialog.</PHRASE>
+	<PHRASE id="TITLE_TABORDER">Apply tab sequence to the current view of the document.</PHRASE>
+	<PHRASE id="TITLE_APPLYCHANGES">Apply changes to the current document.</PHRASE>
+	<PHRASE id="TITLE_DESELECTALL">Deselect all currently selected controls.</PHRASE>
+	<PHRASE id="TITLE_DELETE_REMOTE">Delete a remote UI designer document.</PHRASE>
+	<PHRASE id="TITLE_SENDTOBACK">Send selected control to the background.</PHRASE>
+	<PHRASE id="TITLE_BRINGTOFRONT">Bring selected control to the foreground.</PHRASE>
+	<PHRASE id="TITLE_PROPERTIES">View the properties window.</PHRASE>
+	<PHRASE id="TITLE_DOCPROPERTIES">View properties of the current document.</PHRASE>
+	<PHRASE id="TITLE_TOOLBOX">View the toolbox for the current document.</PHRASE>
+	<PHRASE id="TITLE_REFRESH">Reload the source/script editor contents.</PHRASE>
+	<PHRASE id="TITLE_RELOAD">Reload the user interface source contents.</PHRASE>
+	<PHRASE id="TITLE_DESIGN">View design mode for the current document.</PHRASE>
+	<PHRASE id="TITLE_SCRIPT">View the script editor for the current document.</PHRASE>
+	<PHRASE id="TITLE_OBJECT">View design mode for the current selected object.</PHRASE>
+	<PHRASE id="TITLE_MIGRATEFORMS">Migrate custom forms from prior release.</PHRASE>
+	<PHRASE id="TITLE_SWITCH_FILE">Activate this window.</PHRASE>
+	<PHRASE id="TITLE_ABOUTDESIGNER">Read the about page for this designer.</PHRASE>
+</TRANSLATE>

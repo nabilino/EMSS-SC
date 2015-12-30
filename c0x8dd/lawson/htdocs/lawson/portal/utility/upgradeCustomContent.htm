@@ -1,0 +1,499 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/utility/Attic/upgradeCustomContent.htm,v 1.1.2.4.2.2 2012/08/08 12:37:21 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Migrate Custom Content</title>
+<link id="StyleLink" type="text/css" rel="stylesheet"  href="../portal.css"/>
+<script src="../servenv.js"></script>
+<script>
+//-----------------------------------------------------------------------------
+var portalWnd=null;
+var portalObj=null;
+var textArea=null;
+var fileMgrMsg= "";
+var fileAry = new Array
+var gTimestamp = "";
+
+//-----------------------------------------------------------------------------
+function onLoad()
+{
+	try {
+		portalWnd=envFindObjectWindow("lawsonPortal");
+	} catch (e) { portalWnd=parent; }
+
+	if (!portalWnd || !portalWnd.lawsonPortal)
+	{
+		alert("Unable to proceed: cannot discover Portal window reference.");
+		portalWnd.goHome();
+		return;
+	}
+	portalObj=portalWnd.lawsonPortal;
+
+	if (!portalObj.browser.isIE)
+	{
+		alert("This utility requires the Internet Explorer browser version 5.5 or greater.");
+		portalWnd.goHome();
+		return;
+	}
+
+	portalObj.setTitle("Migrate Custom Forms")
+	with (portalObj.toolbar)
+	{
+		target=window;
+		clear();
+		createButton(portalObj.getPhrase("LBL_HOME"),portalWnd.goHome,"home","","","home");
+		createButton("Clear Console",doClearConsole,"clearConsole");
+		createButton("Start Migration",doUpgradeCustomForms,"startUpgrade");
+		createButton("Analyze Custom Script",doCustomScriptAudit,"startScript");
+	}
+
+	fileMgrMsg=portalObj.getPhrase("msgErrorReportedBy")+" FileMgr:\n";
+	textArea=document.getElementById("txtArea");
+	onResize();
+}
+
+//-----------------------------------------------------------------------------
+function posInFirstField()
+{
+	return;
+}
+//-----------------------------------------------------------------------------
+function doUpgradeCustomForms()
+{
+	fileAry.length	= 0;	
+	doUpdateConsole("***** Start Migration Of Custom Forms *****");
+	doUpdateConsole("- searching...");
+	setTimeout("doUpgradeDiscovery()",1);
+}
+//-----------------------------------------------------------------------------
+function doUpgradeDiscovery()
+{
+	var folder = "/content/forms";
+	doBuildList(folder);
+	var loop = fileAry.length;
+	doUpdateConsole("- found " + loop + " files");
+
+	if(loop==0) return;
+
+	var oDate = new Date;
+	var yr = oDate.getYear();
+	var mo = oDate.getMonth();
+	var day = oDate.getDate();
+	var hr = oDate.getHours();
+	var min = oDate.getMinutes();
+	var sec = oDate.getSeconds();
+	gTimestamp = yr + "_" + mo + "_" + day + "_" + hr + "_" + min + "_" + sec;
+	
+
+	doUpdateConsole("- processing...");		
+	setTimeout("doUpgradeIteration()",1);
+}
+//-----------------------------------------------------------------------------
+function doUpgradeIteration(key)
+{
+	key = !key ? 0 : key;
+
+	var loop = fileAry.length;
+		
+	if(key  < loop)
+	{
+		window.status = "processing " + (key +1 ) + " of " + loop;
+		doFormUpgrade(key);
+	}
+	else
+	{
+		window.status = "";
+		doUpdateConsole("***** Finished Migration Of Custom Forms *****");
+	}
+}
+//------------------------------------------------------------------------------
+function doFormUpgrade(key)
+{
+	try{
+	var nextKey = key + 1;
+	var filepath = fileAry[key];	
+	var timestamp = gTimestamp;
+	var pos = filepath.lastIndexOf("/");
+	var folder = filepath.substr(0,pos);
+	var filename = filepath.substr(pos + 1);
+	var backup = filename + "." + timestamp + ".bak";
+	var msg = ":" + filepath;
+
+	var oXML = portalWnd.fileMgr.getFile(portalObj.path + folder, filename, "text/xml", false, true);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		msg = "file not found - " + (oXML ? " FileMgr status: "+ oXML.status : "") + msg;
+		doUpdateConsole("\t- " + msg);
+		setTimeout("doUpgradeIteration("+nextKey+")",1);
+		return;
+	}
+	
+	if(this.portalWnd.oError.isErrorResponse(oXML,true,false,true,"",window))
+	{
+		msg = this.portalWnd.oError.getDSMessage() + msg;
+		doUpdateConsole("\t- " + msg);
+		setTimeout("doUpgradeIteration("+nextKey+")",1);
+		return;		
+	}
+	
+	var oNode = oXML.selectSingleNode("//form");
+	
+	if(!oNode)
+	{
+		msg = "form node not found" + msg;
+		doUpdateConsole(msg);
+		setTimeout("doUpgradeIteration("+nextKey+")",1);
+		return;
+	}
+
+	var dateUpgraded = oNode.getAttribute("dateupgrade");
+	dateUpgraded = (!dateUpgraded ? "" : dateUpgraded);
+	var confirmMsg = filepath + " was upgrade on " + dateUpgraded  +"\n\n"
+	confirmMsg += "Cancel to skip this file."
+	
+	if(dateUpgraded.length > 0)
+	{
+		if(!confirm(confirmMsg))
+		{
+			msg = "file skipped" + msg;
+			doUpdateConsole(msg);
+			setTimeout("doUpgradeIteration("+nextKey+")",1);
+			return;	
+		}
+	}
+	
+  	var gWidth = oNode.getAttribute("gWidth");
+  	var gHeight = oNode.getAttribute("gHeight");
+
+	if((gWidth == "9")||(gHeight == "20"))
+	{
+		msg = "* file upgraded" + msg + "(backup " + backup + ")";		
+		doSave(folder, backup, oXML);
+			  	
+	  	if(gWidth == "9")
+			oNode.setAttribute("gWidth","10");
+		
+	  	if(gHeight == "20")
+			oNode.setAttribute("gHeight","24");
+    	
+		oNode.setAttribute("dateupgrade", timestamp);
+		doSave(folder, filename, oXML);
+		doUpdateConsole(msg);
+		setTimeout("doUpgradeIteration("+nextKey+")",1);
+		return;
+	}
+	
+	msg = "file required no changes" + msg;
+	doUpdateConsole(msg);
+	
+	}catch(e){}
+	setTimeout("doUpgradeIteration("+nextKey+")",1);
+}
+//------------------------------------------------------------------------------
+function doCustomScriptAudit()
+{
+	fileAry.length	= 0;	
+	doUpdateConsole("***** Start Custom Script Audit *****");
+	doUpdateConsole("- searching...");
+	setTimeout("doAuditDiscovery()",1);
+}
+//-----------------------------------------------------------------------------
+function doAuditDiscovery()
+{
+	var formFolder = "/content/forms";
+	var pageFolder = "/content/pages";
+
+	doBuildList(formFolder);
+	doBuildList(pageFolder);
+
+	var loop = fileAry.length;
+	doUpdateConsole("- found " + loop + " files");
+
+	if(loop==0) return;
+	
+	doUpdateConsole("- processing...");	
+	setTimeout("doAuditIteration()",1);
+}	
+//-----------------------------------------------------------------------------
+function doAuditIteration(key)
+{
+	key = !key ? 0 : key;
+
+	var loop = fileAry.length;
+		
+	if(key  < loop)
+	{
+		window.status = "processing " + (key +1 ) + " of " + loop;
+		doAuditScript(key);
+	}
+	else
+	{
+		window.status = "";
+		doUpdateConsole("***** Finished Custom Script Audit *****");
+	}
+}	
+//------------------------------------------------------------------------------
+
+function doAuditScript(key)
+{
+	try{
+	var nextKey = key+1;	
+	var filepath = fileAry[key];
+	var pos = filepath.lastIndexOf("/");
+	var folder = filepath.substr(0,pos);
+	var filename = filepath.substr(pos + 1);		
+	var oXML = portalWnd.fileMgr.getFile(portalObj.path + folder, filename, "text/xml", false, true);
+	var blnFound = false;
+	
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		var msg ="Unable to audit " + filename + "..." + (oXML ? " FileMgr status: "+oXML.status : "");
+		doUpdateConsole("\t- " + msg);
+		setTimeout("doAuditIteration("+nextKey+")",1);
+		return;
+	}
+
+	if(this.portalWnd.oError.isErrorResponse(oXML,true,false,true,"",window))
+	{
+		msg += this.portalWnd.oError.getDSMessage();
+		doUpdateConsole("\t- " + msg);
+		setTimeout("doAuditIteration("+nextKey+")",1);
+		return;		
+	}
+	
+	var strWarning = "* WARNING: " + folder + "/" + filename + " has script that has hard coded lawson programs";
+	var strRecomend = "\t- use the global var "
+	var ary = new Array;
+	ary.push("ags.exe|AGSPath");
+	ary.push("servlet/ags|AGSPath");
+	ary.push("ida.exe|IDAPath");
+	ary.push("servlet/ida|IDAPath");
+	ary.push("dme.exe|DMEPath");
+	ary.push("servlet/dme|DMEPath");
+	ary.push("joblist.exe|JOBSRVPath");
+	ary.push("userdocs.exe|JOBSRVPath");
+	ary.push("getattach.exe|GETATTACHPath");
+	ary.push("writeattach.exe|WRITEATTACHPath");
+	ary.push("prodproj.exe|PRODPROJPath");
+
+	var loop = ary.length;
+	var oNode = oXML.selectSingleNode("//XSCRIPT");
+	strScript = (!oNode ? "" : oNode.xml);
+	strScript = strScript.toLowerCase();
+
+	for(var i=0; i<loop ; i++)
+	{
+		var split =ary[i].split("|")
+		var engine = split[0];
+		var globalVar = split[1];
+		
+		if(strScript.indexOf(engine) == -1)
+			continue;
+		
+		if(!blnFound)
+			doUpdateConsole(strWarning);
+		
+		doUpdateConsole(strRecomend + globalVar + " instead of " + engine);
+		blnFound = true;
+	}
+
+	}catch(e){}
+	setTimeout("doAuditIteration("+nextKey+")",1);
+}
+//------------------------------------------------------------------------------
+function doBuildList(folder)
+{
+	var oXML = portalWnd.fileMgr.getList("alllist", portalObj.path + folder, "*.xml", false);
+
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving contenst file/folder list...terminating");
+		var msg ="Build List terminated prematurely."+(oXML ? " FileMgr status: "+oXML.status : "");
+		doUpdateConsole("\t- " + msg);
+		return;
+	}
+
+	if(this.portalWnd.oError.isErrorResponse(oXML,true,false,true,"",window))
+	{
+		msg += this.portalWnd.oError.getDSMessage();
+		doUpdateConsole("\t- " + msg);
+		return;		
+	}
+	
+	var fileNodes = oXML.selectNodes("//FILE");
+	var loop = (!fileNodes ? 0 : fileNodes.length);
+
+	for (var i=0; i<loop; i++)
+	{
+		var filename = fileNodes[i].text;
+		if (isDeliveredContent(filename)) continue;
+		fileAry.push(folder+"/"+filename);
+	}
+
+	var folderNodes = oXML.selectNodes("//FOLDER");
+	var len = (!folderNodes ? 0 : folderNodes.length);
+	
+	for(var i = 0; i < len; i++)
+	{
+		var subfolder = folder+"/"+folderNodes[i].text;
+		
+		if(!isDeliveredContentFolder(subfolder))
+			doBuildList(subfolder);
+	}
+}
+//------------------------------------------------------------------------------
+function doSave(folder, filename, content)
+{
+	var oXML = portalWnd.fileMgr.save(portalObj.path + folder, filename, content, "text/xml", true, false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		var msg ="Unable to save " + filename +	(oXML ? " FileMgr status: "+oXML.status : "");
+		doUpdateConsole("\t- " + msg);
+		return false;
+	}
+
+	if(this.portalWnd.oError.isErrorResponse(oXML,true,false,true,"",window))
+	{
+		msg += this.portalWnd.oError.getDSMessage();
+		doUpdateConsole("\t- " + msg);
+		return false;		
+	}
+		
+	return true
+}
+//------------------------------------------------------------------------------
+function doUpdateConsole(strMessage)
+{
+	strMessage += "\n";	
+	txtArea.value += strMessage;
+}
+//-----------------------------------------------------------------------------
+function doClearConsole()
+{
+	txtArea.value = "";
+	window.status = "";
+}
+//------------------------------------------------------------------------------
+function isDeliveredContentFolder(folder)
+{
+	if (folder == "/content") return true;
+	if (folder == "/content"+"/"+"forms") return true;
+	if (folder == "/content"+"/"+"images") return true;
+	if (folder == "/content"+"/"+"pages") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"ag") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"al") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"dme") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"htm") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"ida") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"img") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"lft") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"mn") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"rpt") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"rss") return true;
+	if (folder == "/content"+"/"+"pages"+"/"+"txt") return true;
+	if (folder == "/content"+"/"+"scripts") return true;
+	if (folder == "/content"+"/"+"wizards") return true;
+	return false;
+}
+//------------------------------------------------------------------------------
+function isDeliveredContent(fileName)
+{
+	var fname=fileName.toLowerCase();
+	if (fname == "xlate.xml") return true;;
+	if (fname == "lo12.1.addchild.xml") return true;;
+	if (fname == "lo12.1.addtop.xml") return true;;
+	if (fname == "lo12.1.edit.xml") return true;;
+	if (fname == "rd30.1.webusradd.xml") return true;;
+	if (fname == "rd30.1.webusredit.xml") return true;;
+	if (fname == "rd55.2.usrgrpadd.xml") return true;;
+	if (fname == "rd55.2.usrgrpedit.xml") return true;;
+	return false;
+}
+//------------------------------------------------------------------------------
+function onResize(evt)
+{
+	var scrHeight=(portalObj.browser.isIE
+		? document.body.offsetHeight
+		: window.innerHeight-2);
+	textArea.style.height=(scrHeight-textArea.offsetTop-16);
+}
+
+//------------------------------------------------------------------------------
+function onKeyDown(evt)
+{
+    evt = top.getEventObject(evt)
+    if (!evt) return false;
+
+	// check with portal for hotkey action
+	var action = top.getFrameworkHotkey(evt,"buildlist");
+	if ( !action )
+	{
+		// framework handled the keystroke
+		top.setEventCancel(evt)
+		return false;
+	}
+
+	// hotkey defined for this keystroke
+	if (action != "buildlist")
+	{
+		cntxtActionHandler(evt,action);
+		top.setEventCancel(evt)
+		return false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function cntxtActionHandler(evt,action)
+{
+	if (action==null)		// called by the portal
+	{
+		action = top.getFrameworkHotkey(evt,"buildlist");
+		if (!action || action=="buildlist")
+			return false;
+	}
+
+	var bHandled=false;
+	switch (action)
+	{
+	case "posInFirstField":
+        	posInFirstField()
+		bHandled=true
+		break;
+	case "posInNavbar":
+		top.frmPositionInShortcuts()
+		bHandled=true
+		break;
+	}
+	return (bHandled);
+}
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body tabIndex="-1" onload="onLoad()" onkeydown="onKeyDown(event)" onunload="top.formUnload()" onresize="onResize(event)">
+	<label class="xTLabel" style="position:relative;left:20px;margin:20px;width:100%;">The purpose of this page is to migrate Lawson custom content to meet the requirements for 
+	the current version of Portal.</label>
+	<textarea id="txtArea" READONLY wrap="off" style="position:relative;left:20px;width:95%;"></textarea>
+</body>
+</html>

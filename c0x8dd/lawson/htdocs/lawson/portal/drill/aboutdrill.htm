@@ -1,0 +1,55 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/drill/aboutdrill.htm,v 1.5.2.1.4.2.14.1.2.2 2012/08/08 12:37:23 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Portal Support Information - Drill</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="drill.css">
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css">
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="aboutdrill.js"></script>
+</head>
+
+<body class="DrillBody" onload="aboutInit()" onunload="aboutUnload()" onkeydown="aboutKeyDown(event)" onresize="aboutOnResize(event)">
+	<div style="position:absolute;top:0px;left:0px;height:100%;width:100%;">
+		<div class="tabContainer" style="position:absolute;top:5px;left:0px;height:24px;width:800px;">
+			<div class="activeTab" id="tab0" onclick="aboutSwitchView(this)" >
+				<button id="btn0" onmouseover="this.className='tabbuttonOver'" title="" tabIndex="-1" onmouseout="this.className=''">Drill XML</button>
+			</div>
+			<div class="" id="tab1" onclick="aboutSwitchView(this)" >
+				<button id="btn1" onmouseover="this.className='tabbuttonOver'" title="" tabIndex="-1" onmouseout="this.className=''">Drill HTML</button>
+			</div>
+			<div class="" id="tab2" onclick="aboutSwitchView(this)" >
+				<button id="btn2" onmouseover="this.className='tabbuttonOver'" title="" tabIndex="-1" onmouseout="this.className=''">Drill Object</button>
+			</div>
+			<div class="" id="tab3" onclick="aboutSwitchView(this)" >
+				<button id="btn3" onmouseover="this.className='tabbuttonOver'" title="" tabIndex="-1" onmouseout="this.className=''">Current Tree Node</button>
+			</div>
+		</div>
+		<img id="imgTabBottom" style="display:inline;z-index:100;left:1px;width:55px;position:absolute;top:29px;height:1px" src="../images/ico_tab_bottom_active.gif">
+		<div style="position:absolute;top:29px;left:0px;height:100%;width:100%;border:solid black 1px;">
+			<textarea class="DrillAboutText" type="text" id="textWindow" wrap="off" ></textarea>
+		</div>
+	</div>
+</body>
+</html>

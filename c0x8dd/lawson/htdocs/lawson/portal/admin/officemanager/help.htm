@@ -1,0 +1,204 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/officemanager/help.htm,v 1.12.2.5.4.3.14.1.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<html>
+<head>
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="officemanager.css" type="text/css" />
+<script language="javascript" src="../../servenv.js"></script>
+
+<script>
+// common layers
+var divTipHelp
+
+var isIE = parent.isIE
+var hlpMsgs = null;
+var edgeWidth = (isIE?0:6)
+
+function helpInit()
+{
+	hlpMsgs=new parent.portalWnd.phraseObj("officemanager",parent.portalWnd);
+	var titlePhrase = hlpMsgs.getPhrase("LBL_BOOKMARK_MANAGER_TIPS")
+	window.document.title = titlePhrase
+	divTipHelp = document.getElementById("divTipHelp")
+	parent.portalWnd.cmnSetElementText(parent.formareaTitleBar,titlePhrase)
+	sizeFind()
+	renderHelp()
+}
+
+function renderHelp()
+{
+	var tableNode = document.createElement("table")
+
+	var rowNode = null;
+	var cellNode = null;
+	var text = null;
+	var btn = null;
+
+	// row 0 - book closed
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = "xTBookClosed";
+	btn.style.backgroundPositionX="right";
+	btn.style.cursor="default";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(hlpMsgs.getPhrase("LBL_BOOKMARK_CLOSED"))
+	cellNode.appendChild(text)
+
+	// row 1 - book open
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = "xTBookOpen";
+	btn.style.backgroundPositionX="right";
+	btn.style.cursor="default";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(hlpMsgs.getPhrase("LBL_BOOKMARK_EXPANDED_CHILDREN"))
+	cellNode.appendChild(text)
+
+	// row 2 - book empty
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = "xTBookEmpty";
+	btn.style.backgroundPositionX="right";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(hlpMsgs.getPhrase("LBL_BOOKMARK_EXPANDED_NO_CHILDREN"))
+	cellNode.appendChild(text)
+
+	// row 3 - unlocked
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = parent.getAccessStyle('A');
+	btn.style.backgroundPositionX="right";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(parent.bookmarkPhrase + " " + parent.getAccessPhrase('A'))
+	cellNode.appendChild(text)
+
+	// row 4 - locked
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = parent.getAccessStyle('D');
+	btn.style.backgroundPositionX="right";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(parent.bookmarkPhrase + " " + parent.getAccessPhrase('D'))
+	cellNode.appendChild(text)
+
+	// row 5 - remove
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+	btn = document.createElement("button");
+	btn.className = "xTDelete";
+	btn.style.backgroundPositionX="right";
+	btn.style.width="20px";
+	cellNode.appendChild(btn);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(parent.removePhrase)
+	cellNode.appendChild(text)
+
+	divTipHelp.appendChild(tableNode)
+
+	// row 6 - LBL_RIGHT_CLICK
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(hlpMsgs.getPhrase("LBL_RIGHT_CLICK"))
+	cellNode.appendChild(text)
+
+	// row 7 - LBL_BUTTON_HELP
+	rowNode = tableNode.insertRow(tableNode.rows.length)
+	cellNode = rowNode.insertCell(0);
+
+	cellNode = rowNode.insertCell(1);
+	cellNode.className = "xTLabel"
+	text = document.createTextNode(hlpMsgs.getPhrase("LBL_BUTTON_HELP"))
+	cellNode.appendChild(text)
+
+	divTipHelp.appendChild(tableNode)
+}
+
+function sizeFind()
+{
+	var scrWidth=(isIE
+		? document.body.offsetWidth
+		: window.innerWidth);
+	var scrHeight=(isIE
+		? document.body.offsetHeight
+		: window.innerHeight);
+	var divHelpTop = edgeWidth
+	with (divTipHelp.style)
+	{
+		left = "0px"
+		top = "0px"
+		width = "100%"
+		height = "100%"
+	}
+}
+
+function divClick()
+{
+	parent.popupHide(true)
+}
+
+function noContextMenu()
+{
+	if(document.all)
+		document.releaseCapture()
+	else
+		window.releaseEvents(Event.CLICK)
+	parent.popupHide(true)
+}
+</script>
+</head>
+
+<body tabIndex="-1" onload="helpInit()" onkeydown="parent.handleKeyDown(event)" onresize="sizeFind()">
+	<div id="divTipHelp" style="position:absolute;top:30px;left:0px;width:95%;height:95%;overflow:auto;" class="tip" onclick="divClick()" oncontextmenu="noContextMenu()"></div>
+</body>
+</html>

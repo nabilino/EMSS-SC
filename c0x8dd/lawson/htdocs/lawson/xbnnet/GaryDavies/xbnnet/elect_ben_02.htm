@@ -1,0 +1,133 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	REC_TYPE=2
+	var flexflag=0
+	var empflag=0
+	var compflag=0
+	var head=""
+	var bod=""
+	var bod2=''
+
+	//determineCoverage returns true if plan is not based on another plan
+	//false if it is navigating back to the avail plans screen
+	//and the new coverage if it is based on another plan
+	var cont=parent.parent.determineCoverage(2)
+	if(cont) {
+		var docHeader = parent.header('<br>'+parent.planMessages(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16]));
+
+		if(parent.parent.SelectedPlan[4]=="E") {
+			bod+='<TR><TD class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("EMPLOYEE","BEN")
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])
+		}
+		else if(parent.parent.SelectedPlan[4]=="S") {
+			bod+='<TR><TD class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE","BEN")
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])
+		}
+		else if(parent.parent.SelectedPlan[4]=="D") {
+			bod+='<TR><TD class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])
+		}
+		else if(parent.parent.SelectedPlan[4]=="B")	{
+			bod+='<TR><TD class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE","BEN")
+			// PT 149307
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])
+			bod2+='<TR><TD class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")
+			bod2+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[7])
+		} else {
+			bod+='<TR><TD class="plaintablecellborder" style="text-align:right">&nbsp;</TD><TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])
+		}
+
+		if(parent.parent.SelectedPlan[20]!="") {
+			head+='<TH class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("FLEX_CR","BEN")+'</TH>'
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[20])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			// PT 149307
+			if(parent.parent.SelectedPlan[4]=="B")
+				bod2+='<TD class="plaintablecellborder" style="text-align:right">&nbsp;</TD>'
+		}
+		if(parent.parent.SelectedPlan[18]!="") {
+			head+='<TH class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("COST","BEN")+'</TH>'
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[18])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			// PT 149307
+			if(parent.parent.SelectedPlan[4]=="B")
+				bod2+='<TD class="plaintablecellborder" style="text-align:right">&nbsp;</TD>'
+		}
+		if(parent.parent.SelectedPlan[24]!="") {
+			head+='<TH class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("CO_COST","BEN")+'</TH>'
+			bod+='<TD class="plaintablecellborder" style="text-align:right">'+parent.parent.formatCont(parent.parent.SelectedPlan[24])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			// PT 149307
+			if(parent.parent.SelectedPlan[4]=="B")
+				bod2+='<TD class="plaintablecellborder" style="text-align:right">&nbsp;</TD>'
+		}
+
+		var docFooter = parent.footer(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16])
+
+		var html = '<div class="plaintableborder" style="padding:10px">'
+
+		html += '<table border="0" cellpadding="0" cellspacing="0">'
+		html += '<tr><td class="plaintablecell" valign="top">'
+
+		html += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" styler="list"><TR>'
+		html += '<TH class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("COVERAGE","BEN")+'</TH><TH class="plaintableheaderborder" style="text-align:center" nowrap>&nbsp;</TH>'
+		html += head
+		html += bod
+		html += bod2
+		html += '</table>'
+
+		html += '</td><td class="plaintablecell" valign="top">'
+
+		html += docHeader
+
+		html += '</td></tr>'
+		html += '<tr><td class="plaintablecell" valign="top" colspan="2">'
+
+		html += docFooter
+
+		html += '</td></tr>'
+		html += '</table>'
+
+		html += '</div>'
+
+		parent.parent.removeWaitAlert();
+		if (typeof(parent.parent.parent.removeWaitAlert) != "undefined") {
+			parent.parent.parent.removeWaitAlert();
+		}
+		document.getElementById("paneBody").innerHTML = html
+		document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8]+'</span>';
+	}
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_02.htm,v 1.14.2.9 2009/03/04 17:39:47 brentd Exp $ -->

@@ -1,0 +1,346 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforModuleHeader.css,v 1.1.2.13.2.2 2014/01/10 14:29:53 brentd Exp $
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* Infor Module Container */ 
+
+.inforModuleContainer
+{
+	/* Intentionaly Blank */
+}
+
+/* The Main Content Area Padding - May Not be applicable in all scenarios thus should be overriden. */
+.inforModuleContentArea
+{
+	padding: 20px 10px 20px 10px;
+	background: white;
+}
+
+.inforModuleContentMultipleModules
+{
+	padding: 20px 10px 20px 10px;
+	border-style:solid;
+	border-color: #d4d4d4;
+	
+	border-width: 0px 1px 1px 1px;
+	-moz-border-radius: 0px 0px 5px 5px;
+	border-radius: 0px 0px 5px 5px;
+	-webkit-border-radius: 0px 0px 5px 5px;
+	background: white;
+}	
+
+/* The Main Css for the Module Header. Will Degrade to Square Corners on IE 8. */
+.inforModuleHeader
+{
+	height: 26px;
+	background: url(../../images/module_header_center_1x27.png) repeat-x;
+}
+
+/* Rounded Corners */
+.inforModuleHeaderLeftCorner
+{
+	height: 26px;
+	background: url(../../images/bg_moduleHeader_lft_10x27.png) no-repeat 0px 0px;
+	padding-left: 10px;	
+	border-style:solid;
+	border-width: 0px 0px 1px 0px;
+	border-color: #245d9b;	
+}
+
+.inforModuleHeaderRightCorner
+{
+	height: 26px;
+	background: url(../../images/bg_moduleHeader_rt_10x27.png) no-repeat right top;
+	padding-right: 10px;	
+}
+
+/* The Left Aligned Items */
+.inforModuleHeaderLeft
+{
+	float: left;
+	padding: 0px 0px 0px 0px;
+	height: 25px;
+	text-align:center;
+}
+
+/* The Right Aligned Items */
+.inforModuleHeaderRight
+{
+	float: right;
+	padding: 0px 0px 0px 0px;
+	height: 25px;
+	text-align:center;
+}
+
+.inforModuleHeaderRight button
+{
+	margin-left: 5px;
+}
+
+/* The Main Page Text  */
+.inforPageTitleText
+{
+	font-size: 12px;
+	font-family: Arial;
+	color: White;
+	font-weight: bold;
+	margin-left: 0px;
+	margin-right: 0px;
+	line-height: 27px;
+}
+
+/* The text Showing the Current Record Id */
+.inforModuleRecordIdText
+{
+	font-size: 13px;
+	font-family: Arial;
+	color: White;
+	font-weight: bold;
+	margin-left: 4px;
+	line-height: 27px;
+	padding-left: 30px;
+}
+
+/* Settings Button used optionally on the toolbar. */
+.inforModuleSettingsButton
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px 0px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+.inforModuleSettingsButton:hover
+{
+	background-position: 0px -48px;
+}
+
+.inforModuleSettingsButtonOver
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -48px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+/* Note that Active needs to be after hover in the css */
+.inforModuleSettingsButton:active
+{
+	background-position: 0px -24px;
+}
+
+.inforModuleSettingsButtonActive
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -24px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+.inforModuleSettingsButton:disabled
+{
+	opacity:0.4;
+}
+
+.inforModuleSettingsButton:disabled:hover
+{
+	background-position: 0px 0px;
+}
+
+.inforModuleSettingsButtonDisabled, .inforModuleSettingsButtonDisabledOver
+{
+    opacity:0.4;
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px 0px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+/* Close Button used optionally on the toolbar. */
+.inforModuleCloseButton
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -72px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+.inforModuleCloseButton:hover  
+{
+	background-position: 0px -120px;
+}
+
+.inforModuleCloseButtonOver  
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -120px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;
+}
+
+/* Note that Active needs to be after hover in the css */
+.inforModuleCloseButton:active
+{
+	background-position: 0px -96px;
+}
+
+.inforModuleCloseButtonActive  
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -96px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;
+}
+
+.inforModuleCloseButton:disabled
+{
+	opacity:0.4;
+}
+
+.inforModuleCloseButton:disabled:hover
+{
+	background-position: 0px -72px;
+}
+
+.inforModuleCloseButtonDisabled, .inforModuleCloseButtonDisabledOver
+{
+	opacity:0.4;
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -72px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+/* Application Drop Down Button used optionally on the toolbar. */
+.inforModuleDropDownButton
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -144px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;	
+}
+
+.inforModuleDropDownButton:hover  
+{
+	background-position: 0px -168px;
+}
+
+.inforModuleDropDownButtonOver  
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -168px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;
+}
+
+/* Note that Active needs to be after hover in the css */
+.inforModuleDropDownButton:active  
+{
+	background-position: 0px -192px;
+}
+
+.inforModuleDropDownButtonActive  
+{
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -192px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;
+}
+
+.inforModuleDropDownButton:disabled
+{
+	opacity:0.4;
+}
+
+.inforModuleDropDownButton:disabled:hover
+{
+	background-position: 0px -144px;
+}
+
+.inforModuleDropDownButtonDisabled, .inforModuleDropDownButtonDisabledOver 
+{
+    opacity:0.4;
+	height:14px;
+	width:14px;
+	border-width: 0px;
+	background: url(../../images/module_header_icons.png) no-repeat;
+	background-position: 0px -144px;
+	vertical-align: middle;
+	margin-top: 6px;
+	padding-right: 0px;	
+	padding-left: 0px;
+}

@@ -1,0 +1,52 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+<head>
+
+<script src="/lawson/javascript/message.js"></script>
+
+<script>
+var ScreenField = new Array()
+var Fieldcounter = 0
+var RecordsFound = false
+
+function V(fldname,fldval)
+{ 
+ ScreenField[fldname] = fldval 
+ if (fldname == "REC-COUNT")
+   {
+    ScreenField[fldname] = parseInt(fldval,10)
+    if (ScreenField[fldname] > 0)
+		RecordsFound = true
+   }
+ if (fldname == "RWK-SEQ-NUMBER1")
+    ScreenField[fldname] = parseInt(fldval,10)
+
+ Fieldcounter++
+}
+
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+var MsgOP = ""
+
+   if (msgnbr != "000")
+   {
+		MsgOP =  "<font size=4>"
+		MsgOP += "<b><i>" + msg + "</b></i><br>" 
+		MsgOP += "<font size=2>Detail information: Message Number=" + msgnbr + " Field Number=" + fldnbr
+		MessageWin(MsgOP,200,400)	
+	}	
+}
+
+</script>
+</head>
+<body>
+
+</body>
+</html>
+

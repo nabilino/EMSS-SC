@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<!-- $Header: /cvs/cvs_archive/applications/webtier/webappjs/html/messageDialogError.htm,v 1.5.2.4.2.4 2014/02/18 16:42:34 brentd Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+<html lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+	<meta charset="utf-8">
+	<title></title>
+	<script src="../javascript/messageDialogError.js"></script>
+	<link id="LinkStyle" type="text/css" rel="stylesheet" href="../css/messageDialog.css"></link>
+</head>
+
+<body onload="initMsgDlg()" onkeydown="msgOnKeyDown()" style="visibility:hidden;background-color:threedface;">
+
+	<table id="msgTable" border="0" style="position:absolute;left:0;top:10px;">
+	<tr>
+		<td width="60px" align="center" valign="top">
+			<img id="imgGraphic"></img>
+		</td>
+		<td align="left" valign="center">
+			<label id="lblPrompt" class="dlgLabel" style="text-align:left;overflow:visible;"></label>
+		</td>
+	</tr>
+	</table>
+
+	<!-- details area -->
+	<div id="detailsDiv" style="position:absolute;left:10;top:0;width:520px;height:320px;">
+		<hr style="width:100%;"/>
+		<textarea id="txtDetails" class="dlgLabel" style="text-align:left;height:300px;width:100%;overflow:auto;"></textarea>
+		<br/>
+	</div>
+
+	<!-- button bar area -->
+	<div style="position:absolute;left:0;top:expression(document.body.clientHeight-30);">
+		<table id="btnTable" border="0">
+		<tr>
+			<td valign="top" align="center">
+				<button id="btnOK" name="ok" class="dlgButton" onclick="onClick(this)" style="width:70px;"><!-- OK --></button>
+				<button id="btnDetails" name="showdetails" class="dlgButton" onclick="onClick(this)" style="width:85px;"><!-- Show Details --></button>
+				<button id="btnPrint" name="print" class="dlgButton" onclick="onClick(this)" style="width:70px;"><!-- Print --></button>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+</body>
+</html>

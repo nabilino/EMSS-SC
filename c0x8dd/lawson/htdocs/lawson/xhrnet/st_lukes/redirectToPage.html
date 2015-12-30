@@ -1,0 +1,26 @@
+<html>
+<head>
+<title>Redirect</title>
+<script>
+
+var pages = {
+	ExpenseApproval: "ExpenseApproval.pdf",
+	JobReqApproval: "JobReqApproval.pdf"
+}
+
+function redirect() {
+	var option = location.search.split('work=')[1]
+	if (pages[option])
+	{
+		var URL = location.origin + "/lawson/xhrnet/st_lukes/helperDocs/" + pages[option]
+		window.location.replace(URL)
+	}
+	else
+		document.body.innerHTML = "Unknown document type \"" + option + "\"";
+		
+}
+</script>
+</head>
+
+<body onload="redirect()">
+</body>

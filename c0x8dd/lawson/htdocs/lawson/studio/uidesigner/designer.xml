@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/designer.xml,v 1.1.4.1.4.7.16.2 2012/08/08 12:48:51 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<DESIGNER id="uidesigner" phraseId="lblUIDesigner" installed="y" provDir="forms">
+	<INDEXHTM>index.htm</INDEXHTM>
+	<MENU>menu.xml</MENU>
+	<TOOLBOX>toolbox.xml</TOOLBOX>
+	<MESSAGE>msgs.xml</MESSAGE>
+	<ICON>uidesignersm.gif</ICON>
+	<VIEWS>
+		<VIEW id="design" phraseId="lblDesign" editor="WYSIWYG" src="uidesign.htm" lwidth="15" rwidth="15" default="y"/>
+		<VIEW id="object" phraseId="lblObject" editor="WYSIWYG" src="uiobject.htm" lwidth="15" rwidth="15"/>
+		<VIEW id="source" phraseId="lblSource" editor="TEXT" src="uisource.htm" lwidth="15" rwidth="0"/>
+		<VIEW id="script" phraseId="lblScript" editor="TEXT" src="uiscript.htm" lwidth="15" rwidth="0"/>
+	</VIEWS>
+	<DOCUMENTS>
+		<DOCUMENT id="form">
+			<PROPERTIES>
+				<PROPERTY id="id" phraseId="lblName" readonly="1" init="form1" edit="X" draw="text" type="simple"/>
+				<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="24" edit="999" draw="text" type="simple"/>
+				<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="80" edit="999" draw="text" type="simple"/>
+				<PROPERTY id="gHeight" phraseId="lblGridY" readonly="0" init="24" edit="999" draw="text" type="simple"/>
+				<PROPERTY id="gWidth" phraseId="lblGridX" readonly="0" init="10" edit="999" draw="text" type="simple"/>
+				<PROPERTY id="TITLE" phraseId="lblTitle" readonly="1" init="" edit="X" draw="textbrowse" type="simple" >
+					<BUTTON id="openTitle" htm=""/>
+				</PROPERTY>
+				<PROPERTYPAGE id="proppage" htm="uidesigner/dialogs/propsform.htm" height="490" width="450" />
+			</PROPERTIES>
+			<EVENTS>
+				<EVENT id="oninit" label="OnInit" parms="" returns=""/>
+				<EVENT id="onterminate" label="OnTerminate" parms="" returns=""/>
+				<EVENT id="onkeydown" label="OnKeyDown" parms="evt, action" returns="boolean"/>
+				<EVENT id="onbeforeclearform" label="OnBeforeClearForm" parms="fromFld" returns="boolean"/>
+				<EVENT id="onafterclearform" label="OnAfterClearForm" parms="" returns=""/>				
+				<EVENT id="onbeforedataexchange" label="OnBeforeDataExchange" parms="oCRTIO" returns="oCRTIO"/>
+				<EVENT id="onafterdataexchange" label="OnAfterDataExchange" parms="oCRTIO" returns=""/>
+				<EVENT id="onafterdatainit" label="OnAfterDataInit" parms="" returns=""/>
+				<EVENT id="onafterframeworkinit" label="OnAfterFrameworkInit" parms="" returns=""/>
+				<EVENT id="onbeforetransaction" label="OnBeforeTransaction" parms="fc" returns="boolean"/>
+				<EVENT id="onaftertransaction" label="OnAfterTransaction" parms="data" returns=""/>
+				<EVENT id="onbeforetransfer" label="OnBeforeTransfer" parms="tkn" returns="boolean"/>
+			</EVENTS>
+			<RULES>
+				<RULE id="minHeight" value="4"/>
+				<RULE id="minWidth" value="20"/>
+				<RULE id="isParent" value="1"/>
+				<RULE id="isChild" value="0"/>
+				<RULE id="singleUse" value="1"/> 
+			</RULES>
+			<WIZARDS>
+				<WIZARD id="new" dialogHeight="380" dialogWidth="380">wizards/erp_new.htm</WIZARD>
+				<WIZARD id="existing" dialogHeight="420" dialogWidth="420" prov="remote">wizards/erp_open.htm</WIZARD>
+			</WIZARDS>
+		</DOCUMENT>
+	</DOCUMENTS>
+</DESIGNER>

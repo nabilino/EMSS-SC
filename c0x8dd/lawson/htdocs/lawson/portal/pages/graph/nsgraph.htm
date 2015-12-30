@@ -1,0 +1,84 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/pages/graph/nsgraph.htm,v 1.4.24.1.2.2 2012/08/08 12:37:32 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+	<head>
+		<script language="javascript" src="../../servenv.js"></script>
+		<script language="javascript" src="graph.js"></script>
+		<script>
+			function drawGraph()
+			{
+				var nugId = document.location.search.substr(1)
+				var nugObj = parent.page.objects[nugId]
+				if(nugObj)
+				{
+					var objXML = null;
+					if(nugObj.type.toUpperCase() == "DME")
+						objXML = nugObj.objDmeResult
+					else if(nugObj.type.toUpperCase() == "AGS")
+						objXML = nugObj.agsGraphXML
+
+					if(!objXML)return;
+
+					var g=new Graph(nugObj.width, nugObj.height)
+					// Assign values and calculate the scale
+					var xValues = new Array()
+					var yValues = new Array()
+					var maxVal = 0
+					var dpNodes = objXML.getElementsByTagName("dp")
+					for (var i=0; i < dpNodes.length; i++)
+					{
+						xValues[i] = dpNodes[i].getAttribute("label")
+						yValues[i] = parseInt(dpNodes[i].getAttribute("value"))
+						if(yValues[i] > maxVal)maxVal = yValues[i];
+					}
+					var nScale = Math.round(maxVal/5)
+					var xLabel = objXML.getElementsByTagName("category")[0].firstChild.nodeValue
+					var yLabel = objXML.getElementsByTagName("dataset")[0].getAttribute("name")
+
+					g.scale = nScale
+					g.title = (nugObj.title != "")?nugObj.title:xLabel
+					g.xLabel = xLabel
+					g.yLabel = yLabel
+					g.setLegend(yLabel)
+
+					var strAddRow = "g.addRow("
+					var strXvals = "g.setXScaleValues("
+					for(j=0; j < i; j++)
+					{
+						strAddRow += yValues[j] + ", "
+						strXvals += '"' + xValues[j] + '", '
+					}
+					strAddRow = strAddRow.substr(0, (strAddRow.length-2)) + ")"
+					strXvals  = strXvals.substr(0, (strXvals.length-2)) + ")"
+					eval(strAddRow)
+					eval(strXvals)
+					g.build()
+				}
+			}
+		</script>
+	</head>
+	<body onload="drawGraph()">
+
+	</body>
+</html>

@@ -1,0 +1,442 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/utility/Attic/build_upgrade_list.htm,v 1.1.4.5.12.4.2.2 2012/08/08 12:37:21 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Build Migration List</title>
+<link id="StyleLink" type="text/css" rel="stylesheet"  href="../portal.css"/>
+<script src="../servenv.js"></script>
+<script>
+//-----------------------------------------------------------------------------
+var portalWnd=null;
+var portalObj=null;
+var outFilename="90_migration_list.txt";
+var strPleaseWait="Please wait...";
+var fileList="";
+var fromDir="";
+var toDir="";
+var slash="/";
+var fileMgrMsg="";
+var roleXML=null;
+var statFld=null;
+var textArea=null;
+var cbxWindows=null;
+
+//-----------------------------------------------------------------------------
+function onLoad()
+{
+	try {
+		portalWnd=envFindObjectWindow("lawsonPortal");
+	} catch (e) { portalWnd=parent; }
+
+	if (!portalWnd || !portalWnd.lawsonPortal)
+	{
+		alert("Unable to proceed: cannot discover Portal window reference.");
+		portalWnd.goHome();
+		return;
+	}
+	portalObj=portalWnd.lawsonPortal;
+
+	if (!portalObj.browser.isIE)
+	{
+		alert("This utility requires the Internet Explorer browser version 5.5 or greater.");
+		portalWnd.goHome();
+		return;
+	}
+
+	portalObj.setTitle("Build Migration List")
+	with (portalObj.toolbar)
+	{
+		target=window;
+		clear();
+		createButton(portalObj.getPhrase("LBL_HOME"),portalWnd.goHome,"home","","","home");
+	}
+	
+	statFld=document.getElementById("lblStatus");
+	textArea=document.getElementById("txtArea");
+	onResize();
+	posInFirstField();
+}
+
+//-----------------------------------------------------------------------------
+function posInFirstField()
+{
+	document.getElementById("btnBuild").focus()
+}
+
+//------------------------------------------------------------------------------
+function buildList()
+{
+	// validate to and from location entries
+	fromDir=document.getElementById("txtFrom").value;
+	toDir=document.getElementById("txtTo").value;
+	if (!fromDir || !toDir)
+	{
+		alert("Please enter both a from location and a to location.");
+		document.getElementById(!fromDir ? "txtFrom" : "txtTo").focus();
+		return;
+	}
+	cbxWindows=document.getElementById("cbxWindows");
+	slash = (cbxWindows.checked ? "\\" : "/");
+
+	fileMgrMsg=portalObj.getPhrase("msgErrorReportedBy")+" FileMgr:\n";
+	document.getElementById("btnBuild").disabled=true;
+	fileList="";
+	textArea.value="";
+	statFld.innerHTML=strPleaseWait+"building roles list.";
+	window.status=strPleaseWait;
+	window.setTimeout("buildRolesList()",10);
+}
+
+//------------------------------------------------------------------------------
+function buildRolesList()
+{
+	// get list of roles files
+	roleXML = portalWnd.fileMgr.getList("filelist", portalObj.path+"/data/roles", "*.xml", false);
+	if (portalWnd.oError.handleBadResponse(roleXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving role files list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(roleXML ? " FileMgr status: "+roleXML.status : "");
+		window.status="";
+		return;
+	}
+
+	var fileNodes=roleXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		if (fileNodes[i].text == "default.xml")
+			continue;
+		var listItem="cp "+fromDir+slash+"data"+slash+"roles"+slash+fileNodes[i].text + 
+			"\t"+toDir+slash+"data"+slash+"roles"+slash+fileNodes[i].text+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	// go on to the next part
+	statFld.innerHTML=strPleaseWait+"building users list.";
+	window.setTimeout("buildUsersList()",10);
+}
+
+//------------------------------------------------------------------------------
+function buildUsersList()
+{
+	// get list of roles files
+	var oXML = portalWnd.fileMgr.getList("filelist", portalObj.path+"/data/users", "*.xml", false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving users files list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(oXML ? " FileMgr status: "+oXML.status : "");
+		window.status="";
+		return;
+	}
+
+	var fileNodes=oXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		var listItem="cp "+fromDir+slash+"data"+slash+"users"+slash+fileNodes[i].text +
+			"\t"+toDir+slash+"data"+slash+"users"+slash+fileNodes[i].text+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	// go on to the next part
+	statFld.innerHTML=strPleaseWait+"building hotkeys list.";
+	window.setTimeout("buildHotkeysList()",10);
+}
+
+//------------------------------------------------------------------------------
+function buildHotkeysList()
+{
+	// get list of forms hotkey files
+	var oXML = portalWnd.fileMgr.getList("filelist", portalObj.path+"/data/forms", "*.xml", false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving hotkeys file list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(oXML ? " FileMgr status: "+oXML.status : "");
+		window.status="";
+		return;
+	}
+
+	var fileNodes=oXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		if (!isInRoleList(fileNodes[i].text))
+			continue;
+		var listItem="cp "+fromDir+slash+"data"+slash+"forms"+slash+fileNodes[i].text + 
+			"\t"+toDir+slash+"data"+slash+"forms"+slash+fileNodes[i].text+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	// get list of forms reports files
+	var oXML = portalWnd.fileMgr.getList("filelist", portalObj.path+"/data/reports", "*.xml", false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving hotkeys file list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(oXML ? " FileMgr status: "+oXML.status : "");
+		window.status="";
+		return;
+	}
+
+	var fileNodes=oXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		if (!isInRoleList(fileNodes[i].text))
+			continue;
+		var listItem="cp "+fromDir+slash+"data"+slash+"reports"+slash+fileNodes[i].text + 
+			"\t"+toDir+slash+"data"+slash+"reports"+slash+fileNodes[i].text+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	// go on to the next part
+	statFld.innerHTML=strPleaseWait+"building content list.";
+	window.setTimeout("buildContentList()",10);
+}
+
+//------------------------------------------------------------------------------
+// function to iterate the content folder
+function buildContentList(folder)
+{
+	var bIsRouteCall = (typeof(folder) == "undefined" ? true : false);
+	folder = (typeof(folder) == "undefined" ? "content" : folder);
+
+	// get list of forms hotkey files
+	var oXML = portalWnd.fileMgr.getList("alllist", portalObj.path+"/"+folder, "*.*", false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error retrieving contenst file/folder list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(oXML ? " FileMgr status: "+oXML.status : "");
+		window.status="";
+		return;
+	}
+
+	// issue mkdir command?
+	if (!isDeliveredContentFolder(folder))
+	{
+		var listItem="mkdir "+toDir+slash+folder+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	var fileNodes=oXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		if (isDeliveredContent(fileNodes[i].text))
+			continue;
+		var listItem="cp "+fromDir+slash+folder+slash+fileNodes[i].text + 
+			"\t"+toDir+slash+folder+slash+fileNodes[i].text+"\n";
+		txtArea.value += listItem;
+		fileList += listItem;
+	}
+
+	var folderNodes=oXML.selectNodes("//FOLDER");
+	len = folderNodes.length;
+	for (var i = 0; i < len; i++)
+		buildContentList(folder+slash+folderNodes[i].text);
+
+	if (bIsRouteCall)
+		window.setTimeout("buildListDone()",10);
+}
+
+//------------------------------------------------------------------------------
+function buildListDone()
+{
+	// save the file list
+	var oXML = portalWnd.fileMgr.save(portalObj.path+"/utility", outFilename, 
+		fileList, "text/plain", false);
+	if (portalWnd.oError.handleBadResponse(oXML,true,fileMgrMsg,window))
+	{
+		alert("Error saving file list...terminating");
+		statFld.innerHTML="Build List terminated prematurely." +
+			(oXML ? " FileMgr status: "+oXML.status : "");
+		window.status="";
+		return;
+	}
+
+	document.getElementById("btnBuild").disabled=false;
+	statFld.innerHTML="List complete. " +
+		"Copy and paste list from below or see file:<br/>" + 
+		portalObj.path + "/utility/" + outFilename;
+	window.status="List complete.";
+	posInFirstField();
+}
+
+//------------------------------------------------------------------------------
+function isInRoleList(fileName)
+{
+	var retVal=false;
+	var fileNodes=roleXML.selectNodes("//FILE");
+	var len = fileNodes.length;
+	for (var i = 0; i < len; i++)
+	{
+		if (fileNodes[i].text == fileName)
+		{
+			retVal=true;
+			break;
+		}
+	}
+	return retVal;
+}
+
+//------------------------------------------------------------------------------
+function isDeliveredContentFolder(folder)
+{
+	if (folder == "content") return true;
+	if (folder == "content"+slash+"forms") return true;
+	if (folder == "content"+slash+"images") return true;
+	if (folder == "content"+slash+"pages") return true;
+	if (folder == "content"+slash+"pages"+slash+"ag") return true;
+	if (folder == "content"+slash+"pages"+slash+"al") return true;
+	if (folder == "content"+slash+"pages"+slash+"dme") return true;
+	if (folder == "content"+slash+"pages"+slash+"htm") return true;
+	if (folder == "content"+slash+"pages"+slash+"ida") return true;
+	if (folder == "content"+slash+"pages"+slash+"img") return true;
+	if (folder == "content"+slash+"pages"+slash+"lft") return true;
+	if (folder == "content"+slash+"pages"+slash+"mn") return true;
+	if (folder == "content"+slash+"pages"+slash+"rpt") return true;
+	if (folder == "content"+slash+"pages"+slash+"rss") return true;
+	if (folder == "content"+slash+"pages"+slash+"txt") return true;
+	if (folder == "content"+slash+"scripts") return true;
+	if (folder == "content"+slash+"wizards") return true;
+	return false;
+}
+
+//------------------------------------------------------------------------------
+function isDeliveredContent(fileName)
+{
+	var fname=fileName.toLowerCase();
+	if (fname == "xlate.xml") return true;;
+	if (fname == "lo12.1.addchild.xml") return true;;
+	if (fname == "lo12.1.addtop.xml") return true;;
+	if (fname == "lo12.1.edit.xml") return true;;
+	if (fname == "rd30.1.webusradd.xml") return true;;
+	if (fname == "rd30.1.webusredit.xml") return true;;
+	if (fname == "rd55.2.usrgrpadd.xml") return true;;
+	if (fname == "rd55.2.usrgrpedit.xml") return true;;
+	return false;
+}
+
+//------------------------------------------------------------------------------
+function textKeyDown(evt)
+{
+}
+
+//------------------------------------------------------------------------------
+function onResize(evt)
+{
+	var scrHeight=(portalObj.browser.isIE
+		? document.body.offsetHeight
+		: window.innerHeight-2);
+	textArea.style.height=(scrHeight-textArea.offsetTop-16);
+}
+
+//------------------------------------------------------------------------------
+function onKeyDown(evt)
+{
+    evt = top.getEventObject(evt)
+    if (!evt) return false;
+
+	// check with portal for hotkey action
+	var action = top.getFrameworkHotkey(evt,"buildlist");
+	if ( !action )
+	{
+		// framework handled the keystroke
+		top.setEventCancel(evt)
+		return false;
+	}
+
+	// hotkey defined for this keystroke
+	if (action != "buildlist")
+	{
+		cntxtActionHandler(evt,action);
+		top.setEventCancel(evt)
+		return false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function cntxtActionHandler(evt,action)
+{
+	if (action==null)		// called by the portal
+	{
+		action = top.getFrameworkHotkey(evt,"buildlist");
+		if (!action || action=="buildlist")
+			return false;
+	}
+
+	var bHandled=false;
+	switch (action)
+	{
+	case "posInFirstField":
+        posInFirstField()
+		bHandled=true
+		break;
+	case "posInNavbar":
+		top.frmPositionInShortcuts()
+		bHandled=true
+		break;
+	}
+	return (bHandled);
+}
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body tabIndex="-1" onload="onLoad()" onkeydown="onKeyDown(event)" onunload="top.formUnload()" onresize="onResize()">
+	<label class="xTLabel" style="position:absolute;top:20px;left:20px;">
+		This page will provide a list of Portal files to be migrated for the 9.0 Technology Migration.
+	</label>
+	<label class="xTLabel" style="position:absolute;top:40px;left:30px;font-weight:normal;">
+		(Enter the 'from' and 'to' locations, and click the button below to initiate the build list action.)
+	</label>
+	<hr style="position:absolute;top:60px;left:20px;width:75%;height:1px" />
+	<input type="checkbox" id="cbxWindows" style="position:absolute;top:70px;left:20px;" value=""></input>
+	<label class="xTLabel" style="position:absolute;top:72px;left:46px;font-weight:normal;">Use Windows path conventions</label>
+	<label class="xTLabel" style="position:absolute;top:100px;left:20px;">From location</label>
+	<label class="xTLabel" style="position:absolute;top:100px;left:120px;font-weight:normal">(8.0.3 Portal directory - include 'lawson/portal')</label>
+	<input type="text" id="txtFrom" style="position:absolute;top:120px;left:20px;width:75%" value=""></input>
+
+	<label class="xTLabel" style="position:absolute;top:150px;left:20px;">To location</label>
+	<label class="xTLabel" style="position:absolute;top:150px;left:105px;font-weight:normal">(9.0.0 Portal directory - include 'lawson/portal')</label>
+	<input type="text" id="txtTo" style="position:absolute;top:170px;left:20px;width:75%" value=""></input>
+
+	<button class="xTToolBarButton" id="btnBuild" style="position:absolute;top:210px;left:20px;" onclick="buildList()">Build List</button>
+	<label class="xTLabel" id="lblStatus" style="position:absolute;top:205px;left:140px;font-weight:normal;">
+		&nbsp;
+	</label>
+	<textarea id="txtArea" wrap="off" onkeydown="textKeyDown(event)"
+		style="position:absolute;left:20px;top:250px;width:75%;height:60%;font-size:9pt;font-family:courier new;font-weight:normal;">
+	</textarea>
+</body>
+</html>

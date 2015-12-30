@@ -1,0 +1,474 @@
+<html>
+<head>
+<title>Calendar</title>
+<meta name="viewport" content="width=device-width" />
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script language="JavaScript">
+function calMouseOver (calObj)
+{
+	calObj.className = "calendarButtonHilight";
+	// e.srcElement.setAttribute("className","calendarButtonHilight");
+}
+
+function calMouseOut (calObj)
+{
+	calObj.className = "calendarButton";
+	// e.srcElement.setAttribute("className","calendarButton");
+}
+
+function calFocus (calObj)
+{
+	calObj.className = "calendarButtonHilight";
+	// e.srcElement.setAttribute("className","calendarButtonHilight");
+}
+
+function calBlur (calObj)
+{
+	calObj.className = "calendarButton";
+	// e.srcElement.setAttribute("className","calendarButton");
+}
+
+function buildPage()
+{
+	try {
+	if (typeof(self.getSeaPhrase) != "undefined" && self.getSeaPhrase("JAN","ESS") != "")
+   			camefrom = self;
+	else if (opener && opener.getSeaPhrase("JAN","ESS") != "")
+    	camefrom = opener;
+    else if (opener && opener.opener && opener.opener.getSeaPhrase("JAN","ESS") != "")
+    	camefrom = opener.opener;
+    else
+    	camefrom = self;
+	} catch (e) {
+    	camefrom = self;
+	}
+	
+	document.title = camefrom.getSeaPhrase("CALENDAR","ESS");
+
+	var pageHtml = '<link rel="stylesheet" type="text/css" href="/lawson/xhrnet/ui/ui.css"/>'
+		+ '<BODY CLASS="calendarPopup" onload="parent.setDate()">'
+		+ '<div align=center><FORM NAME="calControl" onSubmit="return false;">'
+        + '<TABLE CELLPADDING=2 CELLSPACING=0 BORDER=0 style="align:center;margin-top:5px;margin-left:7px">'
+        + '<TR height=25><TD ALIGN=CENTER>'
+        + '<SELECT CLASS="calendaritem" NAME="month" onChange="parent.selectDate()">'
+        + '<OPTION>'+camefrom.getSeaPhrase("JAN","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("FEB","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("MAR","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("APR","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("MAY","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("JUN","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("JUL","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("AUG","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("SEP","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("OCT","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("NOV","ESS")
+        + '<OPTION>'+camefrom.getSeaPhrase("DEC","ESS")
+        + '</SELECT>  '
+        + '<INPUT CLASS="calendaritem" NAME="year" TYPE=TEXT SIZE=4 MAXLENGTH=4 onChange="parent.selectDate()" onMouseOut="parent.refreshYear()">'
+        + '</TD>'
+        + '</TR>'
+
+        + '<TR height=25px>'
+        + '<TD HEIGHT=25px ALIGN=CENTER>'
+        + '<INPUT CLASS="calendarButton" STYLE="width:20px;border:0" TYPE=BUTTON NAME="previousYear" VALUE="<<" onClick="parent.setPreviousYear()" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)">'
+        + '<INPUT CLASS="calendarButton" STYLE="width:20px;border:0" TYPE=BUTTON NAME="previousYear" VALUE=" < " onClick="parent.setPreviousMonth()" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)">'
+        + '<INPUT CLASS="calendarButton" STYLE="font-weight:bold;width:60px;border:0" TYPE=BUTTON NAME="today" VALUE="'+camefrom.getSeaPhrase("TODAY","ESS")+'" onClick="parent.setToday()" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)">'
+        + '<INPUT CLASS="calendarButton" STYLE="width:20px;border:0" TYPE=BUTTON NAME="previousYear" VALUE=" > " onClick="parent.setNextMonth()" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)">'
+        + '<INPUT CLASS="calendarButton" STYLE="width:20px;border:0" TYPE=BUTTON NAME="previousYear" VALUE=">>" onClick="parent.setNextYear()" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)">'
+        + '</TD>'
+        + '</TR>'
+        + '</TABLE>'
+        + '</FORM></div>'
+
+        + '<div align=center><FORM NAME="calButtons">'
+
+		+ '<TABLE class="calendarBody" CELLPADDING=0 CELLSPACING=0 BORDER=0 style="margin-left:7px;">'
+        + '<TR height=25px align=center>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("SUN","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("MON","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("TUE","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("WED","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("THU","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("FRI","ESS")+'</TD>'
+        + '<TD class="calendarHeader">'+camefrom.getSeaPhrase("SAT","ESS")+'</TD></TR>'
+
+        + '<TR align=center>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but0"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but1"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but2"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but3"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but4"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but5"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but6"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '<TR align=center>'
+	    + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but7"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but8"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but9"  value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but10" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but11" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but12" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but13" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '<TR align=center>'
+    	+ '<TD><INPUT class="calendarButton" TYPE="button" NAME="but14" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but15" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but16" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but17" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but18" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but19" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but20" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '<TR align=center>'
+    	+ '<TD><INPUT class="calendarButton" TYPE="button" NAME="but21" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but22" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but23" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but24" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but25" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but26" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but27" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '<TR align=center>'
+	    + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but28" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but29" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but30" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but31" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but32" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but33" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but34" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '<TR align=center>'
+	    + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but35" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but36" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but37" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but38" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but39" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but40" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD>'
+        + '<TD><INPUT class="calendarButton" TYPE="button" NAME="but41" value="  " onClick="parent.returnDate(this.value)" onMouseOver="parent.calMouseOver(this)" onMouseOut="parent.calMouseOut(this)" onFocus="parent.calFocus(this)" onBlur="parent.calBlur(this)"></TD></TR>'
+
+        + '</TABLE>'
+        + '</FORM></div>'
+        + '</BODY>'
+
+	self.CALENDAR.document.write(pageHtml);
+	self.CALENDAR.document.close();
+	//self.CALENDAR.document.getElementById("paneBody").style.overflow="hidden";
+	//self.CALENDAR.document.getElementById("paneBody").innerHTML = pageHtml;
+	try {
+		setDate();
+	}
+	catch(e) {}
+}
+
+function refreshYear()
+{
+	if((self.CALENDAR.document.calControl.year.value.length == 4)
+	&& (calYear != self.CALENDAR.document.calControl.year.value))
+	{
+		selectDate();
+	}
+}
+
+function setDate()
+{
+    authUser = opener.authUser;
+
+	DateFmt = authUser.datefmt;
+	DateSep = authUser.date_separator;
+	Century = authUser.century;
+	DATE = authUser.date;
+	inDate = "";
+    if(opener.dateField)
+    {
+    	dateField = opener.dateField;
+		if (ValidDate(dateField))
+		    inDate = dateField.value;
+		else
+			inDate = "";
+	}
+
+    // SET DAY MONTH AND YEAR TO TODAY'S DATE
+    var now   = new Date();
+    calDay   = now.getDate();
+    calMonth = now.getMonth();
+    calYear  = now.getFullYear();
+
+    // IF A DATE WAS PASSED IN THEN PARSE THAT DATE
+	if (inDate != "")
+	{
+		var dateAry = inDate.split(DateSep);
+		calYear = (DateFmt == "YYYYMMDD" ? dateAry[0] : dateAry[2]);
+        if (calYear.length < 4)
+        {
+        	if (Number(calYear) < Number(Century))
+            	calYear = "20" + calYear;
+            else
+            	calYear = "19" + calYear;
+        }
+		calMonth = (DateFmt == "MMDDYYYY" ? dateAry[0] : dateAry[1]);
+		calDay = (DateFmt == "MMDDYYYY" ? dateAry[1] : (DateFmt == "DDMMYYYY" ? dateAry[0] : dateAry[2]));
+		calYear = Number(calYear);
+		calMonth = Number(calMonth) - 1;
+		calDay = Number(calDay);
+	}
+    focusDay = calDay;
+    self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+    self.CALENDAR.document.calControl.year.value          = calYear;
+    displayCalendar(calDay, calMonth, calYear);
+}
+
+function setToday() {
+    // SET DAY MONTH AND YEAR TO TODAY'S DATE
+    var now   = new Date();
+    calDay   = now.getDate();
+    calMonth = now.getMonth();
+    calYear  = now.getFullYear();
+    focusDay = calDay;
+    self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+    self.CALENDAR.document.calControl.year.value          = calYear;
+    displayCalendar(calDay, calMonth, calYear);
+    returnDate(calDay);
+}
+
+function isFourDigitYear(year) {
+    if (year.length != 4) {
+        alert(camefrom.getSeaPhrase("CAL_0","ESS"));
+        self.CALENDAR.document.calControl.year.select();
+        self.CALENDAR.document.calControl.year.focus();
+    }
+    else {
+        return true;
+    }
+}
+
+function selectDate() {
+    calYear  = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setPreviousYear() {
+    calYear  = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        calYear--;
+        self.CALENDAR.document.calControl.year.value = calYear;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setPreviousMonth() {
+    calYear  = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        if (calMonth == 0) {
+            calMonth = 11;
+            if (calYear > 1000) {
+                calYear--;
+                self.CALENDAR.document.calControl.year.value = calYear;
+            }
+        }
+        else {
+            calMonth--;
+        }
+        self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setNextMonth() {
+    calYear  = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        if (calMonth == 11) {
+            calMonth = 0;
+            calYear++;
+            self.CALENDAR.document.calControl.year.value = calYear;
+        }
+        else {
+            calMonth++;
+        }
+        self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setNextYear() {
+    calYear  = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        calYear++;
+        self.CALENDAR.document.calControl.year.value = calYear;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function displayCalendar(day, month, year) {
+
+    day     = Number(day);
+    month   = Number(month);
+    year    = Number(year);
+    var i   = 0;
+    var now = new Date();
+
+    if (day == 0) {
+        var nowDay = now.getDate();
+    }
+    else {
+        var nowDay = day;
+    }
+    var days         = getDaysInMonth(month+1,year);
+    var firstOfMonth = new Date (year, month, 1);
+    var startingPos  = firstOfMonth.getDay();
+    days += startingPos;
+
+    // MAKE BEGINNING NON-DATE BUTTONS BLANK
+    for (i = 0; i < startingPos; i++) {
+		var aButton = self.CALENDAR.document.calButtons[i];
+        aButton.value = "  ";
+        aButton.style.display = "none";
+    	aButton.style.fontWeight = "normal";
+		aButton.style.border="0";
+		aButton.style.backgroundColor="";
+    }
+
+    // SET VALUES FOR DAYS OF THE MONTH
+    for (i = startingPos; i < days; i++)
+    {
+		var val = i-startingPos+1;
+		if (val < 10)
+			val = " " + val;
+
+		var aButton = self.CALENDAR.document.calButtons[i];
+		aButton.value = val;
+		aButton.onClick = "returnDate";
+		aButton.style.display = "";
+		aButton.style.fontWeight = "normal";
+		aButton.style.border="0";
+		aButton.style.backgroundColor="";
+
+   }
+
+    // MAKE REMAINING NON-DATE BUTTONS BLANK
+    for (i=days; i<42; i++)  {
+		var aButton = self.CALENDAR.document.calButtons[i];
+        aButton.value = "  ";
+        aButton.style.display = "none";
+    	aButton.style.fontWeight = "normal";
+		aButton.style.border="0";
+		aButton.style.backgroundColor="";
+    }
+
+	// Only highlight and focus on "day" if we are on the current month and year [dko 8/25/2003]
+	var nowMonth = now.getMonth();
+	var nowYear = now.getFullYear();
+	var compareMonth = Number(self.CALENDAR.document.calControl.month.selectedIndex);
+	var compareYear = Number(self.CALENDAR.document.calControl.year.value);
+	if (day != 0 || ((nowMonth == compareMonth) && (nowYear == compareYear)))
+	{
+		// GIVE FOCUS TO CORRECT DAY
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].focus();
+		// [dko 8/21/03] additional decoration
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.fontWeight="bold";
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.border="1px solid black";
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.backgroundColor="#E2ECE1";
+	}
+
+}
+
+// GET NUMBER OF DAYS IN MONTH
+function getDaysInMonth(month,year)  {
+    var days;
+    if (month==1 || month==3 || month==5 || month==7 || month==8 ||
+        month==10 || month==12)  days=31;
+    else if (month==4 || month==6 || month==9 || month==11) days=30;
+    else if (month==2)  {
+        if (isLeapYear(year)) {
+            days=29;
+        }
+        else {
+            days=28;
+        }
+    }
+    return (days);
+}
+
+// CHECK TO SEE IF YEAR IS A LEAP YEAR
+function isLeapYear (Year) {
+    if (((Year % 4)==0) && ((Year % 100)!=0) || ((Year % 400)==0)) {
+        return (true);
+    }
+    else {
+        return (false);
+    }
+}
+
+// SET FORM FIELD VALUE TO THE DATE SELECTED
+function returnDate(inDay)
+{
+	if (Number(inDay) == 0)
+		return;
+
+    var day   = Number(inDay);
+    var month = (self.CALENDAR.document.calControl.month.selectedIndex)+1;
+    var year  = self.CALENDAR.document.calControl.year.value;
+	var dateValue = "";
+
+    if ((""+month).length == 1)
+    {
+        month="0"+month;
+    }
+    if ((""+day).length == 1)
+    {
+        day="0"+day;
+    }
+    if (day != "  ")
+    {
+		if (DateFmt == "MMDDYYYY")
+	       	dateValue = month + DateSep + day + DateSep + year;
+		else if (DateFmt == "DDMMYYYY")
+	       	dateValue = day + DateSep + month + DateSep + year;
+		else if (DateFmt == "YYYYMMDD")
+	       	dateValue = year + DateSep + month + DateSep + day;
+	    window.opener.ReturnDate(dateValue);
+		window.close();
+    }
+}
+// -->
+</script>
+</head>
+<frameset rows="100%,*" frameborder="no" border="0" onload="buildPage()">
+	<frame src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" name="CALENDAR" id="CALENDAR" scrolling="auto">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/xmlcalendar.htm,v 1.14.2.4 2012/06/29 17:12:22 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

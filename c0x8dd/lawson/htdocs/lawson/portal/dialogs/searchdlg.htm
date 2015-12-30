@@ -1,0 +1,47 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/dialogs/Attic/searchdlg.htm,v 1.1.2.1.14.1.2.2 2012/08/08 12:37:24 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Search Results</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="searchdlg.js"></script>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="dlg.css"></link>
+</head>
+<body onload="srchInit()" onkeydown="srchOnKeyDown()" onresize="srchOnResize()" class="popBody" style="visibility:hidden;">
+
+	<div id="srchContentFrm" class="popContentFrm" style="position:absolute;top:10px;left:10px;">
+		<label id="srchTitle" class="popTitle" style="position:absolute;top:5px;left:25px;">&nbsp;</label>
+		<label id="srchText" class="xtListText" style="position:absolute;top:5px;left:85px;">&nbsp;</label>
+		<div id="srchContent" class="popContent" style="position:absolute;top:25px;left:15px;background-color:white;">
+			<div id="listDiv" class="xtListText" style="position:absolute;top:10px;left:10px;">
+			</div>
+			<div id="srchButtons" style="position:absolute;top:0;left:0;">
+				<input type="button" id="btnClose" class="dlgButton" onclick="window.close()" value="Close" style="width:75px;margin-right:10px;"></input>
+			</div>
+		</div>
+	</div>
+
+</body>
+</html>

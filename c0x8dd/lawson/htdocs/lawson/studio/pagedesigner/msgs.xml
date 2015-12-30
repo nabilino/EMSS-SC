@@ -1,0 +1,118 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/msgs.xml,v 1.4.34.2 2012/08/08 12:48:53 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<TRANSLATE>
+
+<!-- Designer definition phrases -->
+	<PHRASE id="lblPortalPage">Portal Page Designer</PHRASE>
+	<PHRASE id="lblDesign">Design</PHRASE>
+	<PHRASE id="lblSource">Source</PHRASE>
+	<PHRASE id="lblScript">Script</PHRASE>
+
+<!-- Control definition phrases -->
+	<PHRASE id="lblPgGroup1">Lawson</PHRASE>
+	<PHRASE id="lblPgGroup2">General</PHRASE>
+	<PHRASE id="lblDme">Data Query</PHRASE>
+	<PHRASE id="lblAgs">Transaction</PHRASE>
+	<PHRASE id="lblIda">Drill</PHRASE>
+	<PHRASE id="lblRss">RSS News</PHRASE>
+	<PHRASE id="lblReport">Report</PHRASE>
+	<PHRASE id="lblText">Text</PHRASE>
+	<PHRASE id="lblImage">Image</PHRASE>
+	<PHRASE id="lblHtm">Web Page</PHRASE>
+	<PHRASE id="lblLawsonMenu">Lawson Menu</PHRASE>
+	<PHRASE id="lblLocalTransfer">Local Transfer Menu</PHRASE>
+	<PHRASE id="lblUserDefined">User Defined Menu</PHRASE>
+	<PHRASE id="lblFormlet">Formlet</PHRASE>
+	<PHRASE id="lblComposite">Composite</PHRASE>
+	<PHRASE id="lblName">Name</PHRASE>
+	<PHRASE id="lblLeft">Left</PHRASE>
+	<PHRASE id="lblTop">Top</PHRASE>
+	<PHRASE id="lblHeight">Height</PHRASE>
+	<PHRASE id="lblWidth">Width</PHRASE>
+	<PHRASE id="lblBorder">Border</PHRASE>
+	<PHRASE id="lblScroll">Scroll</PHRASE>
+	<PHRASE id="lblzIndex">zIndex</PHRASE>
+	<PHRASE id="lblYes">Yes</PHRASE>
+	<PHRASE id="lblNo">No</PHRASE>
+	<PHRASE id="lblVisibility">Visibility</PHRASE>
+	<PHRASE id="lblVisible">Visible</PHRASE>
+	<PHRASE id="lblHidden">Hidden</PHRASE>
+	<PHRASE id="lblFilter">Filter</PHRASE>
+	<PHRASE id="lblFilterTitle">Filter title</PHRASE>
+	<PHRASE id="lblWindowOption">Navigate</PHRASE>
+	<PHRASE id="lblNewWin">New window</PHRASE>
+	<PHRASE id="lblPassUrl">Pass to parent</PHRASE>
+	<PHRASE id="lblReplacePar">Replace parent</PHRASE>
+	<PHRASE id="lblAutoHide">Auto hide</PHRASE>
+	<PHRASE id="lblDataControl">DataSrc</PHRASE>
+	<PHRASE id="lblShowDesc">Show Desc</PHRASE>
+	<PHRASE id="lblAutoStep">Auto step</PHRASE>
+	<PHRASE id="lblPrint">Print</PHRASE>
+	<PHRASE id="lblSubmit">Submit</PHRASE>
+	<PHRASE id="lblDelete">Delete</PHRASE>
+	<PHRASE id="lblSource">Source</PHRASE>
+	<PHRASE id="lblToken">Token</PHRASE>
+	<PHRASE id="lblFormID">Form ID</PHRASE>
+	<PHRASE id="lblTitle">Title</PHRASE>
+	<PHRASE id="lblVersion">Version</PHRASE>
+	<PHRASE id="lblPage">Property Page</PHRASE>
+	<PHRASE id="lblRefresh">Refresh</PHRASE>
+	<PHRASE id="lblAlways">Always</PHRASE>
+	<PHRASE id="lblKeysChanged">Keys Changed</PHRASE>
+
+<!-- Menu phrases -->
+	<PHRASE id="LBL_IMPORT">Import</PHRASE>
+	<PHRASE id="LBL_INCLUDE">Include</PHRASE>
+	<PHRASE id="LBL_RELOAD">Reload Document</PHRASE>
+
+	<PHRASE id="LBL_APPLYCHANGES">Apply Changes</PHRASE>
+	<PHRASE id="LBL_DESELECTALL">Deselect All</PHRASE>
+
+	<PHRASE id="LBL_DESIGN">Design</PHRASE>
+	<PHRASE id="LBL_SCRIPT">Script</PHRASE>
+
+	<PHRASE id="LBL_ABOUTDESIGNER">About Portal Page Designer</PHRASE>
+
+	<PHRASE id="TITLE_IMPORT">Import a definition.</PHRASE>
+	<PHRASE id="TITLE_INCLUDE">Include a script file.</PHRASE>
+	<PHRASE id="TITLE_RELOAD">Reload the user interface source contents.</PHRASE>
+
+	<PHRASE id="TITLE_APPLYCHANGES">Apply changes to the source/script.</PHRASE>
+	<PHRASE id="TITLE_DESELECTALL">Deselect all currently selected controls.</PHRASE>
+
+	<PHRASE id="TITLE_DESIGN">View the design window for the current document.</PHRASE>
+	<PHRASE id="TITLE_SOURCE">View the source window for the current document.</PHRASE>
+	<PHRASE id="TITLE_SCRIPT">View the script window for the current document.</PHRASE>
+
+	<PHRASE id="TITLE_ABOUTDESIGNER">Displays the about page for this designer.</PHRASE>
+
+<!-- Messages-->
+	<PHRASE id="MSG_SCRIPT_CHANGED">Save script changes to this document?</PHRASE>
+	<PHRASE id="MSG_SOURCE_CHANGED">Save source changes to this document?</PHRASE>
+	<PHRASE id="MSG_LOADING">Loading ...</PHRASE>
+	<PHRASE id="MSG_LOAD_FAILURE">Unable to load page document.</PHRASE>
+	<PHRASE id="MSG_IMPORT_ERROR0">Create a composite to use an existing portal page.</PHRASE>
+	<PHRASE id="MSG_SCRIPTING_OCX_NOT_FOUND_SAVE">Script is saved without syntax error checking.%n%A script control component is not found.%n%Please refer to the documentation for download instructions.</PHRASE>
+</TRANSLATE>

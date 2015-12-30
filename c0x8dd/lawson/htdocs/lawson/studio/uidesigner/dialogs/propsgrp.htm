@@ -1,0 +1,106 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/propsgrp.htm,v 1.2.6.2.22.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Tab Area Properties</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></SCRIPT>
+<script language="javascript" src="propsgrp.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgSelectedGroup">You have asked to delete</phrase>
+		<phrase id="msgAppliedNow">The delete action is applied immediately to the form.</phrase>
+		<phrase id="msgOtherChanges">You have other Tab Area changes pending which will also be applied.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="grpInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="grpOnKeyDown()">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGeneral" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="grpSwitchTab(this)">General</span>
+	</div>
+
+	<!-- General tab pane -->
+	<div id="divGeneral" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" align="left" style="height:20px;">
+				<label id="lblGroupId" for="txtGroupId" class="dsLabel" style="position:relative;">
+					Tab Area Id:
+				</label>&nbsp;
+				<label id="txtGroupId" class="dsLabel" style="position:relative;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblGroups" class="dsLabel" style="position:relative;text-align:left;">Tabs:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selGroups" class="dsListText" size="8" style="width:300px;height:expression(this.size*17);" 
+						ondblclick="grpGroupProperty('existing')" onchange="grpOnGroupChange()">
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnGroupProps" type="button" class="dsDlgButton" style="width:70px;" onclick="grpGroupProperty('existing')" value="Properties"></input>
+				<input id="btnNewGroup" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="grpGroupProperty('new')" value="New"></input>
+				<input id="btnDeleteGroup" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="grpDeleteGroup()" value="Delete"></input>
+				<input id="btnUpGroup" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="grpMoveGroup('up')" value="Up"></input>
+				<input id="btnDownGroup" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="grpMoveGroup('dn')" value="Down"></input>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="grpOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="grpUpdate()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="grpReturn()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

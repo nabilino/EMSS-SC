@@ -1,0 +1,128 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/proppgtext.htm,v 1.2.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Text Property Page</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="proppgtext.js"></script>
+</head>
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<table border="0" height="100%" width="100%">
+		<tr height="30px">
+			<td align="left">
+			<span id="toolbar" style="position:relative;width:100%;background-color:threedface;border-bottom:1px solid threedshadow;">
+ 				<input type="button" id="bold" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/bold.jpg);"
+ 					title="Bold" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+ 				<input type="button" id="italic" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/italic.jpg);"
+ 					title="Italic" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+ 				<input type="button" id="underline" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/underline.jpg);"
+ 					title="Underline" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+				<img align="center" id="sep" src="../images/separator.jpg"></img>
+ 				<input type="button" id="alignleft" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/left.jpg);"
+ 					title="Align Left" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+ 				<input type="button" id="aligncenter" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/center.jpg);"
+ 					title="Align Center" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+ 				<input type="button" id="alignright" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/right.jpg);"
+ 					title="Align Right" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+				<img align="center" id="sep" src="../images/separator.jpg"/>
+ 				<input type="button" id="bgcolor" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/bgcolor.jpg);"
+ 					title="Background color" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+ 				<input type="button" id="color" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(../images/color.jpg);"
+ 					title="Color" onmouseover="ppgMouseover(this)" onmouseout="ppgMouseout(this)" onclick="ppgFormat(this)" >
+ 				</input>
+				<img align="center" id="sep" src="../images/separator.jpg"></img>
+				<select class="dsTextBox" id="font" onchange="ppgFormat(this)" style="position:relative;width:140;" title="Font Family">
+					<option value="arial">Arial</option>
+					<option value="book antiqua">Book Antiqua</option>
+					<option value="comic sans ms">Comic Sans MS</option>
+					<option value="courier new">Courier New</option>
+					<option value="helvetica">Helvetica</option>
+					<option value="lucida console">Lucida Console</option>
+					<option value="modern">Modern</option>
+					<option value="ms sans serif">MS Sans Serif</option>
+					<option value="news gothic mt">News Gothic MT</option>
+					<option value="serif">Serif</option>
+					<option value="sans serif">Sans Serif</option>
+					<option value="tahoma" selected>Tahoma</option>
+					<option value="times new roman">Times New Roman</option>
+					<option value="verdana">Verdana</option>
+					<option value="wide latin">Wide Latin</option>
+				</select>
+				<select id="size" class="dsTextBox" style="position:relative;width:55;" onchange="ppgFormat(this)" title="Font Size">
+					<option value="8pt" selected="true">8 pt</option>
+					<option value="9pt">9 pt</option>
+					<option value="10pt">10 pt</option>
+					<option value="11pt">11 pt</option>
+					<option value="12pt">12 pt</option>
+					<option value="13pt">13 pt</option>
+					<option value="14pt">14 pt</option>
+					<option value="15pt">15 pt</option>
+					<option value="16pt">16 pt</option>
+					<option value="17pt">17 pt</option>
+					<option value="18pt">18 pt</option>
+					<option value="19pt">19 pt</option>
+					<option value="20pt">20 pt</option>
+					<option value="21pt">21 pt</option>
+					<option value="22pt">22 pt</option>
+				</select>
+			</span>
+			</td>
+		</tr>
+		<tr>
+			<td align="center" valign="top">
+			<textarea id="text" contentEditable="true" style="position:relative;width:100%;height:250px;overflow:auto;" class="dsTextBox"></textarea>
+			</td>
+		</tr>
+		<tr height="30px">
+			<td align="right">
+				<input id="btnOK" type="button" class="dsDlgButton" onclick="ppgOK()"
+					style="position:relative;width:70px;" value="OK">
+				</input>
+				<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+					style="position:relative;width:70px;" value="Cancel">
+				</input>
+				<input id="btnApply" type="button" class="dsDlgButton" disabled onclick="ppgUpdate()"
+					style="position:relative;width:70px;" value="Apply">
+				</input>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

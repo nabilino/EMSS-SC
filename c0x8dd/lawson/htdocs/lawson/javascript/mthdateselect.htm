@@ -1,0 +1,208 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<head>
+<title>Calendar</title>
+<script>
+
+var imgURL = "/lawson/images/schedule";
+var today = new Date();
+var thisDay = today.getDate();
+var thisMonth = today.getMonth() + 1;
+//var thisYear = today.getYear() + 1900;
+var thisYear = today.getFullYear();
+var selDay = thisDay;
+var selMonth = thisMonth;
+var selYear = thisYear;
+
+function monthArr()
+{
+	this[0] = 31;
+	this[1] = 28;
+	this[2] = 31;
+	this[3] = 30;
+	this[4] = 31;
+	this[5] = 30;
+	this[6] = 31;
+	this[7] = 31;
+	this[8] = 30;
+	this[9] = 31;
+	this[10] = 30;
+	this[11] = 31;
+}
+
+function monthNameArr()
+{
+	this[0] = ""
+	this[1] = "January"
+	this[2] = "February"
+	this[3] = "March"
+	this[4] = "April"
+	this[5] = "May"
+	this[6] = "June"
+	this[7] = "July"
+	this[8] = "August"
+	this[9] = "September"
+	this[10] = "October"
+	this[11] = "November"
+	this[12] = "December"
+}
+
+function dispCal(month, day, year)
+{
+	var calDoc = frames[1].document;
+
+	if (month >= 1 && month <=12 && month != selMonth)
+		selMonth = month;
+//	if (day >= 1 && day <= 31 && day != selDay)
+//		selDay = day;
+	if (year >= 1970 && year != selYear)
+		selYear = year;
+
+	var MonthName = new monthNameArr();
+	// do the classic leap year calculation
+	var monthDays = new monthArr();
+//	if (((selYear % 4 == 0) && (selYear % 100 != 0)) || (selYear % 400 == 0))
+//		monthDays[1] = 29;
+	// figure out how many days the month will have...
+	var nDays = monthDays[selMonth-1];
+//	if (selDay > nDays)
+//		selDay = nDays;
+	// and go back to the first day of the month...
+//	var firstDay = new Date(selYear, selMonth-1, 1, 8);
+
+	// and figure out which day of the week it hits...
+//	var startDay = firstDay.getDay();
+
+	var page = "<body link=#000000 bgcolor=#ffffff>";
+	// Display the Previous Month button
+	page += "<center><a href=\"javascript:";
+//	if (selMonth == 1)
+//		page += "parent.dispCal(12, parent.selDay, " + (selYear-1) + ")\" ";
+//	else
+//		page += "parent.dispCal(" + (selMonth-1) + ", parent.selDay, " + 
+//			selYear + ")\" ";
+//	page += "target=hid1Frame><img border=0 src=\"" + imgURL + 
+//		"/l_tri.gif\"></a>";
+
+	// Display the Month
+//	page += '<font color=blue size=4><b>' + MonthName[selMonth] + '</b></font>';
+
+	// Display the Next Month button
+//	page += "<a href=\"javascript:";
+//	if (selMonth == 12)
+//		page += "parent.dispCal(1, parent.selDay, " +
+//			(selYear+1) + ")\" ";
+//	else
+//		page += "parent.dispCal(" + (selMonth+1) +
+//			", parent.selDay, " + selYear + ")\" ";
+//	page += "target=hid1Frame><img border=0 src=\"" + imgURL + 
+//		"/blue_tri.gif\"></a>";
+
+	page += "<img border=0 src=\"" + imgURL + "/blnk_tri.gif\">";
+
+	// Display the Previous Year button
+	page += "<a href=\"javascript:";
+	page += "parent.dispCal(" + selMonth + ", parent.selDay, " + 
+		(selYear-1) + ")\" target=hid1Frame>";
+	page += "<img border=0 src=\"" + imgURL + "/l_tri.gif\"></a>";
+
+	// Display the Year
+	page += "<font color=blue size=4><b>" + selYear + "</b></font>";
+
+	// Display the Next Year button
+	page += "<a href=\"javascript:";
+	page += "parent.dispCal(" + selMonth + ", parent.selDay, " + 
+		(selYear+1) + ")\" target=hid1Frame>";
+	page += "<img border=0 src=\"" + imgURL + "/blue_tri.gif\"></a>";
+
+//	var tH = "<th align=center>";
+	page += 
+		"<table border=1 cellspacing=4 cellpadding=4 align=center><tr>" 
+//		tH + "S" + tH + "M" + tH + "T" + tH + "W" + tH + "T" + tH + "F" + 
+//		tH + "S";
+
+	// now write the blanks at the beginning of the calendar
+//	page += "<tr>";
+	var column = 0;
+//	for (i=0; i<startDay; i++)
+//	{
+//		page += "<td>"
+//		column++;
+//	}
+
+	for (i=1; i<=12; i++)
+	{
+		if (column >= 3)
+		{
+			column = 0;
+			page += "<tr>";
+		}
+
+		/* Display the number for the day. */
+		page += "<td align=center bgcolor="
+//		if ((i == selDay) && (i == thisDay) && 
+//			(selMonth == thisMonth) && (selYear == thisYear))
+//			/* If this is the selected day and today, mark it purple */
+//			page += "mediumpurple>";
+		if ((i == selMonth) && (selYear == thisYear))
+			/* If this is the current month, mark it purple */
+			page += "plum>";
+		else if (i == selMonth) 
+			/* If this is the selected Month, mark it red. */
+			page += "magenta>";
+		else
+			page += "white>";
+		page += "<a href='javascript:parent.ReturnMonth(" + i + ")' "
+//			  + "target=hid1Frame>" + i + "</a>"
+			 + "target=hid1Frame>" + MonthName[i] + "</a>"
+		
+		column++;
+	}
+	if (column > 0)
+	{
+		for (var i = column; i < 3; i++)
+		{
+			page += "<td>"
+		}
+	}
+	page += "</font></table></center>";
+	calDoc.write(page);
+	calDoc.close();
+}
+
+
+function ReturnMonth(Month)
+{
+	nmonth = "" + Month
+	if (nmonth.length == 1)
+		nmonth = "0" + nmonth
+	window.opener.ReturnDate(nmonth,selYear)
+	self.close()
+}
+
+var prot = window.location.protocol
+var fram = '<frameset rows="0,*" frameborder=no border=0>'
+
+if (prot == 'http:')
+	fram +=	'<frame src="about:blank" name=hid1Frame scrolling=no>'
+else
+	fram +=	'<frame src="/lawson/dot.htm" name=hid1Frame scrolling=no>'
+
+fram += '<frame src=javascript:parent.dispCal(0,0,0)>'
+	 +  '</frameset>'
+
+window.document.write(fram)
+window.document.close()
+
+</script>
+</head>
+<!--
+<frameset rows="0,*" frameborder=no border=0>
+	<frame src="about:blank" name=hid1Frame scrolling=no>
+	<frame src=javascript:parent.dispCal(0,0,0)>
+</frameset>
+-->

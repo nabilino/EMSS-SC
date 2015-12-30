@@ -1,0 +1,518 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/officemanager/bookmarkuser.htm,v 1.22.2.1.4.7.14.1.2.3 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<head>
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="officemanager.css" type="text/css" />
+<script language="javascript" src="../../servenv.js"></script>
+<script language="javascript" src="../../common.js"></script>
+<script language="javascript" src="../admincommon.js"></script>
+<script language="javascript" src="../../objects/ResourceSearch.js"></script>
+
+<script>
+//-----------------------------------------------------------------------------
+// environment
+var portalWnd = opener.portalWnd;
+var portalObj = opener.portalObj;
+var isIE = opener.isIE;
+
+//page globals
+var divList = null;
+var edgeWidth = 6;
+var listPrev = null;
+var listNext = null;
+var hoverSpan=null;
+var lastFilter = "";
+var lastPage = 0; // TODO: we could render the current page pretty easily now
+var lastRSPackage = null;
+var searchFor=null;
+var spanprev = null;
+var spannext = null;
+var txtSearch=null;
+
+//-----------------------------------------------------------------------------
+function initDialog()
+{
+	window.document.title = opener.subMsgs.getPhrase("LBL_ADD_USER_ACCESS") + " - " + opener.accessbookmarkname;
+
+	var divTitle=document.getElementById("divTitle");
+	opener.top.cmnSetElementText(divTitle,opener.subMsgs.getPhrase("LBL_USERS"));
+
+	spanprev=document.getElementById("spanprev");
+	spanprev.onclick = doPrevious;
+	opener.top.cmnSetElementText(spanprev,portalObj.getPhrase("LBL_PREVIOUS"));
+
+	spannext=document.getElementById("spannext");
+	spannext.onclick = doNext;
+	opener.top.cmnSetElementText(spannext,portalObj.getPhrase("LBL_NEXT"));
+
+	var spansearch=document.getElementById("spansearch");
+	spansearch.onclick = doSearch;
+	opener.top.cmnSetElementText(spansearch,portalObj.getPhrase("LBL_FIND"));
+
+	var spanclose=document.getElementById("spanclose");
+	spanclose.onclick = doClose;
+	opener.top.cmnSetElementText(spanclose,portalObj.getPhrase("LBL_CLOSE"));
+
+	divList=document.getElementById("divList");
+	txtSearch=document.getElementById("txtSearch");
+	txtSearch.onkeypress=keyPress;
+
+	sizeFind();
+	loadList("initial");
+	txtSearch.focus();
+}
+
+//-----------------------------------------------------------------------------
+// Calls function in the opener window that will perform the ags
+// call to update a user's status.  The opener window should know
+// the bookmark ID for which we are allowing/denying access by the user.
+//-----------------------------------------------------------------------------
+function callOpenerAddUser(userId)
+{
+	opener.accessAddWebuser(userId,window);
+	window.focus();
+}
+
+//-----------------------------------------------------------------------------
+// The variable loadedFrom can take one of 4 values:
+// initial -- on first load when window pops up
+// prev or next -- when user clicks next or prev links
+// search -- when user is doing a search.
+//-----------------------------------------------------------------------------
+function loadList( loadedFrom )
+{
+	// construct package
+	var user = portalWnd.oUserProfile.getId();
+	var type = RSPackage.PEOPLE;
+	var arrAttr = new Array("ID", "LastName", "FirstName");
+	var filter = lastFilter;
+	var wildcardsearch = "*";
+	var max = 20;
+	var sortDir = RSPackage.ASCEND;
+	var arrSortAttr = new Array("LastName", "FirstName");
+	var page = 1;
+	switch (loadedFrom)
+	{
+		case "initial":
+			renderMsg();
+			return;
+			break;
+		case "prev":
+			page = listPrev;
+			break;
+		case "next":
+			page = listNext;
+			break;
+		case "search":		
+			if(portalWnd.trim(searchFor) == wildcardsearch)
+			{
+				filter="(|"
+					+ "({ID}=" + wildcardsearch + ")"
+					+ "(|"
+					+ "({LastName}=" + wildcardsearch + ")"
+					+ "({FirstName}=" + wildcardsearch + ")"
+					+ ")"
+					+ ")";
+			}
+			else
+			{
+				var esc = RSPackage.escapeLDAP(searchFor);
+				filter="(|"
+					+ "({ID}=*" + esc + "*)"
+					+ "(|"
+					+ "({LastName}=*" + esc + "*)"
+					+ "({FirstName}=*" + esc + "*)"
+					+ ")"
+					+ ")";
+			}
+		
+			break;
+	}
+	lastPage = page;
+	lastFilter = filter;
+	lastRSPackage = new RSPackage(portalWnd, user, type, arrAttr, filter, max, sortDir, arrSortAttr, page);
+	var pkg = lastRSPackage.toXML();
+	
+	// construct request
+	var rsRequest = new RSRequest(window, portalWnd, pkg);
+	
+	// get response
+	var rsResponse = rsRequest.getResponse(true);
+	if (rsResponse.isValid())
+		renderUsers(rsResponse);
+	else
+		renderMsg(rsResponse.error);
+}
+
+//-----------------------------------------------------------------------------
+// Based on the last response, store the next and previous page indices.
+//-----------------------------------------------------------------------------
+function setPrevNext(rsResponse)
+{
+	listPrev = rsResponse ? rsResponse.getPrevPage() : 0;
+	listNext = rsResponse ? rsResponse.getNextPage() : 0;
+	listPrev = (listPrev != lastPage) ? listPrev : 0;
+	listNext = (listNext != lastPage) ? listNext : 0;
+	
+	if (listPrev == 0)
+	{
+		spanprev.disabled = true;
+		spanprev.className = "xTToolBarButtonDisabled";
+	}
+	else
+	{
+		spanprev.disabled = false;
+		spanprev.className = "xTToolBarButton";
+	}
+
+	if (listNext == 0)
+	{
+		spannext.disabled = true;
+		spannext.className = "xTToolBarButtonDisabled";
+	}
+	else
+	{
+		spannext.disabled = false;
+		spannext.className = "xTToolBarButton";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function renderMsg(msg)
+{
+	msg = (typeof(msg)=="string") ? msg : opener.searchPhrase;
+
+	// clear position calls, next prev buttons
+	setPrevNext(null);
+		
+	// clear previous nodes
+	abandonChildren(divList);
+	
+	var divNode = document.createElement("span");
+	divNode.canHide = true;
+
+	var tableNode = document.createElement("table");
+	tableNode.style.textAlign = "center";
+
+	// header row
+	var rowNode = tableNode.insertRow(tableNode.rows.length);
+
+	// row 0, col 0
+	var cellNode = rowNode.insertCell(rowNode.cells.length);
+	cellNode.className = "xTItemDisabled";
+
+	textNode = document.createTextNode(msg);
+	cellNode.appendChild(textNode);
+
+	divNode.appendChild(tableNode);
+	divList.appendChild(divNode);
+}
+
+//-----------------------------------------------------------------------------
+function renderUsers(rsResponse)
+{
+	var arrDef = rsResponse ? rsResponse.getElementDefArray() : null;
+	var arrRows = rsResponse ? rsResponse.getRowArray() : null;
+	var lenRows = (arrRows ? arrRows.length : 0);
+
+	if (lenRows==0)
+	{
+		renderMsg(opener.subMsgs.getPhrase("LBL_NO_USERS"));
+	}
+	else
+	{
+		// save position calls
+		setPrevNext(rsResponse);
+
+		// clear previous nodes
+		abandonChildren(divList);
+	
+		var divNode = document.createElement("span");
+		divNode.canHide = true;
+	
+		var tableNode = document.createElement("table");
+		tableNode.className = "xTTableList";
+		tableNode.cellPadding = 1;
+		tableNode.cellSpacing = 3;
+		tableNode.style.border = "0px";
+		tableNode.style.width = "100%";
+
+		// header row
+		var rowNode = tableNode.insertRow(tableNode.rows.length);
+
+		// row 0, col 0 - user
+		var cellNode = rowNode.insertCell(rowNode.cells.length);
+		cellNode.className = "xTTableColumnHeader";
+		cellNode.style.width = "50%";
+		var userPhrase = opener.subMsgs.getPhrase("LBL_USER");
+		var textNode = document.createTextNode(userPhrase);
+		cellNode.appendChild(textNode);
+
+		// row 0, col 1 - id
+		cellNode = rowNode.insertCell(rowNode.cells.length);
+		cellNode.className = "xTTableColumnHeader";
+		cellNode.style.width = "50%";
+		var descriptionPhrase = portalObj.getPhrase("lblId");
+		textNode = document.createTextNode(descriptionPhrase);
+		cellNode.appendChild(textNode);
+
+		divNode.appendChild(tableNode);
+
+		// render rows
+		var className;
+		var firstName;
+		var labelId = portalObj.getPhrase("lblId");
+		var labelUser = opener.subMsgs.getPhrase("LBL_USER");
+		var labelFirstName = opener.subMsgs.getPhrase("LBL_FIRST_NAME");
+		var labelLastName = opener.subMsgs.getPhrase("LBL_LAST_NAME");
+		var lastName;
+		var row;
+		var title;
+		var userId;
+		var userName;
+		for (var i=0; i < lenRows; i++)
+		{
+			row = arrRows[i];
+			userId = row.getValue("ID");
+			firstName = row.getValue("FirstName");
+			lastName = row.getValue("LastName");
+			userName = lastName + "," + firstName;
+			className = "xTItem"; // used to vary depending on status - now there is no status
+			title = labelUser + "\n"
+				+ labelId + ": " + userId + "\n"
+				+ labelFirstName + ": " + firstName + "\n"
+				+ labelLastName + ": " + lastName;
+						
+			var spanNode = document.createElement("span");
+			spanNode.className = "xTListItem";
+			spanNode.style.border = "0px";
+			spanNode.style.width = "100%";
+			spanNode.userId = userId;
+			spanNode.tabIndex = 1;
+			spanNode.onmouseover = spanOver;
+			spanNode.onmouseout = spanOut;
+			spanNode.span = spanNode;
+
+			tableNode = document.createElement("table");
+			tableNode.style.border = "0px";
+			tableNode.style.width = "100%";
+
+			// row
+			rowNode = tableNode.insertRow(tableNode.rows.length);
+
+			// row i, col 0 - user
+			cellNode = rowNode.insertCell(rowNode.cells.length);
+			cellNode.style.width = "50%";
+			cellNode.className = className;
+			cellNode.span = spanNode;
+			cellNode.onclick = spanClick;
+			cellNode.title = title;
+			textNode = document.createTextNode(userName);
+			cellNode.appendChild(textNode);
+			spanNode.cellNode = cellNode;
+
+			// row i, col 1 - id
+			cellNode = rowNode.insertCell(rowNode.cells.length);
+			cellNode.style.width = "50%";
+			cellNode.className = className;
+			cellNode.span = spanNode;
+			cellNode.onclick = spanClick;
+			cellNode.title = title;
+			textNode = document.createTextNode(userId);
+			cellNode.appendChild(textNode);
+
+			spanNode.appendChild(tableNode);
+			
+			divNode.appendChild(spanNode);
+		} // for
+		divList.appendChild(divNode);
+	}
+}
+
+//-----------------------------------------------------------------------------
+function doSearch()
+{
+	searchFor = txtSearch.value;
+	if (searchFor)
+		loadList("search");
+	else
+		loadList("initial");
+}
+
+//-----------------------------------------------------------------------------
+function doPrevious()
+{
+	if (!listPrev)
+	{
+		var phrase = opener.subMsgs.getPhrase("LBL_NO_PREV_USERS");
+		portalWnd.cmnDlg.messageBox(phrase,"ok","info",window);
+	}
+	else
+		loadList("prev");
+}
+
+//-----------------------------------------------------------------------------
+function doNext()
+{
+	if (!listNext)
+	{
+		var phrase = opener.subMsgs.getPhrase("LBL_NO_FURTHER_USERS");
+		portalWnd.cmnDlg.messageBox(phrase,"ok","info",window);
+	}
+	else
+		loadList("next");
+}
+
+//-----------------------------------------------------------------------------
+function doClose()
+{
+	window.close();
+}
+
+//-----------------------------------------------------------------------------
+function spanClick(evt)
+{
+	evt = portalWnd.getEventObject(evt,window);
+	var t = portalWnd.getEventElement(evt);
+	if (t)
+	{
+		var userId = t.span.userId;
+		callOpenerAddUser(userId);
+	}
+}
+
+//-----------------------------------------------------------------------------
+function sizeFind()
+{
+	// reposition the find div
+	var scrWidth=(isIE
+		? document.body.offsetWidth
+		: window.innerWidth);
+	var scrHeight=(isIE
+		? document.body.offsetHeight
+		: window.innerHeight);
+
+	var divHeader = document.getElementById("divHeader");
+	var headerTop = parseInt(divHeader.style.top,10);
+	var headerHeight = parseInt(divHeader.style.height,10);
+
+	var divListTop = headerTop + headerHeight + edgeWidth;
+	with (divList.style)
+	{
+		left = "0px";
+		top = divListTop + "px";
+		width = scrWidth + "px";
+		height = (scrHeight - divListTop) + "px";
+		visibility = "visible";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function spanOver(evt)
+{
+	evt = portalWnd.getEventObject(evt,window);
+	var t = portalWnd.getEventElement(evt);
+	if (t)
+	{
+		hoverSpan = t.span;
+		if (hoverSpan)
+			hoverSpan.className = "xTListItemHover";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function spanOut(evt)
+{
+	if (hoverSpan)
+		hoverSpan.className = "xTListItem";
+	hoverSpan = null;
+}
+
+//-----------------------------------------------------------------------------
+function bookKeyDown(evt)
+{
+	evt = portalWnd.getEventObject(evt,window);
+	if (!evt)
+		return false;
+	var evtCaught = false;
+	var keyVal = (isIE) ? evt.keyCode : evt.charCode;
+	if (keyVal == 0)	// netscape only
+		keyVal = evt.keyCode;
+	var t = portalWnd.getEventElement(evt);
+	if (t)
+	{
+		switch(keyVal)
+		{	
+		case 13:	// enter
+			if (t && t.cellNode && typeof(t.cellNode.onclick)=="function")
+			{
+				t.cellNode.click();
+				evtCaught = true;
+			}
+			else if (t && typeof(t.onclick)=="function")
+			{
+				t.click();
+				evtCaught = true;
+			}
+			break;
+		}
+	}
+	if (evtCaught)
+		portalWnd.setEventCancel(evt);
+	return evtCaught;
+}
+</script>
+</head>
+
+<body tabIndex="-1" onLoad="initDialog()" style="margin:0px;" onkeydown="bookKeyDown(event)" onresize="sizeFind()">
+	<div id="divHeader" style="position:absolute;top:0px;left:0px;height:25px;width:100%;" class="xTFormTitleBar">
+		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;height:25px;">
+			<tr style="vertical-align:center;">
+				<td class="xTRightHeader"><span id="divTitle">Users</span></td>
+				<td align="right">
+					<table border="0" cellspacing="0" cellpadding="0" class="xTToolBarButton">
+						<tr style="vertical-align:center;">
+							<td><button id="spanprev" class="xTToolBarButton">Previous</button></td>
+							<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+							<td><button id="spannext" class="xTToolBarButton">Next</button></td>
+							<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+							<td align="center">
+								<input type="text" class="xTSearchField" id="txtSearch" 
+										onfocus="this.style.backgroundColor='lightgrey'" 
+										onblur="this.style.backgroundColor='white'" />
+							</td>
+							<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+							<td><button id="spansearch" class="xTToolBarButton">Find</button></td>
+							<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+							<td><button id="spanclose" class="xTToolBarButton">Close</button></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="divList" style="position:absolute;top:25px;left:0px;width:350px;height:425px;overflow:auto;visibility:hidden;" class="tip"></div>
+</body>
+</html>

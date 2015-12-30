@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<!--
+// CLYNCH 09/01/2011 Customizations for display of employee information on manager employee profile view.  Removed the following
+//                   fields from display: work schedule, union flag, work phone extension, work phone country code, home phone 
+//                   country code, next review date, next review type, pay rate, shift.  Added display of total FTE. 
+-->
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Job Profile</title>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var recs = new Array();
+var empnbr = "";
+var pgmname = "";
+var appObj;
+
+if (fromTask) 
+{
+	pgmname = getVarFromString("from",fromTask);
+	empnbr = getVarFromString("number",fromTask);
+	fromTask = (pgmname != "") ? fromTask : "";
+}
+
+function GetWebuser()
+{
+	authenticate("frameNm='FRAME1'|funcNm='StartApp()'|desiredEdit='EM'");
+}
+
+function StartApp()
+{
+	stylePage();
+	setLayerSizes();
+	if (fromTask)
+		parent.document.getElementById(window.name).style.visibility = "visible";
+	setWinTitle(getSeaPhrase("JOB_PROFILE_1","ESS"));
+	if (fromTask)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), GetEmployee);
+	else
+		GetEmployee();
+}
+
+function GetEmployee()
+{	
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+    // if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+		setTimeout(function(){GetEmployee();}, 10);
+		return;
+	}
+	var emp = authUser.employee;
+	if (empnbr != "" && typeof(empnbr) != "undefined" && empnbr != null)
+		emp = empnbr;
+	var dmeObj = new DMEObject(authUser.prodline, "employee");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.prod = authUser.prodline;
+	dmeObj.field = "label-name-1;process-level.name;hm-dist-co;hm-acct-unit;department.name;"
+	+ "location.description;supervisor.description;employee;"
+	+ "job-code.description;paemployee.wk-phone-ext;paemployee.wk-phone-nbr;"
+	+ "email-address;date-hired;pay-rate;paemployee.hm-phone-nbr;"
+	+ "paemployee.next-review;paemployee.next-rev-code;adj-hire-date;"
+	+ "position;position.effect-date;position.description;union.description;schedule;pay-step;pay-grade;"
+	+ "paemployee.wk-phone-cntry;paemployee.hm-phone-cntry;emp-status.description;nbr-fte;fte-total"
+	if (pgmname == "directreports")
+		dmeObj.field += ";emp-status.description;annivers-date;paemployee.senior-date;shift,xlt;work-sched.description";
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00")
+		dmeObj.field += ";email-personal";
+	// Filter the related position records so that we get the description for the employee's current
+	// position based on the system date.  The 9.0 Data servlet can do this for us.
+	if (iosHandler && iosHandler.getIOSVersionNumber() >= "08.01.00")
+		dmeObj.select = "position.effect-date<=" + authUser.date;
+	dmeObj.max = "1";
+	dmeObj.otmmax = "1";
+	dmeObj.exclude = "drill;keys;sorts";
+	dmeObj.key = parseInt(authUser.company,10) +"="+ parseInt(emp,10);
+	dmeObj.func	= "CheckPayRate()";
+	DME(dmeObj,"FRAME1");
+}
+
+function CheckPayRate()
+{
+	if (self.FRAME1.NbrRecs)
+	{
+		recs = self.FRAME1.record;
+		if ((NonSpace(recs[0].pay_rate) == 0 || recs[0].pay_rate==0) && NonSpace(recs[0].pay_step) != 0 && recs[0].pay_step != 0)
+		{
+			var dmeObj = new DMEObject(authUser.prodline, "prsagdtl");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "sgdset3";
+			dmeObj.prod = authUser.prodline;
+			dmeObj.field = "pay-rate";
+			dmeObj.select = "effect-date<=" + authUser.date
+			dmeObj.key = parseInt(authUser.company,10) +"="+ escape(recs[0].schedule,1) + "=" + escape(recs[0].pay_grade,1) +"="+ escape(recs[0].pay_step,1);
+			dmeObj.max = "1";
+			dmeObj.func = "DspPrsagdtl()";
+			DME(dmeObj,"FRAME1");
+			return;
+		}
+        // if this is a grade range schedule, get the schedule description
+		else if ((NonSpace(recs[0].pay_step) == 0 || recs[0].pay_step == 0) && NonSpace(recs[0].pay_grade) != 0 && NonSpace(recs[0].schedule) > 0)
+        {
+			recs[0].schedule_description = "";
+			var dmeObj =  new DMEObject (authUser.prodline, "prsaghead");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "sghset2";
+			dmeObj.prod	= authUser.prodline;
+			dmeObj.field = "description;"
+			dmeObj.select = "effect-date<=" + authUser.date
+			dmeObj.key = parseInt(authUser.company,10) +"=G="+escape(recs[0].schedule,1)
+			dmeObj.max = "1";
+			dmeObj.func	= "DspPrsaghead()";
+			DME(dmeObj,"FRAME1");
+			return;                    
+        }
+	}
+	CheckPosition();
+}
+
+function DspPrsagdtl()
+{
+	if (self.FRAME1.NbrRecs && recs.length > 0)
+		recs[0].pay_rate = self.FRAME1.record[0].pay_rate;
+	CheckPosition();
+}
+
+function DspPrsaghead()
+{
+	if (self.FRAME1.NbrRecs && recs.length > 0)
+		recs[0].schedule_description = self.FRAME1.record[0].description;
+	CheckPosition();
+}
+
+function CheckPosition()
+{
+	if (recs.length > 0)
+	{
+		// If the position record we found has a future effective date, filter the position records for the employee's current position code
+		// so that we get the description for the employee's current position based on the system date.  This is a work-around for a 8.0.3
+		// DME limitation where not every of the one-to-many related PAPOSITION records is searched in the above DME to the EMPLOYEE file.
+		if (NonSpace(recs[0].position_effect_date) > 0 && formjsDate(formatDME(recs[0].position_effect_date)) > authUser.date)
+		{
+			var dmeObj = new DMEObject(authUser.prodline, "paposition");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "posset2";
+			dmeObj.prod = authUser.prodline;
+			dmeObj.field = "description";
+			dmeObj.key = parseInt(authUser.company,10) +"="+ escape(recs[0].position,1);
+			dmeObj.select = "effect-date<=" + authUser.date;
+			dmeObj.max = "1";
+			dmeObj.func	= "DspPaposition()";
+			DME(dmeObj,"FRAME1");
+			return;
+		}
+	}
+	CheckAcctUnit();
+}
+
+function DspPaposition()
+{
+	if (self.FRAME1.NbrRecs && recs.length > 0)
+		recs[0].position_description = self.FRAME1.record[0].description;
+	CheckAcctUnit();
+}
+
+function CheckAcctUnit()
+{
+	if (recs.length > 0)
+	{
+		if (NonSpace(recs[0].hm_acct_unit) > 0 && NonSpace(recs[0].hm_dist_co) > 0 && recs[0].hm_dist_co != 0)
+		{
+			var dmeObj = new DMEObject(authUser.prodline, "glnames");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "glnset1";
+			dmeObj.prod = authUser.prodline;
+			dmeObj.field = "description";
+			dmeObj.key = escape(recs[0].hm_dist_co,1) +"="+ escape(recs[0].hm_acct_unit,1);
+			dmeObj.max = "1";
+			dmeObj.func = "DspGlnames()";
+			DME(dmeObj,"FRAME1");
+			return;
+		}
+	}
+	DspEmployee();
+}
+
+function DspGlnames()
+{
+	if (self.FRAME1.NbrRecs && recs.length > 0)
+		recs[0].hm_acct_unit = self.FRAME1.record[0].description;
+	DspEmployee();
+}
+
+function DspEmployee()
+{
+	var profileHtml = "";
+	var profileHeading = "";
+	if (pgmname == "directreports" && recs.length > 0)
+		profileHeading = getSeaPhrase("JOB_PROFILE_FOR","ESS") + " " + recs[0].label_name_1;
+	else
+		profileHeading = getSeaPhrase("PROFILE","ESS");
+  	if (recs.length == 0)
+   	{
+   	  	profileHtml = '<table class="plaintable" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+       	+ '<tr><td class="plaintableheader">'+getSeaPhrase("JOB_PROFILE_0","ESS")+'</td></tr></table>'
+		self.MAIN.document.getElementById("paneHeader").innerHTML = profileHeading;
+		self.MAIN.document.getElementById("paneBody").innerHTML = profileHtml;
+		self.MAIN.stylePage();
+   	}
+	else
+   	{
+   		obj = recs[0];
+   		var profileHtml = '<table class="plaintableborder" cellspacing= "0" cellpadding="0" width="100%" summary="'+getSeaPhrase("JOB_PROFILE_SUMMARY","ESS")+'">'
+   		profileHtml += '<caption class="offscreen">'+getSeaPhrase("JOB_PROFILE_1","ESS")+'</caption>'
+   		profileHtml += '<tr><th scope="col" colspan="2"></th></tr>'
+   		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("EMPLOYEE_NAME","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.label_name_1)>0)?obj.label_name_1:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_2","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.employee)>0)?obj.employee:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("EMPLOYEE_STATUS","SEA")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.emp_status_description)>0)?obj.emp_status_description:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_3","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.process_level_name)>0)?obj.process_level_name:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_4","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.department_name)>0)?obj.department_name:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_5","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.hm_acct_unit)>0)?obj.hm_acct_unit:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_6","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.location_description)>0)?obj.location_description:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_7","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.supervisor_description)>0)?obj.supervisor_description:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_8","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.position_description)>0)?obj.position_description:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_9","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.job_code_description)>0)?obj.job_code_description:'&nbsp;')+'</td></tr>'
+		//CLYNCH 09/01/2011 - Remove Work Schedule display from employee detail
+		//if (pgmname == "directreports")
+		//{ 
+		//	profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("WORK_SCHEDULE","ESS")
+		//	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.work_sched_description)>0)?obj.work_sched_description:'&nbsp;')+'</td></tr>'
+		//}		 
+		//CLYNCH 09/01/2011 - Remove Union display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_10","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.union_description)>0)?obj.union_description:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_11","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_wk_phone_nbr)>0)?obj.paemployee_wk_phone_nbr:'&nbsp;')+'</td></tr>'
+		//CLYNCH 09/01/2011 - Remove Work Phone Extension display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("WORK_PHONE_EXTENSION","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_wk_phone_ext)>0)?obj.paemployee_wk_phone_ext:'&nbsp;')+'</td></tr>' 
+		//CLYNCH 09/01/2011 - Remove Work Phone Country Code display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("WORK_PHONE_CNTRY_CODE_ONLY","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_wk_phone_cntry)>0)?obj.paemployee_wk_phone_cntry:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_12","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.email_address)>0)?obj.email_address:'&nbsp;')+'</td></tr>'
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00")
+		{
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("PERSONAL_EMAIL","SEA")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.email_personal)>0)?obj.email_personal:'&nbsp;')+'</td></tr>'
+		}
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_13","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_hm_phone_nbr)>0)?obj.paemployee_hm_phone_nbr:'&nbsp;')+'</td></tr>'
+		//CLYNCH 09/01/2011 - Remove Home Phone Country Code display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("HOME_PHONE_CNTRY_CODE_ONLY","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_hm_phone_cntry)>0)?obj.paemployee_hm_phone_cntry:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_14","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.date_hired)>0)?obj.date_hired:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_15","ESS")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.adj_hire_date)>0)?obj.adj_hire_date:'&nbsp;')+'</td></tr>'
+      	if (pgmname == "directreports")
+      	{
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("STATUS","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.emp_status_description)>0)?obj.emp_status_description:'&nbsp;')+'</td></tr>' 
+			// CLYNCH 09/01/2011 - Adding total FTE to employee profile display	 
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.fte_total)>0)?obj.fte_total:'&nbsp;')+'</td></tr>' 
+			//~CLYNCH	
+			+ '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("ANNIVERSARY_DATE","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.annivers_date)>0)?obj.annivers_date:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("SENIORITY_DATE","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_senior_date)>0)?obj.paemployee_senior_date:'&nbsp;')+'</td></tr>'
+			if (formjsDate(formatDME(obj.adj_hire_date)) > ymdtoday)
+			{
+				years_served = "";
+				months_served = "";
+			}
+			else
+			{
+				var date_diff = Math.abs(getDteDifference(ymdtoday,formjsDate(formatDME(obj.adj_hire_date))))/365.2421896698;
+	   			var date = date_diff.toString().split(".");
+	   			var years_served = parseInt(date[0],10);
+	   			var months_served = parseInt(parseFloat("."+date[1])*12,10);
+			}
+	   		if (isNaN(years_served)) years_served = 0;
+	   		if (isNaN(months_served)) months_served = 0;
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("LENGTH_OF_SERVICE","ESS")
+			+ '<br/>'+getSeaPhrase("YEARS","ESS")+'<br/>'+getSeaPhrase("MONTHS","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%;vertical-align:bottom" nowrap>'
+			if ((years_served > 0) || (months_served > 0))
+			{
+				if (years_served > 0)
+					profileHtml += years_served;
+				if (months_served > 0)
+				{
+					if (years_served > 0)
+						profileHtml += '<br/>';
+					profileHtml += months_served;
+				}
+				else
+					profileHtml += '<br/>'+'&nbsp;';
+			}
+			else
+				profileHtml += '&nbsp;'
+			profileHtml += '</td></tr>'
+		} 
+		//CLYNCH 09/01/2011 - Remove Next Review Date display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_16","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_next_review)>0)?obj.paemployee_next_review:'&nbsp;')+'</td></tr>' 
+		//CLYNCH 09/01/2011 - Remove Next Review Type display from employee detail
+		//profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_17","ESS")
+		//+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_next_rev_code)>0)?obj.paemployee_next_rev_code:'&nbsp;')+'</td></tr>'
+		//CLYNCH 09/01/2011 - Remove Pay Rate display from employee detail
+		//if (NonSpace(recs[0].pay_rate) != 0 && recs[0].pay_rate != 0)
+		//{
+		//	profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("PAY_RATE","ESS")
+		//	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.pay_rate)>0)?obj.pay_rate:'&nbsp;')+'</td></tr>'
+		//}
+		if ((NonSpace(recs[0].pay_step) == 0 || recs[0].pay_step == 0) && NonSpace(recs[0].pay_grade) != 0 && NonSpace(recs[0].schedule) > 0)
+		{
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("PAY_GRADE","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.pay_grade)!=0)?obj.pay_grade:'&nbsp;')+'</td></tr>'
+			profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("GRADE_RANGE_SCHEDULE","ESS")
+			+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.schedule_description)!=0)?obj.schedule_description:'&nbsp;')+'</td></tr>'
+		}
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("FTE","SEA")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((Number(obj.nbr_fte)!=0)?obj.nbr_fte:'&nbsp;')+'</td></tr>'
+		profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("TOTAL_FTE","SEA")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((Number(obj.fte_total)!=0)?obj.fte_total:'&nbsp;')+'</td></tr>'
+	    //CLYNCH 09/01/2011 - Remove Shift display from employee detail
+      	//if (pgmname == "directreports")
+      	//{
+		//	profileHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("SHIFT","ESS")
+		//	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.shift_xlt)>0)?obj.shift_xlt:'&nbsp;')+'</td></tr>'
+      	//}
+		profileHtml += '</table>'
+		if (pgmname == "directreports") 
+		{
+			profileHtml += '<p align="center">'
+			profileHtml += uiButton(getSeaPhrase("BACK","ESS"),"parent.parent.backToMain('profile');return false")
+			profileHtml += '</p><br/>'
+		}
+		try 
+		{
+			self.MAIN.document.getElementById("paneHeader").innerHTML = profileHeading;
+			self.MAIN.document.getElementById("paneBody").innerHTML = profileHtml;
+		}
+		catch(e) {}
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		document.getElementById("MAIN").style.visibility = "visible";
+  	}
+	// if this task has been launched as a related link, remove any processing message
+	if (fromTask && typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();	
+	try { parent.fitToScreen(); } catch(e) {}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="GetWebuser()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;height:464px;width:400px;left:0px;top:0px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="FRAME1" name="FRAME1" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/empprofile.htm,v 1.17.2.61 2014/02/13 22:48:37 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

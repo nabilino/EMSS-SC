@@ -1,0 +1,67 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script>
+function startProgram()
+{
+	var html = '<div class="plaintablecell" style="padding:10px">';
+//    var headertext = '<table border="0" width="100%"><tr><td width="60%"><font style="font-size:smaller" color="#0066cc"><b>AIR St. Luke\'s Plan Coverage</b></font></td><td width="20%" align="right" valign="middle"><a href=javascript:self.close()><font color="#0066cc"><b>Close</b></font></a>&nbsp;</td><td width="20%" align="right" valign="middle"><a href=javascript:self.print()><font color="#0066cc"><b>Print</b></font></a>&nbsp;</td></tr></table>'
+    var headertext = '<table border="0" width="100%"><tr><td width="60%"><font style="font-size:smaller" color="#000000"><b>Air St. Luke\'s Coverage</b></font></td><td width="15%" align="right" valign="middle"><a href="javascript:self.close()"><font color="#000000"><b>Close</b></font></a>&nbsp;</td><td width="15%" align="right" valign="middle"><a href="javascript:self.print()"><font color="#000000"><b>Print</b></font></a>&nbsp;</td></tr></table>'
+	html += '<p>'
+	html += '<i>Air St. Luke\’s</i> is the region’s most comprehensive medical transport program. The helicopters and airplane are airborne critical-care units that provide the highly trained professionals and extensive equipment you need in the event of a medical emergency. We also feature state-of-the-art ground transport vehicles for specialty team response. <i>Air St. Luke\’s</i> also features experienced specialty teams dedicated exclusively to the special care needs of newborn, maternal, pediatric and cardiac patients—an important benefit for infants and children, pregnant women and people with heart disease.<p>'
+	html += 'Memberships<br>Find out about the benefits of an<em> Air St. Luke\'s</em> membership or apply for a membership now.<p>'
+	html += 'The <i>Air St. Luke\’s</i> program includes:<p>'
+	html += '<ul><li class="normal">Integrated helicopter, airplane and ground transport service that allows us the versatility to offer advanced medical care and rapid response for a wide variety of needs and situations.</li>'
+	html += '<li class="normal">Highly trained and experienced flight crews and medical teams that include nurses and paramedics who specialize in all types of medical emergencies.</li>'
+	html += '<li class="normal">A maternal-child transport van specially equipped to respond to emergency transport needs of women with high-risk pregnancies, as well as premature or critically ill newborns.</li>'
+	html += '<li class="normal">Emergency scene response as well as interhospital transport when medically indicated.</li>'
+	html += '<li class="normal">A 24-hour dispatch center staffed by experienced transport specialists.</li></ul>'
+	html += 'One Call Does It All<p>'
+	html += 'Physicians and EMS personnel can call <i>Air St. Luke\'s</i> dispatch at 1-877-STLUKES (1-877-785-8537). General information is available at (208) 706-1000.<p>'
+	html += '<ul><li class="normal"><b>Dispatch</b> – Ground, fixed-wing and helicopter transport.</li>'
+	html += '<li class="normal"><b>Support</b> – Specialized transport team members available 24 hours a day to support doctors in the care of their patients.</li>'
+	html += '<li class="normal"><b>Referral</b> – Assist physicians with patient referral arrangements when needed.</li></ul>'
+	html += 'Scope of Service<p>'
+	html += '<i>Air St. Luke\’s</i> is a full-service air and ground ambulance provider offering the following services:<p>'
+	html += '<ul><li class="normal">Interhospital transfers</li>'
+	html += '<li class="normal">EMS scene response and transport to the most appropriate hospital</li>'
+	html += '<li class="normal">24-hour access to dispatch center</li>'
+	html += '<li><span class="normal">Specialized transport teams: </span>'
+	html += '<ul><li class="normal">Neonatal</li>'
+	html += '<li class="normal">Maternal</li>'
+	html += '<li class="normal">Pediatric</li>'
+	html += '<li class="normal">Cardiac </li></ul></li></ul>'
+	html += 'Three Transport Methods<p>'
+	html += 'The versatile fleet of transport craft (helicopter, airplane and specialty teams vehicles) helps provide the best possible patient outcomes. Working with our dispatch center, referring and receiving physicians match the appropriate method of transport to each patient\’s specific needs.<p>'
+	html += 'Helicopter transport of the critically ill is available 24 hours a day, 365 days a year (weather conditions permitting) within a 150-mile radius of Boise. The Bell 430, a helicopter with a proven safety record, is used to perform inter-hospital transfers as well as emergency scene transport in conjunction with local EMS agencies. Each helicopter team consists of an experienced pilot and a highly trained flight nurse and paramedic.<p>'
+	html += '<em>Idaho Helicopters, Inc. is the FAR Part 135 Certificate Holder providing aviation services and owns and operates Air St. Luke\'s helicopters. Turbo Air, Inc. is the FAR Part 135 Certificate Holder providing aviation services and owns and operates the airplane used by Air St. Luke\'s.</em><p>'
+	html += '</div>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = headertext
+	//stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201005) 09.00.01.03.00 Mon Apr 19 10:15:09 CDT 2010 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/benbulletin.htm,v 1.22.2.4 2009/03/04 17:39:46 brentd Exp $ -->

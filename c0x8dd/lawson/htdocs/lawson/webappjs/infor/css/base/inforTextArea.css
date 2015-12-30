@@ -1,0 +1,72 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforTextArea.css,v 1.1.2.5.2.2 2014/01/10 14:29:53 brentd Exp $ */ 
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/ 
+/* Infor Text Area
+----------------------------------*/
+
+textarea	/* Disable resizing of the text area */
+{
+	resize: none;
+}
+ 
+.inforTextArea
+{
+	border: 1px solid #999999;
+	framespacing: 1px #999999;
+	color: #000000;
+	font-family: Arial;
+	font-size: 11px;
+	border-spacing: 0px;
+	margin: 0px;
+	padding: 1px 4px;
+	line-height: 14px;
+	resize: none;
+	width: 220px; 
+	height: 100px; 
+
+	/* Inner Shadow */	
+	-moz-box-shadow: inset 0 2px 3px #CCC, inset 0 0 1px #CCC;  /* FF3.5+ */
+	-webkit-box-shadow:inset 0 2px 3px #CCC, inset 0 0 1px #CCC;  /*Saf3.0+, Chrome */
+	box-shadow: inset 0 2px 3px #CCC, inset 0 0 1px #CCC;  /*Opera 10.5, IE9, Chrome 10+ */
+	
+	/*-moz-box-shadow: inset 0 0 5px #999999;  /* Firefox */
+	/*-webkit-box-shadow: inset 0 0 5px #999999; /* Safari, Chrome */
+	/*box-shadow: inset 0 0 5px #999999;  /* CSS3 */
+	
+	/*Rounded Corners*/
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;	
+}
+
+.inforTextAreaReadOnly
+{
+	border: 1px solid #f0f0f0;
+	background: #dcdcdc;
+} 
+
+.inforTextAreaDisabled, {
+    background: none repeat scroll 0 0 #CDCDCD;
+    border-color: #999999;
+    cursor: default;
+}

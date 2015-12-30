@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="arsa" version="10.0">
+		<phrase id="MILITARY_SERVICE"><![CDATA[الخدمة العسكرية]]></phrase>
+		<phrase id="BRANCH"><![CDATA[الفرع]]></phrase>
+		<phrase id="SPECIALTY"><![CDATA[التخصص]]></phrase>
+		<phrase id="RANK"><![CDATA[مرتبة]]></phrase>
+		<phrase id="SERVICE_YEARS"><![CDATA[سنوات الخدمة]]></phrase>
+		<phrase id="SERVICE_MONTHS"><![CDATA[أشهر الخدمة]]></phrase>
+		<phrase id="DISCHARGE_DATE"><![CDATA[تاريخ التسريح]]></phrase>
+		<phrase id="DISCHARGE_TYPE"><![CDATA[نوع التسريح]]></phrase>
+		<phrase id="NATIONAL_GUARD"><![CDATA[الحرس الوطني]]></phrase>
+		<phrase id="RESERVES"><![CDATA[الاحتياطي]]></phrase>
+		<phrase id="DISHONORABLE"><![CDATA[غير مشرّف]]></phrase>
+		<phrase id="HONORABLE"><![CDATA[مشرّف]]></phrase>
+		<phrase id="LESS_HONORABLE"><![CDATA[أقل تشريفاً]]></phrase>
+		<phrase id="MEDICAL"><![CDATA[الطبية]]></phrase>
+		<phrase id="OTHER"><![CDATA[أخرى]]></phrase>
+		<phrase id="DRAFT_STATUS"><![CDATA[حالة التجنيد]]></phrase>
+		<phrase id="RANK_ATTAINED"><![CDATA[الرتبة المكتسبة]]></phrase>
+		<phrase id="BRANCH_REQUIRED"><![CDATA[الفرع مطلوب.]]></phrase>
+		<phrase id="NO_MILITARY_RECORDS"><![CDATA[ليس لديك أية معلومات خدمة عسكرية لعرضها.]]></phrase>
+		<phrase id="CHANGE_MILITARY_RECORD"><![CDATA[تغيير المعلومات العسكرية]]></phrase>
+		<phrase id="AIR_FORCE"><![CDATA[سلاح الجو]]></phrase>
+		<phrase id="ARMY"><![CDATA[الجيش]]></phrase>
+		<phrase id="COAST_GUARD"><![CDATA[حرس السواحل]]></phrase>
+		<phrase id="MARINE_CORP"><![CDATA[قوات مشاة البحرية]]></phrase>
+		<phrase id="NAVY"><![CDATA[القوات البحرية]]></phrase>
+		<phrase id="OTHER"><![CDATA[أخرى]]></phrase>
+		<phrase id="NO_BALANCE_DETAILS"><![CDATA[لا يوجد تفاصيل معاملة لهذا الرصيد.]]></phrase>
+		<phrase id="TRAN_TYPE_1"><![CDATA[ضبط يدوي]]></phrase>
+		<phrase id="TRAN_TYPE_2"><![CDATA[ضبط يدوي]]></phrase>
+		<phrase id="TRAN_TYPE_3"><![CDATA[ضبط يدوي]]></phrase>
+		<phrase id="TRAN_TYPE_4"><![CDATA[ضبط يدوي]]></phrase>
+		<phrase id="TRAN_TYPE_5"><![CDATA[ضبط يدوي]]></phrase>
+		<phrase id="TRAN_TYPE_11"><![CDATA[تم بيعها عبر خطة ربح]]></phrase>
+		<phrase id="TRAN_TYPE_12"><![CDATA[تم شراؤها عبر خطة ربح]]></phrase>
+		<phrase id="TRAN_TYPE_21"><![CDATA[تراكمي]]></phrase>
+		<phrase id="TRAN_TYPE_22"><![CDATA[المخصص]]></phrase>
+		<phrase id="TRAN_TYPE_31"><![CDATA[انتقل إلى الرصيد المتوفر]]></phrase>
+		<phrase id="TRAN_TYPE_32"><![CDATA[انتقل إلى الرصيد المتوفر]]></phrase>
+		<phrase id="TRAN_TYPE_33"><![CDATA[تراكمي]]></phrase>
+		<phrase id="TRAN_TYPE_34"><![CDATA[المخصص]]></phrase>
+		<phrase id="TRAN_TYPE_35"><![CDATA[تم إنشاء رصيد مرحّل]]></phrase>
+		<phrase id="TRAN_TYPE_42"><![CDATA[فقدان بسبب وجود حد على الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_43"><![CDATA[فقدان بسبب وجود حد على الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_44"><![CDATA[فقدان بسبب وجود حد ترحيل]]></phrase>
+		<phrase id="TRAN_TYPE_45"><![CDATA[خسارة - انتهاء فترة صلاحية الترحيل]]></phrase>
+		<phrase id="TRAN_TYPE_46"><![CDATA[خسارة - انتهاء فترة صلاحية الترحيل]]></phrase>
+		<phrase id="TRAN_TYPE_47"><![CDATA[إعادة تعيين رصيد الترحيل (بدون خسارة)]]></phrase>
+		<phrase id="TRAN_TYPE_48"><![CDATA[فقدان بسبب وجود حد على الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_51"><![CDATA[تعديل المخصصات]]></phrase>
+		<phrase id="TRAN_TYPE_52"><![CDATA[تعديل المخصصات]]></phrase>
+		<phrase id="TRAN_TYPE_61"><![CDATA[استخدام]]></phrase>
+		<phrase id="TRAN_TYPE_63"><![CDATA[الدفع]]></phrase>
+		<phrase id="TRAN_TYPE_71"><![CDATA[تمت إزالة الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_72"><![CDATA[تمت إزالة الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_73"><![CDATA[تمت إزالة الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_74"><![CDATA[تمت إزالة الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_75"><![CDATA[تمت إزالة الرصيد]]></phrase>
+		<phrase id="TRAN_TYPE_81"><![CDATA[تحويل من رصيد آخر]]></phrase>
+		<phrase id="TRAN_TYPE_82"><![CDATA[تحويل من رصيد آخر]]></phrase>
+		<phrase id="TRAN_TYPE_83"><![CDATA[تحويل من رصيد آخر]]></phrase>
+		<phrase id="TRAN_TYPE_84"><![CDATA[تحويل من رصيد آخر]]></phrase>
+		<phrase id="TRAN_TYPE_85"><![CDATA[تحويل من رصيد آخر]]></phrase>
+		<phrase id="TRAN_TYPE_91"><![CDATA[تفصيل موحد]]></phrase>
+		<phrase id="TRAN_TYPE_92"><![CDATA[تفصيل موحد]]></phrase>
+		<phrase id="TRAN_TYPE_93"><![CDATA[تفصيل موحد]]></phrase>
+		<phrase id="TRAN_TYPE_94"><![CDATA[تفصيل موحد]]></phrase>
+		<phrase id="TRAN_TYPE_95"><![CDATA[تفصيل موحد]]></phrase>		
+		<phrase id="CONTNBR_0"><![CDATA[أرقام اتصال إضافية]]></phrase>
+		<phrase id="CONTNBR_1"><![CDATA[الوصف]]></phrase>
+		<phrase id="CONTNBR_2"><![CDATA[رقم جهة الاتصال]]></phrase>
+		<phrase id="CONTNBR_3"><![CDATA[تغيير تفاصيل رقم جهة الاتصال]]></phrase>
+		<phrase id="CONTNBR_4"><![CDATA[أرقام الاتصال]]></phrase>
+		<phrase id="CONTNBR_5"><![CDATA[لإضافة رقم جهة اتصال، انقر زر "إضافة".]]></phrase>
+		<phrase id="CONTNBR_6"><![CDATA[لتغيير أو عرض تفصيل إضافي لأرقام جهة الاتصال المدرجة أدناه، أنقر نوع الهاتف.]]></phrase>
+		<phrase id="CONTNBR_7"><![CDATA[نوع جهة الاتصال]]></phrase>
+		<phrase id="CONTNBR_8"><![CDATA[تحديث تفاصيل جهة الاتصال]]></phrase>
+		<phrase id="CONTNBR_9"><![CDATA[تم تحديث معلومات جهة الاتصال.]]></phrase>
+		<phrase id="CONTNBR_10"><![CDATA[هل ترغب حقاً بحذف رقم جهة الاتصال هذه؟]]></phrase>
+		<phrase id="CONTNBR_11"><![CDATA[تمت إضافة معلومات جهة الاتصال.]]></phrase>
+		<phrase id="CONTNBR_12"><![CDATA[تم حذف معلومات جهة الاتصال.]]></phrase>
+		<phrase id="CONTNBR_13"><![CDATA[هذا الموظف ليست لديه أية أرقام جهة اتصال إضافية.]]></phrase>
+		<phrase id="CONTNBR_14"><![CDATA[لعرض تفصيل إضافي لأرقام جهات الاتصال المدرجة أدناه، أنقر على نوع الهاتف.]]></phrase>
+		<phrase id="CONTNBR_15"><![CDATA[نوع جهة الاتصال مطلوب.]]></phrase>
+		<phrase id="CONTNBR_16"><![CDATA[رقم الهاتف مطلوب.]]></phrase>
+		<phrase id="SERVICE_DATE"><![CDATA[تاريخ الخدمة]]></phrase>
+		<phrase id="SORT_BY_SERVICE_DATE"><![CDATA[فرز حسب تاريخ الخدمة]]></phrase>
+		<phrase id="PERSONAL_EMAIL"><![CDATA[البريد الإلكتروني الشخصي]]></phrase>
+		<phrase id="WORK_CONTACTS"><![CDATA[جهات اتصال العمل]]></phrase>
+		<phrase id="CONTACT_DETAILS"><![CDATA[تفاصيل جهة الاتصال]]></phrase>
+		<phrase id="EMPLOYEE_STATUS"><![CDATA[حالة الموظف]]></phrase>
+		<phrase id="FTE"><![CDATA[الموظفين بدوام كامل]]></phrase>
+		<phrase id="TOTAL_FTE"><![CDATA[إجمالي الموظفين بدوام كامل FTE]]></phrase>
+		<phrase id="INVALID_SSN"><![CDATA[إن رقم التأمين الوطني الذي قمت بإدخاله غير صالح لبلدك.]]></phrase>
+		<phrase id="PR_LOCKED_OUT"><![CDATA[تم رفض الوصول.  دورة الرواتب قيد التنفيذ حاليًا.  يرجى المحاولة مرة أخرى لاحقًا.]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/arsa/Attic/seamsgs.xml,v 1.1.4.3.2.2 2012/12/12 17:40:44 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

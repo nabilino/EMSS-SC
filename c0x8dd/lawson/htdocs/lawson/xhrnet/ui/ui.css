@@ -1,0 +1,2825 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/ui.css,v 1.45.2.138 2014/02/24 22:02:30 brentd Exp $ */
+/* Version: 8-)@(#)@10.00.05.00.12 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+@media print 
+{   
+  	button
+  	{
+    	display : none;
+  	}
+  	.helpicon
+  	{
+    	display : none;
+  	}
+}
+html
+{
+	overflow : visible;
+}
+body
+{
+    background-color : #ffffff;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    margin : 0px;
+    <!--[if IE]>
+    overflow : auto;
+    <![endif]-->
+}
+a
+{
+	color : #0066cc;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+}
+form
+{
+	display : inline;	
+}
+body.panecontents
+{
+	background-color : transparent;	
+}
+.paneborder
+{
+	background-color : #6699cc;
+	border : #adadad 1px solid;
+	height : auto;	
+	bottom : 5px;
+	left : 5px;
+	right : 5px;
+	overflow : hidden;
+	position : relative;	
+	top : 0px;
+	width : auto;
+	z-index : 5;
+}
+.paneborder2
+{
+	background-color : #ffffff;
+	border-left : #adadad 1px solid;
+	border-right : #adadad 1px solid;
+	border-bottom : #adadad 1px solid;
+	height : auto;
+	bottom : 5px;
+	left : 5px;
+	right : 5px;
+	overflow : hidden;
+	position : relative;
+	top : 0px;
+	z-index : 5;
+}
+.panebordertimeentry
+{
+	background-color : #ffffff;
+	border : #adadad 1px solid;
+	height : auto;
+	bottom : 5px;
+	left : 5px;
+	right : 5px;
+	overflow : auto;
+	position : relative;
+	top : 0px;
+	width : auto;	
+	z-index : 5;
+}
+.paneborderlite
+{
+	background-color : #87ad83;
+	border : #adadad 1px solid;
+	height : auto;
+	bottom : 5px;
+	left : 5px;
+	right : 5px;
+	overflow : hidden;
+	position : relative;
+	top : 0px;
+	width : auto;
+	z-index : 5;
+}
+.helppaneborder
+{
+	background-color : #fff04d;
+	border : #adadad 1px solid;
+	height : auto;
+	bottom : 5px;
+	left : 5px;
+	right : 5px;
+	overflow : hidden;
+	position : relative;
+	top : 0px;
+	width : auto;	
+	z-index : 5;
+}
+.plaintablecellborderlite
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #87ad83 5px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+}
+.plaintablecellborderactive
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #87ad83 5px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+}
+.plaintablecellborderactive2
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+}
+.panebodyborder, .panebodybordernested, .panebodyborder2, .panebodyborder3
+{
+	background-color : #ffffff;
+	height : 100%;
+	overflow : hidden;
+	position : relative;
+	width : 100%;
+    z-index : 7;
+}
+.noborderright
+{
+	border-right : 0px;
+}
+.borderright
+{
+	border-right : #999999 1px solid;
+}
+.plaintableheaderborderright
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheaderborder
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordergreytop
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #dddddd 1px solid;
+	border-top : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordergrey
+{
+	background-color : #eff7ff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordergreybluetop
+{
+	background-color : #eff7ff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	border-top : #6699cc 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderborderdarkgreybluetop
+{
+	background-color : #eff7ff;
+	border-bottom : #999999 1px solid;
+	border-right : #dddddd 1px solid;
+	border-top : #6699cc 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordergreywhite
+{
+	background-color : #ffffff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheaderborderbottomblue, .plaintableheaderbordersidesonly2
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	position : relative;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordersides, .plaintableheaderbordersidesbold
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #dddddd 1px solid;
+	border-left : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderbordersidesonly
+{
+	background-color : #eff7ff;
+	border-right : #dddddd 1px solid;
+	border-left : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheader, .plaintablerowheaderdisplay
+{
+	background-color : #eff7ff;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderbold
+{
+	background-color : #eff7ff;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderborder
+{
+	background-color : #eff7ff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderborderbottomleft
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheaderborderbottom, .plaintablerowheaderborderbottomdisplay
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderborderwhite
+{
+	background-color : #ffffff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderborderwhiteOverDue
+{
+	background-color : #ffffff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #FB2F33;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheaderbordertall
+{
+	background-color : #eff7ff;
+	border-bottom : #9cbdde 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheaderbordertall
+{
+	background-color : #eff7ff;
+	border-bottom : #dddddd 1px solid;
+	border-right : #9cbdde 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheader
+{
+	background-color : #eff7ff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderwhite
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderwhiteright
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheadertall
+{
+	background-color : #eff7ff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheadertallwhiteright
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheadertallwhite
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderborderlite
+{
+	background-color : #e2ece1;
+	border-bottom : #87ad83 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheaderborderlitewhite
+{
+	background-color : #ffffff;
+	border-bottom : #87ad83 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablerowheaderborderlite
+{
+	background-color : #e2ece1;
+	border-bottom : #dddddd 1px solid;
+	border-right : #87ad83 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+	white-space: nowrap;
+}
+.plaintablerowheaderlite
+{
+	background-color : #e2ece1;
+	border-right : #87ad83 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+	white-space: nowrap;
+}
+.plaintableheaderborderactive
+{
+	background-color : #e2ece1;
+	border-bottom : #dddddd 1px solid;
+	border-right : #87ad83 5px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.plaintableheaderbordertalllite
+{
+	background-color : #e2ece1;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderlite
+{
+	background-color : #e2ece1;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheaderactive
+{
+	background-color : #e2ece1;
+	border-right : #87ad83 5px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintableheadertalllite
+{
+	background-color : #e2ece1;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.tablerowhighlight
+{
+    background-color : #e2ece1;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+}
+.paneheader, .paneheader2
+{
+	background-color : #6699cc;
+	color : #ffffff;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	position : relative;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.paneheadertimeentry
+{
+	background-color : #6699cc;
+	color : #ffffff;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 24px;
+	padding-bottom : 4px;
+	padding-left : 7px;
+	padding-right : 5px;
+	padding-top : 4px;
+	position : relative;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.paneheaderlite
+{
+	background-color : #87ad83;
+	color : #ffffff;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	position : relative;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.helppaneheader
+{
+	background-color : #fff04d;
+	color : #ffffff;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	position : relative;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.panebody, .panebodynested
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	position : relative;
+	width : 100%;
+    z-index : 10;
+}
+.panerecords
+{
+	background-color : #ffffff;
+	border-top : #999999 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	position : relative;
+	width : 100%;
+    z-index : 10;
+}
+.helppanebody
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow-y : auto;
+	overflow-x : hidden;
+	padding : 5px;
+	position : relative;
+	width : 100%;
+    z-index : 10;
+}
+.panebodylite
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	position : relative;
+	width : 100%;
+	width : auto;
+    z-index : 10;
+}
+.panebodylite2
+{
+	background-color : #eed3d3;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	position : relative;
+	width : 49%;
+    z-index : 10;
+}
+.innertabs
+{
+	left : 0px;
+	overflow : hidden;
+	top : 0px;
+	padding : 3px 5px 2px 0px;
+	z-index : 10;
+}
+.innertabs td
+{
+	text-decoration:none;
+	background-color : transparent;
+	color : #000000;
+	cursor : pointer;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	text-align : center;
+	z-index : 11;
+	white-space : no-wrap;
+}
+.innertabbody
+{
+	text-decoration:none;
+	background-color : #ffffff;
+	border-left : #adadad 1px solid;
+	border-right : #adadad 1px solid;
+	border-top : #adadad 1px solid;
+	color : #000000;
+	cursor : pointer;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 22px;
+	margin-bottom : -1px;
+	padding-bottom : 2px;
+	padding-left : 10px;
+	padding-right : 10px;
+	padding-top : 2px;
+	position : relative;
+	text-align : center;
+	z-index : 12;
+}
+.innertabbodylite
+{
+	text-decoration: none;
+	background-color : #e2ece1;
+	border-left : #adadad 1px solid;
+	border-right : #adadad 1px solid;
+	border-top : #adadad 1px solid;
+	color : #333333;
+	cursor : pointer;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 22px;
+	margin-bottom : -1px;
+	padding-bottom : 2px;
+	padding-left : 10px;
+	padding-right : 10px;
+	padding-top : 2px;
+	position : relative;
+	text-align : center;
+	z-index : 12;
+}
+.innertabbodylite2
+{
+	text-decoration: none;
+	background-color : #6699cc;
+	border-left : #adadad 1px solid;
+	border-right : #adadad 1px solid;
+	border-top : #adadad 1px solid;
+	color : #333333;
+	cursor : pointer;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 22px;
+	margin-bottom : -1px;
+	padding-bottom : 2px;
+	padding-left : 10px;
+	padding-right : 10px;
+	padding-top : 2px;
+	position : relative;
+	text-align : center;
+	z-index : 12;
+}
+.innertabbodyoff
+{
+	text-decoration: none;
+	background-color : #cacaca;
+	border-bottom : #adadad 1px solid;
+	border-left : #adadad 1px solid;
+	border-right : #adadad 1px solid;
+	border-top : #adadad 1px solid;
+	color : #000000;
+	cursor : pointer;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	height : 22px;
+	padding-bottom : 2px;
+	padding-left : 10px;
+	padding-right : 10px;
+	padding-top : 2px;
+	position : relative;
+	text-align : center;
+	z-index : 12;
+}
+.taskicon
+{
+	height : 32px;
+	left : 0px;
+	margin-right : 10px;
+	top : 0px;
+	width : 32px;
+	z-index : 15;
+}
+.taskheader
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 18px;
+	font-weight : normal;
+	height : 32px;
+	overflow : hidden;
+	margin-left : 6px;
+	width : auto;
+}
+.dialogpaneborder
+{
+	background-color : #d9b340;
+    border : #adadad 1px solid;
+	height : auto;
+	margin-bottom : 5px;
+	margin-left : 5px;
+	margin-right : 5px;
+	overflow : hidden;
+	position : relative;
+	top : 2px;
+	width : auto;
+	z-index : 5;
+}
+.dialoglabel
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	text-align : center;
+}
+.fieldlabelleft
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabel
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldleft
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelbold
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldliteleft
+{
+	background-color : #e2ece1;
+	border-right : #87ad83 1px solid;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelboldlite
+{
+	background-color : #e2ece1;
+	border-right : #87ad83 1px solid;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldliteunderlineleft
+{
+	background-color : #e2ece1;
+	border-bottom : #87ad83 1px solid;
+	border-right : #87ad83 1px solid;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelboldliteunderline
+{
+	background-color : #e2ece1;
+	border-bottom : #87ad83 1px solid;
+	border-right : #87ad83 1px solid;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldwhiteblue
+{
+	background-color : #6699cc;
+    color : #ffffff;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelboldwhitegreen
+{
+	background-color : #87ad83;
+    color : #ffffff;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelbolddialog
+{
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt
+{
+	background-color : transparent;
+    color : #000000;
+	font-family : Sans-serif;
+    font-size : 10px;
+	font-weight : normal;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovtbold
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 10px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovtboldred
+{
+	background-color : transparent;
+    color : red;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1reditalic
+{
+	background-color : transparent;
+    color : red;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : normal;
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1bold
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1italic
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : normal;	
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1
+{
+	background-color : transparent;
+    color : #000000;
+	font-family : Sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelgovt4
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif;
+    font-size : 20px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelgovt5
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 28px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelgovt6
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 36px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.button
+{
+    color : #000000;
+    cursor : pointer;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+ 	margin : 0px;
+ 	width : 0px;	
+ 	overflow : visible;
+ 	padding-left : 5px;
+ 	padding-right : 5px;
+    position : relative;
+    z-index : 10;
+}
+.button[class] /* IE ignores [class] - work around table cell width issue */
+{
+    color : #000000;
+    cursor : pointer;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+ 	margin : 0px;
+ 	width : auto;	
+ 	overflow : visible;
+ 	padding-left : 5px;
+ 	padding-right : 5px;
+    position : relative;
+    z-index : 10;
+}
+.buttonlessformatting
+{
+    color : #000000;
+    cursor : pointer;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+ 	width : auto;
+ 	overflow : visible;
+    position : relative;
+    z-index : 10;
+    margin-right: 2px;
+    padding-left : 5px;
+ 	padding-right : 5px;
+}
+.requiredinputbox
+{
+    border : #ff0000 2px solid;
+    display : inline-block;
+}
+.inputbox
+{
+    background-color : #ffffff;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.inputboxdisabled
+{
+    background-color : #EFEFEF;
+    color : #999999;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.logo
+{
+	background : #ffffff url("/lawson/xhrnet/ui/images/logo.png") no-repeat center;
+	height : 128px;
+	width : 128px;
+}
+.calendaricon
+{
+	cursor : pointer;
+	height : 15px;
+	position :relative;
+	text-align : left;
+	width : 16px;
+	z-index : 10;
+}
+.searchicon
+{
+	cursor : pointer;
+	height : 20px;
+	position :relative;
+	text-align : left;
+	width : 20px;
+	z-index : 10;
+}
+.checkmarkicon
+{
+	height : 14px;
+	margin-right : 5px;
+	position : relative;
+	width : 15px;
+	z-index : 10;
+}
+.requiredicon
+{
+	height : 10px;
+	margin-right : 5px;	
+	width : 10px;
+	z-index : 10;
+}
+.panefooter
+{
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 8pt;
+    font-weight : normal;
+    height : 10px;
+    position : relative;
+	float : none;
+	left : 0px;
+	padding-left : 0px;
+	padding-bottom : 10px;
+	z-index : 10;
+	display : block;
+	text-align : left;	
+}
+.datestring
+{
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 8pt;
+    font-weight : normal;
+    height : 10px;
+	position : relative;
+	text-align : left;
+	padding-bottom : 3px;
+	z-index : 10;
+	display : inline-block;
+}
+.helpicon
+{
+	cursor : pointer;
+	height : 18px;
+	left : 0px;
+	position : absolute;
+	top : 5px;
+	width : 18px;
+	z-index : 12;
+}
+.helpwindowicon
+{
+	height : 18px;
+	left : 5px;
+	position : absolute;
+	top : 5px;
+	width : 18px;
+	z-index : 12;
+}
+.contentframe
+{
+	height : auto;
+	left : 0px;
+	position : absolute;
+	top : 32px;
+	width : 100%;
+	z-index : 5;
+}
+.fullcontentframe
+{
+	height : 100%;
+	left : 0px;
+	position : absolute;
+	top : 0px;
+	width : 100%;
+	z-index : 5;
+}
+.tableborderbox
+{
+	border: #dddddd 1px solid;
+}
+.plaintableborder, .tableborder
+{
+	border-left : #dddddd 1px solid;
+	border-top : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+}
+.plaintablecellborderright, .plaintablecellborderdisplayright
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellborder, .tablecellborder, .plaintablecellborderdisplay
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellborder2
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellborderredfont
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #ff0000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellboldborderright
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellboldborder
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellbordertall, .plaintablecellbordertalldisplay
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellborderleft
+{
+	border-bottom : #dddddd 1px solid;
+	border-left : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellborderyellowbg, .tablecellborderyellowbg
+{
+	background-color : #fffacd;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellbordergreenbg, .tablecellbordergreenbg
+{
+	background-color : #e2ece1;
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecelldisplayright, .plaintablecellright
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecell, .plaintablecelldisplay
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellnopadding
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	text-align : left;
+}
+.plaintablecellsmallright
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 8pt;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellsmall
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 8pt;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellboldright
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellbold
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellboldnopadding
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	text-align : left;
+}
+.plaintablecelllite
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellactive
+{
+	border-right : #87ad83 5px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecelltall
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	height : 20px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellred
+{
+	color : #ff0000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellredright
+{
+	color : #ff0000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellredactive
+{
+	border-right : #87ad83 5px solid;
+	color : #ff0000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintaskheader
+{
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 18px;
+	overflow : hidden;
+	z-index : 10;
+}
+.progressbar
+{
+	background : #ffffff url("/lawson/xhrnet/ui/images/progress_barber_blue_20h200l.gif") no-repeat left;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 20px;
+	left : 0px;
+	margin-left : 30px;
+	overflow : hidden;
+	position : relative;
+	top : 0px;
+	width : 200px;
+	z-index : 15;
+}
+.progressmsg
+{
+	color : #808080;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	left : 0px;
+	padding-left : 30px;
+	top : 0px;
+}
+.columnsort
+{
+	color : #0065a4;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+   	text-decoration : underline;
+   	cursor : pointer;   	
+}
+.helpwindowtableheader
+{
+	background-color : #ffffc5;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+  	display : -moz-inline-box;
+  	display : inline-block;
+}
+.calendarPopup
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.calendarBody
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.calendarHeader
+{
+	background-color : #6699CC;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    width : 30px;
+    height : 20px;
+}
+.calendaritem
+{
+    background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+.calendaritemdisabled
+{
+    background-color : #efefef;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+.calendarButton
+{
+    background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    width : 30px;
+    height : 18px;
+    cursor : pointer;
+}
+.calendarButton:hover, .calendarButton:focus
+{
+    background-color : #D4DFF0;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    width : 30px;
+    height : 18px;
+    cursor : pointer;
+}
+.filterPopup
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterBody
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterHeader
+{
+	background-color : #6699CC;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    width : 30px;
+    height : 20px;
+}
+.filterBar
+{
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filteritem:focus
+{
+    background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+.filteritem
+{
+    background-color : #efefef;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+.filterSearchButton
+{
+    background-color : #E2ECE1;
+    border: 1px solid black;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 8pt;
+    height : 18px;
+    cursor : pointer;
+}
+td.filterButton span
+{
+	display : inline-block;
+}
+.filterButton
+{
+    background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : pointer;
+}
+.filterButtonDisabled
+{
+    background-color : #9DC0E3;
+    color : gray;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : auto;
+}
+.filterButton:hover, .filterButton:focus
+{
+    background-color : #D4DFF0;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : pointer;
+}
+.filteritemtext
+{
+    background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterRecordNbrs
+{
+	color : black;
+	display : inline-block;
+}
+.filterRecordNbrs span
+{
+	display : inline-block;
+}
+table.filterTable
+{
+    width : 100%;
+}
+table.filterTable thead
+{
+    background-color : #6699CC;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterTable th
+{
+    background-color : #6699CC;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterTableRow
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.filterTableRow:hover
+{
+    background-color : #D4DFF0;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    cursor : pointer;
+}
+a.filterTable:link, a.filterTable:visited, a.filterTable:active
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+a.filterTable:hover, a.filterTable:visited:hover
+{
+	background-color : #9DC0E3;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.filterList
+{
+	background-color : #FFFFFF;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    padding : 0px;
+    margin : 0px;
+}
+.filterListBody
+{
+	background-color : #FFFFFF;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+table.filterListTable
+{
+    width: 100%;
+}
+table.filterListTable thead
+{
+    background-color : #CCCCCC;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterListTable th
+{
+    background-color :#CCCCCC;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterListTableRow
+{
+	text-decoration : underline;
+	background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.filterListTableRow2
+{
+	background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+.filterListTableRowHilight
+{
+	text-decoration : underline;
+    background-color : #EEEEEE;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    cursor : pointer;
+}
+a.filterListTable:link, a.filterListTable:visited, a.filterListTable:active
+{
+	background-color : blue;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+a.filterListTable:hover, a.filterListTable:visited:hover
+{
+	background-color : #ffffff;
+    color : white;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+td.filterListButton span
+{
+	display : inline-block;
+}
+.filterListButton
+{
+    background-color : #ffffff;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    height : 18px;
+    cursor : pointer;
+}
+.filterListButtonDisabled
+{
+    background-color : #ffffff;
+    color : gray;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    height : 18px;
+    cursor : none;
+}
+.filterListButton:hover, .filterListButton:focus 
+{
+    background-color : #EEEEEE;
+    color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    height : 18px;
+    cursor : pointer;
+}
+.splashheader
+{
+	color : #eb5b37;
+	font-family : Trebuchet MS;
+	font-size : 38px;
+	font-weight : bold;
+	position : absolute;
+}
+.splashlink
+{
+	color : #6699cc;
+	cursor : pointer;
+	font-family : Trebuchet MS;
+	font-size : 26px;
+	font-weight : normal;
+	position : absolute;
+	white-space : nowrap;
+}
+.splashlink:focus 
+{
+	border : 1px dotted #6699cc;
+}
+.splashlink:hover 
+{
+	color : #ff6400;
+}
+.splashicon
+{
+	position : absolute;
+	left : 97px;
+	top : 185px;
+	width : 128px;
+	height : 133px;
+}
+.panewrapperCM
+{
+	position:relative;
+	height:100%;
+	width:100%;
+}
+.panepaddingCM
+{
+	position:relative;
+	padding-top:3px;
+	padding-bottom:3px;
+	padding-right:3px;
+	padding-left:3px;
+	height:100%;
+	width:100%;
+}
+.panebackgroundCM
+{
+	position:relative;
+	background-color:#6699cc;
+	height:100%;
+	width:100%;
+	margin-bottom:-1px;
+}
+.panebackgroundliteCM
+{
+	position:relative;
+	background-color:#87ad83;
+	height:100%;
+	width:100%;
+	margin-bottom:-1px;
+}
+.paneouterborderCM
+{
+	position:relative;
+	border:#adadad 1px solid;
+	height:100%;
+	width:100%;
+	overflow:hidden;
+}
+.paneframeCM
+{
+	position:relative;
+	padding-top:26px;
+	padding-bottom:0px;
+	padding-right:0px;
+	padding-left:0px;
+	height:100%;
+	width:100%;
+}
+.paneinnerborderCM
+{
+	position:relative;
+	background-color:#ffffff;
+	border-top:#adadad 1px solid;
+	height:100%;
+	width:100%;
+}
+.titleCM
+{
+	color:#ffffff;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size:12pt;
+	font-weight:bold;
+}
+.titlesmallCM
+{
+	color:#ffffff;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size:12px;
+	font-weight:bold;
+}
+.layertitleCM
+{
+	color:#ffffff;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size:12px;
+	font-weight:bold;
+}
+.contentlabelCM, .contenttextheaderCM, .contentlabelCM label, .contenttextheaderCM label
+{
+   	color:#000000;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+	font-weight:bold;
+	padding:1px;
+}
+.contenttextCM, .contenttextdisplayCM
+{
+   	color:#000000;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+	font-weight:normal;
+	padding:1px;
+}
+.tablerowhighlightCM
+{
+   	background-color:#e2ece1;
+}
+.buttonCM
+{
+   	color:#000000;
+   	cursor:pointer;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+   	font-weight:normal;
+}
+.button2CM
+{
+   	color:#000000;
+   	cursor:pointer;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+   	font-weight:normal;
+ 	margin-bottom:5px;
+ 	margin-left:0px;
+ 	margin-right:5px;
+ 	margin-top:5px;
+}
+.tabbordercolorCM
+{
+    background-color:#828282;
+}
+.tabbackgroundcolorCM
+{
+	background-color:#ffffff;
+}
+.tabbackgroundborderbottomCM
+{
+	background-color:#ffffff;
+	border-bottom:1px solid #828282;
+}
+.tableftoffCM
+{
+	background-color:#828282;
+	border-left:1px solid #828282;
+	border-right:1px solid #828282;
+	border-top:1px solid #828282;
+	border-bottom:1px solid #828282;
+}
+.tableftonCM
+{
+	background-color:#ffffff;
+	border-left:1px solid #828282;
+	border-right:1px solid #828282;
+	border-top:1px solid #828282;
+	border-bottom:1px solid #ffffff;
+}
+.taboffCM
+{
+	background-color:#828282;
+	border-right:1px solid #828282;
+	border-top:1px solid #828282;
+	border-bottom:1px solid #828282;
+}
+.tabonCM
+{
+	background-color:#ffffff;
+	border-right:1px solid #828282;
+	border-top:1px solid #828282;
+	border-bottom:1px solid #ffffff;
+}
+.tabupCM
+{
+	cursor:pointer;
+	background-color:#ffffff;
+   	color:#000000;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+	font-weight:bold;
+	text-decoration: none;
+	display: block;
+}
+.tabdownCM
+{
+	cursor:pointer;
+	text-decoration: none;
+	background-color:#cacaca;
+   	color:#000000;
+   	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size:12px;
+	font-weight:bold;
+	display: block;
+	padding-bottom : 3px;
+	padding-top: 3px;
+}
+.popuphelptextCM
+{
+	background-color:#fffdd3;
+	color:#000000;
+	font-family:Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size:12px;
+	font-weight:normal;
+}
+.balanceinnertotals
+{
+	background-color : #ffffff;
+	border : #9ec1e0 1px solid;
+	text-align: left;
+	color : #000000;
+	width : 100%;
+}
+.balanceinnertotals hr
+{
+	text-align : center;
+	width : 82%;
+	height : 1px;
+	color : #9ec1e0;
+	background-color : #9ec1e0;
+	padding : 0;
+}
+.balanceinnertotals span
+{
+	color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight: normal;
+}
+.balanceinnertotals h2, .balanceinnertotals li.carryover
+{
+	color : #e6552b;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	margin : 0;
+	padding-left : 10px;
+}
+.balanceinnertotals li
+{
+	color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balanceinnertotals ul
+{
+	list-style-type:none;
+	margin : 0px;
+	padding : 0px;
+}
+.balanceinnerdetails
+{
+	background-color : #ffffff;
+	border : #87ad83 1px solid;
+	text-align : left;
+	color : #000000;
+	width : 100%;
+}
+.balanceinnerdetails hr
+{
+	text-align : left;
+	width : 90%;
+	height : 1px;
+	color : #87ad83;
+	background-color : #87ad83;
+	padding : 0px;
+}
+.balanceinnerdetails li span
+{
+	color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+}
+.balanceinnerdetails h2, .balanceinnerdetails li.carryover
+{
+	color : #e6552b;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	margin : 0px;
+	padding-left : 10px;
+}
+.balanceinnerdetails li
+{
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balanceinnerdetails ul
+{
+	margin : 0px;
+	padding : 0px;
+}
+.balancetotals
+{
+	background-color : #ecf4fb;
+	border-left : #999999 1px solid;
+	border-bottom : #999999 1px solid;
+	border-right : #999999 1px solid;
+    color : #000000;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-top: 10px;
+	padding-left : 10px;
+	padding-right : 10px;
+	text-align : left;
+	height : auto;
+    margin : 0;   	
+}
+.balancedetails
+{
+	background-color : #e2ece1;
+	border-bottom : #999999 1px solid;
+	border-right : #999999 1px solid;	
+    color : #003366;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-left : 15px;
+	padding-right : 10px;
+	text-align : left;
+	height : auto;
+    margin : 0;
+}
+.balancedetails h3
+{
+	color : #003366;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	padding-top : 10px;
+	padding-bottom : 0px;
+	margin-bottom : 2px;
+}
+.listItem
+{
+	background-color : transparent;
+}
+.acknowledgeText 
+{
+	color : black;
+    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 11px;
+    padding-left:3px;
+}
+.plaintableheaderborderlitesmall
+{
+	background-color : #e2ece1;
+	border-bottom : #87ad83 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 11px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 3px;
+	padding-right : 3px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellbordersmall
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #000000;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 11px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 3px;
+	padding-right : 3px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.nophotoicon
+{
+	height : 32px;
+	width : 32px;
+}
+.goalSelect
+{
+	padding-left: 4px;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 11px;
+}
+.tabletimeentry
+{
+	border : 1px solid #005580;
+}
+.offscreen
+{
+	position : absolute;
+	width : auto;
+	left : -9999px;
+}
+.dataDiv
+{
+	width : 100%;
+	overflow : auto;
+}
+.buttonBar
+{
+	float : right;
+	padding-right : 15px;
+}
+.textAlignLeft
+{
+	text-align : left;
+}
+.textAlignRight
+{
+	text-align : right;
+}
+.floatLeft
+{
+	float : left;
+}
+.floatRight
+{
+	float : right;
+}
+.logoutDiv
+{
+	color : #999999;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    padding : 12px 5px 5px 5px;
+    margin : 0px 15px 0px 0px;   
+	position : absolute;
+    top : 0px;
+    left : 0px;
+    width : 99%;
+    text-align : right;
+    z-index : 9999;   
+}
+.logoutSpan
+{
+	color : #999999;
+	font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    cursor : pointer;
+    z-index : 10000;  
+}
+/* CSS for iPad only */
+@media only screen and (max-device-width:1024px)
+{
+	body
+	{
+		font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+		font-weight : normal;
+		font-size : 12px;
+		-webkit-tap-highlight-color : #c7dfa2;
+		-webkit-user-select : #c7dfa2;
+	}
+	input
+	{
+		background-image : -webkit-gradient(linear, left top, left bottom, from(#fff), to(#ccc));
+		font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+		font-weight : normal;
+		font-size : 12px;	
+		max-width : 200px;
+	}
+	select
+	{
+		font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+		font-weight : normal;
+		font-size : 12px;
+		max-width : 200px;
+	}	
+	.filterTableRow
+	{
+		background-color : #9DC0E3;
+	    color : black;
+	    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	    font-weight : normal;
+	    font-size : 12px;
+	    height : 25px;
+	}
+	.filterTableRow:hover
+	{
+	    background-color : #D4DFF0;
+	    color : black;
+	    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	    font-weight : normal;
+	    font-size : 12px;
+	    cursor : pointer;
+	    height : 25px;
+	}
+	table.filterTable th
+	{
+	    background-color : #6699CC;
+	    color : white;
+	    font-family : Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	    font-weight : bold;
+	    font-size : 11px;
+	    text-align : left;
+	    height : 25px;
+		padding-left : 2px;
+	}
+	#filterBar table
+	{
+		height : 25px;
+	}	
+}

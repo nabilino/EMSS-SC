@@ -1,0 +1,142 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/menu.xml,v 1.3.28.2 2012/08/08 12:48:51 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<MENUBAR>
+	<MENU captionid="LBL_FILE" id="ID_FILE"	titleid="TITLE_FILE" >
+		<ITEM captionid="LBL_NEW" ellipses="1" id="ID_FILE_NEW" shortcut="Ctrl+Shift+N" 
+			titleid="TITLE_NEW" />
+		<ITEM captionid="LBL_OPEN" ellipses="1" id="ID_FILE_OPEN" shortcut="Ctrl+Shift+O" 
+			titleid="TITLE_OPEN" />
+		<ITEM captionid="LBL_SAVE" id="ID_FILE_SAVE" shortcut="Ctrl+Shift+S" 
+			titleid="TITLE_SAVE" />
+		<ITEM captionid="LBL_SAVEAS" ellipses="1" id="ID_FILE_SAVEAS" 
+			titleid="TITLE_SAVEAS" />
+		<ITEM captionid="LBL_CLOSE" id="ID_FILE_CLOSE" shortcut="Ctrl+F4" 
+			titleid="TITLE_CLOSE" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_RELOAD" id="ID_FILE_RELOAD" shortcut="Ctrl+Shift+R" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('reload')" titleid="TITLE_RELOAD" />
+		<ITEM captionid="LBL_DELETE_DOCUMENT" ellipses="1" id="ID_FILE_DELETE" 
+			titleid="TITLE_DELETE_REMOTE" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_INCLUDE" ellipses="1" id="ID_FILE_INCLUDE" shortcut="Ctrl+Shift+I" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('include')" titleid="TITLE_INCLUDE" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_RECENT" id="ID_FILE_RECENT" 
+			dynlist="eval_top.designStudio.getRecentMenu()" titleid="TITLE_RECENT" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_EXIT" id="ID_FILE_EXIT" shortcut="Alt+F4" 
+			 titleid="TITLE_EXIT" />
+	</MENU>
+	
+	<MENU captionid="LBL_EDIT" id="ID_EDIT" titleid="TITLE_EDIT" >
+		<ITEM captionid="LBL_UNDO" id="ID_EDIT_UNDO" shortcut="Ctrl+Z" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('undo')" titleid="TITLE_UNDO" />
+		<ITEM captionid="LBL_REDO" id="ID_EDIT_REDO" shortcut="Ctrl+Y" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('redo')" titleid="TITLE_REDO" />
+		<ITEM captionid="LBL_APPLYCHANGES" id="ID_EDIT_APPLYCHANGES" shortcut="Ctrl+Shift+A" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('apply')" titleid="TITLE_APPLYCHANGES" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_TABORDER" ellipses="1" id="ID_EDIT_TABORDER" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('taborder')" titleid="TITLE_TABORDER" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_DESELECTALL" id="ID_EDIT_DESELECTALL" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('deselectall')" titleid="TITLE_DESELECTALL" />
+		<ITEM captionid="LBL_SENDTOBACK" id="ID_EDIT_SENDTOBACK" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('sendtoback')" titleid="TITLE_SENDTOBACK" />
+		<ITEM captionid="LBL_BRINGTOFRONT" id="ID_EDIT_BRINGTOFRONT" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('bringtofront')" titleid="TITLE_BRINGTOFRONT" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_DELETE" id="ID_EDIT_DELETE" shortcut="Del" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('delete')" titleid="TITLE_DELETE" />
+	</MENU>
+
+	<MENU captionid="LBL_VIEW" id="ID_VIEW" titleid="TITLE_VIEW" >
+		<ITEM captionid="LBL_DOCTOOLBOX" id="ID_VIEW_TOOLBOX" shortcut="Ctrl+Alt+T" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('toolbox')" titleid="TITLE_DOCTOOLBOX" />
+		<ITEM captionid="LBL_PROPERTIES_PANE" id="ID_VIEW_PROPERTIES" shortcut="Ctrl+Alt+P" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('proppane')" titleid="TITLE_PROPERTIES_PANE" />
+		<ITEM caption="-"/>
+		<ITEM captionid="LBL_DOCPROPERTIES" id="ID_VIEW_DOCPROPERTIES" shortcut="Alt+Enter" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('properties')" titleid="TITLE_DOCPROPERTIES" />
+		<ITEM caption="-"/>
+		<ITEM captionid="LBL_DESIGN" id="ID_VIEW_DESIGN" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('design')" titleid="TITLE_DESIGN" />
+		<ITEM captionid="lblObject" id="ID_VIEW_OBJECT" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('object')" titleid="TITLE_OBJECT" />
+		<ITEM captionid="LBL_SOURCE" id="ID_VIEW_SOURCE" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('source')" titleid="TITLE_SOURCE" />
+		<ITEM captionid="LBL_SCRIPT" id="ID_VIEW_SCRIPT" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('script')" titleid="TITLE_SCRIPT" />
+		<ITEM captionid="LBL_PREVIEW" id="ID_VIEW_PREVIEW" shortcut="Ctrl+Alt+V" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('preview')" titleid="TITLE_PREVIEW" />
+		<ITEM caption="-"/>
+		<ITEM captionid="LBL_REFRESH" id="ID_VIEW_REFRESH" shortcut="Ctrl+Shift+F5" 
+			enabled="eval_top.designStudio.activeDesigner.source.myCommands.setEnable('refresh')" titleid="TITLE_REFRESH" />
+	</MENU>
+
+	<MENU captionid="LBL_TOOLS" id="ID_TOOLS" titleid="TITLE_TOOLS" >
+		<ITEM captionid="LBL_API" id="ID_API_BUILDER" 
+			titleid="TITLE_API" />
+		<ITEM caption="-"/>
+		<ITEM captionid="LBL_REBUILDINDEX" ellipses="1" id="ID_TOOLS_REBUILDINDEX" 
+			titleid="TITLE_REBUILDINDEX" />
+		<ITEM captionid="LBL_SETFORMPDL" ellipses="1" id="ID_TOOLS_SETFORMPDL" 
+			titleid="TITLE_SETFORMPDL" />
+		<ITEM captionid="LBL_SETWIZPDL" ellipses="1" id="ID_TOOLS_SETWIZPDL" 
+			titleid="TITLE_SETWIZPDL" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_OBJECTVIEWER" id="ID_TOOLS_OBJECTS" 
+			titleid="TITLE_OBJECTVIEWER" />
+		<ITEM caption="-"/>
+		<ITEM captionid="LBL_OPTIONS" ellipses="1" id="ID_TOOLS_OPTIONS" 
+			titleid="TITLE_OPTIONS" />
+	</MENU>
+
+	<MENU captionid="LBL_WINDOW" id="ID_WINDOW"
+		dynlist="eval_top.designStudio.explorer.getWindowsMenu()" titleid="TITLE_WINDOW" >
+	</MENU>
+
+	<MENU captionid="LBL_HELP" id="ID_HELP" titleid="TITLE_HELP" >
+		<!--
+		<ITEM captionid="LBL_CONTENTS" id="ID_HELP_CONTENTS" 
+			titleid="TITLE_CONTENTS" />
+		<ITEM captionid="LBL_INDEX" id="ID_HELP_INDEX" 
+			titleid="TITLE_INDEX" />
+		<ITEM captionid="LBL_SEARCH" id="ID_HELP_SEARCH" 
+			titleid="TITLE_SEARCH" />
+		<ITEM caption="-" />
+		<ITEM captionid="LBL_TECHSUPPORT" id="ID_HELP_TECHSUPPORT" 
+			titleid="TITLE_TECHSUPPORT" />
+		<ITEM captionid="LBL_LAWSONKB" id="ID_HELP_LAWSON" 
+			titleid="TITLE_LAWSONKB" />
+		<ITEM caption="-" />
+		-->
+		<ITEM captionid="LBL_ABOUTUIDESIGNER" id="ID_HELP_ABOUTDESIGNER" 
+			titleid="TITLE_ABOUTDESIGNER" />
+		<ITEM captionid="LBL_ABOUTSTUDIO" id="ID_HELP_ABOUTSTUDIO" 
+			titleid="TITLE_ABOUTSTUDIO" />
+	</MENU>
+</MENUBAR>

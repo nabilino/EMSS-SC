@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Primary Care Physician</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var updatetype = "";
+var EmpInfo = new Object();
+
+function OpenPhysician()
+{
+	clearTimeout(timer);
+	authenticate("frameNm='jsreturn'|funcNm='StartApp()'|desiredEdit='EM'");
+}
+
+function StartApp()
+{
+	stylePage();
+	var title = getSeaPhrase("PRIMARY_CARE_PHYSICIAN","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Benefits");
+	StoreDateRoutines();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), GetEmployee);
+}
+
+function GetEmployee()
+{
+	var fields = "primary-care;primary-care.description";
+	GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",fields,"GetPhysicianData()");
+}
+
+
+function GetPhysicianData()
+{
+	if (!emssObjInstance.emssObj.filterSelect && CalledPcodesInfo == false)
+		GetPcodesSelect(authUser.prodline,"PC","DrawPhysicianScreen()","Active");
+	else
+		DrawPhysicianScreen();
+}
+
+function DrawPhysicianScreen()
+{
+	var toolTip;
+	var PhysicianContent = '<form name="physicianform">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%" role="presentation">'
+	+ '<tr><td class="plaintablerowheaderborderbottom" style="width:40%;padding-top:5px"><label for="pcpcode">'+getSeaPhrase("PRIMARY_CARE_PHYSICIAN","ESS")+'</label></td>'
+	+ '<td class="plaintablecell" style="width:60%;padding-top:5px" nowrap>';
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("pcpcode");
+		PhysicianContent += '<input type="text" id="pcpcode" name="pcpcode" fieldnm="pcpcode" class="inputbox" size="10" maxlength="10" '
+		+ 'value="'+EmpInfo.primary_care+'" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'pcpcode\');"/>'
+		+ '<a href="javascript:;" onclick="parent.openDmeFieldFilter(\'pcpcode\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+toolTip+'" title="'+toolTip+'">'
+		+ '</a><span class="plaintablecelldisplay" style="width:200px" id="xlt_pcpcode">'+EmpInfo.primary_care_description+'</span>';
+	}
+	else
+		PhysicianContent += '<select class="inputbox" id="pcpcode" name="pcpcode">'+DrawPcodesSelect("PC",EmpInfo.primary_care)+'</select>';
+	PhysicianContent += '</td></tr>'
+	+ '<tr><td>&nbsp;</td><td class="plaintablecell">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessPhysician();return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CancelPhysician();return false","margin-top:10px;margin-left:5px")
+	+ '</td></tr></table></form>'
+	try 
+	{
+		self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAILS","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = PhysicianContent;
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		document.getElementById("MAIN").style.visibility = "visible";
+	}
+	catch(e) {}
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();
+}
+
+function CancelPhysician()
+{
+	self.MAIN.location = "/lawson/xhrnet/ui/logo.htm";
+}
+
+function ProcessPhysician()
+{
+	var formObj = self.MAIN.document.forms["physicianform"];
+	for (var i=0; i<formObj.elements.length; i++)
+	{
+		if (NonSpace(formObj.elements[i].value) == 0)
+			formObj.elements[i].value = " ";
+	}
+	var agsObj = new AGSObject(authUser.prodline, "HR11.1");
+	agsObj.event = "CHANGE";
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=C"
+	+ "&EFFECT-DATE=" + ymdtoday
+	+ "&EMP-COMPANY=" + parseInt(authUser.company,10)
+	+ "&EMP-EMPLOYEE=" + parseInt(authUser.employee,10)
+	+ "&PEM-PRIMARY-CARE=" + escape(formObj.elements["pcpcode"].value,1)
+	+ "&XMIT-HREMP-BLOCK=1000000000"
+	+ "&XMIT-REQDED=1"
+	+ "&PT-BYPASS-PERS-ACT=1";
+	agsObj.func = "parent.DisplayMessage()";
+	agsObj.debug = false;
+	updatetype = "PCP";
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+	AGS(agsObj,"jsreturn");
+}
+
+function DisplayMessage()
+{
+	removeWaitAlert();
+	var msg = self.lawheader.gmsg;
+	var msgnbr = parseInt(self.lawheader.gmsgnbr,10);
+	if (msgnbr != 0)
+	{
+		if (msgnbr == 50 || msgnbr == 141)
+			msg = getSeaPhrase("REQUIRE_ADDITIONAL_INFO_CONTACT_HR","ESS");
+		seaAlert(msg, null, null, "error");
+	}
+	else
+	{
+		msg = getSeaPhrase("CHANGE_COMPLETE_NO_CONTINUE","ESS");
+		seaPageMessage(msg, null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+		GetEmployee(); 
+	}
+
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "pcpcode":
+			dmeFilter.addFilterField("code", 15, getSeaPhrase("PRIMARY_CARE_PHYSICIAN","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"type;code;description",
+				"PC",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "pcpcode":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"type;code;description",
+			"PC",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm)
+	{
+		case "pcpcode": 
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("PRIMARY_CARE_PHYSICIAN","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	switch (fieldNm.toLowerCase())
+	{
+		case "pcpcode": 
+			formElm.value = selRec.code;
+			try { self.MAIN.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description;} catch(e) {}
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var fld = [null, null, null];
+	try
+	{
+		var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+		fld = [self.MAIN, formElm, null];
+		switch (fieldNm.toLowerCase())
+		{	
+			case "pcpcode": fld[2] = getSeaPhrase("PRIMARY_CARE_PHYSICIAN","ESS"); break;										
+			default: break;
+		}	
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	switch (fieldNm.toLowerCase())
+	{
+		case "pcpcode":
+			try { self.MAIN.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = ""; } catch(e) {}
+			break;
+		default: break;
+	}	
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+var timer = setTimeout("OpenPhysician()",3000);
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenPhysician()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;height:300px;left:0px;top:32px;width:400px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" src="/lawson/xhrnet/errmsg.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/physician.htm,v 1.1.2.48 2014/02/25 22:49:12 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

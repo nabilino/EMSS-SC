@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="arsa" version="10.0">
+		<phrase id="CR_0"><![CDATA[نوع الاختصاص غير صالح]]></phrase>
+		<phrase id="CR_1"><![CDATA[الاختصاص الذي تم تحديده غير صالح]]></phrase>
+       	<phrase id="CR_2"><![CDATA[المهارة أو الشهادة.]]></phrase>
+       	<phrase id="CR_3"><![CDATA[التشكيل الجانبي لاختصاص الموظف]]></phrase>
+       	<phrase id="CR_4"><![CDATA[فاعل]]></phrase>
+       	<phrase id="CR_5"><![CDATA[البحث عن تقييدات العمل]]></phrase>
+       	<phrase id="CR_6"><![CDATA[الاختصاصات المطلوبة]]></phrase>
+       	<phrase id="CR_7"><![CDATA[لم يتم إنشاء اختصاصات مطلوبة لهذه الوظيفة أو المنصب.]]></phrase>
+		<phrase id="CR_9"><![CDATA[جاري تحميل اختصاصات الموظف...]]></phrase>
+		<phrase id="CR_10"><![CDATA[تقييدات العمل والسكن]]></phrase>
+		<phrase id="CR_11"><![CDATA[لا يوجد أي معلومات متوفرة.]]></phrase>
+		<phrase id="CR_12"><![CDATA[التشكيل الجانبي المهني غير موجود.]]></phrase>
+		<phrase id="CR_13"><![CDATA[التشكيل الجانبي للممرض (ة)]]></phrase>
+		<phrase id="CR_14"><![CDATA[التشكيل الجانبي للطبيب (ة)]]></phrase>
+		<phrase id="CR_15"><![CDATA[ANCC]]></phrase>
+		<phrase id="CR_16"><![CDATA[PRACTICE AREAS]]></phrase>
+		<phrase id="CR_17"><![CDATA[ACGME]]></phrase>
+		<phrase id="CR_18"><![CDATA[ABMS]]></phrase>
+		<phrase id="CR_19"><![CDATA[NBME]]></phrase>
+		<phrase id="CR_20"><![CDATA[ECFMG APPLICANT NUMBER]]></phrase>
+		<phrase id="CR_21"><![CDATA[AOA BUREAU OF OSTEOPATHIC SPECIALISTS]]></phrase>
+		<phrase id="CR_23"><![CDATA[DEA REGISTRATION]]></phrase>
+		<phrase id="CR_24"><![CDATA[AMA PRA]]></phrase>
+		<phrase id="CR_25"><![CDATA[MAJOR PROFESSIONAL ACTIVITIES]]></phrase>
+		<phrase id="CR_26"><![CDATA[SELF DESIGNATED PRACTICE SPECIALTIES]]></phrase>
+		<phrase id="CR_27"><![CDATA[تقرير توافق الاختصاص]]></phrase>
+		<phrase id="CR_28"><![CDATA[الاختصاصات المطلوبة تنتهي ابتداء من]]></phrase>
+		<phrase id="CR_29"><![CDATA[الرقم منتهي الصلاحية]]></phrase>
+		<phrase id="CR_30"><![CDATA[ليس لديك أي اختصاصات منتهية.]]></phrase>
+		<phrase id="CR_31"><![CDATA[للتقارير المباشرة لـ]]></phrase>
+		<phrase id="CR_32"><![CDATA[قائمة الموظفين لـ]]></phrase>
+		<phrase id="CR_34"><![CDATA[الاسم]]></phrase>
+		<phrase id="CR_36"><![CDATA[التشكيل الجانبي للاختصاص]]></phrase>
+		<phrase id="CR_37"><![CDATA[تشكيل جانبي مهني]]></phrase>
+		<phrase id="CR_38"><![CDATA[فتح التشكيل الجانبي للاختصاص]]></phrase>
+		<phrase id="CR_39"><![CDATA[فتح التشكيل الجانبي المهني]]></phrase>
+		<phrase id="CR_40"><![CDATA[تقرير اختصاص منتهي صلاحية]]></phrase>
+		<phrase id="CR_41"><![CDATA[الاختصاص ينتهي ابتداء من]]></phrase>
+		<phrase id="CR_42"><![CDATA[جميع الاختصاصات المطلوبة تنتهي ابتداء من]]></phrase>
+		<phrase id="CR_43"><![CDATA[ليس من التقارير المباشرة الخاصة بك]]></phrase>
+		<phrase id="CR_44"><![CDATA[لديه اختصاصات منتهية الصلاحية]]></phrase>
+		<phrase id="CR_45"><![CDATA[غير مكتمل]]></phrase>
+		<phrase id="CR_46"><![CDATA[جاري تحديث اختصاصات الموظف...]]></phrase>
+		<phrase id="CR_47"><![CDATA[عرض التقويم]]></phrase>
+		<phrase id="CR_48"><![CDATA[تاريخ الاكتساب]]></phrase>
+		<phrase id="CR_49"><![CDATA[دورة التجديد]]></phrase>
+		<phrase id="CR_50"><![CDATA[المحافظة/ الدولة]]></phrase>
+		<phrase id="CR_51"><![CDATA[تاريخ آخر استخدام]]></phrase>
+		<phrase id="CR_52"><![CDATA[مصدر المهارة]]></phrase>
+		<phrase id="CR_53"><![CDATA[رقم الرخصة]]></phrase>
+		<phrase id="CR_57"><![CDATA[تحديث معلومات مقدم الطلب...]]></phrase>
+		<phrase id="CR_58"><![CDATA[تحديث معلومات الموظف...]]></phrase>
+		<phrase id="CR_59"><![CDATA[الشهادة مطلوبة]]></phrase>
+		<phrase id="CR_60"><![CDATA[المهارة مطلوبة]]></phrase>
+		<phrase id="CR_61"><![CDATA[تاريخ انتهاء الصلاحية]]></phrase>
+       		<phrase id="CR_63"><![CDATA[رقم رخصة مصدر المهارة]]></phrase>
+		<phrase id="CR_64"><![CDATA[التشكيل الجانبي للتقرير المباشر]]></phrase>
+		<phrase id="CR_65"><![CDATA[لا يوجد في تقاريرك المباشرة أي اختصاصات منتهية الصلاحية]]></phrase>
+		<phrase id="CR_66"><![CDATA[الاختصاص التي تم تحديده ليس مهارة صالحة أو شهادة.]]></phrase>
+		<phrase id="HIRE_DATE"><![CDATA[تاريخ التوظيف]]></phrase>
+		<phrase id="LAST_REVIEW"><![CDATA[آخر مراجعة]]></phrase>
+		<phrase id="NEXT_REVIEW"><![CDATA[المراجعة التالية]]></phrase>
+		<phrase id="NEXT_PHYSICAL"><![CDATA[المادي التالي]]></phrase>
+		<phrase id="WORK_RESTRICTIONS"><![CDATA[تقييدات العمل]]></phrase>
+		<phrase id="NONE"><![CDATA[بلا]]></phrase>
+		<phrase id="COMPETENCY"><![CDATA[الكفاءة]]></phrase>
+		<phrase id="ACQUIRED"><![CDATA[مكتسب]]></phrase>
+		<phrase id="RENEW_BY"><![CDATA[تجديد بواسطة]]></phrase>
+		<phrase id="JOB"><![CDATA[وظيفة]]></phrase>
+		<phrase id="JOB_DATE"><![CDATA[تاريخ الوظيفة]]></phrase>
+		<phrase id="POSITION_DATE"><![CDATA[تاريخ المنصب]]></phrase>
+		<phrase id="COMPETENCIES"><![CDATA[الاختصاصات]]></phrase>
+		<phrase id="FOR"><![CDATA[لـ]]></phrase>
+		<phrase id="DESCRIPTION"><![CDATA[الوصف]]></phrase>
+		<phrase id="BEGIN"><![CDATA[البدء]]></phrase>
+		<phrase id="END"><![CDATA[النهاية]]></phrase>
+		<phrase id="WORK_RESTRICTION"><![CDATA[تقييد العمل]]></phrase>
+		<phrase id="ACCOMMODATION"><![CDATA[السكن]]></phrase>
+		<phrase id="EDUCATION"><![CDATA[التعليم]]></phrase>
+		<phrase id="INSTITUTION"><![CDATA[المعهد ]]></phrase>
+		<phrase id="COMPLETED"><![CDATA[منجزة]]></phrase>
+		<phrase id="DEGREE"><![CDATA[درجة]]></phrase>
+		<phrase id="LICENSES"><![CDATA[LICENSES]]></phrase>
+		<phrase id="STATE"><![CDATA[الولاية]]></phrase>
+		<phrase id="LICENSE_NBR"><![CDATA[رقم الرخصة]]></phrase>
+		<phrase id="ISSUED"><![CDATA[صادر]]></phrase>
+		<phrase id="CREDENTIALS"><![CDATA[أوراق اعتماد]]></phrase>
+		<phrase id="EFFECTIVE_EXPIRES"><![CDATA[فعالية - انتهاء]]></phrase>
+		<phrase id="EXPIRES"><![CDATA[ينتهي]]></phrase>
+		<phrase id="CERTIFICATION"><![CDATA[الشهادة]]></phrase>
+		<phrase id="SKILL"><![CDATA[المهارة]]></phrase>
+		<phrase id="SUB_CERT"><![CDATA[شهادة فرعية]]></phrase>
+		<phrase id="N_A"><![CDATA[N/A]]></phrase>
+		<phrase id="SANCTIONS"><![CDATA[SANCTIONS]]></phrase>
+		<phrase id="ORGANIZATION"><![CDATA[مؤسسة]]></phrase>
+		<phrase id="DATE"><![CDATA[التاريخ]]></phrase>
+		<phrase id="AWARD"><![CDATA[مكافأة]]></phrase>
+		<phrase id="COMPLIANCE"><![CDATA[توافق]]></phrase>
+		<phrase id="RECALCULATE"><![CDATA[إعادة احتساب]]></phrase>
+		<phrase id="PRINT"><![CDATA[طباعة]]></phrase>
+		<phrase id="EMPLOYEE"><![CDATA[موظف]]></phrase>
+		<phrase id="CHANGE"><![CDATA[تغيير]]></phrase>
+		<phrase id="ADD"><![CDATA[إضافة]]></phrase>
+		<phrase id="DONE"><![CDATA[تم]]></phrase>
+		<phrase id="UPDATE"><![CDATA[تحديث]]></phrase> 
+		<phrase id="COMPETENCY_REPORTS"><![CDATA[تقارير الاختصاص]]></phrase>
+		<phrase id="DIRECT_REPORTS"><![CDATA[تقارير مباشرة]]></phrase>
+		<phrase id="PROFILE"><![CDATA[ملف شخصي]]></phrase>
+		<phrase id="PHOTO"><![CDATA[صورة]]></phrase>
+		<phrase id="VIEW"><![CDATA[عرض ]]></phrase>
+		<phrase id="DEPARTMENT"><![CDATA[قسم]]></phrase>
+		<phrase id="OVERDUE"><![CDATA[تجاوز]]></phrase>
+		<phrase id="SUMMARY"><![CDATA[ملخص]]></phrase>
+		<phrase id="NO_WORK_RESTRICTIONS"><![CDATA[لا يوجد قيود عمل فاعلة حالياً.]]></phrase>
+		<phrase id="TYPE"><![CDATA[نوع]]></phrase>
+		<phrase id="SORT_BY_COMPETENCY"><![CDATA[الترتيب حسب الاختصاص]]></phrase>
+		<phrase id="SORT_BY_ACQUIRED_DATE"><![CDATA[الترتيب حسب تاريخ التحصيل]]></phrase>
+		<phrase id="SORT_BY_EXPIRATION_DATE"><![CDATA[الترتيب حسب تاريخ انتهاء الصلاحية]]></phrase>
+		<phrase id="SORT_BY_RENEW_DATE"><![CDATA[الترتيب حسب تاريخ التجديد]]></phrase>
+		<phrase id="BACK"><![CDATA[متأخر]]></phrase>
+		<phrase id="SORT_BY_NAME"><![CDATA[الفرز حسب الاسم]]></phrase>
+		<phrase id="SORT_BY_JOB"><![CDATA[الترتيب حسب الوظيفة]]></phrase>
+		<phrase id="SELECT_EMPLOYEE"><![CDATA[تحديد موظف]]></phrase>
+		<phrase id="NO_QUAL_RECORD"><![CDATA[ لا يوجد تفاصيل للعرض.  ليس لديك هذا الاختصاص المطلوب على السجل.]]></phrase>
+		<phrase id="DETAIL"><![CDATA[تفصيل]]></phrase>
+		<phrase id="CANCEL"><![CDATA[إلغاء]]></phrase>
+		<phrase id="DELETE"><![CDATA[حذف]]></phrase>
+		<phrase id="UPDATE_COMPLETE"><![CDATA[اكتمل التحديث]]></phrase>
+		<phrase id="NO_REQ_COMPS"><![CDATA[لم يتم إنشاء اختصاصات مطلوبة لهذه الوظيفة أو المنصب.]]></phrase>
+		<phrase id="PERSONAL_INFO"><![CDATA[المعلومات الشخصية]]></phrase>
+		<phrase id="SOCIAL_NUMBER"><![CDATA[رقم الضمان]]></phrase>
+		<phrase id="ADDRESS"><![CDATA[العنوان]]></phrase>
+		<phrase id="BIRTHDATE"><![CDATA[تاريخ الولادة]]></phrase>
+		<phrase id="CITY"><![CDATA[المدينة]]></phrase>
+		<phrase id="BIRTHPLACE"><![CDATA[مكان الميلاد]]></phrase>
+		<phrase id="POSTAL_CODE"><![CDATA[الرمز البريدي]]></phrase>
+		<phrase id="STATE_NUMBER"><![CDATA[رقم الولاية]]></phrase>
+		<phrase id="ACGME_RESIDENCY"><![CDATA[إقامة ACGME]]></phrase>
+		<phrase id="DATES"><![CDATA[التواريخ]]></phrase>
+		<phrase id="SELECT_REPORT_CRITERIA"><![CDATA[تحديد معايير التقرير]]></phrase>
+		<phrase id="SELECT_DEFICIENCY_TYPE"><![CDATA[تحديد نوع العجز]]></phrase>
+		<phrase id="SELECT_THROUGH_DATE"><![CDATA[تحديد التاريخ من خلال]]></phrase>
+		<phrase id="CALCULATE"><![CDATA[حساب]]></phrase>
+		<phrase id="REPORT_OPTIONS"><![CDATA[خيارات التقرير]]></phrase>
+		<phrase id="DISPLAY_CAL"><![CDATA[عرض التقويم]]></phrase>
+		<phrase id="REQUIRED"><![CDATA[مطلوب]]></phrase>
+		<phrase id="REPORT_CRITERIA_0"><![CDATA[المؤهل والمادي والمراجعة]]></phrase>
+		<phrase id="REPORT_CRITERIA_1"><![CDATA[مادي]]></phrase>
+		<phrase id="REPORT_CRITERIA_2"><![CDATA[مراجعة]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_0"><![CDATA[منتهي]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_1"><![CDATA[مفقود]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_2"><![CDATA[منتهي أو مفقود أو تفاوت]]></phrase>
+		<phrase id="EFFECTIVE"><![CDATA[فاعل]]></phrase>
+		<phrase id="SELECT_RPT_CRITERIA_FIRST"><![CDATA[الرجاء تحديد معايير التقرير أولاً.]]></phrase>
+		<phrase id="RPT_CRITERIA_REQUIRED"><![CDATA[الرجاء تحديد معايير التقرير.]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_REQUIRED"><![CDATA[الرجاء تحديد نوع العجز.]]></phrase>
+		<phrase id="NO_EXPIRED_COMPS"><![CDATA[لا يوجد معلومات للعرض بناءا على معايير التقرير التي قمت بتحديدها.]]></phrase>
+		<phrase id="INVALID_DATE"><![CDATA[تاريخ غير صالح]]></phrase>
+		<phrase id="HELP"><![CDATA[المساعدة]]></phrase>
+		<phrase id="EXPIRED_COMPETENCIES_HELP"><![CDATA[تعليمات تقرير الاختصاص المنتهي الصلاحية]]></phrase>
+		<phrase id="EXPIRED_COMPS_HELP_0"><![CDATA[تقوم هذه المهمة بتعريف التقارير المباشرة للاختصاصات أو الشهادات 
+		التي انتهت صلاحيتها.  إضافة إلى ذلك، يمكنك تحديد معايير أخرى:  الموظفين الذين يفتقرون إلى المؤهلات أو هؤلاء الذين 
+		لديهم تفاوت في مستوى الكفاءة بين ما هو معرّف للوظيفة مقابل المستوى الذي يمتلكه الموظف.]]></phrase>
+		<phrase id="EXPIRED_COMPS_HELP_1"><![CDATA[قم بتحديد نوع التقرير الذي تريد من خلال اختيار معايير التقرير.  الخيارات 
+		تتضمن الاختصاصات، الشهادات، المادية والمراجعات أو المادية فقط أو المراجعات فقط.  إذا قمت باختيار المادية 
+		أو المراجعات، فإن النوع العجز الصالح سيكون فقط مفقود أو منتهي.]]></phrase>
+		<phrase id="COMPLIANCE_REPORT"><![CDATA[تقرير التوافق]]></phrase>
+		<phrase id="SORT_BY_COMPLIANCE"><![CDATA[الترتيب حسب التوافق]]></phrase>
+		<phrase id="VIEW_EXPIRATION_DETAIL"><![CDATA[عرض تفصيل انتهاء الصلاحية]]></phrase>
+		<phrase id="PERCENT_SYMBOL"><![CDATA[%]]></phrase>
+		<phrase id="PROCESSING_WAIT"><![CDATA[جاري المعالجة...]]></phrase>
+		<phrase id="WAIT"><![CDATA[الرجاء الانتظار...]]></phrase>
+		<phrase id="GATHERING_INFO"><![CDATA[تجميع المعلومات...]]></phrase>
+		<phrase id="EXPIRATION_DETAIL"><![CDATA[تفصيل انتهاء الصلاحية]]></phrase>
+		<phrase id="CLOSE"><![CDATA[إغلاق]]></phrase>
+		<phrase id="EXPIRATION_DATE"><![CDATA[تاريخ الانتهاء]]></phrase>
+		<phrase id="COMPLIANCE_REPORT_HELP"><![CDATA[تعليمات تقرير التوافق]]></phrase>
+		<phrase id="COMPLIANCE_HELP_0"><![CDATA[يقوم تقرير التوافق بتعريف الاختصاصات والشهادات والمراجعات والماديات 
+		المطلوبة من الوظيفة المنهية الصلاحية أو التي مضى استحقاقها أو الغير موجودة في سجل الموظف.  تحديد "الرقم المنتهي" 
+		للارتباط التشعبي لمعرفة أي من الموظفين يشكلون المجموعة.]]></phrase>
+		<phrase id="CR_67"><![CDATA[بسبب حجم البيانات، الغير المباشر غير مكتمل. الرجاء استخدام خيارات التقرير.]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/arsa/Attic/crmsgs.xml,v 1.1.4.3.2.2 2012/12/12 17:40:44 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

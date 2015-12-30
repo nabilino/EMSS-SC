@@ -1,0 +1,581 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<title>Manager Time Entry Approval</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script language="JavaScript">
+function PlanCodeObject(company, employee)
+{
+	this.Company = company;
+	this.Employee = employee;
+	this.NumberOfPlans = null;
+	this.Detail = new Array(0);
+}
+
+function PlanCodeDetailObject(code, description)
+{
+	this.PlanCode = code;
+	this.Description = description;
+}
+
+function ReportsObject(company, employee)
+{
+	this.Company = company
+	this.Employee = employee
+	this.EmployeeName = null;
+	this.PlanCode = null;
+	this.PeriodStart = null;
+	this.PeriodEnd = null;
+	this.View = null;
+	this.PlanCodeDescription = null;
+	this.Email = null;
+	this.LastHsuCode = null;
+	this.LastLastName = null;
+	this.LastFirstName = null;
+	this.LastMiddleInit = null;
+	this.LastEmployee = null;
+	this.LastStartDate = null;
+	this.Detail = new Array(0);
+}
+
+function ReportsDetailObject(employee)
+{
+	this.Employee = employee;
+	this.TimecardType = null;
+	this.TimecardTypeDesc = null;
+	this.PlanCode = null;
+	this.CommentsExist = null
+	this.FullName = null;
+	this.TotalHours = null;
+	this.Status = null;
+	this.Email = null;
+	this.DatesExist = null;
+	this.PeriodStartsAt = null;
+	this.PeriodStopsAt = null;
+	// PT116112
+	this.PlanCode = null;
+	this.PlanCodeDescription = null;
+	this.FullName = null;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+
+var program	= "";
+
+if (window.location.search && window.location.search.toLowerCase().indexOf("type=") >= 0)
+{
+	program = getVarFromString("type", window.location.search).toLowerCase();
+}
+
+if (!program)
+{
+	program = "period";
+}
+
+var PlanCode;
+var Reports;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize function. Pops open an alert window then authenticates the webuser and grabs
+// their webuser information for use in this program. We really only need to concentrate on
+// their prodline, company and employee number and maybe their type.
+//
+
+function Initialize()
+{
+	Reports = null;
+
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		return;
+	}
+
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|sysenv=true|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize function. Please setup any more variables needed for the execution of this
+// program.
+
+// In our case we will perform a check on what type of program we are running, 'period', 'daily'
+// or 'summary', setup the appropriate lawheader and object variables and setup which program
+// we will be calling, HS22.2 for summary, HS22.1 for period. We will setup the AGS call here
+// for simplisty.
+//
+
+function AuthenticateFinished()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("LOADING_MANAGER_APPROVAL","TE"));
+	document.title = getSeaPhrase("MANAGER_APPROVAL","TE");
+	setTaskHeader("header", getSeaPhrase("MANAGER_APPROVAL","TE"), "TimeEntry");
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("MANAGER_APPROVAL","TE");
+	var obj;
+
+	switch (program)
+	{
+		case "summary":
+			PlanCodes = new PlanCodeObject(authUser.company, authUser.employee);
+			parent.lawheader.linecount = 0;
+			parent.lawheader.UpdateType = "HS22.2"
+			obj = new AGSObject(authUser.prodline, "HS22.2");
+			break;
+		case "period":;
+		case "daily":
+
+			if (Reports == null)
+			{
+				parent.lawheader.linecount = 0;
+				Reports = new ReportsObject(authUser.company, authUser.employee);
+				parent.lawheader.formlinecount = -1;
+			}
+
+			parent.lawheader.linecount = 0;
+			parent.lawheader.UpdateType = "HS22.1";
+			obj	= new AGSObject(authUser.prodline, "HS22.1");
+			break;
+	}
+
+	obj.evt			= "ADD";
+	obj.rtn			= "DATA";
+	obj.longNames	= true;
+	obj.lfn			= "ALL";
+	obj.tds			= false;
+
+	obj.field		= "FC=I"
+					+ "&HSU-COMPANY="+authUser.company
+					+ "&HSU-EMPLOYEE="+authUser.employee
+
+	if (arguments.length > 0 && arguments[0])
+	{
+		obj.field += "&LAST-EMPLOYEE="+Reports.Detail[Reports.Detail.length-1].Employee
+	  	obj.field += "&LAST-HSU-CODE="+Reports.LastHsuCode
+	  	obj.field += "&LAST-LAST-NAME="+escape(Reports.LastLastName)
+	  	obj.field += "&LAST-FIRST-NAME="+escape(Reports.LastFirstName)
+  		obj.field += "&LAST-MIDDLE-INIT="+escape(Reports.LastMiddleInit)
+	}
+
+	obj.func		= "parent.FinishedHS22Call()";
+	obj.debug		= false;
+	AGS(obj,"jsreturn");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Program finished. Perform error checking before continuing forward.
+//
+
+function FinishedHS22Call()
+{
+	// Exit if the lawheader frame is not loaded.
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		return;
+	}
+
+	if (self.lawheader.gmsgnbr=="000")
+	{
+		if (self.lawheader.gmsg == "More records exist, use PageDown")
+		{
+			AuthenticateFinished(true);
+		}
+		else
+		{
+			Draw();
+		}
+	}
+	else
+	{
+		seaAlert(self.lawheader.gmsg);
+		removeWaitAlert();
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Draw the window.
+
+// Our function here simply draws a smaller window of which contains an image header and then
+// what our AGS call returned, be it names or plan codes. These will be links for the user to
+// click on.
+//
+
+function Draw()
+{
+	try
+	{
+		self.CONTROLITEM.document.getElementById("paneBody1").innerHTML = "";
+	}
+	catch(e)
+	{
+		setTimeout(function() { Draw.apply(this, arguments); }, 5);
+		return;
+	}
+
+	var html = '<div style="text-align:center">';
+	html += '<table align="center" border="0"><tr><td class="plaintablecell"><div style="padding-bottom:10px">';
+
+	if (program == "summary")
+	{
+		html += getSeaPhrase("SELECT_GROUP_REVIEW_CARDS","TE");
+	}
+	else
+	{
+		html += getSeaPhrase("SELECT_EMPLOYEE_REVIEW_CARDS","TE");
+	}
+
+	html += '</div><table width="100%" border="0" cellpadding="1" cellspacing="0"><tr><td style="text-align:center">';
+	html += '<table align="center" width="100%" border="0" cellpadding="1" cellspacing="0">';
+
+	if (program == "summary")
+	{
+		if (PlanCodes.Detail.length == 1)
+		{
+			PlanCodeClicked(PlanCodes.Detail[0].PlanCode);
+			removeWaitAlert();
+			return;
+		}
+		else
+		{
+			for (var i=0; i<PlanCodes.Detail.length; i++)
+			{
+				if (PlanCodes.Detail.length > 20)
+				{
+					if (i && (i%2))
+					{
+						html += '</tr><tr>';
+					}
+				}
+				else
+				{
+					if (i)
+					{
+						html += '<tr>';
+					}
+				}
+
+				//html += '<td width="50">&nbsp;</td>';
+				html += '<td>';
+				html += '<a href="" onclick="parent.PlanCodeClicked(\''+PlanCodes.Detail[i].PlanCode+'\');return false;">';
+				html += PlanCodes.Detail[i].Description;
+				html += '</a>';
+				html += '</td>';
+			}
+		}
+	}
+	else
+	{
+		if (Reports.Detail.length == 1)
+		{
+			ReportsClicked(0);
+			removeWaitAlert();
+			return;
+		}
+		else
+		{
+			for (var i=0; i<Reports.Detail.length; i++)
+			{
+				if (Reports.Detail.length > 20)
+				{
+					if (i && !(i%2))
+					{
+						html += '</tr><tr>';
+					}
+					else if (i)
+					{
+						html += '<td>&nbsp;</td>';
+					}
+				}
+				else
+				{
+					if (i)
+					{
+						html += '</tr>';
+					}
+					html += '<tr>';
+				}
+
+				//html += '<td width="50">&nbsp;</td>';
+				html += '<td>';
+				html += '<a href="" onclick="parent.ReportsClicked('+i+');return false;">';
+				html += Reports.Detail[i].FullName;
+				html += '</a>';
+				html += '</td>';
+			}
+		}
+
+		if (Reports.Detail.length % 2 && Reports.Detail.length > 20)
+		{
+			html += '<td>&nbsp;</td><td>&nbsp;</td>';
+		}
+	}
+
+	html += '</table>';
+
+	// buttons
+	html += '<table align="center" width="100%" border="0" cellpadding="1" cellspacing="0">';
+	html += '<tr><td>';
+	html += uiButton(getSeaPhrase("QUIT","TE"),"parent.CloseManagerApproval();return false", "margin-top:10px");
+	html += '</td></tr></table>';
+
+	html += '</td></tr></table></td></tr></table>';
+	html += '</div>';
+
+	self.CONTROLITEM.document.getElementById("paneBody1").innerHTML = html;
+	self.CONTROLITEM.stylePage();
+	fitToScreen();
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Close function.
+
+// Activiated from the "Quit" button. Closes itself.
+//
+
+function CloseManagerApproval()
+{
+	removeWaitAlert();
+	if (opener)
+	{
+		window.close();
+	}
+	else
+	{
+		self.location = "/lawson/xhrnet/timeentry/employee/timeentrysplash.htm";
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// function is called when user clicks on one of the plan codes. Therefore this function is
+// only called when our program type is 'summary'. This function will open a new window loading
+// the summaryapproval.htm and appending our plancode to the htm
+//
+
+function PlanCodeClicked(planCode)
+{
+	document.getElementById("header").style.visibility = "hidden";
+	document.getElementById("CONTROLITEM").style.visibility = "hidden";
+	self.DETAIL.location.replace("/lawson/xhrnet/timeentry/manager/summaryapproval.htm?plancode="+planCode);
+	document.getElementById("DETAIL").style.visibility = "visible";
+}
+
+function DoesObjectExist(pObj)
+{
+	if (typeof(pObj) == "undefined" || typeof(pObj) == "unknown" || pObj == null || typeof(pObj) == "null")
+	{
+		return false;
+	}
+	else
+	{
+		return true;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// function is called when user clicks on one of the reports. Therefore this function is only
+// called when our program type is 'period' or 'daily'. This function will open a new window
+// loading the timeentry program with our program type appended to it, plus an index of the
+// report clicked for use in determining our employee to display on the time card, plus another
+// flag to tell us that we did not go through summary approval.
+//
+
+function ReportsClicked(Index)
+{
+	if (Reports.Detail[Index].DatesExist == 2)
+	{
+		var dtlUrl;
+
+		if (Reports.Detail[Index].TimecardTypeDesc == "Exception" && program == "period") // || Reports.ExceptionFlag == "Y")
+		{
+			dtlUrl = "/lawson/xhrnet/timeentry/exception/exception.htm?type=period&index="+Index+"&summary=no";
+		}
+		else
+		{
+			dtlUrl = "/lawson/xhrnet/timeentry/employee/timeentry.htm?type="+program+"&index="+Index+"&summary=no";
+		}
+
+		document.getElementById("header").style.visibility = "hidden";
+		document.getElementById("CONTROLITEM").style.visibility = "hidden";
+		self.DETAIL.location.replace(dtlUrl);
+		document.getElementById("DETAIL").style.visibility = "visible";
+	}
+	else
+	{
+		seaAlert(getSeaPhrase("NO_DATES_FOR_PAY_PLAN_CONTACT_HR","TE"));
+		removeWaitAlert();
+	}
+}
+
+function checkResolution()
+{
+	if (screen.width <= "800" && screen.height <= "600")
+	{
+		if (document.body.clientHeight)
+		{
+			document.getElementById("paneBorder").style.height = (document.body.clientHeight - 55) + "px";
+		}
+		window.moveTo(0,0);
+		window.resizeTo(screen.width,screen.height);
+	}
+}
+
+function CloseDetailFrame(newSrc)
+{
+	if (newSrc)
+	{
+		document.getElementById("DETAIL").src = newSrc;
+	}
+	else {
+		document.getElementById("DETAIL").style.visibility = "hidden";
+		document.getElementById("DETAIL").src = "/lawson/xhrnet/dot.htm";
+		document.getElementById("header").style.visibility = "visible";
+		document.getElementById("CONTROLITEM").style.visibility = "visible";
+	}
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+	setDetailFrameSize();
+
+	var winHeight = 520;
+	var winWidth = 800;
+	var headerHeight = 40;
+	var outerPane = self.CONTROLITEM.document.getElementById("outerPane");
+	var paneBody1 = self.CONTROLITEM.document.getElementById("paneBody1");
+	var paneBody2 = self.CONTROLITEM.document.getElementById("paneBody2");
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var tblFrame = document.getElementById("CONTROLITEM");
+	tblFrame.style.height = (winHeight - headerHeight) + "px";
+	tblFrame.style.width = (winWidth - 20) + "px";
+
+	var paneBorder = document.getElementById("paneBorder");
+	paneBorder.style.height = (winHeight - headerHeight) + "px";
+
+	if (outerPane)
+	{
+		outerPane.setAttribute("styler", "groupbox");
+		outerPane.style.width = "100%";
+	}
+
+	if (paneBody1 && paneBody2)
+	{
+		paneBody1.style.overflow = "auto";
+		paneBody1.style.width = "100%";
+
+		if (winHeight > (paneBody2.offsetHeight + headerHeight + 32))
+		{
+			paneBody1.style.height = (winHeight - paneBody2.offsetHeight - headerHeight - 32) + "px";
+		}
+	}
+}
+
+function setDetailFrameSize()
+{
+	if (navigator.appName.indexOf("Microsoft") >= 0)
+	{
+		return;
+	}
+
+	var frameObj = document.getElementById("DETAIL");
+    var frameWidth = 803;
+    var frameHeight = 600;
+
+    if (window.innerWidth)
+    {
+        // non-IE browsers
+        frameWidth = window.innerWidth;
+        frameHeight = window.innerHeight;
+    }
+    else if (document && document.documentElement && document.documentElement.clientWidth)
+    {
+        // IE 6+ in "standards compliant mode"
+        frameWidth = document.documentElement.clientWidth;
+        frameHeight = document.documentElement.clientHeight;
+    }
+    else if (document && document.body && document.body.clientWidth)
+    {
+        // IE 6 in "quirks mode"
+		frameWidth = document.body.clientWidth;
+		frameHeight = document.body.clientHeight;
+    }
+
+    frameObj.style.width = frameWidth;
+    frameObj.style.height = frameHeight;
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="checkResolution();fitToScreen();Initialize()" onresize="fitToScreen()">
+
+<iframe id="header" name="header" src="/lawson/xhrnet/ui/header.htm" style="visibility:visible;position:absolute;height:34px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+<iframe id="DETAIL" name="DETAIL" style="visibility:hidden;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:999" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+
+<div id="paneBorder" class="panebordertimeentry" style="position:absolute;top:34px;left:0px;height:560px;overflow:hidden">
+	<table id="paneTable" border="0" width="100%" cellpadding="0" cellspacing="0">
+	<tr style="height:16px" styler="hidden">
+	<td>
+		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%"><tr>
+		<td>
+			<div id="paneHeader" class="paneheadertimeentry" width="100%" height="100%">&nbsp;</div>
+		</td>
+		</tr>
+		</table>
+	</td></tr>
+	<tr><td style="padding-left:5px">
+		<table border="0" width="100%" cellpadding="0" cellspacing="0">
+		<tr><td>
+			<iframe name="CONTROLITEM" id="CONTROLITEM" src="/lawson/xhrnet/ui/plain.htm" allowtransparency="yes" style="visibility:visible;width:100%;height:500px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		</td></tr>
+		</table>
+	</td></tr>
+	<tr><td>
+		<iframe name="jsreturn" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="lawheader" src="/lawson/xhrnet/timeentry/manager/managerlaw.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/manager/manager.htm,v 1.14.2.27 2011/05/04 21:10:16 brentd Exp $ -->

@@ -1,0 +1,53 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/Attic/actionframework.htm,v 1.1.2.3 2012/08/08 12:37:19 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="actionframework.js"></script>
+<script language="javascript" src="afmagic.js"></script>
+
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../forms/lawform.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../forms/wizard.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../dropdown.css"></link>
+
+
+<script>
+	var ptlWnd=envFindObjectWindow("lawsonPortal");
+	// can't use 'portalWnd'...another instance will be initialized
+	if (ptlWnd && ptlWnd.lawsonPortal)
+	{	
+		if(!ptlWnd.AFSERVICE)
+			ptlWnd.AFSERVICE=new ptlWnd.ActionFrameworkService(ptlWnd);
+		frmhostXML = ptlWnd.AFSERVICE.loadForm(document.location.search);
+		if (frmhostXML)
+		{
+			var newHTM=ptlWnd.AFSERVICE.buildForm(frmhostXML);
+			document.write(newHTM);
+			
+		}
+	}
+</script>
+</head>
+</html>

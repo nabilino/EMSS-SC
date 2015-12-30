@@ -1,0 +1,81 @@
+<html>
+<head>
+<title>Performance Management Help</title>
+<meta name="viewport" content="width=device-width" />
+<script>
+// Dynamically write the contents of the Performance Management Help window.
+// This can be fully customized by placing content in the body of this document and
+// removing this function.
+function writeContents() 
+{
+	document.title = opener.getSeaPhrase("HELP","ESS");
+
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'
+	+ opener.getSeaPhrase("HELP","ESS")
+	+ '</div>'
+
+	var strHtml = '<span class="helpwindowtableheader" style="width:100%">' + opener.getSeaPhrase("REVIEWS", "ESS") + '</span></br/>'
+	+ opener.getSeaPhrase("PERF_VIEW_HELP_01", "ESS")
+	+ '<p>'
+	+ opener.getSeaPhrase("PERF_VIEW_HELP_02", "ESS")
+	+ '<p>'
+	+ opener.getSeaPhrase("PERF_VIEW_HELP_03", "ESS")
+
+	self.main.document.getElementById("paneBody").innerHTML = strHtml;
+	self.main.stylePage();
+	self.main.setLayerSizes();
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winHeight = 0;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+	}
+
+	if (winHeight >= 35)
+	{
+		try
+		{
+			self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		}
+		catch(e)
+		{}
+	}
+}
+</script>
+</head>
+<frameset rows="100%" frameborder="no" border="0" onload="fitToScreen();writeContents()" onresize="fitToScreen()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" id="main" marginwidth="0" marginheight="0" scrolling="no">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/perfViewHelp.html,v 1.1.2.10 2012/06/29 17:12:05 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/controls/cotabarea.xml,v 1.1.4.1.4.3.22.2 2012/08/08 12:48:52 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="tabregion" phraseId="lblTabArea" img="tabarea.gif" host="form1" >
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="nbr" phraseId="lblFieldNbr" readonly="1" init="" edit="X" draw="text" type="simple" />
+	<PROPERTY id="row" phraseId="lblTop" readonly="0" init="2" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="col" phraseId="lblLeft" readonly="0" init="4" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="8" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="40" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="grp" phraseId="lblTabPage" readonly="0" init="" draw="select" type="simple" displayonly="1" />
+	<PROPERTY id="par" phraseId="" readonly="1" init="" edit="X" draw="hide" type="simple" />
+	<PROPERTY id="det" phraseId="" readonly="1" init="" edit="X" draw="hide" type="simple" />
+	<PROPERTYPAGE id="proppage" htm="uidesigner/dialogs/propsgrp.htm" height="450" width="450" />
+	<EVENT id="onbeforetabactivated" label="OnBeforeTabActivated" parms="nbr" returns="boolean" />
+	<EVENT id="onaftertabactivated" label="OnAfterTabActivated" parms="nbr" returns="" />
+	<RULES>
+		<RULE id="minHeight" value="3"/>
+		<RULE id="minWidth" value="20"/>
+		<RULE id="isParent" value="1"/>
+		<RULE id="isChild" value="1"/>
+		<RULE id="isObject" value="1"/>
+		<RULE id="singleUse" value="0"/> 
+		<RULE id="useInDetail" value="0"/> 
+		<RULE id="nodeName" value="tabregion"/> 
+		<RULE id="allowDataBind" value="0"/> 
+	</RULES>
+</CONTROL>

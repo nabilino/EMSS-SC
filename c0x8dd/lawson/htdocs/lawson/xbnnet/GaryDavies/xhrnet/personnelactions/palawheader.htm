@@ -1,0 +1,230 @@
+<!-- Lawheader file for AGS calls to PA52.1 -->
+
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE></TITLE>
+<META NAME="Generator" CONTENT="TextPad 3.0">
+<META NAME="Author" CONTENT="Chris Klecker">
+<META NAME="Keywords" CONTENT="JAVASCRIPT">
+<META NAME="Description" CONTENT="?">
+<SCRIPT>
+
+var myMsg;
+var gmsgnbr;
+var gfldnbr;
+var UpdateType;
+var PTFIELDS = false;
+var Items = new Array(36)
+var Fields = new Array(36)
+var ValuesNew = new Array(36)
+var ValuesPre = new Array(36)
+var Xmit = new Array(5)
+var HiddenKeys = ""; // PT 152887
+var FunctionCode = "";
+var OrigCompany = "";
+var OrigEmployee = "";
+var OrigActionCode = "";
+var OrigEffectDate = "";
+
+function V(fldnbr,fldval)
+{
+	switch(UpdateType)
+	{
+		case "HS10_1": V_HS10_1(fldnbr,fldval); break;
+		default: V_PA52_1(fldnbr, fldval); break;
+	}
+}
+
+function V_PA52_1(fldnbr, fldval)
+{
+	switch(fldnbr)
+	{
+		case "XMIT-HREMP-BLOCK":
+			Xmit[0] = fldval;break;
+		case "XMIT-DEDDAT":
+			Xmit[1] = fldval;break;
+		case "XMIT-IMMED":
+			Xmit[2] = fldval;break;
+		case "XMIT-REQDED":
+			Xmit[3] = fldval;break;
+		case "XMIT-ACT-EXISTS":
+			Xmit[4] = fldval;break;
+		case "ORIG-COMPANY":
+			OrigCompany = fldval; break;
+		case "ORIG-EMPLOYEE":
+			OrigEmployee = fldval; break;
+		case "ORIG-ACTION-CODE":
+			OrigActionCode = fldval; break;
+		case "ORIG-EFFECT-DATE":
+			OrigEffectDate = fldval; break;
+		case "PT-ACTION-TYPE":
+			parent.Rules[parent._RULESINDEX].ActionType = fldval;break;
+		case "PCT-COMPANY":
+	 		parent.Rules[parent._RULESINDEX].Company = fldval;break;
+		case "PCT-ACTION-CODE":
+			parent.Rules[parent._RULESINDEX].ActionCode = fldval;break;
+		case "PCT-EMPLOYEE":
+			parent.Rules[parent._RULESINDEX].Employee = fldval;break;
+		case "EMP-FICA-NBR":
+			parent.Rules[parent._RULESINDEX].FicaNbr = fldval;break;
+		case "EMP-NAME":
+			parent.Rules[parent._RULESINDEX].EmployeeName = fldval;break;
+		case "IMMEDIATE-ACTION":
+			parent.Rules[parent._RULESINDEX].WebImmediate = fldval;break;
+		case "PCT-UPDATE-BENEFIT":
+			parent.Rules[parent._RULESINDEX].UpdateBenefit = fldval;break;
+		case "PCT-REASON1":
+			parent.Rules[parent._RULESINDEX].Reason1 = fldval;break;
+		case "PCT-REASON2":
+			parent.Rules[parent._RULESINDEX].Reason2 = fldval;break;
+		case "PCT-REASON":
+			parent.Rules[parent._RULESINDEX].ReasonText = fldval;break;
+		case "PCT-ACTION-NBR":
+			parent.Rules[parent._RULESINDEX].ActionNbr = fldval;break;
+		case "COMMENTS-FLAG":
+			parent.Rules[parent._RULESINDEX].CommentsFlag = fldval;break;
+		case "FC":
+			FunctionCode = fldval;break;
+		case "_HK": // PT 152887
+			HiddenKeys = fldval;break;
+		default:
+			GetFieldData(fldnbr,fldval);break;
+	}
+}
+
+function GetFieldData(fldnbr,fldval)
+{
+	var count = 1;
+	var flag = false;
+
+	for(var j=1,k=1;j<=36;j++)
+	{
+		if("PAT-ITEM-NAME-"+parseInt((k+"")+(count+""),10)==fldnbr)
+			{Items[j-1] = fldval;break;}
+		else if("PCT-PRE-VALUE-"+parseInt((k+"")+(count+""),10)==fldnbr)
+			{ValuesPre[j-1] = fldval;break;}
+		else if("PCT-NEW-VALUE-"+parseInt((k+"")+(count+""),10)==fldnbr)
+			{ValuesNew[j-1] = fldval;break;}
+		else if("PAT-FLD-NBR-"+parseInt((k+"")+(count+""),10)==fldnbr)
+			{Fields[j-1] = fldval;break;}
+
+		if(++count>12)
+			{count = 1;k++;}
+	}
+}
+
+function V_HS10_1(fld,val)
+{
+	if(fld == "FC")
+        PTFIELDS = false;
+
+	if(fld.indexOf("PTF-EMPLOYEE") == 0)
+	{
+		Index = parent.DirectReports.length;
+		parent.DirectReports[Index] = new parent.DirectReportsObject();
+	}
+
+	if(fld.indexOf("PT-FC") >= 0)
+	{
+		parent.DirectReports.PtFc 					= val
+		return;
+	}
+	if(fld.indexOf("PT-HSU-CODE") >= 0)
+	{
+		if (val != "") PTFIELDS = true;
+		parent.DirectReports.LastHsuCode 			= val;
+		return;
+	}
+	if(fld.indexOf("PT-HSU-OP-CODE") >= 0)
+	{
+		if (val != "") PTFIELDS = true;
+		parent.DirectReports.LastHsuOpCode 			= val;
+		return;
+	}
+	if(fld.indexOf("PT-PTF-EMPLOYEE") >= 0)
+	{
+		if (val != "" && Number(val) != 0) PTFIELDS = true;
+		parent.DirectReports.LastEmployee 			= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("PTF-EMPLOYEE") == 0)
+	{
+		parent.DirectReports[Index].Code 			= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("PTF-FULL-NAME") >= 0)
+	{
+		parent.DirectReports[Index].FullName 		= val;
+		return;
+	}
+	if(fld.indexOf("EMP-LAST-NAME") >= 0)
+	{
+		parent.DirectReports[Index].LastName 		= val;
+		return;
+	}
+	if(fld.indexOf("PEM-BIRTHDATE") >= 0)
+	{
+		parent.DirectReports[Index].BirthDate 		= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("EMP-DATE-HIRED") >= 0)
+	{
+		parent.DirectReports[Index].DateHired 		= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("EMP-ADJ-HIRE-DATE") >= 0)
+	{
+		parent.DirectReports[Index].AdjHireDate 	= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("PEM-NEXT-REVIEW") >= 0)
+	{
+		parent.DirectReports[Index].NextReview 		= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("WORK-DESC") >= 0)
+	{
+		parent.DirectReports[Index].WorkDesc 		= val;
+		return;
+	}
+	if(fld.indexOf("EMP-WORK-COUNTRY") >= 0)
+	{
+		parent.DirectReports[Index].WorkCountry 	= val;
+		return;
+	}
+	if(fld.indexOf("JBC-WEB-TYPE") >= 0)
+	{
+		parent.DirectReports[Index].JobWebType 		= val;
+		return;
+	}
+	if(fld.indexOf("HSU-CODE") >= 0)
+	{
+		parent.DirectReports[Index].HsuCode 		= parseInt(Number(val), 10);
+		return;
+	}
+	if(fld.indexOf("DIRECT-REPORTS") >= 0)
+	{
+		parent.DirectReports[Index].DirectReports 	= parseInt(Number(val), 10);
+		return;
+	}
+}
+
+function DataReturned(fldnbr, msgnbr, msg)
+{
+	gfldnbr = fldnbr;
+	gmsgnbr = msgnbr;
+	myMsg = msg;
+
+	if (UpdateType == "PA52.1" && FunctionCode == "A" 
+	&& Number(gmsgnbr) == 0 && myMsg.toUpperCase().indexOf("WARNING") != 0)
+	{
+		parent.FC = "C";
+	}
+}
+
+</SCRIPT>
+</HEAD>
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/personnelactions/palawheader.htm,v 1.2.6.9 2011/02/11 05:52:34 juanms Exp $ -->

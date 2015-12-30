@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Dependents</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+function LoadDependents()
+{
+	authenticate("frameNm='jsreturn'|funcNm='DependentsContent()'|officeObjects=true|desiredEdit='EM'");
+}
+function DependentsContent()
+{
+	stylePage();
+	// Set the task title.
+	var title = getSeaPhrase("LIFE_EVENTS_4","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Personal");
+	// Load the application.
+	self.main.location.replace("/lawson/xhrnet/dependents.htm?from=main");
+	fitToScreen();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? (winWidth - 17) : (winWidth - 7);
+	var fullPaneContentWidth = (window.styler && window.styler.showLDS) ? fullContentWidth - 5 : fullContentWidth;
+	try
+	{
+		self.main.document.getElementById("paneBodyBorder").style.width = fullContentWidth + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.main.document.getElementById("paneBody").style.width = fullPaneContentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = (winHeight - 35) + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();LoadDependents()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:32px;height:555px;left:0px;width:803px" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/dependentsmain.htm,v 1.7.2.33 2014/02/17 21:29:54 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

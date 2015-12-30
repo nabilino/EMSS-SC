@@ -1,0 +1,145 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/preferences/GeneralTab.htm,v 1.8.2.7.4.2.14.3.2.4 2012/08/08 12:37:27 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<!-- the general tab HTML -->
+<table border="0" width="95%" cellpadding="1" cellspacing="8" style="margin:10px;">
+	<tr>
+		<td colspan="4">&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="30%" align="right" valign="top">
+			<label for="selLocale" id="lblLocale" class="xTLabelForm" style="position:relative;">Locale</label>
+		</td>
+		<td width="110px" align="left" valign="top">
+			<select id="selLocale" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td width="10%" align="right" valign="top">
+			<input type="checkbox" id="cbxAutoSelect" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td align="left" valign="top">
+			<label for="cbxAutoSelect" id="lblAutoSelect" class="xTLabelForm" style="position:relative;">Auto Select Required Fields</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selPDL" id="lblPDL" class="xTLabelForm" style="position:relative;">Data Area</label>
+		</td>
+		<td align="left" valign="top">
+			<select id="selPDL" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top">
+			<input type="checkbox" id="cbxUseLists"
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td align="left" valign="top">
+			<label for="cbxUseLists" id="lblUseLists" class="xTLabelForm" style="position:relative;">Use List Style Presentation</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selDefValSep" id="lblDefValSep" class="xTLabelForm" style="position:relative;">Value Separator</label>
+		</td>
+		<td align="left">
+			<select id="selDefValSep" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top">
+			<input type="checkbox" id="cbxFldHelp" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td align="left" valign="top">
+			<label for="cbxFldHelp" id="lblFldHelp" class="xTLabelForm" style="position:relative;">Display Field Help</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label id="lblLeftbarState" class="xTLabelForm" for="selLeftbarState" style="position:relative;">Navigation Bar on Startup</label>
+		</td>
+		<td align="left" valign="top">
+			<select id="selLeftbarState" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top">
+			<input type="checkbox"  id="cbxFldAdvance" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>
+		<td align="left" valign="top">
+			<label for="cbxFldAdvance" id="lblFldAdvance" class="xTLabelForm" style="position:relative;">Use Data Entry Field Advance</label>
+		</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selAutoOpenNavlets" id="lblAutoOpenNavlets" class="xTLabelForm" style="position:relative;">Navigation Menus on Startup</label>
+		</td>
+		<td align="left" valign="top">
+			<select id="selAutoOpenNavlets" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top">&nbsp;</td>
+		<td align="left" valign="top">
+			<input type="checkbox"  id="cbxUseShortDate" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;<label for="cbxUseShortDate" id="lblUseShortDate" class="xTLabelForm" style="position:relative;">Advance on 6-digit date entry</label>
+		</td>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selToolbarDisplay" id="lblToolbarDisplay" class="xTLabelForm" style="position:relative;">Toolbar Button Display</label>
+		</td>
+		<td align="left">
+			<select id="selToolbarDisplay" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top" colspan="2">&nbsp;</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selDefRptType" id="lblDefRptType" class="xTLabelForm" style="position:relative;">Default Report Type</label>
+		</td>
+		<td align="left">
+			<select id="selDefRptType" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select>
+		</td>
+		<td align="right" valign="top" colspan="2">&nbsp;</td>
+	</tr>
+	<tr>
+		<td align="right" valign="top">
+			<label for="selDefPrinter" id="lblDefPrinter" class="xTLabelForm" style="position:relative;">Default Printer</label>
+		</td>
+		<td align="left" valign="top">
+			<!--select id="selDefPrinter" class="xTTextBox" style="margin-left:0px;position:relative;width:100px;"
+				onchange="window.tabMgr.tabs['tabGeneral'].onSelectionChange(this)"></select-->
+				<input type="text" id="selDefPrinter"  class="xTTextBox" style="WIDTH: 90px" onblur="window.tabMgr.tabs['tabGeneral'].onPrinterBlur()"></input>
+				<span><img  class=selectButton id="imgSelBtn2" style="cursor:hand;position:relative;margin-left:-5px;top:3px" onclick="window.tabMgr.tabs['tabGeneral'].doPrinterSelect()" src="../images/ico_form_dropselect.gif"></span>
+		</td>
+		<td colspan="2" align="left" valign="top">
+			<label class="xTLabel" id="lblPrintDesc">&nbsp;</label>
+		</td>
+	</tr>
+</table>

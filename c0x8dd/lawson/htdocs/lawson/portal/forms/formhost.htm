@@ -1,0 +1,73 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/formhost.htm,v 1.7.2.3.4.5.12.1.2.3 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="../dropdown.js"></script>
+<script language="javascript" src="../objects/FeedBack.js"></script>
+<script language="javascript" src="wizard.js"></script>
+<script language="javascript" src="lawform.js"></script>
+
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="lawform.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="wizard.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../dropdown.css"></link>
+
+<script>
+	var ptlWnd=envFindObjectWindow("lawsonPortal");
+	// can't use 'portalWnd'...another instance will be initialized
+	if (ptlWnd && ptlWnd.lawsonPortal)
+	{	
+		if(!ptlWnd.IEXMLSERVICE)
+			ptlWnd.IEXMLSERVICE=new ptlWnd.IEFormService();
+		frmhostXML=ptlWnd.IEXMLSERVICE.loadForm(document.location.search + document.location.hash);
+		if (frmhostXML)
+		{
+			var newHTM=ptlWnd.IEXMLSERVICE.buildForm(frmhostXML);
+			document.write(newHTM);
+		}
+		else
+		{
+			if (ptlWnd.IEXMLSERVICE.mode == "modal")
+			{
+				lawformPopWindow();
+				parent.xslInitFramework();
+			}
+			else if (ptlWnd.IEXMLSERVICE.host != "page")
+			{
+				if (!ptlWnd.IEXMLSERVICE.status || ptlWnd.IEXMLSERVICE.status != 500)
+				{
+					if (ptlWnd.oPortalConfig.isPortalLessMode())
+						ptlWnd.displayErrorPage(ptlWnd,ptlWnd.IEXMLSERVICE.errMsg);
+					else
+						ptlWnd.goBack();
+				}
+			}
+		}
+	}
+</script>
+
+
+</head>
+</html>

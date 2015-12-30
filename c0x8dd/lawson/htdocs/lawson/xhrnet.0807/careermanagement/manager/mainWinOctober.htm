@@ -1,0 +1,402 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Career Management</TITLE>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<!-- Stylesheet //-->
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<!-- Common Libraries //-->
+<SCRIPT SRC="/lawson/webappjs/common.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/commonHTTP.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/waitalert.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/transaction.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/data.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmldateroutines.js"></SCRIPT>
+<script src="/lawson/webappjs/user.js"></script>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/ui/ui.js"></SCRIPT>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<!-- HR Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/esscommon80.js"></SCRIPT>
+<!-- Common Career Management Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/cmlib.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/writeattach.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/getattach.js"></SCRIPT>
+<!-- Career Management Manager Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/manager/mgrlib.js"></SCRIPT>
+<!-- Change this to the Template of your choice//-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/Skins/October/Template.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var CareerProfile, JobDetail;
+var Lockout = false;
+var _PROFILETABSELECTED = 0;
+
+function OpenProgram(TabSelected)
+{
+    document.getElementById("main").style.visibility = "hidden";
+	stylePage();
+	self.PGCONTROL.stylePage();	
+	document.title = getSeaPhrase("CM_396","CM");
+	_cbdhtml_ResetAll();
+
+	// ui change
+	showWaitAlert(getSeaPhrase("CM_155","CM"));
+
+	// set task header
+	setTaskHeader("HEADER",getSeaPhrase("CM_396","CM"),"Career");
+
+	if(!DMECALLED)
+	{
+		GetSelectBoxesForGeneralUsage("OpenProgram("+TabSelected+")","MANAGER");
+		return;
+	}
+
+	//Define the tabs here. If the user wishes to hide tabs they can do so by commenting out
+	//the line which defines the TabPane.
+
+	var TabsArray = new Array(
+								new TabPane("IndividualProfile", getSeaPhrase("CM_382","CM"), 110, getSeaPhrase("CM_388","CM")),
+								new TabPane("EmployeeActionPlan", getSeaPhrase("CM_386","CM"), 170, getSeaPhrase("CM_389","CM")+'<br><br>'),
+								new TabPane("EmployeeQualifications", getSeaPhrase("CM_387","CM"), 170, getSeaPhrase("CM_390","CM")),
+								new TabPane("ExploreCareers", getSeaPhrase("CM_158","CM"), 115, getSeaPhrase("CM_391","CM")),
+								new TabPane("TrainingOptions", getSeaPhrase("CM_159","CM"), 115, getSeaPhrase("CM_392","CM")+'<br><br>'),
+								new TabPane("GroupProfile", getSeaPhrase("CM_359","CM"), 100, getSeaPhrase("CM_393","CM")+'<br><br><br>')
+							 );
+
+	var Tab 				= new TabObject(TabsArray, TabSelected);
+		Tab.BorderColor 	= MainTabBorderColor;
+		Tab.bgColorTabDown 	= MainTabbgColorTabDown;
+		Tab.bgColorTabUp 	= MainTabbgColorTabUp;
+		Tab.fgColorTabDown 	= MainTabfgColorTabDown;
+		Tab.fgColorTabUp 	= MainTabfgColorTabUp;
+		Tab.fontSize 		= MainTabfontSize;
+		Tab.fontFamily 		= MainTabfontFamily;
+		Tab.fontWeight		= MainTabfontWeight;
+		Tab.TabName			= "MainTabs";
+
+	if(arguments.length>1)
+		var TabName = arguments[1];
+	else
+		var TabName = 0;
+
+	if(arguments.length>2)
+		var ProfileTabName = arguments[2];
+	else
+		var ProfileTabName = 0;
+
+	with(self.main.document)
+	{
+		Lockout = true;
+		self.main.document.body.innerHTML = "";
+
+		var divObj = self.main.document.createElement("div")
+		self.main.document.body.appendChild(divObj)
+		var tabDrawResult = Tab.Draw(BackgroundColor);
+		divObj.innerHTML = tabDrawResult
+
+		divObj = self.main.document.createElement("div")
+        divObj.setAttribute("id", Tab.TabName + "," + TabsArray[TabSelected].Code + ",TabBody");
+        self.main.document.body.appendChild(divObj);
+
+		switch(TabsArray[TabSelected].Code)
+		{
+			case "IndividualProfile":
+								if (_CURRENTTAB == "INDIVIDUALPROFILE")
+								{
+									DrawJobProfileWindows_Manager(TabName, true);
+								}
+								else
+								{
+									_CURRENTTAB = "INDIVIDUALPROFILE";
+									DrawJobProfileWindows_Manager(TabName);
+								}
+								break;
+			case "EmployeeActionPlan": _CURRENTTAB = "EMPLOYEEACTIONPLAN";
+								DrawEmployeeActionPlan();
+								break;
+			case "EmployeeQualifications": _CURRENTTAB = "EMPLOYEEQUALIFICATIONS";
+								DrawMyQualificationsWindows_Manager();
+								break;
+			case "ExploreCareers": _CURRENTTAB = "M_EXPLORECAREERS";
+								DrawExploreCareersWindows_Manager(TabName,ProfileTabName);
+								break;
+			case "TrainingOptions": _CURRENTTAB = "M_TRAININGOPTIONS";
+								DrawTrainingOptionsWindows()
+								break;
+			case "GroupProfile": _CURRENTTAB = "GROUPPROFILE"
+								DrawGroupProfile()
+								break;
+		}
+	}
+}
+
+function FinishedDrawingTabs()
+{
+	if (parentTask == "") {
+		initManagerRelatedBookmarkLinks();
+		DrawRelatedBookmarkLinks()
+		ShowRelatedBookmarkLinks(true)
+	}
+
+	autoSelectDirectReport();
+	self.main.stylePage();
+	document.getElementById("main").style.visibility = "visible";
+	Lockout = false;
+	removeWaitAlert();
+	fitToScreen();
+}
+
+var _DIRECTREPORTSINDEX = -1;
+
+function OnTabClicked_MainTabs(TabName)
+{
+	ResetTabValues()
+	var FormObj = GetSelectFormObject("main", "DirectReports", "cmbDirectReports");
+
+	if(typeof(FormObj) != 'undefined' && FormObj != null)
+		_DIRECTREPORTSINDEX = FormObj.selectedIndex-1
+
+
+	if(!Lockout)
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			ShowFilterList(false);
+			closeDmeFieldFilter();
+		}
+
+		switch(TabName)
+		{
+			case "IndividualProfile": if (_CURRENTTAB != "INDIVIDUALPROFILE") OpenProgram(0);break;
+			case "EmployeeActionPlan": 	if (_CURRENTTAB != "EMPLOYEEACTIONPLAN") OpenProgram(1);break;
+			case "EmployeeQualifications": if (_CURRENTTAB != "EMPLOYEEQUALIFICATIONS") OpenProgram(2);break;
+			case "ExploreCareers": if (_CURRENTTAB != "M_EXPLORECAREERS") OpenProgram(3);break;
+			case "TrainingOptions": if (_CURRENTTAB != "M_TRAININGOPTIONS") OpenProgram(4);break;
+			case "GroupProfile": if (_CURRENTTAB != "GROUPPROFILE") OpenProgram(5);break;
+		}
+	}
+}
+
+function cmbDirectReports_OnChange()
+{
+	var FormObj = GetSelectFormObject("main", "DirectReports", "cmbDirectReports");
+
+	if(typeof(FormObj) != 'undefined' && FormObj != null)
+		_DIRECTREPORTSINDEX = FormObj.selectedIndex-1
+
+	var code = (_DIRECTREPORTSINDEX>=0)? DirectReports[_DIRECTREPORTSINDEX].code : null;
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		ShowFilterList(false);
+		closeDmeFieldFilter();
+	}
+
+	switch(_CURRENTTAB)
+	{
+		case "EMPLOYEEACTIONPLAN":
+			showWaitAlert(getSeaPhrase("CM_155","CM"));
+			Reviews_EmployeeActionPlan_XIconClicked();
+			TrainingHistory_EmployeeActionPlan_XIconClicked();
+			TrainingRegistration_EmployeeActionPlan_XIconClicked();
+			if (code == null)
+			{
+				Do_HS50_1_Call_M_ACTIONPLAN_NoRefresh_Finished();
+			}
+			else if (StandardCareerProfileHash[Number(code)])
+			{
+				StandardCareerProfile = StandardCareerProfileHash[Number(code)];
+				Do_HS50_1_Call_M_ACTIONPLAN_NoRefresh_Finished();
+			}
+			else
+			{
+				Do_HS50_Call(3, 1, "Y", null, "HS50.1", "M_ACTIONPLAN", code)
+			}
+			break;
+		case "EMPLOYEEQUALIFICATIONS":
+			showWaitAlert(getSeaPhrase("CM_155","CM"));
+			if (code == null)
+			{
+				Do_HS50_1_Call_M_QUALIFICATIONS_NoRefresh_Finished();
+			}
+			else if (StandardCareerProfileHash[Number(code)])
+			{
+				StandardCareerProfile = StandardCareerProfileHash[Number(code)];
+				Do_HS50_1_Call_M_QUALIFICATIONS_NoRefresh_Finished();
+			}
+			else
+			{
+				Do_HS50_Call(3, 1, "Y", null, "HS50.1", "M_QUALIFICATIONS", code)
+			}
+			break;
+		case "INDIVIDUALPROFILE":
+			showWaitAlert(getSeaPhrase("CM_155","CM"));
+			if (code == null)
+			{
+				Do_HS50_1_Call_M_INDIVIDUALPROFILE_Finished();
+			}
+			else if (JobProfileCareerProfileHash[Number(code)])
+			{
+				CareerProfile = StandardCareerProfileHash[Number(code)];
+				Do_HS50_1_Call_M_INDIVIDUALPROFILE_Finished();
+			}
+			else
+			{
+				Do_HS50_Call(3, 1, null, null, "HS50.1", "M_INDIVIDUALPROFILE", code)
+			}
+			break;
+		case "M_TRAININGOPTIONS":
+			showWaitAlert(getSeaPhrase("CM_155","CM"));
+			Do_HS50_Call(3, 1, " ", null, "HS50.1", "M_TRAININGOPTIONS", code)
+			break;
+	}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("main");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;
+		contentHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? winHeight - 65 : winHeight - 65;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth = winWidth - 23;
+		contentWidthBorder = winWidth - 2;
+		contentHeight = winHeight - 65;	
+		contentHeightBorder = winHeight - 5;
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 : winWidth - 12;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 42;	
+	}
+	
+	//don't size smaller than 850 x 600
+	if (winWidth >= 850)
+		mainFrame.style.width = winWidth + "px";
+	if (winHeight >= 600)
+		mainFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.main.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		if (winWidth >= 850)
+		{
+			self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+			self.main.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+			self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		}
+		if (winHeight >= 600)
+		{
+			self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+			self.main.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+			self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+		}
+	}
+	catch(e)
+	{}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		mainFrame.style.left = "";
+		mainFrame.style.right = "5px";
+	}
+	else
+	{
+		mainFrame.style.left =  "5px";
+	}	
+}
+var cmTimer = setTimeout("AuthenCM()",3000);
+</SCRIPT>
+</HEAD>
+<!-- PT 111057: Netscape 6.2+ will not print hidden frame contents -->
+<body style="overflow:auto" onload="AuthenCM()" onresize="fitToScreen()">
+	<iframe id="HEADER" name="HEADER" src="/lawson/xhrnet/ui/header.htm" style="position:absolute;left:0px;width:820px;top:0px;height:32px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" src="/lawson/xhrnet/careermanagement/cmmain.htm" style="visibility:hidden;position:absolute;left:5px;width:820px;top:32px;height:635px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:1px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="PGCONTROL" name="PGCONTROL" style="visibility:visible;height:1px;width:0px;" src="/lawson/xhrnet/ui/pane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="HIDDEN" name="HIDDEN" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/careermanagement/lib/cm_lawheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="filterList" name="filterList" src="/lawson/xhrnet/dot.htm" frameborder="no" allowtransparency="true" marginwidth="0" marginheight="0" scrolling="no" style="visibility:hidden;position:absolute;left:150px:top:150px;width:450px;height:263px"></iframe>
+</body>
+</HTML>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/careermanagement/manager/mainWinOctober.htm,v 1.8.2.34 2012/06/29 17:12:21 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

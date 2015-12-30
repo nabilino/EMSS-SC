@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Smoker Status</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	setWinTitle(getSeaPhrase("SMOKER_STATUS","BEN"));
+	var html = '<form><div role="radiogroup" class="plaintablecell" style="padding:5px;text-align:center" aria-labelledby="smokerLbl">'
+	html += '<p><span id="smokerLbl">'+getSeaPhrase("SMOKER_QUESTION","BEN")+'&nbsp;</span>'
+	html += '<input type="radio" id="yes" name="yesorno" value="Y"/><label for="yes">'+getSeaPhrase("YES","BEN")+'</label>'
+	html += '<input type="radio" id="no" name="yesorno" value="N"/><label for="no">'+getSeaPhrase("NO","BEN")+'</label>'
+	html += '</p></div>'
+	html += '<div class="plaintablecellright" style="padding:5px">'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.setSmokerStatus(this.form);return false","margin-left:5px","closebtn")
+	html += uiButton(getSeaPhrase("PREVIOUS","BEN"), "parent.document.getElementById('main').src='"+parent.LastDoc[parent.currentdoc]+"';parent.currentdoc--;return false", "margin-left:5px")
+	html += uiButton(getSeaPhrase("EXIT","BEN"), "parent.quitEnroll(self.location.href);return false", "margin-left:5px", null, 'aria-haspopup="true"')
+	html += '</div></form>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("SMOKER_STATUS","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+	stopProcessing();
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td style="vertical-align:top">
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/Attic/smoker.htm,v 1.1.2.27 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

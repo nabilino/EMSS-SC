@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config>
+	<param name="flv" value="enrollment_tutorial.flv" />
+	<param name="width" value="800" />
+	<param name="height" value="620" />
+	<param name="bgcolor" value="6699CC" />
+	<param name="playercolor" value="6699CC" />
+	<param name="bgcolor1" value="6699CC" />
+	<param name="bgcolor2" value="003399" />
+	<param name="buttoncolor" value="dddddd" />
+	<param name="buttonovercolor" value="003399" />
+	<param name="slidercolor1" value="dddddd" />
+	<param name="slidercolor2" value="dddddd" />
+	<param name="sliderovercolor" value="003399" />
+	<param name="showstop" value="1" />
+	<param name="showvolume" value="1" />
+	<param name="showtime" value="1" />
+  <param name="showiconplay" value="1"/>
+  <param name="autoplay" value="1"/>
+  <param name="showplayer" value="always"/>
+  <param name="showloading" value="always"/>  
+  <param name="startimage" value="video_still.JPG"/>
+</config>

@@ -1,0 +1,121 @@
+<HTML>
+<!--
+#-------------------------------------------------------------------------------------
+# Copyright (c) 2006 Siemens Medical Solutions Health Services Corporation.
+# All rights reserved. This software is proprietary to Siemens.
+# It is protected by copyright laws in the US and abroad, and is licensed for use
+# by customers only in strict accordance with the license agreement governing its use.
+#-------------------------------------------------------------------------------------
+# Module:		smujobdumpinfo.htm
+#
+# Description:	ujobdump - ujobload functionality screen help
+#
+# Notes:
+#
+# History:      Date	 Who	Charm/comment
+#               -------- ------	-------------
+#               03/12/06 JDG	Original version
+#-------------------------------------------------------------------------------------
+-->
+
+<HEAD>
+	<link id="StyleLink" type="text/css" href="smstyle.css" rel="stylesheet">
+</HEAD>
+
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+
+<SPAN class=smWelcome>ujobdump - ujobload</SPAN>
+<hr size="2" width="95%" align="left">
+
+<b>Description</b><BR>
+This section describes how to use the ujobdump - ujobload utilities. The Lawson ujobdump and ujobload
+utilities were created by Lawson to aid the customer when a new or updated screen (.scr) file has been
+placed in a productline as a result of CTP or MSP installation or an application upgrade. These
+utilities will update the job definitions and therefore, you do not have to manually change the job
+definitions when the .scr files are installed. Further information on all input parameters can be
+found at support.lawson.com<BR>
+<BR><b>Note:</b>&nbsp&nbspOnly System Administrators can use this utility.
+<BR><b>&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbspDO NOT enter the lawson option parameters (-u, -t. -d) in any of the text areas.</b><BR>
+<BR><b>Input Fields for ujobdump</b><BR>
+
+<table WIDTH="90%" BORDER="0">
+<tbody>
+	<tr>
+		<td width="30%" align="left" valign="top"><li>Data Area:</li></td>
+		<td align="70%" valign="top">Select a data area from drop down.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Verbose Option (-v):</li></td>
+		<td align="left" valign="top">Select the checkbox to list any jobs that are not dumped.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Job Count Only Option(-c):</li></td>
+		<td align="left" valign="top">Select the checkbox to displays the number of jobs that will be processed. This option does not process any jobs. Results are displayed on the screen.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>List Jobs with Job Count Option (-l):</li></td>
+		<td align="left" valign="top">Select the checkbox to list all jobs that are counted with the Job Count Only (-c) option.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Include Upgrade Jobs Option (-x):</li></td>
+		<td align="left" valign="top">Select the checkbox to include upgrade jobs.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Output File:</li></td>
+		<td align="left" valign="top">Select the checkbox and enter the output file name. The actual file that will be create will be preceeded by <b>ujob_(data area)_</b>. This field is disabled when using the Job Counts Only (-c) option.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>User Name [Job Names] (-u):</li></td>
+		<td align="left" valign="top">Select the checkbox and enter a user name to be dumped. If job names are listed after the user name, only	those jobs for the given user will be dumped. Multiple jobs may be specied.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Backup Source Directory (-d):</li></td>
+		<td align="left" valign="top">Select the checkbox and select a backup (or alternate) source directory. The option specifies where backup source directories (acsrc, amsrc, apsrc, etc.) are located. They hold the original source for any programs that changed after applying an MSP or CTP and will cause ujobdump to only dump jobs associated with changed programs.</tr>
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Program Tokens(-t):</li></td>
+		<td align="left" valign="top">Select the checkbox and enter token names to be dumped. If this option is specied, specic jobs cannot be entered with the -u option.
+	</tr>
+</tbody>
+</table>
+<BR>
+
+<b>Input Fields for ujobload</b><BR>
+
+<table WIDTH="90%" BORDER="0">
+<tbody>
+	<tr>
+		<td width="30%" align="left" valign="top"><li>Data Area:</li></td>
+		<td align="70%" valign="top">Select a data area from drop down.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Input File:</li></td>
+		<td align="left" valign="top">Select an Input File from the drop down.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Overwrite Option (-o):</li></td>
+		<td align="left" valign="top">Select the checkbox to overwrite existing jobs. If you do not specify this option, only jobs that do not exist will be created.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Update Option (-u):</li></td>
+		<td align="left" valign="top">Select the checkbox to update jobs. <b>If you do not check the update option, no jobs will be overwritten or created.</b>
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Display Last Job Log Option (-l):</li></td>
+		<td align="left" valign="top">Select the checkbox to display the job log from the last ujobload run. You must select a product line. All other parameters are disabled when running this option.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Display Deleted Fields Option (-d):</li></td>
+		<td align="left" valign="top">Select the checkbox to list deleted fields.
+	</tr>
+	<tr>
+		<td align="left" valign="top"><li>Overwrite Job Names (-x):</li></td>
+		<td align="left" valign="top">Select the checkbox and enter translations. The translate option renames specied job names from OldJobName to NewJobName. You can specify as many translate options as necessary. For example: JOB-1:JOB-1a JOB2:JOB-2a
+	</tr>
+</tbody>
+</table>
+<BR>
+
+</HTML>
+
+

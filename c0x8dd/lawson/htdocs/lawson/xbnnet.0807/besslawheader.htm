@@ -1,0 +1,2104 @@
+<html>
+<head>
+<script>
+//Note: xmlcommon.js and ui.js must be loaded in the parent window.
+//This also assumes that esscommon80.js is loaded in the same window as user.js.
+var gmsg = "";
+var gmsgnbr = "";
+var gfldnbr = "";
+var bncount = 0;
+var count = 0;
+var count2 = 0;
+var plangrp = "";
+var plantype = "";
+var plancode = "";
+var exitAgs = false;
+var temp = new Array();
+var FSHobject = new Object();
+
+function setValues(nbr,dec)
+{
+	var num;
+	num = nbr;
+	var negative = false;
+	if ((num+'').indexOf('-') != -1 && (num+'').indexOf('-') != 0)
+		negative = true;
+	// PT 152345. Values coming back from AGS with XML output are already formatted properly.
+    if ((num+'').indexOf('.')==-1)
+    {
+		num = parseFloat(num);
+		num += '';
+		if (typeof(parent.FormatDecimalField) != "undefined")
+			nbr = parent.FormatDecimalField(num,dec);
+		else if (typeof(parent.parent.FormatDecimalField) != "undefined")
+			nbr = parent.parent.FormatDecimalField(num,dec);
+    }
+    else
+    	nbr = parseFloat(num);
+	if (negative)
+		nbr = '-' + nbr;
+	return nbr;
+}
+
+function V(fldnbr,fldval)
+{
+	if (parent.updatetype == "FSH")
+	{
+		if (fldnbr == "FSH-BENEFIT-UPDATE")
+		{
+			FSHobject.Benefit_update = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-1")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-2")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-3")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-4")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-5")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-6")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-7")
+		{
+			FSHobject.DEP1=fldval
+			return
+		}
+		else if (fldnbr == "FSH-DEP-8")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+		else if (fldnbr == "FSH-DEP-9")
+		{
+			FSHobject.DEP1 = fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "CHK")
+	{
+		if (count == 0) exitAgs = false;
+		if (exitAgs) return;
+
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-COMPANY")
+		{
+			parent.PT_Company = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-EMPLOYEE")
+		{
+			parent.PT_Employee = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-LEVEL")
+		{
+			parent.PT_Process_Level = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-FAMILY-STATUS")
+		{
+			parent.PT_Family_Status = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-GROUP-NAME")
+		{
+			parent.PT_Group_Name = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-ORDER")
+		{
+			parent.PT_Process_Order = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-TYPE")
+		{
+			parent.PT_Plan_Type = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-CODE")
+		{
+			parent.PT_Plan_Code = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-BEN-START-DATE")
+		{
+			parent.PT_Ben_Start_Date = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-TYPE"+(count+1))
+		{
+			if (fldval.length > 2)
+				return;
+			if (count >= 1)
+			{
+				parent.setelected(temp);
+			}
+			count++;
+			if (fldval == "")
+			{
+				exitAgs = true;
+				return;
+			}
+			temp = new Array();
+			temp[1] = fldval;
+			temp[39] = "N";
+			temp[41] = "N";
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-CODE"+count)
+		{
+			temp[2] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-START-DATE"+count)
+		{
+			temp[3] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "PLN-DISPLAY-DESC"+count)
+		{
+			temp[4] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DESC"+count)
+		{
+			temp[5] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-CREATION-DATE"+count)
+		{
+			temp[6] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-UPD-DATE"+count)
+		{
+			temp[7] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COVER-AMT"+count)
+		{
+			temp[8] = setValues(fldval,2);
+			temp[38] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-MULTIPLE"+count)
+		{
+			temp[9] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-SMOKER"+count)
+		{
+			temp[10] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-PCT-AMT-FLAG"+count)
+		{
+			temp[11] =  fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COMP-CONT"+count)
+		{
+			temp[12] =  setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-PRE-AFT-FLAG"+count)
+		{
+			temp[13] =  fldval;
+			return;
+		}
+		else if (fldnbr == "KEEP-FLAG"+count)
+		{
+			temp[14] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-STOP-DATE"+count)
+		{
+			temp[15] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COV-OPTION"+count)
+		{
+			temp[16] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COVER-DESC"+count)
+		{
+			temp[17] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-EMP-PRE-CONT"+count)
+		{
+			temp[18] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-EMP-AFT-CONT"+count)
+		{
+			temp[19] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-SALARY-PCT"+count)
+		{
+			temp[20] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-CMP-FLX-CONT"+count)
+		{
+			temp[21] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE"+count)
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			temp[22] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-COVER-DESC"+count)
+		{
+			temp[23] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-DEP-COVER-AMT"+count)
+		{
+			temp[24] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-NBR-HOURS"+count)
+		{
+			temp[25] = setValues(fldval,2);
+			temp[30] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-BOND-DED-AMT"+count)
+		{
+			temp[26] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-ANNUAL-AMT"+count)
+		{
+			temp[27] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-MTCH-UP-TO"+count)
+		{
+			temp[28] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COMP-MATCH"+count)
+		{
+			temp[29] = fldval;
+			return;
+		}
+		// PT 150730. Store the BEN-NBR-HOURS field above in both array locations 25 and 30.
+		//if (fldnbr == "BEN-NBR-HOURS"+count)
+		//{
+		//	temp[30] = setValues(fldval,2);
+		//	return;
+		//}
+		else if (fldnbr == "CVR-LIFE-ADD-FLG"+count)
+		{
+			temp[31] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			temp[32] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-1"+count)
+		{
+			temp[33] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-2"+count)
+		{
+			temp[34] = fldval;
+			return;
+		}
+		else if (fldnbr == "VAC-HOURLY-RATE"+count)
+		{
+			temp[35] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-PAY-RATE"+count)
+		{
+			temp[36] = setValues(fldval,4);
+			return;
+		}
+		else if (fldnbr == "BEN-TOTAL-COST"+count)
+		{
+			temp[37] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-FLEX-PLAN"+count)
+		{
+			temp[39] = "Y";
+			return;
+		}
+		else if (fldnbr == "BEN-YTD-CONT"+count)
+		{
+			temp[40] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BNT-CREATE-TRANS"+count)
+		{
+			temp[41] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-REASON"+count)
+		{
+			temp[42] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-MEMBER-ID"+count)
+		{
+			temp[43] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-CYCLES-REMAIN"+count)
+		{
+			temp[44] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.setCostDivisor(fldval);
+			return;
+		}
+		else if (fldnbr == "BAE-CURRENT-DATE")
+		{
+			parent.CurrentBenDate = fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "FLX1" || parent.updatetype == "FLX2")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "EFD-START-DATE")
+		{
+			parent.FlexPlan[1] = fldval;
+			return;
+		}
+		else if (fldnbr == "EFD-FLEX-PLAN")
+		{
+			parent.FlexPlan[2] = fldval;
+			return;
+		}
+		else if (fldnbr == "EFD-SALARY")
+		{
+			parent.FlexPlan[3] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EFD-COMP-FLX-AMT")
+		{
+			parent.FlexPlan[4] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EFD-AGE-CREDIT")
+		{
+			parent.FlexPlan[5] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EFD-LIFE-CREDIT")
+		{
+			parent.FlexPlan[6] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EFD-ADJ-CALC")
+		{
+			parent.FlexPlan[7] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EFD-TOT-COMP-AMT")
+		{
+			parent.FlexPlan[8] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "FLD-ADD-TO-GRS-PCT")
+		{
+			parent.flexFlag = true;
+			// PT 144875. Do not format percentage.
+			parent.FlexPlan[9] = fldval;
+			return;
+		}
+		else if (fldnbr == "EFD-EMP-FLEX-AMT")
+		{
+			parent.FlexPlan[10] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "KEEP-FLAG")
+		{
+			parent.FlexPlan[11] = fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "RLE")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "EMP-SHORT-NAME")
+		{
+			parent.shortname = fldval;
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-RULE-TYPE")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[0] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-CURRENT-DATE")
+		{
+			parent.BenefitRules[1] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-NEW-DATE")
+		{
+			parent.BenefitRules[2] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-ENROLL-START")
+		{
+			parent.BenefitRules[3] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-ENROLL-STOP")
+		{
+			parent.BenefitRules[4] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-GROUP-NAME")
+		{
+			parent.BenefitRules[5] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[6] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-IMMEDIATE")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[7] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-ADD-DEPENDENTS")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[8] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-UPDATE-FREQ")
+		{
+			parent.BenefitRules[9] = fldval;
+			return;
+		}
+		else if (fldnbr == "DEPENDENT-OPTION")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[10] = fldval;
+			return;
+		}
+		else if (fldnbr == "SMOKER-STATUS-OPTION")
+		{
+			if (fldval.length < 2)
+				parent.BenefitRules[11] = fldval;
+			return;
+		}
+		else if (fldnbr == "SYR-FROM-DATE")
+		{
+			parent.BenefitRules[12] = fldval;
+			return;;
+		}
+		else if (fldnbr == "SYR-NBR-DAYS")
+		{
+			parent.BenefitRules[13] = fldval;
+			return;
+		}
+		else if (fldnbr == "EMP-DATE")
+		{
+			parent.BenefitRules[14] = fldval;
+			return;
+		}		
+	}
+	else if (parent.updatetype == "BEN")
+	{
+		if (count == 0) exitAgs = false;
+		if (exitAgs) return;
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-COMPANY")
+		{
+			parent.PT_Company = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-EMPLOYEE")
+		{
+			parent.PT_Employee = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-LEVEL")
+		{
+			parent.PT_Process_Level = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-FAMILY-STATUS")
+		{
+			parent.PT_Family_Status = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-GROUP-NAME")
+		{
+			parent.PT_Group_Name = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-ORDER")
+		{
+			parent.PT_Process_Order = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-TYPE")
+		{
+			parent.PT_Plan_Type = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-CODE")
+		{
+			parent.PT_Plan_Code = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-BEN-START-DATE")
+		{
+			parent.PT_Ben_Start_Date = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-TYPE"+(count+1))
+		{
+			if (fldval.length > 2)
+				return;
+			count++;
+			bncount++;
+			if (fldval == "")
+			{
+				exitAgs = true;
+				return;
+			}
+			parent.CurrentBens[bncount] = new Array(37);
+			for (var i=0; i<37; i++)
+				parent.CurrentBens[bncount][i] = "";
+			parent.CurrentBens[bncount][1] = fldval;
+			parent.CurrentBens[bncount][39] = "N";
+			parent.CurrentBens[bncount][41] = "N";
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-CODE"+count)
+		{
+			parent.CurrentBens[bncount][2] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-START-DATE"+count)
+		{
+			parent.CurrentBens[bncount][3] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "PLN-DISPLAY-DESC"+count)
+		{
+			parent.CurrentBens[bncount][4] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DESC"+count)
+		{
+			parent.CurrentBens[bncount][5] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-CREATION-DATE"+count)
+		{
+			parent.CurrentBens[bncount][6] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-UPD-DATE"+count)
+		{
+			parent.CurrentBens[bncount][7] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COVER-AMT"+count)
+		{
+			parent.CurrentBens[bncount][8] = setValues(fldval,2);
+			parent.CurrentBens[bncount][38] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-MULTIPLE"+count)
+		{
+			parent.CurrentBens[bncount][9] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-SMOKER"+count)
+		{
+			parent.CurrentBens[bncount][10] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-PCT-AMT-FLAG"+count)
+		{
+			parent.CurrentBens[bncount][11] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COMP-CONT"+count)
+		{
+			parent.CurrentBens[bncount][12] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-PRE-AFT-FLAG"+count)
+		{
+			parent.CurrentBens[bncount][13] = fldval;
+			return;
+		}
+		else if (fldnbr == "KEEP-FLAG"+count)
+		{
+			parent.CurrentBens[bncount][14] = fldval;
+			if (fldval != "Y")
+				parent.keepflag = "N";
+			return;
+		}
+		else if (fldnbr == "BEN-STOP-DATE"+count)
+		{
+			parent.CurrentBens[bncount][15] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COV-OPTION"+count)
+		{
+			parent.CurrentBens[bncount][16] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COVER-DESC"+count)
+		{
+			parent.CurrentBens[bncount][17] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-EMP-PRE-CONT"+count)
+		{
+			parent.CurrentBens[bncount][18] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-EMP-AFT-CONT"+count)
+		{
+			parent.CurrentBens[bncount][19] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-SALARY-PCT"+count)
+		{
+			parent.CurrentBens[bncount][20] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-CMP-FLX-CONT"+count)
+		{
+			parent.CurrentBens[bncount][21] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE"+count)
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.CurrentBens[bncount][22] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-COVER-DESC"+count)
+		{
+			parent.CurrentBens[bncount][23] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-DEP-COVER-AMT"+count)
+		{
+			parent.CurrentBens[bncount][24] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-NBR-HOURS"+count)
+		{
+			parent.CurrentBens[bncount][25] = setValues(fldval,2);
+			parent.CurrentBens[bncount][30] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-BOND-DED-AMT"+count)
+		{
+			parent.CurrentBens[bncount][26] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-ANNUAL-AMT"+count)
+		{
+			parent.CurrentBens[bncount][27] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-MTCH-UP-TO"+count)
+		{
+			parent.CurrentBens[bncount][28] = fldval;
+			return;
+		}
+		else if (fldnbr == "BEN-COMP-MATCH"+count)
+		{
+			parent.CurrentBens[bncount][29] = fldval;
+			return;
+		}
+		// PT 150730. Store the BEN-NBR-HOURS field above in both array locations 25 and 30.
+		//if (fldnbr == "BEN-NBR-HOURS"+count)
+		//{
+		//	parent.CurrentBens[bncount][30] = setValues(fldval,2);
+		//	return;
+		//}
+		else if (fldnbr == "CVR-LIFE-ADD-FLG"+count)
+		{
+			parent.CurrentBens[bncount][31] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			parent.CurrentBens[bncount][32] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-1"+count)
+		{
+			parent.CurrentBens[bncount][33] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-2"+count)
+		{
+			parent.CurrentBens[bncount][34] = fldval;
+			return;
+		}
+		else if (fldnbr == "VAC-HOURLY-RATE"+count)
+		{
+			parent.CurrentBens[bncount][35] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BEN-PAY-RATE"+count)
+		{
+			parent.CurrentBens[bncount][36] = setValues(fldval,4);
+			return;
+		}
+		else if (fldnbr == "BEN-TOTAL-COST"+count)
+		{
+			parent.CurrentBens[bncount][37] = setValues(fldval,4);
+			return;
+		}
+		else if (fldnbr == "BEN-FLEX-PLAN"+count && fldval != "")
+		{
+			parent.CurrentBens[bncount][39] = "Y";
+			parent.CurrentFlexExist = true;
+			return;
+		}
+		else if (fldnbr == "BEN-YTD-CONT"+count)
+		{
+			parent.CurrentBens[bncount][40] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "BNT-CREATE-TRANS"+count)
+		{
+			parent.CurrentBens[bncount][41] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-REASON"+count)
+		{
+			parent.CurrentBens[bncount][42] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-MEMBER-ID"+count)
+		{
+			parent.CurrentBens[bncount][43] = fldval;
+			return;
+		}
+		else if (fldnbr == "BCC-REMAIN-CYCLES"+count)
+		{
+			parent.CurrentBens[bncount][44] = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.setCostDivisor(fldval);
+			return;
+		}
+		else if (fldnbr == "BAE-CURRENT-DATE")
+		{
+			parent.CurrentBenDate = fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "RNM")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+		}
+		else if (fldnbr == "TC")
+			parent.TC_val = fldval;
+		else if (fldnbr == "_HK")
+			parent.HK_val = fldval;
+		else if (fldnbr == "DKEY-PROTECTED")
+			parent.nextpo = fldval;
+		else if (fldnbr.substring(0,14) == "BPG-PLAN-GROUP")
+		{
+			plangrp = fldval;
+			return;
+		}
+		else if (fldnbr.substring(0,13) == "BPG-NBR-PLANS")
+		{
+			for (var i=1; i<parent.EligPlans.length; i++)
+			{
+				if (parent.EligPlans[i][8] == plangrp)
+					parent.EligPlans[i][9] = fldval;
+			}
+			return;
+		}
+		else if (fldnbr.substring(0,17) == "BPG-REQUIRED-FLAG")
+		{
+			for (var i=1; i<parent.EligPlans.length; i++)
+			{
+				if (parent.EligPlans[i][8] == plangrp)
+					parent.EligPlans[i][19] = fldval;
+			}
+			return;
+		}
+	}
+	else if (parent.updatetype == "ELG")
+	{
+		if (count == 0) exitAgs = false;
+		if (exitAgs) return;
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = "";
+			parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-TYPE"+(count+1))
+		{
+			if (fldval.length > 2)
+				return;
+			count++;
+			count2++;
+			if (fldval == "")
+			{
+				exitAgs = true;
+				return;
+			}
+			parent.EligPlans[count2] = new Array();
+			parent.EligPlans[count2][1] = fldval;
+			parent.EligPlans[count2][22] = "N";
+			parent.EligPlans[count2][24] = "N";
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-CODE"+count)
+		{
+			parent.EligPlans[count2][2] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DISPLAY-DESC"+count)
+		{
+			parent.EligPlans[count2][3] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DESC"+count)
+		{
+			parent.EligPlans[count2][4] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-ELIG-DATE"+count)
+		{
+			parent.EligPlans[count2][5] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE"+count)
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.EligPlans[count2][6] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-PLAN-OPTION"+count)
+		{
+			if (fldval.length < 3)
+				parent.EligPlans[count2][7] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			parent.EligPlans[count2][8] = fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-ADD-ALLOWED"+count)
+		{
+			parent.EligPlans[count2][10] = fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-ADD-DATE"+count)
+		{
+			parent.EligPlans[count2][11] = (Number(fldval) == 0) ? "" : fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-CHANGE-ALLOWED"+count)
+		{
+			parent.EligPlans[count2][12] = fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-CHANGE-DATE"+count)
+		{
+			parent.EligPlans[count2][13] = (Number(fldval) == 0) ? "" : fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-STOP-ALLOWED"+count)
+		{
+			parent.EligPlans[count2][14] = fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-STOPPED-DATE"+count)
+		{
+			parent.EligPlans[count2][15] = (Number(fldval) == 0) ? "" : fldval;
+			return;
+		}
+		else if (fldnbr == "BFS-EOI-DAYS"+count)
+		{
+			parent.EligPlans[count2][16] = fldval;
+			return;
+		}
+		else if (fldnbr == "LAST-CHG-DATE"+count)
+		{
+			parent.EligPlans[count2][17] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-DEP-BENEFITS"+count)
+		{
+			parent.EligPlans[count2][18] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-BN-PLAN-TYPE"+count)
+		{
+			if (fldval.length < 3)
+				parent.EligPlans[count2][20] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-BN-PLAN-CODE"+count)
+		{
+			parent.EligPlans[count2][21] = fldval;
+			return;
+		}
+		else if (fldnbr == "FLP-FLEX-PLAN"+count && fldval != "")
+		{
+			parent.EligPlans[count2][22] = "Y";
+			parent.EligFlexExist = true;
+			return;
+		}
+		else if (fldnbr == "FLP-SPEND-ONLY"+count)
+		{
+			parent.EligPlans[count2][23] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-CREATE-TRANS"+count)
+		{
+			parent.EligPlans[count2][24] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-REASON"+count)
+		{
+			parent.EligPlans[count2][25] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNT-MEMBER-ID"+count)
+		{
+			parent.EligPlans[count2][26] = fldval;
+			return;
+		}
+		else if (fldnbr == "BNN-EFFECTIVE-DATE"+count)
+		{
+			parent.EligPlans[count2][27] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "PT-PLAN-TYPE")
+		{
+			parent.nextpt = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLAN-CODE")
+		{
+			parent.nextpc = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PLN-COMPANY" || fldnbr == "PT-COMPANY")
+		{
+			parent.nextcofld = fldnbr;
+			parent.nextco = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-EMP-EMPLOYEE" || fldnbr == "PT-EMPLOYEE")
+		{
+			parent.nextempfld = fldnbr;
+			parent.nextemp = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-BAE-RULE-TYPE")
+		{
+			parent.nextrle = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-BFS-FAMILY-STATUS")
+		{
+			parent.nextfs = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-LEVEL")
+		{
+			parent.nextpl = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-GROUP-NAME")
+		{
+			parent.nextgn = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-PROCESS-ORDER")
+		{
+			parent.nextpo = fldval;
+			return;
+		}
+		else if (fldnbr == "PT-INQUIRY-COMPLETE")
+		{
+			parent.inquireComplete = fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "CRT")
+	{
+		if (count == 0) exitAgs = false;
+		if (exitAgs) return;
+		if (fldnbr == "FC")
+		{
+			parent.parent.TC_val = "";
+			parent.parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.parent.errorCat = "";
+			parent.parent.TC_val = fldval;
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "CRT-ERROR-CAT")
+		{
+			parent.parent.errorCat = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-COVERAGE-OPT"+(count+1))
+		{
+			count++;
+			if (fldval == "")
+			{
+				exitAgs = true;
+				return;
+			}
+			parent.parent.SelectedPlan[count] = new Array();
+			for (var i=0; i<27; i++)
+				parent.parent.SelectedPlan[count][i] = "";
+			parent.parent.SelectedPlan[count][1] = fldval;
+			parent.parent.SelectedPlan[count][11] = plantype;
+			parent.parent.SelectedPlan[count][12] = plancode;
+			return;
+		}
+		else if (fldnbr == "COP-COV-DESC"+count)
+		{
+			parent.parent.SelectedPlan[count][2] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-CONT-TAX-STS"+count)
+		{
+			parent.parent.SelectedPlan[count][3] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-DEFAUL-TAX-TYP"+count)
+		{
+			parent.parent.SelectedPlan[count][4] = fldval;
+			return;
+		}
+		else if (fldnbr == "EMP-CONT"+count)
+		{
+			parent.parent.SelectedPlan[count][5] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "FLEX-CONT"+count)
+		{
+			parent.parent.SelectedPlan[count][6] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "TOT-CONT"+count)
+		{
+			parent.parent.SelectedPlan[count][7] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "COMP-CONT"+count)
+		{
+			parent.parent.SelectedPlan[count][8] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE"+count)
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.parent.SelectedPlan[count][9] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			parent.parent.SelectedPlan[count][10] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-STUDENT-AGE"+count)
+		{
+			parent.parent.SelectedPlan[count][13] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-DEP-AGE"+count)
+		{
+			parent.parent.SelectedPlan[count][14] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			parent.parent.SelectedPlan[count][15] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-COV-DEPENDENTS"+count)
+		{
+			if (fldval.length < 2)
+				parent.parent.SelectedPlan[count][16] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP"+count)
+		{
+			parent.parent.SelectedPlan[count][17] = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-NBR-DEPENDENTS"+count)
+		{
+			parent.parent.SelectedPlan[count][18] = fldval;
+			return;
+		}
+		//PT 150062
+		else if (fldnbr == "PRE-EMP-CONT-TYPE"+count)
+		{
+			parent.parent.SelectedPlan[count][24] = fldval;
+			parent.parent.EMP_CONT_TYPE = fldval;
+			return;
+		}
+		//placeholder fields for emp pre cont and emp aft cont - do not override these
+		//parent.parent.SelectedPlan[count][25]
+		//parent.parent.SelectedPlan[count][26]
+		else if (fldnbr == "COP-PLAN-TYPE")
+		{
+			if (fldval.length < 3)
+				plantype = fldval;
+			return;
+		}
+		else if (fldnbr == "COP-PLAN-CODE")
+		{
+			plancode = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.parent.setCostDivisor(fldval);
+			return;
+		}
+		else if (fldnbr == "COP-TERM-OPT"+count)
+		{
+			parent.parent.termopt=fldval;
+			return;
+		}
+	}
+	else if (parent.updatetype == "CRT2")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.parent.TC_val = "";
+			parent.parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.parent.errorCat = "";
+			parent.parent.TC_val = fldval;
+			for (var i=0; i<65; i++)
+				parent.parent.SelectedPlan[i] = "";
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "CRT-ERROR-CAT")
+		{
+			parent.parent.errorCat = fldval;
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE")
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.parent.SelectedPlan[0] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DISPLAY-DESC")
+		{
+			parent.parent.SelectedPlan[1] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DESC")
+		{
+			parent.parent.SelectedPlan[2] = fldval;
+			return;
+		}
+		else if (fldnbr == "ELIG-DATE")
+		{
+			parent.parent.SelectedPlan[3] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "CVR-LIFE-ADD-FLG")
+		{
+			parent.parent.SelectedPlan[4] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-1")
+		{
+			parent.parent.SelectedPlan[5] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-BN-PLAN-TYPE")
+		{
+			if (fldval.length < 3)
+				parent.parent.SelectedPlan[6] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-FLAT-AMT-2")
+		{
+			parent.parent.SelectedPlan[7] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-BN-PLAN-CODE")
+		{
+			parent.parent.SelectedPlan[8] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-BN-DISPLAY-DESC")
+		{
+			parent.parent.SelectedPlan[9] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-BN-DESC")
+		{
+			parent.parent.SelectedPlan[10] = fldval;
+			return;
+		}
+		else if (fldnbr == "CAL-SALARY")
+		{
+			parent.parent.SelectedPlan[11] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-SALARY-PCT")
+		{
+			parent.parent.SelectedPlan[12] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PEM-SMOKER")
+		{
+			parent.parent.SelectedPlan[13] = fldval;
+			return;
+		}
+		else if (fldnbr == "CAL-COVERAGE")
+		{
+			parent.parent.SelectedPlan[14] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-CONT-TAX-STS")
+		{
+			parent.parent.SelectedPlan[15] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-DEFAUL-TAX-TYP")
+		{
+			parent.parent.SelectedPlan[16] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-MULT-SALARY")
+		{
+			parent.parent.SelectedPlan[17] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-EMP-COST")
+		{
+			parent.parent.SelectedPlan[18] = setValues(fldval,4);
+			return;
+		}
+		else if (fldnbr == "CVR-MIN-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[19] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-FLEX-COST")
+		{
+			parent.parent.SelectedPlan[20] = setValues(fldval,3);
+			return;
+		}
+		else if (fldnbr == "CAL-MIN-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[21] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-TOTAL-COST")
+		{
+			parent.parent.SelectedPlan[22] = setValues(fldval,3);
+			return;
+		}
+		else if (fldnbr == "CVR-MAX-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[23] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-COMP-COST")
+		{
+			parent.parent.SelectedPlan[24] = setValues(fldval,3);
+			return;
+		}
+		else if (fldnbr == "CAL-MAX-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[25] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-MIN-COVER")
+		{
+			parent.parent.SelectedPlan[26] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-MAX-COVER")
+		{
+			parent.parent.SelectedPlan[27] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-BENEFIT-PCT")
+		{
+			parent.parent.SelectedPlan[28] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "MIN-MULT-START")
+		{
+			parent.parent.SelectedPlan[29] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-MIN-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[30] = fldval;
+			return;
+		}
+		else if (fldnbr == "MAX-MULT-STOP")
+		{
+			parent.parent.SelectedPlan[31] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-MAX-MULTIPLE")
+		{
+			parent.parent.SelectedPlan[32] = fldval;
+			return;
+		}
+		else if (fldnbr == "MIN-COV-START")
+		{
+			parent.parent.SelectedPlan[33] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "MAX-COV-STOP")
+		{
+			parent.parent.SelectedPlan[34] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-INCREMENTS")
+		{
+			parent.parent.SelectedPlan[35] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-BENEFIT-PCT")
+		{
+			parent.parent.SelectedPlan[36] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-PLAN-TYPE")
+		{
+			if (fldval.length < 3)
+				parent.parent.SelectedPlan[37] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-PLAN-CODE")
+		{
+			parent.parent.SelectedPlan[38] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-BEF-AFT-FLAG")
+		{
+			parent.parent.SelectedPlan[39] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-ROUND-METH")
+		{
+			parent.parent.SelectedPlan[40] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-ROUND-TO")
+		{
+			parent.parent.SelectedPlan[41] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-CONTRIB-BASIS")
+		{
+			parent.parent.SelectedPlan[42] = fldval;
+			return;
+		}
+		else if (fldnbr == "BN-PLAN-TYPE")
+		{
+			parent.parent.SelectedPlan[43] = fldval;
+			return;
+		}
+		else if (fldnbr == "BN-PLAN-CODE")
+		{
+			parent.parent.SelectedPlan[44] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-STUDENT-AGE")
+		{
+			parent.parent.SelectedPlan[45] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-DEP-AGE")
+		{
+			parent.parent.SelectedPlan[46] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-COV-DEPENDENT")
+		{
+			parent.parent.SelectedPlan[47] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-EMP-CONT-TYPE")
+		{
+			parent.parent.SelectedPlan[51] = fldval;
+			parent.parent.EMP_CONT_TYPE = fldval;
+			return;
+		}
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.parent.setCostDivisor(fldval);
+			return;
+		}
+		else if (fldnbr == "CAL-MAX-COVERAGE")
+		{
+			parent.parent.SelectedPlan[52] = fldval;
+			return;
+		}
+		else if (fldnbr == "CAL-MIN-COVERAGE")
+		{
+			parent.parent.SelectedPlan[53] = fldval;
+			return;
+		}
+		else if (fldnbr == "BPE-PLAN-GROUP")
+		{
+			parent.parent.SelectedPlan[54] = fldval;
+			return;
+		}
+		else if (fldnbr == "DEPS")
+		{
+			parent.parent.SelectedPlan[55] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-COST-PER-CVG")
+		{
+			parent.parent.SelectedPlan[56] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "EMP-PAY-FREQ")
+		{
+			parent.parent.SelectedPlan[57] = fldval;
+			return;
+		}
+		else if (fldnbr == "CVR-RATE-TABLE")
+		{
+			parent.parent.SelectedPlan[58] = fldval;
+			return;
+		}
+		else if (fldnbr == "REDUCE-PCT")
+		{
+			parent.parent.SelectedPlan[59] = setValues(fldval,3);
+			return;
+		}
+		else if (fldnbr == "REDUCE-AMOUNT")
+		{
+			parent.parent.SelectedPlan[60] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "REDUCE-METH")
+		{
+			parent.parent.SelectedPlan[61] = fldval;
+			return;
+		}
+		else if (fldnbr == "REDUCE-ROUND-TO")
+		{
+			parent.parent.SelectedPlan[62] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CVR-TERM-OPT") 
+		{
+			parent.parent.termopt=fldval;
+			return;
+		}
+		//placeholder fields for emp pre cont and emp aft cont - do not override these
+		//parent.parent.SelectedPlan[63]
+		//parent.parent.SelectedPlan[64]
+	}
+	else if (parent.updatetype == "CRT3")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.parent.TC_val = "";
+			parent.parent.HK_val = "";
+			return;
+		}
+		else if (fldnbr == "TC")
+		{
+			parent.parent.errorCat = "";
+			parent.parent.TC_val = fldval;
+			for (var i=0; i<56; i++)
+				parent.parent.SelectedPlan[i] = "";
+			return;
+		}
+		else if (fldnbr == "_HK")
+		{
+			parent.parent.HK_val = fldval;
+			return;
+		}
+		else if (fldnbr == "RECORD-TYPE")
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.parent.SelectedPlan[0] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DISPLAY-DESC")
+		{
+			parent.parent.SelectedPlan[1] = fldval;
+			return;
+		}
+		else if (fldnbr == "PLN-DESC")
+		{
+			parent.parent.SelectedPlan[2] = fldval;
+			return;
+		}
+		else if (fldnbr == "ELIG-DATE")
+		{
+			parent.parent.SelectedPlan[3] = fixDate(fldval);
+			return;
+		}
+		else if (fldnbr == "CND-MATCH-PCT")
+		{
+			parent.parent.SelectedPlan[4] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-PAY-PER-MIN")
+		{
+			parent.parent.SelectedPlan[5] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CND-PCT-MATCHED")
+		{
+			parent.parent.SelectedPlan[6] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-PAY-PER-MAX")
+		{
+			parent.parent.SelectedPlan[7] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CND-MAX-MATCH")
+		{
+			parent.parent.SelectedPlan[8] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-ANN-AMT-MIN")
+		{
+			parent.parent.SelectedPlan[9] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-END-PCT")
+		{
+			if (fldval)
+				parent.parent.SelectedPlan[10] = parseInt(fldval,10);
+			return;
+		}
+		else if (fldnbr == "PRE-ANN-AMT-MAX")
+		{
+			parent.parent.SelectedPlan[11] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-END-PCT")
+		{
+			parent.parent.SelectedPlan[12] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-PCT-MINIMUM")
+		{
+			parent.parent.SelectedPlan[13] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-SALARY1")
+		{
+			parent.parent.SelectedPlan[14] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-PCT-MAXIMUM")
+		{
+			parent.parent.SelectedPlan[15] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-EMP-COST")
+		{
+			parent.parent.SelectedPlan[16] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-SALARY2")
+		{
+			parent.parent.SelectedPlan[17] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-FLEX-COST")
+		{
+			parent.parent.SelectedPlan[18] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-VAC-MAX-HOURS")
+		{
+			parent.parent.SelectedPlan[19] = setValues(fldval,3);
+			return;
+		}
+		else if (fldnbr == "PRE-TOTAL-COST")
+		{
+			parent.parent.SelectedPlan[20] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-VAC-COST")
+		{
+			parent.parent.SelectedPlan[21] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-COMP-COST")
+		{
+			parent.parent.SelectedPlan[22] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-RATE")
+		{
+			parent.parent.SelectedPlan[23] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-EMP-CONT-TYPE")
+		{
+			parent.parent.SelectedPlan[24] = fldval;
+			parent.parent.EMP_CONT_TYPE = fldval;
+			return;
+		}
+		else if (fldnbr == "CND-EMP-PRE-PCT")
+		{
+			parent.parent.SelectedPlan[25] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-CONT-TAX-STS")
+		{
+			parent.parent.SelectedPlan[26] = fldval;
+			return;
+		}
+		else if (fldnbr == "CAL-PRE-PCT")
+		{
+			parent.parent.SelectedPlan[27] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "PRE-DEFAUL-TAX-TYP")
+		{
+			parent.parent.SelectedPlan[28] = fldval;
+			return;
+		}
+		else if (fldnbr == "CND-EMP-POST-PCT")
+		{
+			parent.parent.SelectedPlan[29] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-POST-PCT")
+		{
+			parent.parent.SelectedPlan[30] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CND-EMP-TOT-PCT")
+		{
+			parent.parent.SelectedPlan[31] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-TOT-PCT")
+		{
+			parent.parent.SelectedPlan[32] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-ANNUAL-MIN")
+		{
+			parent.parent.SelectedPlan[33] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "CAL-ANNUAL-MAX")
+		{
+			parent.parent.SelectedPlan[34] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "VAC-BUY-SELL")
+		{
+			parent.parent.SelectedPlan[35] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-RATE")
+		{
+			parent.parent.SelectedPlan[36] = fldval;
+			return;
+		}
+		else if (fldnbr == "NBR-CYCLES")
+		{
+			parent.parent.SelectedPlan[37] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-PLAN-TYPE")
+		{
+			if (fldval.length < 3)
+				parent.parent.SelectedPlan[38] = fldval;
+			return;
+		}
+		else if (fldnbr == "PRE-PLAN-CODE")
+		{
+			parent.parent.SelectedPlan[39] = fldval;
+			return;
+		}
+		// array locations 40 - 50 are reserved for internal program storage
+		else if (fldnbr == "PRE-INCREMENT")
+		{
+			parent.parent.SelectedPlan[51] = setValues(fldval,2);
+			return;
+		}
+		else if (fldnbr == "COST-DIV-CYCLE")
+		{
+			parent.parent.SelectedPlan[52] = fldval;
+			return;
+		}
+		else if (fldnbr == "PAY-FREQ-CYCLE")
+		{
+			parent.parent.SelectedPlan[53] = fldval;
+			return;
+		}
+		// array locations 54 - 55 are reserved for internal program storage
+		//placeholder fields for emp pre cont and emp aft cont - do not override these
+		//parent.parent.SelectedPlan[56]
+		//parent.parent.SelectedPlan[57]		
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			if (fldval.length < 2)
+				parent.parent.setCostDivisor(fldval);
+			return;
+		}
+		else if (fldnbr == "CRT-ERROR-CAT")
+		{
+			parent.parent.errorCat = fldval;
+			return
+		}
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gfldnbr = fldnbr;
+	gmsgnbr = msgnbr;
+	gmsg = msg;
+	var updtype = parent.updatetype;
+	if (parent.updatetype == "CHK" && count >= 1 && !exitAgs)
+	{
+		parent.setelected(temp)
+	}
+	if (msgnbr != "000")
+	{
+		if (parent.updatetype == "RLE" || parent.updatetype == "CHK" || parent.updatetype == "BEN" || parent.updatetype == "FLX"
+		|| parent.updatetype == "ELG" || parent.updatetype == "RNM")
+		{
+			try
+			{
+				parent.stopProcessing();
+			}
+			catch(e) {}
+			parent.LoadError = true;
+		}
+		if (parent.updatetype == "UPD" || parseInt(msgnbr,10) != 108)
+		{
+			parent.updatetype = "ERR";
+			parent.gotError = true;
+		}
+		if (parseInt(msgnbr,10) == 120 && updtype == "ELG")
+		{
+			try
+			{
+				parent.stopProcessing();
+			}
+			catch(e) {}
+			parent.LoadError = true;
+			var alertmsg = parent.getSeaPhrase("ERROR_28","BEN");
+			parent.seaAlert(alertmsg);
+			if (parent.opener)
+				setTimeout("parent.close()",3000);
+			return;
+		}
+		else if (parseInt(msgnbr,10) == 121 && updtype == "ELG")
+		{
+			try
+			{
+				parent.stopProcessing();
+			}
+			catch(e) {}
+			parent.LoadError = true;
+			var alertmsg = parent.getSeaPhrase("ERROR_116","BEN");
+			parent.seaAlert(alertmsg);
+			if (parent.opener)
+				setTimeout("parent.close()",3000);
+			return;
+		}
+		else if (parseInt(msgnbr,10) == 104 && (updtype == "FLX1" || updtype == "FLX2"))
+		{
+			// ignore flex dollar record does not exist error for current benefit summary
+			if (updtype == "FLX1")
+				return;
+			try
+			{
+				parent.stopProcessing();
+			}
+			catch(e) {}	
+			parent.LoadError = true;
+			var alertmsg = parent.getSeaPhrase("ERROR_29","BEN")+" "+parent.FormatDte4(parent.FlexDate)+".";
+			parent.seaAlert(alertmsg);
+			if (parent.opener)
+				setTimeout("parent.close()",3000);
+			return;
+		}
+		else if (parseInt(msgnbr,10) == 102 && updtype == "FSH")
+		{
+			parent.updatetype = parent.getSeaPhrase("NHBULLETIN_7","BEN");
+		}
+		else
+		{
+			try
+			{
+				parent.stopProcessing();
+			}
+			catch(e) {}
+			parent.msgnbr = msgnbr;
+			if (updtype == "CRT" || updtype == "CRT2" || updtype == "CRT3")
+			{
+				var str = "";
+				// if we get an error category back, make sure the error category is BNAC ("spouse does not exist"); otherwise display error message from 4GL program
+				if (msgnbr == "101" && parent.parent.errorCat && parent.parent.errorCat == "BNAC")
+					str = parent.getSeaPhrase("ERROR_94","BEN");
+				else if (msgnbr == "102" && (updtype != "CRT" || !parent.parent.errorCat || parent.parent.errorCat != "BNRE"))
+					str = parent.getSeaPhrase("ERROR_95","BEN");
+				else if (msgnbr == "103" && parent.parent.errorCat && parent.parent.errorCat=="BNAC")
+					str = parent.getSeaPhrase("ERROR_96","BEN");
+				else if (msgnbr == "100")
+					str = parent.getSeaPhrase("ERROR_97","BEN");
+				//else if (parent.parent.CurrentBens[parent.parent.planname][14] == "N")
+				// who cares!
+				else
+					str = parent.getSeaPhrase("ERROR_43","BEN")+" "+"\n("+msg+","+fldnbr+")";
+				if (msg != "")
+					parent.parent.seaAlert(str);
+				for (var i=1; i<parent.parent.EligPlans.length; i++)
+				{
+					if (i != parent.parent.CurrentEligPlan)
+					{
+						if (!parent.parent.enrollError[i])
+							parent.parent.selectedPlanInGrp[i] = false;
+					}
+					else
+					{
+						parent.parent.selectedPlanInGrp[i] = true;
+						parent.parent.enrollError[i] = true;
+						parent.parent.cantEnroll[i] = true;
+					}
+				}
+				parent.parent.clearGroup = true;
+				parent.parent.document.getElementById("main").src = "/lawson/xbnnet/availplans.htm";
+			}
+			else 
+			{
+				parent.seaAlert(msg);
+			}
+		}
+	}
+	else
+	{
+		parent.msgnbr = "";
+	}
+}
+
+function fixDate(fldval)
+{
+	if (fldval == "")
+		return fldval;
+	var userWnd = null;
+	try
+	{
+		if (typeof(parent.userWnd) != "undefined")
+			userWnd = parent.userWnd;
+		else
+			userWnd = parent.findAuthWnd(true);
+	}
+	catch(e)
+	{
+		userWnd = null;
+	}				
+	if (!userWnd || fldval.indexOf(userWnd.authUser.date_separator) == -1)
+	{
+		return fldval;
+	}
+	else
+	{	
+		try 
+		{
+			return parent.formjsDate(fldval);
+		}
+		catch(e) 
+		{
+			try
+			{
+				return userWnd.formjsDate(fldval);
+			}
+			catch(e) {}	
+		}
+	}
+	return fldval;
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.35 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/besslawheader.htm,v 1.16.2.35.2.1 2013/01/07 15:39:57 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

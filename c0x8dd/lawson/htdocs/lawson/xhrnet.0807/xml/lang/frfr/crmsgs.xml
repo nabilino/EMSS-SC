@@ -1,0 +1,203 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="frfr" version="10.0">
+		<phrase id="CR_0"><![CDATA[Type incorrect de compétence]]></phrase>
+		<phrase id="CR_1"><![CDATA[La compétence sélectionnée n'est pas une]]></phrase>
+       	<phrase id="CR_2"><![CDATA[qualité/certif. valide.]]></phrase>
+       	<phrase id="CR_3"><![CDATA[Profil de compétences de l'employé]]></phrase>
+       	<phrase id="CR_4"><![CDATA[En vigueur]]></phrase>
+       	<phrase id="CR_5"><![CDATA[Accéder à Restr trvail]]></phrase>
+       	<phrase id="CR_6"><![CDATA[Compétences requises]]></phrase>
+       	<phrase id="CR_7"><![CDATA[Aucune compétence requise n'a été définie pour cet emploi ou ce poste.]]></phrase>
+		<phrase id="CR_9"><![CDATA[Chargement compétences de l'employé...]]></phrase>
+		<phrase id="CR_10"><![CDATA[Aménagement spécial/restriction au niveau du travail]]></phrase>
+		<phrase id="CR_11"><![CDATA[Aucune information disponible.]]></phrase>
+		<phrase id="CR_12"><![CDATA[Profil professionnel indisponible.]]></phrase>
+		<phrase id="CR_13"><![CDATA[Profil professionnel d'infirmière]]></phrase>
+		<phrase id="CR_14"><![CDATA[Profil professionnel de médecin]]></phrase>
+		<phrase id="CR_15"><![CDATA[ANCC]]></phrase>
+		<phrase id="CR_16"><![CDATA[ZONES D'EXERCICE]]></phrase>
+		<phrase id="CR_17"><![CDATA[ACGME]]></phrase>
+		<phrase id="CR_18"><![CDATA[ABMS]]></phrase>
+		<phrase id="CR_19"><![CDATA[NBME]]></phrase>
+		<phrase id="CR_20"><![CDATA[N° DE CANDIDAT ECFMG]]></phrase>
+		<phrase id="CR_21"><![CDATA[AMERICAN OSTEOPATHIC ASSOCIATION]]></phrase>
+		<phrase id="CR_23"><![CDATA[INSCRIPTION DEA]]></phrase>
+		<phrase id="CR_24"><![CDATA[AMA PRA]]></phrase>
+		<phrase id="CR_25"><![CDATA[ACTIVITES PROFESSIONNELLES PRINCIPALES]]></phrase>
+		<phrase id="CR_26"><![CDATA[SPÉCIALISATION AUTO-DÉSIGNÉE]]></phrase>
+		<phrase id="CR_27"><![CDATA[Rapport de conformité des compétences]]></phrase>
+		<phrase id="CR_28"><![CDATA[Compétences requises expirées le]]></phrase>
+		<phrase id="CR_29"><![CDATA[N° expiré]]></phrase>
+		<phrase id="CR_30"><![CDATA[Vous n'avez pas de compétences ayant expiré.]]></phrase>
+		<phrase id="CR_31"><![CDATA[Pour les subordonnés de]]></phrase>
+		<phrase id="CR_32"><![CDATA[Liste des employés pour]]></phrase>
+		<phrase id="CR_34"><![CDATA[Nom]]></phrase>
+		<phrase id="CR_36"><![CDATA[Profil compétences]]></phrase>
+		<phrase id="CR_37"><![CDATA[Profil professionnel]]></phrase>
+		<phrase id="CR_38"><![CDATA[Ouvrir Profil de compétences]]></phrase>
+		<phrase id="CR_39"><![CDATA[Ouvrir profil professionnel]]></phrase>
+		<phrase id="CR_40"><![CDATA[État compétences expiré]]></phrase>
+		<phrase id="CR_41"><![CDATA[Compétences expirées le]]></phrase>
+		<phrase id="CR_42"><![CDATA[Toutes les compétences requises expirées le]]></phrase>
+		<phrase id="CR_43"><![CDATA[Aucun de vos subordonnés]]></phrase>
+		<phrase id="CR_44"><![CDATA[n'a de compétences ayant expiré]]></phrase>
+		<phrase id="CR_45"><![CDATA[Non terminé]]></phrase>
+		<phrase id="CR_46"><![CDATA[Mise à jour des compétences de l'employé…]]></phrase>
+		<phrase id="CR_47"><![CDATA[Afficher calendrier]]></phrase>
+		<phrase id="CR_48"><![CDATA[Date d'acquisition]]></phrase>
+		<phrase id="CR_49"><![CDATA[Durée de validité]]></phrase>
+		<phrase id="CR_50"><![CDATA[État/province]]></phrase>
+		<phrase id="CR_51"><![CDATA[Date de la dernière utilisation]]></phrase>
+		<phrase id="CR_52"><![CDATA[Source de compétence]]></phrase>
+		<phrase id="CR_53"><![CDATA[N° licence]]></phrase>
+		<phrase id="CR_57"><![CDATA[Mise à jour informations candidat…]]></phrase>
+		<phrase id="CR_58"><![CDATA[Mise à jour informations employé…]]></phrase>
+		<phrase id="CR_59"><![CDATA[Attestation obligatoire]]></phrase>
+		<phrase id="CR_60"><![CDATA[La compétence renouvelable est requise]]></phrase>
+		<phrase id="CR_61"><![CDATA[Date d'expiration]]></phrase>
+       		<phrase id="CR_63"><![CDATA[N° de licence source compétence]]></phrase>
+		<phrase id="CR_64"><![CDATA[Profil subordonné]]></phrase>
+		<phrase id="CR_65"><![CDATA[Aucun de vos subordonnés dont les compétences sont expirées.]]></phrase>
+		<phrase id="CR_66"><![CDATA[La compétence sélectionnée n'est pas une qualité/certification valide.]]></phrase>
+		<phrase id="HIRE_DATE"><![CDATA[Date emb]]></phrase>
+		<phrase id="LAST_REVIEW"><![CDATA[Dernière évaluation]]></phrase>
+		<phrase id="NEXT_REVIEW"><![CDATA[Proch. évaluat.]]></phrase>
+		<phrase id="NEXT_PHYSICAL"><![CDATA[Proch ex méd]]></phrase>
+		<phrase id="WORK_RESTRICTIONS"><![CDATA[Restrictions au niveau du travail]]></phrase>
+		<phrase id="NONE"><![CDATA[Aucun(e)]]></phrase>
+		<phrase id="COMPETENCY"><![CDATA[Compétence]]></phrase>
+		<phrase id="ACQUIRED"><![CDATA[Acquise]]></phrase>
+		<phrase id="RENEW_BY"><![CDATA[Renouvelé par]]></phrase>
+		<phrase id="JOB"><![CDATA[Métier]]></phrase>
+		<phrase id="JOB_DATE"><![CDATA[Date fonction]]></phrase>
+		<phrase id="POSITION_DATE"><![CDATA[Date de l'emploi]]></phrase>
+		<phrase id="COMPETENCIES"><![CDATA[Compétences]]></phrase>
+		<phrase id="FOR"><![CDATA[Pou]]></phrase>
+		<phrase id="DESCRIPTION"><![CDATA[Description]]></phrase>
+		<phrase id="BEGIN"><![CDATA[Commencer]]></phrase>
+		<phrase id="END"><![CDATA[Fin]]></phrase>
+		<phrase id="WORK_RESTRICTION"><![CDATA[Restriction travail]]></phrase>
+		<phrase id="ACCOMMODATION"><![CDATA[Aménagement spécial]]></phrase>
+		<phrase id="EDUCATION"><![CDATA[DIPLÔME]]></phrase>
+		<phrase id="INSTITUTION"><![CDATA[Lieu d'obtention du diplôme]]></phrase>
+		<phrase id="COMPLETED"><![CDATA[Terminé]]></phrase>
+		<phrase id="DEGREE"><![CDATA[Diplôme]]></phrase>
+		<phrase id="LICENSES"><![CDATA[LICENCES]]></phrase>
+		<phrase id="STATE"><![CDATA[Région]]></phrase>
+		<phrase id="LICENSE_NBR"><![CDATA[N° licence]]></phrase>
+		<phrase id="ISSUED"><![CDATA[Émis]]></phrase>
+		<phrase id="CREDENTIALS"><![CDATA[Habilitations]]></phrase>
+		<phrase id="EFFECTIVE_EXPIRES"><![CDATA[En vigueur - Expire]]></phrase>
+		<phrase id="EXPIRES"><![CDATA[Expire]]></phrase>
+		<phrase id="CERTIFICATION"><![CDATA[Habilitation]]></phrase>
+		<phrase id="SKILL"><![CDATA[Compétence renouvelable]]></phrase>
+		<phrase id="SUB_CERT"><![CDATA[Sous certifié]]></phrase>
+		<phrase id="N_A"><![CDATA[S/O]]></phrase>
+		<phrase id="SANCTIONS"><![CDATA[SANCTIONS]]></phrase>
+		<phrase id="ORGANIZATION"><![CDATA[Organisation]]></phrase>
+		<phrase id="DATE"><![CDATA[Date]]></phrase>
+		<phrase id="AWARD"><![CDATA[Attribution]]></phrase>
+		<phrase id="COMPLIANCE"><![CDATA[Conformité]]></phrase>
+		<phrase id="RECALCULATE"><![CDATA[Recalculer]]></phrase>
+		<phrase id="PRINT"><![CDATA[Imprimer]]></phrase>
+		<phrase id="EMPLOYEE"><![CDATA[Employé]]></phrase>
+		<phrase id="CHANGE"><![CDATA[Modifier]]></phrase>
+		<phrase id="ADD"><![CDATA[Ajouter]]></phrase>
+		<phrase id="DONE"><![CDATA[Fait]]></phrase>
+		<phrase id="UPDATE"><![CDATA[Mettre à jour]]></phrase> 
+		<phrase id="COMPETENCY_REPORTS"><![CDATA[États de compétences]]></phrase>
+		<phrase id="DIRECT_REPORTS"><![CDATA[Dépend directement de]]></phrase>
+		<phrase id="PROFILE"><![CDATA[Profil]]></phrase>
+		<phrase id="PHOTO"><![CDATA[Photo]]></phrase>
+		<phrase id="VIEW"><![CDATA[Afficher]]></phrase>
+		<phrase id="DEPARTMENT"><![CDATA[Service]]></phrase>
+		<phrase id="OVERDUE"><![CDATA[En retard]]></phrase>
+		<phrase id="SUMMARY"><![CDATA[Récapitulatif]]></phrase>
+		<phrase id="NO_WORK_RESTRICTIONS"><![CDATA[Aucune restriction de travail en vigueur actuellement.]]></phrase>
+		<phrase id="TYPE"><![CDATA[Type]]></phrase>
+		<phrase id="SORT_BY_COMPETENCY"><![CDATA[Trier par compétence]]></phrase>
+		<phrase id="SORT_BY_ACQUIRED_DATE"><![CDATA[Trier par date d'acquisition]]></phrase>
+		<phrase id="SORT_BY_EXPIRATION_DATE"><![CDATA[Trier par date d'expiration]]></phrase>
+		<phrase id="SORT_BY_RENEW_DATE"><![CDATA[Trier par date de renouvellement]]></phrase>
+		<phrase id="BACK"><![CDATA[Précédent]]></phrase>
+		<phrase id="SORT_BY_NAME"><![CDATA[Trier par nom]]></phrase>
+		<phrase id="SORT_BY_JOB"><![CDATA[Trier par poste]]></phrase>
+		<phrase id="SELECT_EMPLOYEE"><![CDATA[Sélectionner un employé]]></phrase>
+		<phrase id="NO_QUAL_RECORD"><![CDATA[Aucun détail à afficher. Vous n'avez pas enregistré la compétence requise.]]></phrase>
+		<phrase id="DETAIL"><![CDATA[Détail]]></phrase>
+		<phrase id="CANCEL"><![CDATA[Annuler]]></phrase>
+		<phrase id="DELETE"><![CDATA[Supprimer]]></phrase>
+		<phrase id="UPDATE_COMPLETE"><![CDATA[Mise à jour terminée]]></phrase>
+		<phrase id="NO_REQ_COMPS"><![CDATA[Aucune compétence requise n'a été définie pour cet emploi ou ce poste.]]></phrase>
+		<phrase id="PERSONAL_INFO"><![CDATA[Informations personnelles]]></phrase>
+		<phrase id="SOCIAL_NUMBER"><![CDATA[N° SS]]></phrase>
+		<phrase id="ADDRESS"><![CDATA[Adresse]]></phrase>
+		<phrase id="BIRTHDATE"><![CDATA[Date de naissance]]></phrase>
+		<phrase id="CITY"><![CDATA[Ville]]></phrase>
+		<phrase id="BIRTHPLACE"><![CDATA[Lieu de naissance]]></phrase>
+		<phrase id="POSTAL_CODE"><![CDATA[Code postal]]></phrase>
+		<phrase id="STATE_NUMBER"><![CDATA[ID État]]></phrase>
+		<phrase id="ACGME_RESIDENCY"><![CDATA[Résidence ACGME]]></phrase>
+		<phrase id="DATES"><![CDATA[Dates]]></phrase>
+		<phrase id="SELECT_REPORT_CRITERIA"><![CDATA[Sélectionner un critère de rapport]]></phrase>
+		<phrase id="SELECT_DEFICIENCY_TYPE"><![CDATA[Sélectionner un type de carence]]></phrase>
+		<phrase id="SELECT_THROUGH_DATE"><![CDATA[Sélectionner une date limite]]></phrase>
+		<phrase id="CALCULATE"><![CDATA[Calculer]]></phrase>
+		<phrase id="REPORT_OPTIONS"><![CDATA[Options d'état]]></phrase>
+		<phrase id="DISPLAY_CAL"><![CDATA[Afficher calendrier]]></phrase>
+		<phrase id="REQUIRED"><![CDATA[Requis]]></phrase>
+		<phrase id="REPORT_CRITERIA_0"><![CDATA[Qualification, examen médical et évaluation]]></phrase>
+		<phrase id="REPORT_CRITERIA_1"><![CDATA[Examen médical]]></phrase>
+		<phrase id="REPORT_CRITERIA_2"><![CDATA[Examiner]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_0"><![CDATA[Expiré]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_1"><![CDATA[Manquant]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_2"><![CDATA[Expiré, manquant ou écart]]></phrase>
+		<phrase id="EFFECTIVE"><![CDATA[EnVigueur]]></phrase>
+		<phrase id="SELECT_RPT_CRITERIA_FIRST"><![CDATA[Sélectionnez d'abord un critère de rapport.]]></phrase>
+		<phrase id="RPT_CRITERIA_REQUIRED"><![CDATA[Sélectionnez un critère de rapport.]]></phrase>
+		<phrase id="DEFICIENCY_TYPE_REQUIRED"><![CDATA[Sélectionnez un type de carence.]]></phrase>
+		<phrase id="NO_EXPIRED_COMPS"><![CDATA[Aucune information sur les critères de rapport sélectionnés à afficher.]]></phrase>
+		<phrase id="INVALID_DATE"><![CDATA[Date incorrecte]]></phrase>
+		<phrase id="HELP"><![CDATA[Aide]]></phrase>
+		<phrase id="EXPIRED_COMPETENCIES_HELP"><![CDATA[Aide du rapport de compétences expiré]]></phrase>
+		<phrase id="EXPIRED_COMPS_HELP_0"><![CDATA[Cette tâche identifie les subordonnés dont les compétences ou les attestations ont expiré. De plus, vous pouvez indiquer d'autres critères : manque de qualifications de certains employés, écart entre les compétences requises par le poste et celles de l'employé.]]></phrase>
+		<phrase id="EXPIRED_COMPS_HELP_1"><![CDATA[Déterminez le type de rapport souhaité en sélectionnant le critère de rapport. Cette option inclut des compétences, des attestations, des examens médicaux et des évaluations, des examens médicaux uniquement ou des évaluations uniquement. Si vous sélectionnez les examens médicaux ou les évaluations, le seul type de carence valide est manquant ou expiré.]]></phrase>
+		<phrase id="COMPLIANCE_REPORT"><![CDATA[État conformité]]></phrase>
+		<phrase id="SORT_BY_COMPLIANCE"><![CDATA[Trier par conformité]]></phrase>
+		<phrase id="VIEW_EXPIRATION_DETAIL"><![CDATA[Afficher les détails d'expiration]]></phrase>
+		<phrase id="PERCENT_SYMBOL"><![CDATA[%]]></phrase>
+		<phrase id="PROCESSING_WAIT"><![CDATA[En cours...]]></phrase>
+		<phrase id="WAIT"><![CDATA[Veuillez patienter...]]></phrase>
+		<phrase id="GATHERING_INFO"><![CDATA[Collecte des informations...]]></phrase>
+		<phrase id="EXPIRATION_DETAIL"><![CDATA[Détails d'expiration]]></phrase>
+		<phrase id="CLOSE"><![CDATA[Fermer]]></phrase>
+		<phrase id="EXPIRATION_DATE"><![CDATA[Date d'expiration]]></phrase>
+		<phrase id="COMPLIANCE_REPORT_HELP"><![CDATA[Aide – État de conformité]]></phrase>
+		<phrase id="COMPLIANCE_HELP_0"><![CDATA[L'état de conformité identifie les compétences, les attestations, les évaluations et les examens médicaux requis par le poste qui ont expiré ou qui n'existent pas dans les informations concernant l'employé. Cliquez sur le lien hyper-texte 'N° expiré' pour afficher les employés qui constituent ce groupe.]]></phrase>
+		<phrase id="CR_67"><![CDATA[En raison du volume de données, l'affichage en ligne est incomplet. Utilisez les options d'état.]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/frfr/crmsgs.xml,v 1.3.2.6.2.1 2012/09/04 21:26:07 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

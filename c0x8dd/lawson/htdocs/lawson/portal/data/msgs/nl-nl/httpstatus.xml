@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/nl-nl/Attic/httpstatus.xml,v 1.1.2.2.16.2 2012/08/08 12:37:28 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="nlnl">
+		<phrase id="100">De aanvraag kan verder worden verwerkt.</phrase>
+		<phrase id="101">De server heeft de protocollen in een upgrade-kop verwisseld.</phrase>
+		<phrase id="200">De verwerking van de aanvraag is voltooid.</phrase>
+		<phrase id="201">De aanvraag is verwerkt en er is een nieuwe resource gemaakt.</phrase>
+		<phrase id="202">De aanvraag is voor verwerking geaccepteerd, maar de verwerking is nog niet voltooid.</phrase>
+		<phrase id="203">De geretourneerde set metagegevens in de kop van de entiteit is niet de definitieve verzameling die beschikbaar is op de bronserver.</phrase>
+		<phrase id="204">De server heeft de aanvraag verwerkt, maar er zijn geen nieuwe gegevens om terug te zenden.</phrase>
+		<phrase id="205">De aanvraag is verwerkt en het clientprogramma moet de documentweergave die de aanvraag heeft verzonden opnieuw instellen. De gebruiker kan dan gemakkelijk een andere invoeractie starten.</phrase>
+		<phrase id="206">De server heeft de aanvraag voor de gedeeltelijke GET van de resource verwerkt.</phrase>
+		<phrase id="300">De server kan niet bepalen wat moet worden geretourneerd.</phrase>
+		<phrase id="301">De aangevraagde resource is toegewezen aan een nieuwe, permanente URI (Uniform Resource Identifier). Voor toekomstige verwijzingen naar deze resource moet een van de geretourneerde URI's worden gebruikt.</phrase>
+		<phrase id="302">De aangevraagde resource heeft tijdelijk een andere URI (Uniform Resource Identifier).</phrase>
+		<phrase id="303">Het antwoord op de aanvraag kan via een andere URI (Uniform Resource Identifier) worden gevonden en moet worden opgehaald via de HTTP-methode GET voor deze resource.</phrase>
+		<phrase id="304">De aangevraagde resource is niet aangepast.</phrase>
+		<phrase id="305">Voor de aangevraagde resource moet toegang worden verkregen via de proxy die is opgegeven in het veld voor de locatie.</phrase>
+		<phrase id="307">De omgeleide aanvraag houdt dezelfde HTTP-methode. Gedrag als in HTTP/1.1.</phrase>
+		<phrase id="400">De aanvraag kan vanwege ongeldige syntaxis niet door de server worden verwerkt.</phrase>
+		<phrase id="401">Voor de aangevraagde resource is verificatie van de gebruiker vereist.</phrase>
+		<phrase id="402">Niet in het huidige HTTP-protocol geïmplementeerd.</phrase>
+		<phrase id="403">De server heeft de aanvraag begrepen, maar weigert de aanvraag te verwerken.</phrase>
+		<phrase id="404">De server heeft niets gevonden dat overeenkomt met de aangevraagde URI (Uniform Resource Identifier).</phrase>
+		<phrase id="405">De gebruikte HTTP-methode is niet toegestaan.</phrase>
+		<phrase id="406">Er zijn geen antwoorden gevonden die acceptabel zijn voor de client.</phrase>
+		<phrase id="407">Verificatie op de proxy is vereist.</phrase>
+		<phrase id="408">Er is een time-out op de server opgetreden tijdens het wachten op de aanvraag.</phrase>
+		<phrase id="409">De verwerking van de aanvraag kan niet worden voltooid omdat er een conflict is met de huidige status van de resource. De gebruiker moet de aanvraag opnieuw indienen met meer gegevens.</phrase>
+		<phrase id="410">De aangevraagde bron is niet meer beschikbaar op de server en er is geen adres voor doorsturen bekend.</phrase>
+		<phrase id="411">De server weigert de aanvraag te accepteren zonder een opgegeven lengte van de inhoud.</phrase>
+		<phrase id="412">De voorwaarde die is opgegeven in een of meer velden in de kop van de aanvraag heeft op de server de uitkomst 'onwaar' opgeleverd.</phrase>
+		<phrase id="413">De server weigert de aanvraag te verwerken omdat de aanvraag groter is dan de server kan of mag verwerken.</phrase>
+		<phrase id="414">De server weigert de aanvraag te verwerken omdat de URI (Uniform Resource Identifier) van de aanvraag langer is dan de server kan interpreteren.</phrase>
+		<phrase id="415">De server weigert de aanvraag te verwerken omdat de indeling van de aanvraagentiteit niet wordt ondersteund door de aangevraagde resource voor de aangevraagde methode.</phrase>
+		<phrase id="449">De aanvraag moet opnieuw worden ingediend na de juiste bewerking.</phrase>
+		<phrase id="500">Er is een onverwachte fout opgetreden op de server waardoor de aanvraag niet kan worden verwerkt.</phrase>
+		<phrase id="501">De server ondersteunt de functionaliteit niet die vereist is voor het uitvoeren van de aanvraag.</phrase>
+		<phrase id="502">De server, die tijdelijk optreedt als gateway of proxy, heeft een ongeldig antwoord ontvangen van de upsteam-server die is aangesproken bij het verwerken van de aanvraag.</phrase>
+		<phrase id="503">De service is tijdelijk overbelast.</phrase>
+		<phrase id="504">De aanvraag is tijdens het wachten op een gateway verlopen.</phrase>
+		<phrase id="505">De server ondersteunt de versie van het HTTP-protocol die in de aanvraag werd gebruikt, niet of weigert deze te ondersteunen.</phrase>
+	</Translate>
+</LAWXML>

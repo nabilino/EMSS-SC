@@ -1,0 +1,242 @@
+<html>
+<head>
+<script>
+var competencyCounter
+var certificationCounter
+var educationCounter
+var DetailLine = 0
+var gmsgnbr = ''
+var gmsg 	= ''
+var gfldnbr = ''
+var UpdateType = ''
+var endOfLines = false;
+
+function V(fld, val)
+{
+	switch(UpdateType)
+	{
+		case "HS50_1": V_HS50(fld, val)
+			break
+	}
+}
+
+function V_HS50(fld, val)
+{
+	switch(fld)
+	{
+		case "TC":break;
+		case "FC":break;
+		case "DETAIL-MAX": 		parent.QualificationProfile.detailMax = val; break;
+		case "COMPANY": 		parent.QualificationProfile.company = val; break;
+		case "EMPLOYEE": 		parent.QualificationProfile.employee = val;	break;
+		case "REQUESTOR": 		parent.QualificationProfile.requestor = val; break;
+		case "ESSENTIAL": 		parent.QualificationProfile.essential = val; break;
+		case "EMP-PROFILE": 	parent.QualificationProfile.empProfile = val; break;
+		case "EXPIRE-DAYS": 	parent.QualificationProfile.expireDays = val; break;
+		case "JOB-COMP-FLAG": 	parent.QualificationProfile.jobCompFlag = val; break;
+		case "EMP-COMP-FLAG": 	parent.QualificationProfile.empCompFlag = val; break;
+		case "JOB-DETAIL-FLAG": parent.QualificationProfile.jobDetailFlag = val; break;
+		case "JOB-DESC-FL":		parent.QualificationProfile.jobDescFlag = val; break;
+		case "POS-DETAIL-FLAG": parent.QualificationProfile.posDetailFlag = val; break;
+		case "POSITION": 		parent.QualificationProfile.position = val;	break;
+		case "POS-DESC": 		parent.QualificationProfile.posDesc = val; break;
+		case "JOB-CODE": 		parent.QualificationProfile.jobCode = val; break;
+		case "JBC-DESC": 		parent.QualificationProfile.jbcDesc = val; break;
+		case "COURSE-GAP-FLAG": parent.QualificationProfile.courseGapFlag = val; break;
+		case "CRSCNT":			parent.QualificationProfile.courseCount = val; break;
+		case "NEXT-REVIEW":		parent.QualificationProfile.NextReviewDate = val; break;
+		default: GetOtherInformation(fld, val)
+	}
+}
+
+function GetOtherInformation(fld, val)
+{
+	// PT 149003. Return if we have no more records to store.  The Transaction servlet w/ XML output
+	// returns blank records, and we end up overwriting the last record with blank values.
+    if(DetailLine == 0)
+        endOfLines = false;
+    else if(endOfLines)
+        return;
+
+	if(fld.indexOf("SORT") >= 0 && fld.indexOf("SORT-") == -1)
+		DetailLine++;
+
+	if("SORT" + DetailLine == fld)
+	{
+		if(val == 1)
+		{
+			competencyCounter = parent.QualificationProfile.CompetencyDetail.length
+			certificationCounter = -1;
+			educationCounter = -1;
+			parent.QualificationProfile.CompetencyDetail[competencyCounter] = new parent.DetailObject()
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].sort = val;
+		}
+		else if(val == 2)
+		{
+			certificationCounter = parent.QualificationProfile.CertificationDetail.length
+			competencyCounter = -1;
+			educationCounter = -1;
+			parent.QualificationProfile.CertificationDetail[certificationCounter] = new parent.DetailObject()
+			parent.QualificationProfile.CertificationDetail[certificationCounter].sort = val;
+		}
+		else if(val == 3)
+		{
+			educationCounter = parent.QualificationProfile.EducationDetail.length
+			competencyCounter = -1;
+			certificationCounter = -1;
+			parent.QualificationProfile.EducationDetail[educationCounter] = new parent.DetailObject()
+			parent.QualificationProfile.EducationDetail[educationCounter].sort = val;
+		}
+        else
+            endOfLines = true;
+	}
+	else if("WEIGHT" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].weight = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].weight = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].weight = val;
+	}
+	else if("TYPE" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].type = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].type = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].type = val;
+	}
+	else if("CODE" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].code = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].code = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].code = val;
+	}
+	else if("SUBJECT" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].subject = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].subject = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].subject = val;
+	}
+	else if("DESCRIPTION" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].description = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].description = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].description = val;
+	}
+	else if("ESSENTIAL-REQ" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].essentialReq = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].essentialReq = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].essentialReq = val;
+	}
+	else if("EMP-HAS-CODE" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].empHasCode = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].empHasCode = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].empHasCode = val;
+	}
+	else if("UPDATE-FLAG" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].updateFlag = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].updateFlag = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].updateFlag = val;
+	}
+	else if("JOB-PROFIC" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].jobProfic = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].jobProfic = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].jobProfic = val;
+	}
+	else if("EMP-PROFIC" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].empProfic = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].empProfic = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].empProfic = val;
+	}
+	else if("EMP-PROFIC-DESC" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].empProficDesc = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].empProficDesc = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].empProficDesc = val;
+	}
+	else if("GAP" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].gap = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].gap = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].gap = val;
+	}
+	else if("GAP-LEVEL" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].gapLevel = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].gapLevel = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].gapLevel = val;
+	}
+	else if("SEQ-NBR" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].seqNbr = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].seqNbr = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].seqNbr = val;
+	}
+	else if("RENEW-DATE" + DetailLine == fld)
+	{
+		if(competencyCounter >=0)
+			parent.QualificationProfile.CompetencyDetail[competencyCounter].renewDate = val;
+		else if(certificationCounter >=0)
+			parent.QualificationProfile.CertificationDetail[certificationCounter].renewDate = val;
+		else if(educationCounter >=0)
+			parent.QualificationProfile.EducationDetail[educationCounter].renewDate = val;
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr		= msgnbr
+	gmsg 		= msg
+	gfldnbr 	= fldnbr
+}
+
+</script>
+</head>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/qualificationsheader.htm,v 1.2.6.1 2005/07/28 20:18:59 andrewv Exp $ -->

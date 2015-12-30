@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Manager Time Off Request</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeoffrequest.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script>
+function MgrDataObject()
+{
+	this.directReports = [];
+};
+
+var mgrData = new MgrDataObject();
+
+function initTimeOff()
+{
+	authenticate("frameNm='jsreturn'|funcNm='loadPage()'|desiredEdit='EM'");
+}
+
+function loadPage()
+{
+	stylePage();
+	var taskNm = getSeaPhrase("MGR_TIME_OFF_REQUEST","SEA");
+	setWinTitle(taskNm);
+	setTaskHeader("header",taskNm,"TimeEntry");
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), checkAppVersion);
+}
+
+function getData()
+{
+	getDirectReports();
+}
+
+function getDirectReports()
+{
+	var storeReports = function()
+	{
+		var msgNbr = tranObj.getMsgNbr();
+		var msg = tranObj.getMessage();
+		if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+		{
+			var i = 0;
+			var employee = tranObj.getValue("PTF-EMPLOYEEr" + i);
+			while (employee != null)
+			{
+				mgrData.directReports[mgrData.directReports.length] = {
+					"employee" : Number(employee),
+					"name" : tranObj.getValue("PTF-FULL-NAMEr" + i)
+				};
+				i++;
+				employee = tranObj.getValue("PTF-EMPLOYEEr" + i);
+			}
+			// page down functionality
+			var nextEmployee = tranObj.getValue("PT-PTF-EMPLOYEE");
+			if (mgrData.directReports.length && nextEmployee && Number(nextEmployee) > 0)
+			{
+				tranObj = new TransactionObject(window, techVersion, httpRequest, storeReports);
+				tranObj.setEncoding(authUser.encoding);
+				tranObj.setParameter("_PDL", authUser.prodline);
+				tranObj.setParameter("_TKN", "HS10.1");
+				tranObj.setParameter("FC", "I");
+				tranObj.setParameter("_LFN", "ALL");
+				tranObj.setParameter("_EVT", "ADD");
+				tranObj.setParameter("_RTN", "DATA");
+				tranObj.setParameter("_TDS", "Ignore");
+				if (techVersion == TransactionObject.TECHNOLOGY_900)
+					tranObj.setParameter("_DTLROWS", "FALSE");
+				tranObj.setParameter("HSU-COMPANY", String(Number(authUser.company)));
+				tranObj.setParameter("HSU-EMPLOYEE", String(Number(authUser.employee)));
+				tranObj.setParameter("PT-FC", tranObj.getValue("PT-FC"));
+				tranObj.setParameter("PT-PTF-EMPLOYEE", nextEmployee);
+				tranObj.setParameter("PT-HSU-CODE", tranObj.getValue("PT-HSU-CODE"));
+				tranObj.setParameter("PT-HSU-OP-CODE", tranObj.getValue("PT-HSU-OP-CODE"));
+				tranObj.callTransaction();
+				return;
+			}
+			displayPage();
+		}
+		else
+		{
+			setTimeout(removeWaitAlert, 10);
+			if (msg)
+				seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+		}
+	};
+	tranObj = new TransactionObject(window, techVersion, httpRequest, storeReports);
+	tranObj.setEncoding(authUser.encoding);
+	tranObj.setParameter("_PDL", authUser.prodline);
+	tranObj.setParameter("_TKN", "HS10.1");
+	tranObj.setParameter("FC", "I");
+	tranObj.setParameter("_LFN", "ALL");
+	tranObj.setParameter("_EVT", "ADD");
+	tranObj.setParameter("_RTN", "DATA");
+	tranObj.setParameter("_TDS", "Ignore");
+	if (techVersion == TransactionObject.TECHNOLOGY_900)
+		tranObj.setParameter("_DTLROWS", "FALSE");
+	tranObj.setParameter("HSU-COMPANY", String(Number(authUser.company)));
+	tranObj.setParameter("HSU-EMPLOYEE", String(Number(authUser.employee)));
+	tranObj.callTransaction();
+}
+
+function resetPage()
+{
+	self.main.document.getElementById("requestsSection").innerHTML = "";
+	displayActionRequestSection(false);
+}
+
+function displayPage()
+{
+	empData.dirty = null;
+	var strBuffer = [];
+	if (mgrData.directReports.length == 0)
+		strBuffer[0] = '<div class="fieldlabelboldleft" style="padding-top:5px;padding-left:5px">'+getSeaPhrase("NO_DIRECT_REPORTS","ESS")+'</div>';
+	else
+	{
+		strBuffer[0] = '<div id="reportsSection"><form name="directReports" onsubmit="return false;"><table border="0" cellspacing="0" cellpadding="0" style="padding-left:10px;padding-top:2px" role="presentation">'
+		+ '<tr><td class="plaintablecellbold"><label for="reports">'+getSeaPhrase("SELECT_DIRECT_REPORT","ESS")+'</label><br/>'
+		+ '<span id="reportsCell"><select class="inputbox" id="reports" name="reports" onchange="parent.resetPage()">'+drawDirectReportSelect()+'</select>'+uiRequiredIcon()+'</span></td>'
+		+ '<td class="plaintablecellbold" style="padding-left:5px" nowrap><label for="requestType">'+getSeaPhrase("SELECT_TIME_OFF_REQUEST_TYPE","SEA")+'</label><br/>'
+		+ '<span id="requestTypeCell"><select class="inputbox" id="requestType" name="requestType" onchange="parent.resetPage()">'+drawRequestTypeSelect('submitted')+'</select>'+uiRequiredIcon()+'</span></td>'
+		+ '<td class="plaintablecell" style="vertical-align:bottom" nowrap="">'+uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.continueClicked();return false","margin-top:0px;margin-right:5px")+'</td></tr>'
+		+ '</table></form></div>';
+		strBuffer[1] = '<div id="requestsSection"></div><div id="actionRequestSection" style="display:none">'
+		+ '<table style="width:auto" border="0" cellspacing="0" cellpadding="0" role="presentation"><tr>'
+		+ '<td>'+uiButton(getSeaPhrase("APPROVE","SEA"),"parent.actionRequest('approve');return false","margin-left:5px;margin-top:10px","approveBtn")+'</td>'
+		+ '<td>'+uiButton(getSeaPhrase("REJECT","SEA"),"parent.actionRequest('reject');return false","margin-left:5px;margin-top:10px","rejectBtn")+'</td>'
+		+ '</tr></table></div>';
+	}
+	self.main.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+	self.main.stylePage();
+	fitToScreen();
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+	document.getElementById("main").style.visibility = "visible";
+}
+
+function displayEmployeeData()
+{
+	empData.dirty = null;
+	if (empData.timeOffRequestType == "leaveofabsence")
+		empData.allRequests = empData.leaveOfAbsenceRequests;
+	else
+		empData.allRequests = empData.timeOffRequests;
+	// if data is being refreshed, retain the prior sort order
+	empData.sortField = empData.reqSortField;
+	empData.sortDir = (!empData.reqSortDir || empData.reqSortDir == "descending") ? "ascending" : "descending";
+	displayRequests(empData.sortField);
+}
+
+function getEmployeeData()
+{
+	if (empData.dirty)
+	{
+		if (empData.dirty["timeOffRequests"] || empData.dirty["leaveOfAbsenceRequests"])
+		{
+			getEmployeeRequests();
+			return;
+		}
+	}
+	displayEmployeeData();
+}
+
+function displayActionRequestSection(show)
+{
+	if (show)
+		self.main.document.getElementById("actionRequestSection").style.display = "";
+	else
+		self.main.document.getElementById("actionRequestSection").style.display = "none";
+}
+
+function selectRequest(cbElm, recIndex)
+{
+	empData.allRequests[recIndex].selected = cbElm.checked;
+}
+
+function selectAllRequests(cbElm)
+{
+	var formElm = self.main.document.forms["empRequests"];
+	var selectBoxes = formElm.elements["selectBox"];
+	if (!selectBoxes)
+		return;
+	if (selectBoxes.length)
+	{	
+		var len = selectBoxes.length;
+		for (var i=0; i<len; i++)
+		{
+			var rIndex = Number(selectBoxes[i].getAttribute("rec_index"));
+			selectBoxes[i].checked = cbElm.checked;
+			empData.allRequests[rIndex].selected = cbElm.checked;
+			styleElement(selectBoxes[i]);
+		}
+	}
+	else
+	{
+		var rIndex = Number(selectBoxes.getAttribute("rec_index"));
+		selectBoxes.checked = cbElm.checked;
+		empData.allRequests[rIndex].selected = cbElm.checked;
+		styleElement(selectBoxes);
+	}
+}
+
+function sortRequests(sort)
+{
+	showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), function(){displayRequests(sort);});
+}
+
+function displayRequests(sort)
+{
+	// if sorting the same field more than once, alternate the direction
+	if (sort && empData.sortField && sort == empData.sortField)
+		empData.sortDir = (!empData.sortDir || empData.sortDir == "descending") ? "ascending" : "descending";
+	else
+		empData.sortDir = "ascending";
+	empData.sortField = sort || "desc";
+	empData.reqSortField = empData.sortField;
+	empData.reqSortDir = empData.sortDir;	
+	var sortFunc = (empData.sortDir == "descending") ? sortByDescField : sortByAscField;
+	switch (empData.sortField)
+	{
+		case "desc":
+		case "status_xlt":
+		case "leave_date":
+		case "return_date":
+		case "hours":	
+			empData.allRequests.sort(sortFunc);
+			break;
+		default: break;
+	}
+	var strBuffer = [];
+	var len = empData.allRequests.length;
+	var selectExists = empData.timeOffRequestType == "submitted" || empData.timeOffRequestType == "pending";
+	var commentsExist = empData.timeOffRequestType != "leaveofabsence";
+	var checkBoxesExist = false;
+	if (len > 0)
+	{
+		for (var k=0; k<len; k++)
+		{
+			var commentsToolTip = getSeaPhrase("OPEN_CMT_REQUEST","SEA",[empData.allRequests[k].desc,empData.allRequests[k].leave_date,''+AppObject.truncateNbr(empData.allRequests[k].hours,2)]);
+			strBuffer[k] = '<tr>';
+			if (selectExists)
+			{
+				strBuffer[k] += '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+				if (empData.allRequests[k].status == 1)
+				{
+					checkBoxesExist = true;
+					var checkedStr = (empData.allRequests[k].selected) ? ' checked="checked"' : '';
+					var reqData = [empData.allRequests[k].desc,empData.allRequests[k].leave_date,empData.allRequests[k].return_date,empData.allRequests[k].status_xlt,''+AppObject.truncateNbr(empData.allRequests[k].hours,2)];
+					var reqToolTip = getSeaPhrase("SELECT_REQUEST_FOR","SEA",reqData);
+					strBuffer[k] += '<input class="inputbox" type="checkbox" id="selectBox'+k+'" name="selectBox" rec_index="'+k+'" onclick="parent.selectRequest(this,'+k+')" title="'+reqToolTip+'"'+checkedStr+'>';
+					strBuffer[k] += '<label class="offscreen" for="selectBox'+k+'">'+reqToolTip+'</label>'
+				}	
+				else
+					strBuffer[k] += '&nbsp;';
+				strBuffer[k] += '</td>';	
+			}
+			strBuffer[k] += '<td class="plaintablecellborder" nowrap>'
+			+ ((empData.allRequests[k].desc)?empData.allRequests[k].desc:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" nowrap>'
+			+ ((empData.allRequests[k].status_xlt)?empData.allRequests[k].status_xlt:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+			+ ((empData.allRequests[k].leave_date)?empData.allRequests[k].leave_date:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+			+ ((empData.allRequests[k].return_date)?empData.allRequests[k].return_date:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborderright" nowrap>'+AppObject.truncateNbr(empData.allRequests[k].hours,2)+'</td>'
+			if (commentsExist)
+			{
+				commentsExist = true;
+				var cmtsUrl = (NonSpace(empData.allRequests[k].comments) > 0) ? commentsExistUrl : commentsUrl;
+				strBuffer[k] += '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+				+ '<a href="javascript:;" onclick="parent.displayRequestComments('+k+');return false;" onmouseover="parent.commentIconHover(true,'+k+');return true;" onfocus="parent.commentIconHover(true,'+k+');return true;" onmouseout="parent.commentIconHover(false,'+k+');return true;" onblur="parent.commentIconHover(false,'+k+');return true;" title="'+commentsToolTip+'" aria-label="'+commentsToolTip+'" aria-haspopup="true">'
+				+ '<img styler="documenticon" src="'+cmtsUrl+'" border="0" width="32" height="32" default_icon="'+commentsUrl+'" active_icon="'+commentsExistUrl+'" name="comment'+k+'" id="comment'+k+'" alt="'+commentsToolTip+'" title="'+commentsToolTip+'"></a></td>';
+			}
+			strBuffer[k] += '</tr>';
+		}
+	}
+	else
+		strBuffer[0] = '<tr><td class="plaintablecell" colspan="5">'+getSeaPhrase("NO_TIME_OFF_REQUESTS","SEA")+'</td></tr>';	
+	var toolTip = getSeaPhrase("SORT_BY_TYPE","ESS");
+	var strHtml = '<form name="empRequests" onsubmit="return false;">';
+	strHtml += '<table id="requestsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_82","SEA",[empData.empName,empData.timeOffRequestTypeDesc])+'">';
+	strHtml += '<caption class="offscreen">'+getSeaPhrase("TCAP_61","SEA",[empData.empName,empData.timeOffRequestTypeDesc])+'</caption>';
+	strHtml += '<tr>';
+	if (selectExists)
+	{	
+		strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center"><input class="inputbox" type="checkbox" id="selectAllBox" name="selectAllBox" onclick="parent.selectAllRequests(this)" title="'+getSeaPhrase("SELECT_ALL","SEA")+'">';
+		strHtml += '&nbsp;<label for="selectAllBox">'+getSeaPhrase("SELECT_ALL","SEA")+'</label></th>';
+	}	
+	strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'desc\');return false;" title="'+toolTip+'">'+getSeaPhrase("TYPE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_STATUS","ESS");
+	strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'status_xlt\');return false;" title="'+toolTip+'">'+getSeaPhrase("STATUS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_DATE","SEA");
+	strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'leave_date\');return false;" title="'+toolTip+'">'+getSeaPhrase("DATE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("RETURN_DATE","SEA")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'return_date\');return false;" title="'+toolTip+'">'+getSeaPhrase("RETURN_DATE","SEA")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("HOURS","ESS")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'hours\');return false;" title="'+toolTip+'">'+getSeaPhrase("HOURS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>';
+	if (commentsExist)
+		strHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("COMMENTS","ESS")+'</th>';
+	strHtml += '</tr>'+strBuffer.join("")+'</table></form>';
+	var tblHtml = uiTable(self.main, getSeaPhrase("DIRECT_REPORT_TIME_OFF_REQUESTS","SEA"), strHtml);
+	self.main.document.getElementById("requestsSection").innerHTML = tblHtml;
+	self.main.stylePage();
+	self.main.styleSortArrow("requestsTbl", empData.sortField, empData.sortDir);
+	if (checkBoxesExist)
+		displayActionRequestSection(true);
+	else
+		displayActionRequestSection(false);
+	fitToScreen();
+	if (!sort && len > 0 && empData.timeOffRequestType != "leaveofabsence")
+	{
+		var commentIcon = self.main.document.getElementById("comment0");
+		if (commentIcon)
+		{
+			commentsUrl = commentIcon.getAttribute("default_icon");
+			commentsExistUrl = commentIcon.getAttribute("active_icon");
+		}
+	}
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+	// workspace IE8 hack: a vertical scrollbar may not display until the window has focus and its contents have changed
+	try 
+	{ 
+		self.main.focus();
+		var tmpNode = self.main.document.createElement("div");
+		self.main.document.body.appendChild(tmpNode);
+		self.main.document.body.removeChild(tmpNode);
+	} 
+	catch(e) {}	
+}
+
+function sendPTOManagerRequestEmail(action, updatedRequests, callback)
+{
+	if (emssObjInstance.emssObj.processFlowsEnabled)
+	{	
+		// trigger processflow to email employee that requests have been approved/rejected
+		var nextFunc = function()
+		{
+			var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+			pfObj.setEncoding(authUser.encoding);
+			pfObj.showErrors = false;	
+			var nbrRecs = (updatedRequests) ? updatedRequests.length : 0;
+			var seqNbrs = [];
+			var k = 0;
+			seqNbrs[k] = "";
+			for (var j=0; j<nbrRecs; j++)
+			{
+				var sNbr = String(Number(updatedRequests[j].seq_nbr));
+				var newLen = seqNbrs[k].length + sNbr.length;
+				if (seqNbrs[k] != "")
+					newLen = newLen + 1;
+				if (newLen <= 45)
+				{
+					if (seqNbrs[k] != "")
+						seqNbrs[k] += ";";
+					seqNbrs[k] += sNbr;
+				}
+				else
+				{
+					k++;
+					seqNbrs[k] = sNbr;
+				}
+			}
+			var nbrFlows = Math.ceil(seqNbrs.length / 10);
+			var seqNbrsIndex = 0;
+			for (var l=0; l<nbrFlows; l++)
+			{
+				var flowObj = pfObj.setFlow("EMSSTimeOffChg", Workflow.SERVICE_EVENT_TYPE, Workflow.ERP_SYSTEM,authUser.prodline, authUser.webuser, null, "");
+				flowObj.addVariable("company", String(Number(authUser.company)));
+				flowObj.addVariable("employee", String(Number(empData.empNbr)));
+				flowObj.addVariable("emailFormat", String(emssObjInstance.emssObj.emailFormat)+","+String(emssObjInstance.emssObj.emailAddressType));
+				flowObj.addVariable("role", "manager");
+				flowObj.addVariable("action", String(action)); // approve/reject
+				//send up to 10 seqNbrs variables per flow
+				var m = seqNbrsIndex;
+				var n = 1;
+				while (m < (seqNbrsIndex + 10))
+				{
+					if (m < seqNbrs.length)
+						flowObj.addVariable("seqNbrs"+n, seqNbrs[m]);
+					else
+						flowObj.addVariable("seqNbrs"+n, "");
+					m++;
+					n++;
+				}
+				seqNbrsIndex += 10;
+				pfObj.triggerFlow();
+			}
+			if (callback)
+				callback();
+			else
+				removeWaitAlert();			
+		};
+		showWaitAlert(getSeaPhrase("SENDING_EMAIL","ESS"), nextFunc);
+	}
+	else
+	{	
+		if (callback)
+			callback();
+		else
+			removeWaitAlert();
+	}
+}
+
+function actionRequest(action)
+{
+	var formElm = self.main.document.forms["empRequests"];
+	var selectBoxes = formElm.elements["selectBox"];
+	var reqsSelected = [];
+	if (selectBoxes)
+	{	
+		if (selectBoxes.length)
+		{
+			var len = selectBoxes.length;
+			for (var i=0; i<len; i++)
+			{
+				if (selectBoxes[i].checked)
+				{
+					var rIndex = Number(selectBoxes[i].getAttribute("rec_index"));
+					reqsSelected[reqsSelected.length] = empData.allRequests[rIndex];
+				}	
+			}	
+		}
+		else
+		{
+			if (selectBoxes.checked)
+			{
+				var rIndex = Number(selectBoxes.getAttribute("rec_index"));
+				reqsSelected[reqsSelected.length] = empData.allRequests[rIndex];
+			}
+		}
+	}
+	if (reqsSelected.length == 0)
+		seaAlert(getSeaPhrase("SELECT_REQUEST","SEA"), "", null, "error");
+	else
+	{
+		var updatedRequests = [];
+		var status = (action == "reject") ? "4" : "2";		
+		var reqsByPlan = empData.getTimeOffRequestsByPlan(reqsSelected);
+		var submitComplete = function()
+		{
+			var refreshData = function()
+			{
+				empData.dirty = {"timeOffRequests":true};
+				showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+			};
+			removeWaitAlert();
+			var alertResponse = seaPageMessage(getSeaPhrase("TIME_OFF_STATUS_CHANGE_SUBMITTED","SEA"), "", "info", null, refreshData, true, getSeaPhrase("UPDATE_COMPLETE","ESS"), true);
+			if (typeof(alertResponse) == "undefined" || alertResponse == null)
+			{	
+				if (seaPageMessage == window.alert)
+					refreshData();
+				return;
+			}			
+		};
+		// approve/reject time off request
+		var checkHS19Response = function(planIndex, recIndex)
+		{
+			var msgNbr = tranObj.getMsgNbr();
+			var msg = tranObj.getMessage();
+			if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+			{
+				var continueUpdate = function()
+				{
+					if (recIndex < reqsByPlan[planIndex].length)
+						callHS19(planIndex, recIndex);
+					else
+						callHS19(planIndex+1, 0);
+				};						
+				// send email
+				if (sysRules.notification_required == 2)
+				{
+					if (updatedRequests.length > 0)
+					{
+						sendPTOManagerRequestEmail(action, updatedRequests, continueUpdate);
+						return;
+					}	
+				}
+				continueUpdate();				
+			}
+			else
+			{
+				setTimeout(removeWaitAlert, 10);
+				if (msg)
+					seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+			}
+		};
+		var callHS19 = function(planIndex, recIndex)
+		{
+			if (planIndex < reqsByPlan.length)
+			{
+				updatedRequests = [];
+				tranObj = new TransactionObject(window, techVersion, httpRequest, function(){checkHS19Response(planIndex,recIndex+40);});
+				tranObj.setEncoding(authUser.encoding);
+				tranObj.setParameter("_PDL", authUser.prodline);
+				tranObj.setParameter("_TKN", "HS19.2");
+				tranObj.setParameter("_LFN", "ALL");
+				tranObj.setParameter("_EVT", "CHG");
+				tranObj.setParameter("_RTN", "DATA");
+				tranObj.setParameter("_TDS", "Ignore");
+				if (techVersion == TransactionObject.TECHNOLOGY_900)
+					tranObj.setParameter("_DTLROWS", "FALSE");
+				tranObj.setParameter("FC", "C");
+				tranObj.setParameter("COMPANY", String(Number(authUser.company)));
+				tranObj.setParameter("EMPLOYEE", String(Number(empData.empNbr)));
+				var reqAry = reqsByPlan[planIndex];
+				var len2 = reqAry.length;
+				if (len2 > 0 && recIndex < len2)
+				{
+					tranObj.setParameter("TEM-PLAN", reqAry[0].plan);
+					tranObj.setParameter("TEM-EMPLOYEE-GROUP", reqAry[0].employee_group);
+					tranObj.setParameter("TEM-POSITION", reqAry[0].position);
+					tranObj.setParameter("WEB-UPDATE", "Y");
+					tranObj.setParameter("LPQ-MGR-USER-ID", "W" + authUser.employee);
+					var k = 0;
+					for (var j=recIndex; j<len2; j++)
+					{
+						updatedRequests[k] = {
+							"rec_type" : "PTO",
+							"seq_nbr" : Number(reqAry[j].seq_nbr)
+						};						
+						//seq nbr, hours, leave date, status, and memo all need to be passed on a change
+						tranObj.setParameter("LINE-FCr"+k, "C");
+						tranObj.setParameter("LPQ-SEQ-NUMBERr"+k, String(Number(reqAry[j].seq_nbr)));
+						tranObj.setParameter("LPQ-HOURSr"+k, String(Number(reqAry[j].hours)));						
+						tranObj.setParameter("LPQ-LEAVE-DATEr"+k, formjsDate(formatDME(reqAry[j].leave_date)));
+						tranObj.setParameter("LPQ-STATUSr"+k, status);
+						if (reqAry[j].comments)
+							tranObj.setParameter("LPQ-MEMOr"+k, String(reqAry[j].comments));
+						else
+							tranObj.setParameter("LPQ-MEMOr"+k, "");
+						k++;
+						if (k >= 40)
+							break;
+					}
+					tranObj.funcAfterCall = function(){checkHS19Response(planIndex,recIndex+k);};
+					tranObj.callTransaction();
+				}
+				else
+					callHS19(planIndex+1, 0);
+			}
+			else	
+				submitComplete();	
+		};
+		var startAction = function()
+		{
+			showWaitAlert(getSeaPhrase("SUBMITTING_REQUEST","SEA"), function(){callHS19(0, 0);});
+		};
+		var confirmActionTaken = function(confirmWin)
+		{
+			if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+				startAction();
+		};
+		var msg;
+		if (action == "reject")
+			msg = getSeaPhrase("CONFIRM_REJECT_REQUESTS","SEA");
+		else	
+			msg = getSeaPhrase("CONFIRM_APPROVE_REQUESTS","SEA");
+		if (seaConfirm(msg, "", confirmActionTaken))
+			startAction();
+	}
+}
+
+function continueClicked()
+{
+	var formElm = self.main.document.forms["directReports"];
+	var reportsElm = formElm.elements["reports"];
+	var requestTypeElm = formElm.elements["requestType"];
+	clearRequiredField(self.main.document.getElementById("reportsCell"));
+	clearRequiredField(self.main.document.getElementById("requestTypeCell"));
+	if (reportsElm.selectedIndex <= 0)
+	{
+		empData.empNbr = 0;
+		setRequiredField(self.main.document.getElementById("reportsCell"), getSeaPhrase("PLEASE_SELECT_DIRECT_REPORT","ESS"), reportsElm);
+	}
+	else
+	{
+		empData.empNbr = Number(reportsElm.options[reportsElm.selectedIndex].value);
+		empData.empName = reportsElm.options[reportsElm.selectedIndex].text || "";
+		if (requestTypeElm.selectedIndex <= 0)
+			setRequiredField(self.main.document.getElementById("requestTypeCell"), getSeaPhrase("SELECT_REQUEST_TYPE_VIEW","SEA"), requestTypeElm);
+		else
+		{
+			empData.timeOffRequestType = requestTypeElm.options[requestTypeElm.selectedIndex].value;
+			empData.timeOffRequestTypeDesc = requestTypeElm.options[requestTypeElm.selectedIndex].text || "";
+			if (empData.timeOffRequestType == "leaveofabsence")
+			{
+				empData.dirty = {"leaveOfAbsenceRequests":true};
+				empData.timeOffRequests = [];
+			}
+			else
+			{
+				empData.dirty = {"timeOffRequests":true};
+				empData.leaveOfAbsenceRequests = [];
+			}
+			showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+		}
+	}
+}
+
+function drawDirectReportSelect(selectedValue)
+{
+	var strBuffer = [];
+	strBuffer[0] = '<option value=""></option>';
+	var len = mgrData.directReports.length;
+	for (var i=0; i<len; i++)
+	{
+		strBuffer[i+1] = '<option value="'+mgrData.directReports[i].employee+'"';
+		if (selectedValue && selectedValue == mgrData.directReports[i].employee)
+			strBuffer[i+1] += ' selected="selected"';
+		strBuffer[i+1] += '>'+mgrData.directReports[i].name+'</option>';
+	}
+	return strBuffer.join("");
+}
+
+function drawRequestTypeSelect(selectedValue)
+{
+	var requestTypes = [
+		{"value":"submitted","desc":getSeaPhrase("SUBMITTED","SEA")},
+		{"value":"pending","desc":getSeaPhrase("PENDING","SEA")},
+		{"value":"cancelled","desc":getSeaPhrase("CANCELLED","SEA")},
+		{"value":"rejected","desc":getSeaPhrase("REJECTED","SEA")},
+		{"value":"leaveofabsence","desc":getSeaPhrase("LEAVE_OF_ABSENCE","SEA")}
+	];
+	var strBuffer = [];
+	strBuffer[0] = '<option value=""></option>';
+	var len = requestTypes.length;
+	for (var i=0; i<len; i++)
+	{
+		strBuffer[i+1] = '<option value="'+requestTypes[i].value+'"';
+		if (selectedValue && selectedValue == requestTypes[i].value)
+			strBuffer[i+1] += ' selected="selected"';
+		strBuffer[i+1] += '>'+requestTypes[i].desc+'</option>';
+	}
+	return strBuffer.join("");
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;
+		contentHeight = winHeight - 40;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;
+		contentHeight = winHeight - 50;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 40;
+		contentHeightBorder = contentHeight;
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.main.onresize = null;
+	}
+	catch(e) {}
+	try
+	{
+		self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="initTimeOff()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;position:absolute;height:464px;left:0px;top:32px;width:400px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/timeoffrequestmanager.htm,v 1.1.2.44 2014/02/12 23:38:23 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,460 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/inputCalendarElement.css,v 1.5.2.5.2.4 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Calendar controls --- */
+.calendarBorderStyler
+{
+  border : none;
+  vertical-align : middle;
+  background : transparent url("../../images/02_input_field_box-2.png") no-repeat center center;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  height : 19px;
+  width : 17px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.calendarStyler
+{
+  width : 17px;
+  height : 17px;
+  background : transparent url("../../images/17_datepicker_btncal_rest.png") no-repeat center center;
+  margin-top : 1px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.calendarStylerHover
+{
+  width : 17px;
+  height : 17px;
+  background : transparent url("../../images/17_datepicker_btncal_activ.png") no-repeat center center;
+  margin-top:1px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.calendarRightSideStyler
+{
+  background : transparent url("../../images/02_input_field_box_date-3.png") no-repeat center right;
+  vertical-align : middle;
+  margin-top : 1px;
+  margin-bottom : 1px;
+  height : 19px;
+  width : 6px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  margin-left : -3px;
+}
+.calendarRightSideRequiredStyler
+{
+  background : transparent url("../../images/02_input_field_box_date-3_required.png") no-repeat center right;
+  vertical-align : middle;
+  margin-top : 1px;
+  margin-bottom : 1px;
+  height : 19px;
+  width : 14px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  margin-left : -3px;
+}
+/* --- Calendar dropdown -- */
+div.calendarOuter
+{
+  position : absolute;
+  background-color : transparent;
+  visibility : hidden;
+  width : auto;
+  height : auto;
+  z-index : 999999;
+  padding : 0px;
+  margin : 0px;
+  border : 0px;
+}
+div.calendarInner
+{
+  background : transparent url("../../images/17_datepicker_panel.png") no-repeat center center;
+  position : relative;
+  padding : 5px;
+  text-align : center;
+  width : 169px;
+  height : 162px;
+}
+div.calendarInner table.calendarNav
+{
+  padding-bottom : 5px;
+  width : 169px;
+}
+div.calendarInner table.calendarTable
+{
+  width : 169px;
+}
+div div span.calendarHeading
+{
+  background-color : transparent;
+  color : #000000;
+  font-size : 12px;
+  font-weight : bold;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+}
+div div table td.calendarDayHeader
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  height : 15px;
+  width : 20px;
+  text-decoration : none;
+  text-align : center;
+  padding : 2px 0px 0px 0px;
+  border : 0px;
+  padding-bottom : 6px;
+}
+div div table td.calendarTodayHeader
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  height : 15px;
+  width : 25px;
+  text-decoration : none;
+  text-align : center;
+  padding : 2px 0px 0px 0px;
+  border : 0px;
+  padding-bottom : 6px;
+}
+div div table td.calendarSystemDateHeader
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  height : 15px;
+  width : 24px;
+  text-decoration : none;
+  text-align : center;
+  padding : 0px;
+  border : 0px;
+  padding-bottom : 6px;
+}
+div div table td.calendarDay
+{
+  border : none;
+  background-color : transparent;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 19px;
+}
+div div table td button.calendarDay
+{
+  border : none;
+  background-color : transparent;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  width: 100%;
+  height : 100%;
+}
+div div table td.weekNbrHeader
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  height : 15px;
+  width : 24px;
+  text-decoration : none;
+  text-align : center;
+  padding : 0px;
+  border : 0px;
+}
+div div table td.weekNbr
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 19px;
+}
+div div table td.calendarDayRight
+{
+  border : none;
+  background-color : transparent;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayToday
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_highlight.png") no-repeat center center;
+  color : #35373a;
+  font-size : 14px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td button.calendarDayOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  width : 100%;
+  height : 100%;
+}
+div div table td.calendarDayRightOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayTodayOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_highlight.png") no-repeat center center;
+  color : #35373a;
+  font-size : 14px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div.calendarArrow, td.calendarArrow
+{
+  border : none;
+  background : transparent;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  width : 18px;
+  height : 14px;
+}
+div.calendarArrowOver, td.calendarArrowOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  width : 18px;
+  height : 14px;
+}
+button.calendarArrowLeft
+{
+  border : 0px;
+  background : transparent url("../../images/17_datepicker_arrow_left.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+}
+button.calendarArrowRight
+{
+  border : 0px;
+  background : transparent url("../../images/17_datepicker_arrow_right.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+}
+div div table td.calendarDayGray
+{
+  border : none;
+  background-color : transparent;
+  color : #bfbfbf;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayGrayOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #bfbfbf;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayGrayRight
+{
+  border : none;
+  background-color : transparent;
+  color : #bfbfbf;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDayGrayRightOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_dateval_over.png") no-repeat center center;
+  color : #bfbfbf;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDaySystemDate
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_today_highlight.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}
+div div table td.calendarDaySystemDateOver
+{
+  border : none;
+  background : transparent url("../../images/17_datepicker_today_highlight.png") no-repeat center center;
+  color : #35373a;
+  font-size : 12px;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  margin : 0px;
+  height : 19px;
+}

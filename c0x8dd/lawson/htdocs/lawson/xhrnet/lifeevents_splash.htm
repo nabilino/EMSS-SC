@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Life Events</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script>
+var bookmark = new Array();
+function Init()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitSplash()'|officeObjects=true|desiredEdit='EM'");
+}
+
+function InitSplash()
+{
+	stylePage();
+	setWinTitle(getSeaPhrase("LIFE_EVENTS","ESS"));
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), StartSplash);
+}
+
+function StartSplash()
+{
+	var strHtml = "";
+	bookmark = new Array();
+   	if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var bkmks = authUser.OfficeObject;
+		var foundBkmk = new Array();
+		var i = 0;
+		var done = false;
+		while ((i < authUser.NbrOfOfficeObj) && (!done))
+		{
+			var bkLawName = (bkmks[i].lawnm) ? bkmks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+			if ((!foundBkmk[bkLawName]) && ((bkLawName == "XMLHRADOPTION") || (bkLawName == "XMLHRBIRTHADOPTION") || (bkLawName == "XMLHRDIVORCE") || (bkLawName == "XMLHRLEGALSEPARATION")
+			|| (bkLawName == "XMLHRMARRIAGE") || (bkLawName == "XMLHRMOVING") || (bkLawName == "XMLHRSPOUSEEMPLOY")))
+			{
+				foundBkmk[bkLawName] = true;
+				// grant access to this bookmark on the splash screen
+				bookmark[bookmark.length] = bkmks[i];
+				if (bookmark.length == 7)
+					done = true;
+			}
+			i++;
+		}
+	}
+   	var len = bookmark.length;
+	if (len > 0)
+		bookmark.sort(sortByBkmkName);
+  	strHtml += '<div id="splashHeader" class="splashheader" style="left:83px;top:43px">'+getSeaPhrase("LIFE_EVENTS","ESS")+'</div>';
+  	strHtml += '<img id="splashIcon" class="splashicon" src="/lawson/xhrnet/ui/images/ico_big_house.gif" alt="'+getSeaPhrase("LIFE_EVENTS_ICON","SEA")+'" title="'+getSeaPhrase("LIFE_EVENTS_ICON","SEA")+'"/>';
+	try 
+	{
+		var bkObj;
+		var x = 187;
+		var y = 95;
+		var cnt = 0;
+  		for (var i=0; i<len; i++)
+  		{
+  			bkObj = bookmark[i];
+  			var tip = bkObj.name+' - '+getSeaPhrase("OPEN_LINK_TO","SEA");
+  			strHtml += '<a href="'+bkObj.url+'" target="_parent" id="splashLink'+i+'" class="splashlink" style="left:'+x+'px;top:'+y+'px" styler="none" title="'+tip+'">'+bkObj.name+'<span class="offscreen"> - '+getSeaPhrase("OPEN_LINK_TO","SEA")+'</span></a>';
+    		cnt++;
+    		y += 40;
+    		switch (cnt) 
+    		{
+    			case 1:	x += 41; break;
+    			case 2: x += 28; break;
+    			case 3: x += 15; break;
+    			case 4: x += 16; break;
+    			default: break;
+  			}
+  		}
+  	}
+  	catch(e) {}
+	self.main.document.getElementById("paneBorder").style.border = "0px";
+	self.main.document.getElementById("paneBody").innerHTML = strHtml;
+	self.main.stylePage(true, getSeaPhrase("LIFE_EVENTS","ESS"));
+	self.main.setWinTitle(getSeaPhrase("LIFE_EVENTS","ESS"));
+	document.getElementById("main").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+	fitToScreen();
+}
+
+function sortByBkmkName(obj1, obj2)
+{
+	var name1 = obj1.name;
+	var name2 = obj2.name;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 36;
+		contentHeightBorder = contentHeight;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.main.onresize = null;		
+	}
+	catch(e) {}	
+	try
+	{
+		self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		try 
+		{
+			var spHdr = self.main.document.getElementById("splashHeader");
+			var spIcn = self.main.document.getElementById("splashIcon");
+			if (spHdr.style.left)
+			{
+				spHdr.style.right = spHdr.style.left;
+				spHdr.style.left = "";
+			}
+			if (spIcn.style.left)
+			{
+				spIcn.style.right = spIcn.style.left;
+				spIcn.style.left = "";
+			}				
+  			for (var i=0; i<bookmark.length; i++)
+  			{
+  				var spLink = self.main.document.getElementById("splashLink" + i);
+  				if (spLink.style.left)
+  				{
+  					spLink.style.right = spLink.style.left;
+  					spLink.style.left = "";
+  				}
+  			}
+  		}
+  		catch(e) {}	
+	}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="Init()" onresize="fitToScreen()">
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;height:510px;width:814px;left:0px;top:32px" src="/lawson/xhrnet/ui/pane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/lifeevents_splash.htm,v 1.3.2.44 2014/02/13 22:48:37 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

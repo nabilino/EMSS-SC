@@ -1,0 +1,228 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor3/css/base/Attic/inforControlsCustom.css,v 1.1.2.15 2014/03/12 19:58:28 tmd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+.inforApplicationPadding 
+{
+	margin-left: 10px !important;
+} 
+/* Hidden elements */
+.inforHiddenCustom
+{
+	display: none;
+}
+/* Custom dialog text */
+.inforDialogContent
+{
+	font-size: 1.2em !important;
+}
+/* Trigger buttons */
+.inforTriggerButton 
+{
+	margin-left: -19px !important;
+}
+div.inforSearchFieldContainer button.inforCancelButton
+{
+	left:	-15px !important;
+}
+label span.inforRequiredIndicator
+{
+	margin-left: 0px !important;
+}
+caption.tableHeader 
+{
+	font-size: 14px;
+	color: #13a3f7;
+	margin-bottom: 8px;
+	line-height: 27px;
+	text-align: left;
+	border-bottom: 1px solid #B3B3B3;
+}
+/* List elements */
+table.inforDataGridCustom
+{
+	background-color: #ffffff;
+}
+th.inforDataGridColumnHeader
+{
+    background-color: #d9d9d9;
+    background-image: none;
+    border-left: 1px solid transparent;
+    border-right: 1px solid transparent;
+    border-top: 0px;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    height: 22px;
+    line-height: 22px;
+    margin: 0;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: relative;
+    cursor: default;
+    white-space: nowrap;
+}
+th.inforDataGridColumnHeader:hover
+{
+    background-color: #cccccc;
+    background-image: none;
+    border-left: 1px solid #e5e5e5;
+    border-right: 1px solid #e5e5e5;
+    border-top: 0px;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    font-weight: normal;
+    height: 22px;
+    line-height: 22px;
+    margin: 0;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: relative;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGridCustom th span.inforDataGridColumnName
+{
+    color: #666666;
+    font-size: 12px;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    line-height: 22px;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGridCustom th span.inforDataGridColumnNameSorted
+{
+    color: #666666;
+    font-size: 12px;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-weight: normal;
+    line-height: 22px;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGridCustom th span.inforDataGridColumnName a, table.inforDataGridCustom th span.inforDataGridColumnNameSorted a
+{
+    color: #666666;
+    text-decoration : none;
+}
+table.inforDataGridCustom th span.inforSortIndicatorAsc
+{
+	background: url("../../images/sort_indicator_asc.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 6px;
+    margin-left: 4px;
+    width: 5px;
+}
+table.inforDataGridCustom th span.inforSortIndicatorDesc
+{
+	background: url("../../images/sort_indicator_desc.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 6px;
+    margin-left: 4px;
+    width: 5px;
+}
+table.inforDataGridCustom td
+{
+	overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #e5e5e5;
+    color: #000000;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    height: 23px;
+    padding-left: 4px !important;
+    padding-right: 4px;
+/*    line-height: 22px; */
+	white-space: nowrap;
+	cursor: default;
+}
+table.inforDataGridCustom td td
+{
+    border: none;
+}
+td.inforDataGridCellEditable
+{
+	overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #e5e5e5;
+    color: #000000;
+    font-family:  Helvetica, Arial, sans-serif;
+    font-size: 12px;
+    height: 23px;
+    padding-left: 4px !important;
+    padding-right: 4px;
+/*    line-height: 22px; */
+	white-space: nowrap;
+	cursor: default;
+}
+tr.inforDataGridRow
+{
+    background-color: transparent;
+}
+tr.inforDataGridRow:hover
+{
+    background-color: #f2f2f2 !important;
+}
+/* drilldown */
+.inforDrillDown
+{
+    background-image: url("../../images/btn_drilldown_enabled.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 11px;
+    margin-bottom: -4px;
+    margin-left: -1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    width: 11px;
+}
+.inforDrillDown:hover, .inforDrillDown:focus
+{
+    background-image: url("../../images/btn_drilldown_hover.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 11px;
+    margin-bottom: -4px;
+    margin-left: -1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    width: 11px;
+}
+/* Infor Context Menu */
+.inforMenu 
+{
+	min-height: 47px;
+}
+/* Infor Drop Down List */
+.ui-autocomplete 
+{ 
+	min-height: 47px; 
+}
+.inforOffScreen
+{
+	position: absolute;
+	width: auto;
+	left: -9999px;	
+}

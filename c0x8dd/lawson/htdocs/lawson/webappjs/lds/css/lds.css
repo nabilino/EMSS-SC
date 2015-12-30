@@ -1,0 +1,51 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/lds.css,v 1.1.2.4.2.2 2014/01/10 14:29:56 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+ 
+@import url(base/body.css);
+@import url(base/print.css);
+@import url(base/hiddenElement.css);
+@import url(base/disabledElement.css);
+@import url(base/asteriskElement.css);
+@import url(base/headerElement.css);
+@import url(base/pushButtonElement.css);
+@import url(base/textAreaElement.css);
+@import url(base/textbox.css);
+@import url(base/inputSelectElement.css);
+@import url(base/inputCalendarElement.css);
+@import url(base/groupBoxElement.css);
+@import url(base/tabControlElement.css);
+@import url(base/tableListElement.css);
+@import url(base/selectComboBoxElement.css);
+@import url(base/inputRadioButtonElement.css);
+@import url(base/inputCheckBoxElement.css);
+@import url(base/footerStyler.css);
+@import url(base/titleBar.css);
+@import url(base/activityDialog.css);
+@import url(base/searchElement.css);
+@import url(base/scrollBarElement.css);
+@import url(base/groupLineElement.css);
+@import url(base/expanderControlElement.css);
+@import url(base/linkElement.css);
+@import url(base/about.css);
+

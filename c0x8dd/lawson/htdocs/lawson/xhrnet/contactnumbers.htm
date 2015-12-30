@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Additional Contact Numbers</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/dr.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var parentTask = "";
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var empNbr;
+var empName;
+var hrcseqnbr = 0;
+var ContactNumbers = new Array();
+var ContactTypeList = new Array();
+var UnfilteredContactList = new Array();
+var _action;
+var appObj;
+if (fromTask) 
+{
+	parentTask = getVarFromString("from",fromTask);
+	if (parentTask == "directreports") 
+	{
+		empNbr = getVarFromString("number",fromTask);
+		empName = getVarFromString("name",fromTask);
+	}
+	fromTask = (parentTask != "") ? fromTask : "";
+}
+
+function InitContactNumbers()
+{	
+	authenticate("frameNm='jsreturn'|funcNm='LoadContactNumbers()'|desiredEdit='EM'");
+}
+
+function LoadContactNumbers()
+{
+	stylePage();
+	setWinTitle(getSeaPhrase("CONTNBR_0","SEA"));
+	var nextFunc = function()
+	{
+		if (fromTask)
+			parent.document.getElementById(window.name).style.visibility = "visible";
+		if (fromTask && parentTask == "directreports")
+			GetContactNumbers();
+		else
+		{	
+			empNbr = authUser.employee;
+			checkLawsonApplicationVersion();
+		}
+	};
+	if (fromTask)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+	else
+		showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+}
+
+function checkLawsonApplicationVersion()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+		setTimeout("checkLawsonApplicationVersion()", 10);
+		return;
+	}
+	if (!appObj || appObj.getAppVersion() == null || appObj.getAppVersion().toString() < "10.00.00")
+	{
+		if (fromTask)
+			parent.removeWaitAlert();
+		else
+			removeWaitAlert();
+		seaAlert(getSeaPhrase("HR_APP_1000_VER_ERR","SEA"), getSeaPhrase("CONTACT_HR","ESS"), null, "error");
+		return;
+	}
+	GetContactNumbers();
+}
+
+function GetContactNumbers()
+{
+	ContactNumbers = new Array();
+	var dmeObj = new DMEObject(authUser.prodline, "hrcontnbr");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "hcnset1"; 
+	dmeObj.field = "company;req-type;id-nbr;dependent;seq-nbr;effect-date;end-date;date;contact-type;phone-country;phone;phone-ext;comment;contact-type.description;contact-type.active-flag;contact-type.web-available;contact-type.web-avail-supv";
+	dmeObj.key = parseInt(authUser.company,10)+"=1="+parseInt(empNbr,10);
+	dmeObj.max = "100";
+	dmeObj.func = "GetContactNumbersDone()";
+	dmeObj.debug = false;
+	DME(dmeObj, "jsreturn");
+}
+
+function GetContactNumbersDone()
+{	
+	UnfilteredContactList = ContactNumbers.concat(self.jsreturn.record);
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+	ContactNumbers = GetAvailableRecords(UnfilteredContactList);
+	GetContactTypesList();
+}
+
+function GetAvailableRecords(UnfilteredContactList)
+{
+	var WebAvailRecs = new Array()
+	var webAvail;
+	var activeFlag;
+	for (var i=0; i<UnfilteredContactList.length; i++)
+	{
+		if (fromTask && parentTask == "directreports")
+			webAvail = (UnfilteredContactList[i].contact_type_web_avail_supv) ? UnfilteredContactList[i].contact_type_web_avail_supv : UnfilteredContactList[i].web_avail_supv;
+		else
+			webAvail = (UnfilteredContactList[i].contact_type_web_available) ? UnfilteredContactList[i].contact_type_web_available : UnfilteredContactList[i].web_available;
+		activeFlag = (UnfilteredContactList[i].contact_type_active_flag) ? UnfilteredContactList[i].contact_type_active_flag : UnfilteredContactList[i].active_flag;
+		if (((UnfilteredContactList[i].contact_type_active_flag && typeof(webAvail) != "undefined" && parseInt(webAvail,10) > 1)
+		|| (UnfilteredContactList[i].active_flag && typeof(webAvail) != "undefined" && parseInt(webAvail,10) > 2 )) 
+		&& typeof(activeFlag) != "undefined" && activeFlag == "A")
+		{
+			WebAvailRecs[WebAvailRecs.length] = UnfilteredContactList[i];
+		}
+	}
+	WebAvailRecs.sort(sortByDescription);
+	return WebAvailRecs;
+}
+
+function GetContactTypesList()
+{
+	ContactTypeList = new Array();
+	if (!emssObjInstance.emssObj.filterSelect)
+	{
+		var dmeObj = new DMEObject(authUser.prodline,"PCODES");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "pcoset1";
+		dmeObj.field = "code;description;active-flag;web-available;web-avail-supv";
+		dmeObj.key = "NT";
+		dmeObj.cond = "active";
+		dmeObj.max = "600"; 
+		dmeObj.func = "StoreContactTypeList()";
+		DME(dmeObj,"jsreturn");
+	}
+	else
+		DrawContactNumbersScreen();
+}
+
+function StoreContactTypeList()
+{
+	ContactTypeList = ContactTypeList.concat(self.jsreturn.record);
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+	ContactTypeList = GetAvailableRecords(ContactTypeList);
+	DrawContactNumbersScreen();
+}
+
+function DrawContactNumbersScreen()
+{
+	var rowNbr = -1;
+	var thisContNbr = new Object();
+   	hrcseqnbr = 0;
+   	var ContNbrListContent = '<table id="contnbrTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_29","SEA")+'">'
+   	+ '<caption class="offscreen">'+getSeaPhrase("CONTNBR_4","SEA")+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborder" style="width:58%;text-align:center">'+getSeaPhrase("CONTNBR_1","SEA")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="width:42%;text-align:center">'+getSeaPhrase("CONTNBR_2","SEA")+'</th></tr>'
+  	for (var i=0; i<ContactNumbers.length; i++)
+   	{
+      	thisContNbr = ContactNumbers[i];
+	  	if (parseInt(thisContNbr.seq_nbr,10) > hrcseqnbr)
+	     	hrcseqnbr = parseInt(thisContNbr.seq_nbr,10);
+		rowNbr++;
+		var tip = thisContNbr.contact_type_description.toUpperCase()+' - '+getSeaPhrase("CONTNBR_3","SEA");
+		ContNbrListContent += '<tr><td class="plaintablecellborder" style="width:58%">'
+      	+ '<a href="javascript:parent.ChangeContactNumber('+i+','+rowNbr+','+thisContNbr.contact_type_web_available+');" title="'+tip+'" nowrap>'+thisContNbr.contact_type_description.toUpperCase()+'<span class="offscreen"> - '+getSeaPhrase("CONTNBR_3","SEA")+'</span></a></td>'
+		+ '<td class="plaintablecellborderright" style="width:42%" nowrap>'
+		+ ((thisContNbr.phone)?thisContNbr.phone_country:'&nbsp;')
+		+ ((thisContNbr.phone)?('&nbsp;'+thisContNbr.phone):'&nbsp;')
+		+ '</td></tr>'
+	}
+	ContNbrListContent += '</table>'
+	if (fromTask && parentTask == "directreports")
+	{
+		var BackBtnContent = '<table cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td class="plaintablecellright" style="padding-top:5px" nowrap="">'
+		BackBtnContent += uiButton(getSeaPhrase("BACK","ESS"),"parent.parent.backToMain('additionalcontactnumbers');return false")
+		BackBtnContent += '</td></tr></table>'
+		ContNbrListContent += BackBtnContent;
+		if (fromTask && parentTask == "directreports" && empName)
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTNBR_4","SEA") + ' - ' + empName;
+		else
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTNBR_4","SEA");	
+		if (ContactNumbers.length == 0)
+		{
+			self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px">'
+			+ getSeaPhrase("CONTNBR_13","SEA")+'</div><p/><div style="overflow:hidden">'+BackBtnContent+'</div>'
+		}
+		else
+		{
+			if (document.all) 
+			{
+				self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px">'
+				+ getSeaPhrase("CONTNBR_14","SEA")+'</div><p/><div id="dataDiv">'+ContNbrListContent+'</div>'
+			}
+			else 
+			{
+				self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px;padding-bottom:20px">'
+				+ getSeaPhrase("CONTNBR_14","SEA")+'</div><p/><div id="dataDiv">'+ContNbrListContent+'</div>'
+			}
+		}
+	}
+	else
+	{
+		var AddBtnContent = '<table cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td class="plaintablecellright" style="padding-top:5px" nowrap="">'
+		AddBtnContent += uiButton(getSeaPhrase("ADD","ESS"),"parent.AddContactNumber();return false",null,"addbtn");
+		AddBtnContent += '</td></tr></table>'
+		ContNbrListContent += AddBtnContent;
+		self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTNBR_4","SEA");
+		if (ContactNumbers.length == 0)
+		{
+			self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px">'
+			+ getSeaPhrase("CONTNBR_5","SEA")+'</div><div style="overflow:hidden">'+AddBtnContent+'</div>'
+		}
+		else
+		{
+			if (document.all) 
+			{
+				self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px">'
+				+ getSeaPhrase("CONTNBR_5","SEA")+'<p/>'+getSeaPhrase("CONTNBR_6","SEA")+'</div><p/><div id="dataDiv">'+ContNbrListContent+'</div>'
+			}
+			else 
+			{
+				self.left.document.getElementById("paneBody").innerHTML = '<div id="instructionsDiv" class="fieldlabelboldleft" style="padding-left:5px;padding-top:5px;padding-bottom:20px">'
+				+ getSeaPhrase("CONTNBR_5","SEA")+'<p/>'+getSeaPhrase("CONTNBR_6","SEA")+'</div><p/><div id="dataDiv">'+ContNbrListContent+'</div>'
+			}
+		}
+	}
+	self.left.stylePage();
+	self.left.setLayerSizes();
+	document.getElementById("left").style.visibility = "visible";
+	if (fromTask)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]));
+	else
+		removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]));
+	fitToScreen();
+}
+
+function sortByDescription(obj1, obj2)
+{
+	var description1 = (typeof(obj1.description) != "undefined") ? obj1.description : ((typeof(obj1.contact_type_description) != "undefined")  ? obj1.contact_type_description : "");
+	var description2 = (typeof(obj2.description) != "undefined") ? obj2.description : ((typeof(obj2.contact_type_description) != "undefined") ? obj2.contact_type_description : "");
+	description1 = description1.toUpperCase();
+	description2 = description2.toUpperCase();
+	if (description1 < description2)
+		return -1;
+	else if (description1 > description2)
+		return 1;
+	else
+		return 0;
+}
+
+function HideListButtons()
+{
+	self.left.document.getElementById("addbtn").style.visibility = "hidden";
+}
+
+function ShowListButtons()
+{
+	self.left.document.getElementById("addbtn").style.visibility = "visible";
+}
+
+function ChangeContactNumber(i, rowNbr, webAvailable)
+{
+	var nextFunc = function()
+	{
+		activateTableRow("contnbrTbl",rowNbr,self.left);
+		document.getElementById("right").style.visibility = "hidden";
+		if ((fromTask && parentTask == "directreports") || parseInt(webAvailable,10) == 2)
+			DrawContactNumberDetailsDisplay(i);
+		else if (parseInt(webAvailable,10) > 2)
+			DrawContactNumberDetails("Change",i);
+	};
+	if (fromTask)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+	else
+		showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+}
+
+function AddContactNumber()
+{
+	var nextFunc = function()
+	{
+		HideListButtons();
+		DrawContactNumberDetails("Add",-1);
+	};
+	if (fromTask)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+	else
+		showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+}
+
+function DrawContactNumberDetailsDisplay(contnbrIndex)
+{
+	var classStr = "plaintablerowheaderlite";
+	var classStrDisplay = "plaintablecelldisplay";
+	var detailsHtml = "";
+	var contactTypeCode = "";
+	var contactTypeDesc = "";
+	contactTypeCode = (ContactNumbers[contnbrIndex].contact_type) ? ContactNumbers[contnbrIndex].contact_type : "";
+	contactTypeDesc = (ContactNumbers[contnbrIndex].contact_type_description) ? ContactNumbers[contnbrIndex].contact_type_description : "";
+	detailsHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_30","SEA",[ContactNumbers[contnbrIndex].contact_type_description])+'">'
+	detailsHtml += '<caption class="offscreen">'+getSeaPhrase("TCAP_19","SEA",[ContactNumbers[contnbrIndex].contact_type_description])+'</caption>'
+	detailsHtml += '<tr><th scope="col" colspan="2"></th></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("CONTNBR_1","SEA")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+contactTypeDesc.toUpperCase()+'</td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].phone_country+'</td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].phone+'</td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("EXTENSION","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].phone_ext+'</td></tr>'
+	detailsHtml += '<tr><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("START_DATE","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].effect_date+'</td></tr>'
+	detailsHtml += '<tr><th scope="row" class="'+classStr+'" style="width:35%">'+getSeaPhrase("END_DATE","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].end_date+'</td></tr>'
+	detailsHtml += '<tr><th scope="row" class="fieldlabelboldliteunderline">'+getSeaPhrase("COMMENTS","ESS")+'</th>'
+	detailsHtml += '<td class="'+classStrDisplay+'" nowrap>'+ContactNumbers[contnbrIndex].comment+'</td></tr></table>'
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = detailsHtml;
+	self.right.stylePage();
+	self.right.setLayerSizes();
+	document.getElementById("right").style.visibility = "visible";
+	if (fromTask)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	else
+		removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	fitToScreen();
+}
+
+function DrawContactNumberDetails(action,contnbrIndex)
+{
+	var toolTip;
+	var classStr = "fieldlabelboldlite";
+	var detailsHtml = "";
+	var contactTypeCode = "";
+	var contactTypeDesc = "";
+	detailsHtml += '<form name="maincontnbrform" onsubmit="return false;">'
+	if (action == "Add")
+		detailsHtml += '<input class="inputbox" type="hidden" name="seqnbr" value="'+(parseInt(hrcseqnbr,10)+1)+'">'
+	else
+	{
+		detailsHtml += '<input class="inputbox" type="hidden" name="seqnbr" value="'+ContactNumbers[contnbrIndex].seq_nbr+'">'
+		detailsHtml += '<input class="inputbox" type="hidden" name="ptdate" value="'+ContactNumbers[contnbrIndex].date+'">'	
+		detailsHtml += '<input class="inputbox" type="hidden" name="dependentnbr" value="'+ContactNumbers[contnbrIndex].dependent+'">'	
+		detailsHtml += '<input class="inputbox" type="hidden" name="contacttype" value="'+ContactNumbers[contnbrIndex].contact_type+'">'
+		contactTypeCode = (ContactNumbers[contnbrIndex].contact_type) ? ContactNumbers[contnbrIndex].contact_type : "";
+		contactTypeDesc = (ContactNumbers[contnbrIndex].contact_type_description) ? ContactNumbers[contnbrIndex].contact_type_description : "";
+	}
+	detailsHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%" scope="presentation">'
+	detailsHtml += '<tr style="padding-top:5px"><td class="'+classStr+'" style="width:35%">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><td class="'+classStr+'" style="width:35%">'
+	detailsHtml += ((action == "Add") ? '<label for="contacttype">'+getSeaPhrase("CONTNBR_7","SEA")+'</label>':getSeaPhrase("CONTNBR_1","SEA"))+'</td>'	
+	if (action == "Change")
+		detailsHtml += '<td class="plaintablecelldisplay" nowrap>'+contactTypeDesc.toUpperCase()+'</td>'
+	else
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("contacttype");
+			detailsHtml += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="contacttype" name="contacttype" fieldnm="contacttype" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'contacttype\');">'	
+			+ '<a href="javascript:;" onclick="parent.openDmeFieldFilter(\'contacttype\');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+toolTip+'" title="'+toolTip+'">'
+			+ '</a>'+uiRequiredIcon()+'<span class="plaintablecelldisplay" style="width:200px" id="xlt_contacttype">'+contactTypeDesc.toUpperCase()+'</span></td>'
+		}	
+		else
+			detailsHtml += '<td class="plaintablecell" nowrap><select id="contacttype" name="contacttype">'+DrawContactNumberSelect(contactTypeCode)+'</select></td>';
+	}
+	detailsHtml += '</tr><tr style="padding-top:5px"><td class="'+classStr+'" style="width:35%"><label for="phonecountry" title="'+getSeaPhrase("COUNTRY_CODE_HELP_TEXT","ESS")+'">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'<span class="offscreen">&nbsp;'+getSeaPhrase("COUNTRY_CODE_HELP_TEXT","ESS")+'<span></label></td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="phonecountry" name="phonecountry" size="6" maxlength="6" onfocus="this.select()"'
+	if (action == "Change")
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].phone_country+'"'
+	detailsHtml += '></td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><td class="'+classStr+'" style="width:35%"><label for="phonenumber">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</label></td>'
+		+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="phonenumber" name="phonenumber" size="15" maxlength="15" onfocus="this.select()"'
+	if (action == "Change") 
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].phone+'"'
+	detailsHtml += '>'+uiRequiredIcon()+'</td></tr>'
+	detailsHtml += '<tr style="padding-top:5px"><td class="'+classStr+'" style="width:35%"><label for="phoneext">'+getSeaPhrase("EXTENSION","ESS")+'</label></td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="phoneext" name="phoneext" size="5" maxlength="5" onfocus="this.select()"'
+	if (action == "Change") 
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].phone_ext+'"'
+	detailsHtml += '></td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("START_DATE","ESS"));
+	detailsHtml += '<tr><td class="'+classStr+'" style="width:35%"><label id="startdateLbl" for="startdate">'+getSeaPhrase("START_DATE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="startdate" name="startdate" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this);"'
+	if (action == "Change") 
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].effect_date+'"'
+	detailsHtml += ' aria-labelledby="startdateLbl startdateFmt"><a href="javascript:parent.DateSelect(\'startdate\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("startdateFmt")+uiRequiredIcon()+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("END_DATE","ESS"));
+	detailsHtml += '<tr><td class="'+classStr+'" style="width:35%"><label id="enddateLbl" for="enddate">'+getSeaPhrase("END_DATE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="enddate" name="enddate" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this);"'
+	if (action == "Change") 
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].end_date+'"'
+	detailsHtml += ' aria-labelledby="enddateLbl enddateFmt"><a href="javascript:parent.DateSelect(\'enddate\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("enddateFmt")+'</td></tr>'
+	detailsHtml += '<tr><td class="fieldlabelboldliteunderline"><label for="comments">'+getSeaPhrase("COMMENTS","ESS")+'</label></td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="comments" name="comments" size="20" maxlength="40" onfocus="this.select()"'
+	if (action == "Change")
+		detailsHtml += ' value="'+ContactNumbers[contnbrIndex].comment+'"'
+	detailsHtml += '></td></tr>'
+	detailsHtml += '<tr><td class="plaintablecell" style="width:35%">&nbsp;</td><td nowrap="">'
+	detailsHtml += uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateContactNumber('"+action+"');return false","margin-top:10px")
+	if (action == "Change") 
+		detailsHtml += uiButton(getSeaPhrase("DELETE","ESS"),"parent.UpdateContactNumber('Delete');return false","margin-left:5px;margin-top:10px")
+	detailsHtml += uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CancelContactNumberAction()","margin-left:5px;margin-top:10px")
+	detailsHtml += '</td></tr></table></form>'		
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = detailsHtml;
+	self.right.stylePage();
+	self.right.setLayerSizes();
+	document.getElementById("right").style.visibility = "visible";
+	if (fromTask)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	else
+		removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	fitToScreen();
+}
+
+function ReturnDate(date)
+{
+	var mainform = self.right.document.forms["maincontnbrform"];
+	try { mainform.elements[date_fld_name].value = date; } catch(e) {}
+}
+
+function UpdateContactNumber(action)
+{
+	var mainform = self.right.document.forms["maincontnbrform"];
+	clearRequiredField(mainform.phonenumber);
+	clearRequiredField(mainform.startdate);
+	clearRequiredField(mainform.enddate);
+	_action = action;
+	if (action == "Add")
+	{	
+		if (emssObjInstance.emssObj.filterSelect)
+			clearRequiredField(mainform.contacttype);
+		else
+			clearRequiredField(self.right.document.getElementById("contacttype"));
+		if ((!emssObjInstance.emssObj.filterSelect && (mainform.contacttype.selectedIndex == 0))
+   		|| (emssObjInstance.emssObj.filterSelect && (NonSpace(mainform.contacttype.value) == 0)))
+   		{
+			var msg = getSeaPhrase("CONTNBR_15","SEA");
+		   	if (emssObjInstance.emssObj.filterSelect)
+		   		setRequiredField(mainform.contacttype, msg);
+		   	else
+		   		setRequiredField(self.right.document.getElementById("contacttype"), msg, mainform.contacttype);
+			return;
+		}	
+	}
+	if (NonSpace(mainform.phonenumber.value) == 0)
+	{
+		setRequiredField(mainform.phonenumber, getSeaPhrase("CONTNBR_16","SEA"));
+	   	return;
+	}
+	if (NonSpace(mainform.phonenumber.value) > 0 && !ValidPhoneEntry(mainform.phonenumber))
+	{
+		setRequiredField(mainform.phonenumber, getSeaPhrase("PHONE_NBR_ERROR","ESS"));
+		return;
+	}
+	if (NonSpace(mainform.phonecountry.value) > 0 && !ValidPhoneEntry(mainform.phonecountry))
+	{
+		setRequiredField(mainform.phonecountry, getSeaPhrase("PHONE_COUNTRY_CODE_ERROR","ESS"));
+		return;
+	}	
+ 	if (ValidDate(mainform.startdate) == false)
+	   	return;
+ 	if (NonSpace(mainform.enddate.value) != 0 && ValidDate(mainform.enddate) == false)
+	   	return; 
+	if (getDteDifference(formjsDate(formatDME(mainform.startdate.value)),formjsDate(formatDME(mainform.enddate.value)))<0) 
+	{
+		setRequiredField(mainform.startdate, getSeaPhrase("START_MUST_BEFORE_END","TE"));
+	   	return;
+	}
+	for (var i=0; i<mainform.elements.length; i++)
+	{
+		if (NonSpace(mainform.elements[i].value) == 0)
+			mainform.elements[i].value = " ";	
+	}
+	if (action != "Delete")
+		ProcessHR20(action);
+	else
+	{
+		if (seaConfirm(getSeaPhrase("CONTNBR_10","SEA"), "", handleConfirmResponse))
+			ProcessHR20(action,true);
+	}
+}
+
+function ProcessHR20(action,nowarning)
+{
+	var mainform = self.right.document.forms["maincontnbrform"];
+	var agsObj = new AGSObject(authUser.prodline, "HR20.1");
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = "ALL";
+	agsObj.tds = false;
+	agsObj.debug = false;
+	agsObj.event = "CHANGE";
+	agsObj.field = "FC=C"
+	+ "&HCN-COMPANY=" + escape(parseInt(authUser.company,10),1)
+	+ "&HCN-EMPLOYEE=" + escape(parseInt(authUser.employee,10),1)
+	+ "&WEB-UPDATE=Y";
+	if (nowarning) agsObj.field += "&PT-XMIT-NBR=1";
+   	if (action == "Change" || action == "Delete")
+   	{
+   		agsObj.field += "&PT-DATE=" + escape(formjsDate(formatDME(mainform.ptdate.value)),1)
+		+ "&PT-SEQ-NBR=" + escape(Number(mainform.seqnbr.value),1)
+		+ "&DEPENDENT-NBR=" + escape(Number(mainform.dependentnbr.value),1);
+   	}
+   	agsObj.field += "&LINE-FC1=" + ((action=="Add") ? "A" : ((action=="Change") ? "C" : "D"))
+   	+ "&HCN-SEQ-NBR1=" + escape(Number(mainform.seqnbr.value),1)
+   	+ "&HCN-DATE1=" + escape(formjsDate(formatDME(mainform.startdate.value)),1)
+	+ "&HCN-EFFECT-DATE1=" + escape(formjsDate(formatDME(mainform.startdate.value)),1)
+	+ "&HCN-END-DATE1=" + escape(formjsDate(formatDME(mainform.enddate.value)),1);
+	if (action == "Add" && !emssObjInstance.emssObj.filterSelect)
+		agsObj.field += "&HCN-CONTACT-TYPE1=" + escape(mainform.contacttype[mainform.contacttype.selectedIndex].value,1);
+	else
+		agsObj.field += "&HCN-CONTACT-TYPE1=" + escape(mainform.contacttype.value,1);
+   	agsObj.field += "&HCN-CONTACT-TYPE1=" + escape(mainform.contacttype.value,1)
+	+ "&HCN-PHONE-COUNTRY1=" + escape(mainform.phonecountry.value,1)
+	+ "&HCN-PHONE1=" + escape(mainform.phonenumber.value,1)
+	+ "&HCN-PHONE-EXT1=" + escape(mainform.phoneext.value,1)
+	+ "&HCN-COMMENT1=" + escape(mainform.comments.value,1);
+   	agsObj.func = "parent.DisplayHR20Message('"+action+"')";
+	self.lawheader.formCheck = "HR20";
+	if (fromTask)
+		parent.showWaitAlert(getSeaPhrase("CONTNBR_8","SEA"), function(){AGS(agsObj,"jsreturn");});
+	else
+		showWaitAlert(getSeaPhrase("CONTNBR_8","SEA"), function(){AGS(agsObj,"jsreturn");});
+}
+
+function DisplayHR20Message(action)
+{
+	var msg = self.lawheader.gmsg;
+	var msgnbr = parseInt(self.lawheader.gmsgnbr,10);
+	if (fromTask)
+		parent.removeWaitAlert();
+	else	
+		removeWaitAlert();	
+	if (msgnbr != 0)
+	{
+		if (msgnbr == 112)
+		{
+			_action = action;
+			if (seaConfirm(getSeaPhrase("CONTNBR_10","SEA"), "", handleConfirmResponse))
+				ProcessHR20(action, true);
+			return;
+		}
+		else
+		{	
+			seaAlert(msg, null, null, "error");
+			return;
+		}	
+	}
+	else
+	{
+		if (action == "Add")
+			msg = getSeaPhrase("CONTNBR_11","SEA");
+		else if (action == "Change")
+			msg = getSeaPhrase("CONTNBR_9","SEA");
+		else
+			msg = getSeaPhrase("CONTNBR_12","SEA");
+		var refreshData = function()
+		{
+			if (fromTask)
+				parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), ContactNumberUpdateComplete);
+			else
+				showWaitAlert(getSeaPhrase("WAIT","ESS"), ContactNumberUpdateComplete);			
+		}
+		var alertResponse = seaPageMessage(msg, "", "info", null, refreshData, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+		if (typeof(alertResponse) == "undefined" || alertResponse == null)
+		{	
+			if (seaPageMessage == window.alert)
+				refreshData();
+		}		
+	}
+}
+
+function handleConfirmResponse(confirmWin)
+{
+	if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+		ProcessHR20(_action, true);
+}
+
+function ContactNumberUpdateComplete()
+{
+	document.getElementById("right").style.visibility = "hidden";
+	ShowListButtons();
+	self.right.document.maincontnbrform.reset();
+	GetContactNumbers();
+}
+
+function CancelContactNumberAction()
+{
+	deactivateTableRows("contnbrTbl",self.left);
+	try 
+	{
+		self.document.getElementById("right").style.visibility = "hidden";
+		ShowListButtons();
+	}
+	catch(e) {}
+}
+
+function DrawContactNumberSelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+	for (var i=0; i<ContactTypeList.length; i++)
+	{
+		codeselect[i+1] = "<option value='" + ContactTypeList[i].code + "'";
+		if (ContactTypeList[i].hrctry_code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + ContactTypeList[i].description;
+	}
+	return codeselect.join("");
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "contacttype": // contacttype
+			var keyStr = "NT";
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("CONTNBR_7","SEA"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description;active-flag;web-available;web-avail-supv",
+				keyStr,
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "contacttype": // contacttype
+		var keyStr = "NT";
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description;active-flag;web-available;web-avail-supv",
+			keyStr,
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var fld = [null, null, null];
+	try
+	{
+		var contactForm = self.right.document.forms["maincontnbrform"];
+		switch (fieldNm.toLowerCase())
+		{
+			case "contacttype":
+				fld = [self.right, contactForm.elements["contacttype"], getSeaPhrase("CONTNBR_7","SEA")];
+				break;
+			default: break;
+		}
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = self.right.document.getElementById(fieldNm.toLowerCase());
+	var formDescElm;
+	switch (fieldNm.toLowerCase())
+	{
+		case "contacttype": // contacttype
+			selRec = ContactTypeList[recIndex];
+			formElm.value = selRec.code;
+			try { self.right.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description.toUpperCase(); } catch(e) {}
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	var formElm = self.right.document.getElementById(fieldNm.toLowerCase());
+	switch (fieldNm.toLowerCase())
+	{
+		case "contacttype": // contacttype
+			formElm.value = "";
+			try { self.right.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = ""; } catch(e) {}
+			break;
+		default: break;
+	}	
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm.toLowerCase())
+	{
+		case "contacttype": // contacttype
+			var tmpObj;
+			ContactTypeList = GetAvailableRecords(dmeRecs);
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("CONTNBR_7","SEA")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<ContactTypeList.length; i++)
+			{
+				tmpObj = ContactTypeList[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description.toUpperCase() : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (ContactTypeList.length == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.50) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;				
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	leftFrame.style.width = parseInt(winWidth*.50) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.left.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.left.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	rightFrame.style.width = parseInt(winWidth*.50) + "px";
+	rightFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.right.onresize = null;	
+	}
+	catch(e) {}
+	try
+	{
+		self.right.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		leftFrame.style.left = "";
+		leftFrame.style.right = "0px";	
+		rightFrame.style.left = "0px";
+	}
+	else
+		rightFrame.style.left = parseInt(winWidth*.50,10) + "px";	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();InitContactNumbers()" onresize="fitToScreen()">
+	<iframe id="left" name="left" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;width:49%;top:0px;height:555px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" title="Secondary Content" level="3" tabindex="0" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;left:49%;width:51%;top:0px;height:555px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/contactnumbers.htm,v 1.1.2.47.2.2 2014/03/31 14:33:42 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

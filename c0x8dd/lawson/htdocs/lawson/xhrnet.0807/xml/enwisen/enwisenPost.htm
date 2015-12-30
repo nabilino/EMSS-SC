@@ -1,0 +1,68 @@
+<html>
+<head>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="enwisen.css"/>
+<script src="enwisenPost.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/UserManager.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<!--script src="/sso/sso.js"></script-->
+<script language="JavaScript" runat="server">
+function getUnixTime(sDate)
+{
+	if (sDate)
+	{
+		return new Date(sDate).valueOf();
+	}
+}
+var serverDate = new Date();
+serverDate = (getUnixTime(serverDate.toUTCString())/1000).toString();
+</script>
+</head>
+<body onload="form_init()">
+	<div id="divMessage" style="position:absolute;top:65px;left:25px;">
+		<img type="button" class="selectButton" src="/lawson/xhrnet/ui/images/ico_arrow_spin3_sm_gray.gif"/>
+		<label id="lblMessage" class="xTLabel" style="font-size:10pt;">Performing login to remote service</label>
+	</div>
+	<div id="loginFormDiv" style="visibility:hidden;display:none;">
+		<form action="" id="loginForm" name="loginForm" method="post">
+		<table cellpadding="3" cellspacing="1">
+		<tr>
+			<td class="FormHeading">Master account information</td>
+		</tr>
+		<tr>
+		    <td><input id="XMLData" name="XMLData" value=""/></td>
+		</tr>
+		<tr>
+    		<td><input name="Submit" type="submit" value="Submit Query"></td>
+		</tr>
+		</table>
+		</form>
+	</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/enwisenPost.htm,v 1.1.2.7 2012/06/29 17:12:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

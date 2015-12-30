@@ -1,0 +1,28 @@
+<html>
+<head>
+<title></title>
+<script>
+var ApplicantNumber = '';
+var gmsgnbr         = '';
+var gmsg            = '';
+var gfldnbr         = '';
+
+function V(fldnbr,fldval)
+{
+   if (fldnbr == "APL-APPLICANT")
+      ApplicantNumber = fldval;
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+    gmsgnbr = msgnbr;
+	gmsg = msg;
+	gfldnbr = fldnbr;
+	ProcessFlag = true;
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/applicantsuite/applicantlaw.htm,v 1.4.2.1 2009/03/09 18:52:15 brentd Exp $ -->

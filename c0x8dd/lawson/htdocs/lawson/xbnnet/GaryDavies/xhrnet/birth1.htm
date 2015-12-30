@@ -1,0 +1,370 @@
+<html>
+<head>
+<title>Birth</title>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var EmpInfo = new Object();
+EmpInfo.employee_work_country = "";
+var Benefits = new Array();
+var dateneeded = getVarFromString("date",fromTask);
+// Default all access to "Deny" except for Life Events Benefits Enrollment
+var withholding = false;
+var beneficiary = false;
+var benefits = true;
+
+function OpenBirth()
+{
+	// Check if a parent or opener document has already done an authenticate,
+	// otherwise go get the webuser info.
+	if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+	{
+		authUser = parent.authUser;
+		if (typeof(parent.EmpInfo) != "undefined" && parent.EmpInfo != null)
+			EmpInfo = parent.EmpInfo;
+		try {
+			profileHandler.setLoganenvVars();
+		}
+		catch(e) {}
+	}
+	else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+	{
+		authUser = opener.authUser;
+		if (typeof(opener.EmpInfo) != "undefined" && opener.EmpInfo != null)
+			EmpInfo = opener.EmpInfo;
+		try {
+			profileHandler.setLoganenvVars();
+		}
+		catch(e) {}
+	}
+	else if (typeof(authUser) == "undefined" || authUser == null)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='GetBenefits()'|officeObjects=true|desiredEdit='EM'");
+		return;
+	}
+	GetBenefits();
+}
+
+function GetBenefits()
+{
+	document.title = parent.parent.getSeaPhrase("LIFE_EVENTS_6","ESS");
+
+	var object 		= new DMEObject(authUser.prodline, "BENEFIT");
+	object.out 		= "JAVASCRIPT";
+	object.index 	= "benset3";
+	object.field 	= "plan-type;employee.work-country";
+	object.key 		= parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10);
+	object.func 	= "BirthEvent()";
+	object.max 		= "600";
+	DME(object,"jsreturn");
+}
+
+function BirthEvent()
+{
+	Benefits = Benefits.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next != "")
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	if (Benefits.length > 0) EmpInfo.employee_work_country = Benefits[0].employee_work_country;
+
+    if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var Bookmarks = authUser.OfficeObject;
+
+		for (var i=0; i<authUser.NbrOfOfficeObj; i++)
+		{
+			var bkName = Bookmarks[i].name.toUpperCase(); // the Lawson-assigned task name
+			var bkLawName = (Bookmarks[i].lawnm) ? Bookmarks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+
+			//PT 160400
+			//if IOS version < 802 then there Lawson name property woun't be available so need to check that case
+			if (bkLawName!=""){
+
+				if (bkLawName == "XMLHRWITHHOLDING1" || bkLawName == "XMLHRWITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if ( bkLawName == "XMLHRBENEFICIARY" || bkLawName == "XMLHRBENEFICIARY1")
+				{
+					// grant access to beneficiary
+					beneficiary = true;
+				}
+			}
+			else{
+
+			 	if (bkName == "TAX WITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if (bkName == "BENEFICIARY")
+				{
+					// grant access to beneficiary
+					beneficiary = true;
+				}
+			}
+		}
+	}
+
+  	// If there is a WITHHOLDING task set to "I" ("Include"), verify the employee's
+	// work country before displaying in the list of items the employee can update.
+    if (withholding)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) ||
+			(Benefits.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+		{
+			CheckEmpWorkCountry();
+		}
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",
+				"employee.work-country;","CheckEmpWorkCountry()");
+			return;
+		}
+	}
+	else
+	{
+		DrawBirthScreen();
+	}
+}
+
+function CheckEmpWorkCountry()
+{
+	withholding = (EmpInfo.employee_work_country!="US")?false:true;
+	DrawBirthScreen();
+}
+
+function DrawBirthScreen()
+{
+  	var BirthContent = '<table border="0" cellspacing="0" cellpadding="0" styler="list">'
+  	+ '<tr><th>&nbsp;</th><th>&nbsp;</th></tr>'
+
+  	if (beneficiary && Benefits.length > 0)
+  	{
+      	for (var n=0; n<Benefits.length; n++)
+	  	{
+	   	  	if (Benefits[n].plan_type == "DB" || Benefits[n].plan_type == "DC" ||
+	       	Benefits[n].plan_type == "DI" || Benefits[n].plan_type == "EL")
+	      	{
+				BirthContent += '<tr><td align="right" valign="top">'
+				+ uiCheckmarkIcon("beneficiaries_checkmark","visibility:hidden")
+				+ '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.OpenBeneficiary()>'
+    			+ parent.parent.getSeaPhrase("BENEFICIARIES","ESS")+'</a></td></tr>'
+              	break;
+          	}
+      	}
+  	}
+
+  	// Don't require current benefits--enable Benefits Enrollment to verify eligibility
+  	// and allow an add of a new benefit.
+  	if (benefits)
+  	{
+		BirthContent += '<tr><td align="right" valign="top">'
+		+ uiCheckmarkIcon("benefits_checkmark","visibility:hidden")
+		+ '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.OpenBenefits()>'
+    	+ parent.parent.getSeaPhrase("BENEFITS","ESS")+'</a></td></tr>'
+  	}
+
+	if (withholding)
+	{
+		BirthContent += '<tr><td align="right" valign="top">'
+		+ uiCheckmarkIcon("w4form_checkmark","visibility:hidden")
+		+ '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.OpenW4()>'
+    	+ parent.parent.getSeaPhrase("LIFE_EVENTS_2","ESS")+'</a></td></tr>'
+	}
+
+  	BirthContent += '</table>';
+
+	self.MAIN.document.getElementById("paneHeader").innerHTML = parent.parent.getSeaPhrase("ADDL_CHANGES","ESS")
+	self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:20px;padding-right:20px;padding-top:20px;padding-bottom:20px">'
+	+'<div class="fieldlabelbold" style="text-align:left">'+parent.parent.getSeaPhrase("MARRIAGE_CHANGE_INFO_1","ESS")+'</div>'
+	+'</div><div style="padding-left:20px">'+BirthContent+'</div>';
+
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+
+	// if this task has been launched as a related link, remove any processing message
+	try {
+		parent.parent.removeWaitAlert();
+	}
+	catch(e) {}
+}
+
+function setImageVisibility(imgID,visibleState)
+{
+	var imgs = window.MAIN.document.images;
+	var i=0;
+	var found = false;
+	while (i<imgs.length && !found)
+	{
+		if(imgs[i].id == imgID)
+		{
+			found = true;
+			imgs[i].style.visibility = visibleState;
+		}
+		i++;
+	}
+}
+
+function OpenBeneficiary()
+{
+   	if (parent.fullrelatedtask.location.href.indexOf("SHR002.htm")==-1)
+   	{
+   		parent.parent.showWaitAlert(parent.parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/Beneficiaries/SHR002.htm?from=birth");
+   	}
+   	try {
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("leftform").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	catch(e) {}
+}
+
+function OpenW4()
+{
+   	if (parent.fullrelatedtask.location.href.indexOf("w4.htm")==-1)
+   	{
+   		parent.parent.showWaitAlert(parent.parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/w4/w4.htm?from=birth");
+   	}
+   	try {
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("leftform").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	catch(e) {}
+}
+
+function OpenBenefits()
+{
+   	//if (parent.fullrelatedtask.location.href.indexOf("benleenroll.htm")==-1)
+   	//{
+   		parent.parent.showWaitAlert(parent.parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xbnnet/benleenroll.htm?event=B&date="+dateneeded);
+   	//}
+   	try {
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("leftform").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	}
+   	catch(e) {}
+   	try {
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	catch(e) {}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 464;
+	var winWidth = 400;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? (winWidth - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (winWidth - 12) : (winWidth - 7));
+	var fullPaneContentWidth = (window.styler && window.styler.showLDS) ? fullContentWidth - 5 : fullContentWidth;
+
+	try
+	{
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = fullContentWidth + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = fullPaneContentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = (winHeight - 35) + "px";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenBirth()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:0%;top:0px;width:100%;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/birth1.htm,v 1.13.2.17 2009/02/25 20:23:40 brentd Exp $ -->

@@ -1,0 +1,104 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/pgscript.htm,v 1.2.6.1.22.2 2012/08/08 12:48:53 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="pages.css"/>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript">
+
+TextEdit.prototype = new top.TEXT();
+TextEdit.prototype.constructor = TextEdit;
+TextEdit.superclass = top.TEXT.prototype;
+
+var editor = null;
+
+//-----------------------------------------------------------------------------
+function onload()
+{
+	var params = window.location.search.replace("?", "");
+	params = params.split("&");
+
+	var mode = (params.length > 0 && params[0].length > 0) ? params[0] : "text";
+	var defaultView = (params.length > 1 && params[1].length > 0) ? params[1] : "n";
+
+	editor = new TextEdit();
+	editor.initialize(mode, window.frameElement.contentWindow.document, false);
+	parent.dsWorkspace.registerView(window.frameElement.id.replace("view_", ""), editor, defaultView);
+}
+//-----------------------------------------------------------------------------
+function TextEdit()
+{
+	TextEdit.superclass.initialize.call(this);
+}
+
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body onload="onload()" onscroll="parent.dsWorkspace.activate(event)">
+
+	<!-- widget/event selection area -->
+	<DIV id="scrToolbar" class="uiViewToolbar" style="position:absolute;top:0;height:80px;left:expression(document.body.clientWidth-this.offsetWidth);width:expression(document.body.clientWidth/5);">
+		<table style="position:relative;" width="100%">
+		<tr>
+			<td valign="top" align="left">
+				<div id="lblObj" class="uiViewToolbarLabel" align="left" style="position:relative;">Objects</div>
+				<select id="selObj" class="uiTextBox" style="position:relative;width:150px;color:black;font-size:7pt;"></select>
+			</td>
+		</tr><tr>
+			<td valign="bottom" align="left">
+				<div id="lblEvent" class="uiViewToolbarLabel" align="left" style="position:relative;">Events</div>
+				<select id="selEvent" class="uiTextBox" style="position:relative;width:150px;color:black;font-size:7pt;"></select>
+				&nbsp;<input type="hidden" id="copyText"></input>
+			</td>
+		</tr>
+		</table>
+	</DIV>
+
+	<!-- functions/object table area -->
+	<DIV id="scrFuncs" style="position:absolute;overflow:hidden;left:expression(document.body.clientWidth-this.offsetWidth);top:expression(scrToolbar.offsetHeight);width:expression(document.body.clientWidth/5);height:expression(document.body.offsetHeight-scrToolbar.offsetHeight-edtMsg.offsetHeight);background-color:buttonface;">
+		<div id="RIGHTTOP" class="uiScriptViewRightbar">
+		<table style="position:relative;" cellpadding="0" width="100%">
+			<tr>
+			<td valign="top" align="left">&nbsp;</td>
+			</tr>
+		</table>
+		</div>
+		<div id="tablediv" style="border-bottom:1px solid silver;overflow:auto;height:expression(scrFuncs.clientHeight-this.offsetTop);"> </div>
+	</DIV>
+
+	<!-- main edit area -->
+	<DIV id="edtFrame" style="overflow-x:hidden;overflow-y:auto;position:absolute;left:0;top:0;width:80%;height:expression(document.body.offsetHeight-edtMsg.offsetHeight);"> 
+		<textarea id="txtArea" wrap="off" 
+			style="position:absolute;top:0;left:0;border:solid silver 1px;width:100%;height:100%;overflow:auto;">
+		</textarea>
+	</DIV>
+
+	<!-- message area (initially hidden) -->
+	<DIV id="edtMsg" class="uiViewToolbar" style="position:absolute;left:0;width:100%;top:expression(edtFrame.offsetHeight);height:0px;overflow:auto;">
+		<span id="errMsg" class="uiViewErrorMsg" style="position:static;"></span>
+	</DIV>"
+
+</body>
+</html>

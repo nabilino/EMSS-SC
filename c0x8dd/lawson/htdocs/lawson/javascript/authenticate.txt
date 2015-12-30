@@ -1,0 +1,630 @@
+//** DESCRIPTION: 	
+//**	This routine will go through the WEBUSER, USEROPTS, and assciated files to do preliminary
+//**	edit checks and to return valuable information on the USER.
+//** 	Error results will be given but no messages will be displayed, the Application needs to show the Error Messages and
+//** 	in the case of the FATAL Error stop processing all together!  The FATAlError field is passed in the call back function.
+//**	The authenticate routine uses a split command to gather passed values, when calling authenticate send it in a 
+//**	string field in this format "variable1Name='Value'|variable2Name='Value'".  Use the pipe '|' as a value seperator.
+//**    For example: authenticate("frameNm='AUTH'|funcNm='editUser()'")
+//**
+//** ARGUMENTS: 4 Arguments  1 required 3 optional
+//**	1) (required) frameNm = the hidden frame all the DME calls will be directed
+//** 	2) (optional) func = the function name to be called on the return. (default -> "startApp(FATALError)")
+//**	3) (optional) desiredEdit = the associated field to do extended edits. (default -> "user.type")
+//**		valid entries for desiredEdit are: 	'VN' (Vendor), 
+//**											'EM' (Employee), 
+//**											'CU' (Customer), 
+//**											'BU' (Buyer), 
+//**											'RQ' (Requester), 
+//**											'AP' (Approver)
+//**	4) (optional) hostNm = the Host Name
+
+//**	Look at the office programs in $WEBDIR/lawson/office for some extensive examples.
+
+//** This is the user Object and the initial values:
+function userInformation(frameNm,func)
+{
+	this.frameNm 		= frameNm //** (Passed) the Hidden frame the DME calls use
+    this.func			= func    //** (Passed) the function name to call on the return, startApp() is called if '' is passed
+   								  //** A parameter representing the FATALError flag will be added to the end of the function call, either a true or false
+
+	this.webuser 		= null    //** These fields are the WEBUSER file  
+    this.status			= null
+    this.type			= null
+    this.type_name		= null
+    this.email			= null
+    this.login			= null
+    this.prodline		= null
+    this.access			= false
+
+	this.company 		= null	  //** These fields are the association information off the WEBUSER file
+	this.employee		= null	  //** Edits are done from these key fields		
+    this.is_super       = false
+    this.requester		= null
+    this.approve_cd		= null
+    this.cust_group		= null
+    this.customer		= null
+	this.vendor_group 	= null    
+    this.vendor			= null
+    this.buyer_code		= null
+    this.prospect		= null
+    this.partner		= null
+
+    this.ErrorMsg		= null  //** This contains the Error Message
+	this.FATALError 	= false //** The causes for a Fatal Error are:
+   							  	//** 1) Webuser record does not exist
+                               	//** 2) Webuser record has been inactivated
+    this.editError		= false //** The causes for a Non-Fatal Error are:
+   							  	//** 1) When Webuser type key fields are left blank 
+                               	//** 2) When "Desired" edit key fields are left blank
+                               	//** 3) When a validity error occurs with "Desired" edit.  i.e. Employee Number is not on Employee File
+    this.editDone       = null  //** Stores what edit was done so if authenticate is called again edit checks wil not occur again.
+    this.name			= null  //** Name according to "Desired" edit
+      
+    this.locale         = null  //** These fields represent a users locale (language).
+    this.language		= null
+    this.date_format    = null
+    this.time_format	= null
+    this.currency		= null		
+
+    this.gif_text		= null      //** These fields are from the USEROPTS file
+    this.font_color		= '000000'
+    this.cell_color		= 'ffffff'
+    this.bg_color		= '000000'
+    this.font_size		= '3'
+    this.font_type		= null
+    this.style			= ''
+    this.alwaysIcons 	= false
+    this.alwaysText  	= false
+	this.do_stats	    = false     //** These fields are from the USEROPTS file at a Global Level
+    this.note           = ''
+    this.logout_tmr     = 3
+
+	this.styleIcons		= null	//** These are a result of the users style from the USEROPTS file
+	this.styleButtons	= null	//** If a style is specified then we go into the desired style directory and
+	this.nbrOfIcons		= 0		//** all the Icon and Button information.  (Used in conjunction with button.js)
+	this.nbrOfButtons	= 0
+}
+
+//** Function to call when creating an Authenticate Object:
+//**		authenticate('Parameter String')
+//** Will use a call back function to continue processing
+
+host=null
+authUser=null
+editThis=null
+quickEdit=false
+
+function authenticate(param)
+{
+var frameNm     = ''
+var funcNm      = ''
+var desiredEdit = ''
+var hostNm      = ''
+
+    var paramLst  = param.split('|')
+    var NbrParams = paramLst.length
+    
+    for (var i=0;i<NbrParams;i++)
+        if (paramLst[i].indexOf("=") != -1)
+            eval(paramLst[i])    	
+
+    if (frameNm == '')
+    {
+        authUser.FATALError = true
+        authUser.ErrorMsg   = 'ERROR: In Calling Authenticate Routine'
+        finishUp()
+    }
+    else
+    {
+        editThis = desiredEdit	
+
+        if ((top
+        &&   top.authUser)
+        ||  (opener
+        &&   opener.top
+        &&   opener.top.authUser))
+        {
+            quickEdit = true
+            if (top	
+            &&  top.authUser)
+	            authUser = top.authUser
+            else
+            if (opener
+            &&  opener.top	
+            &&  opener.top.authUser)
+	            authUser = opener.top.authUser
+
+            authUser.frameNm = frameNm
+            authUser.func = funcNm
+            if (editThis == authUser.editDone
+            ||  editThis == null)
+                finishUp()
+            else
+                editAuthType()
+        }
+        else
+        {
+            authUser = new userInformation(frameNm,funcNm)
+
+            if (hostNm) 
+                host=hostNm
+
+            getGlobalOpts()
+        }
+	}
+}
+
+function getGlobalOpts()
+{
+    var dmeCall = new DMEObject("logan","useropts")
+
+	if (host) 
+		dmeCall.host=host
+
+	dmeCall.out		= "JAVASCRIPT"
+    dmeCall.field	= "web-user;gif-text;font-color;cell-color;bg-color;font-size;style;always-icons;always-text;"
+    				+ "font-type;info-side;adm-do-stats;adm-note;adm-co-logo;logo-txt-gif;adm-logout-tmr"
+    dmeCall.key		= 'lawson'
+    dmeCall.func	= "validateGlobalOpts()"
+    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+	DME(dmeCall,authUser.frameNm)
+}
+
+function validateGlobalOpts()
+{   
+	if (eval('window.' + authUser.frameNm + '.NbrRecs != 0'))
+    {
+        if (eval('window.' + authUser.frameNm + '.record[0].gif_text') != "")
+            authUser.gif_text = eval('window.' + authUser.frameNm + '.record[0].gif_text')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].font_color') != "")
+            authUser.font_color   = eval('window.' + authUser.frameNm + '.record[0].font_color')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].cell_color') != "")
+            authUser.cell_color   = eval('window.' + authUser.frameNm + '.record[0].cell_color')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].bg_color') != "")
+            authUser.bg_color     = eval('window.' + authUser.frameNm + '.record[0].bg_color')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].font_size') != "")
+            authUser.font_size    = eval('window.' + authUser.frameNm + '.record[0].font_size')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].font_type') != "")
+            authUser.font_type    = eval('window.' + authUser.frameNm + '.record[0].font_type')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].style') != "")
+            authUser.style        = eval('window.' + authUser.frameNm + '.record[0].style')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].always_icons') == "Y")
+            authUser.alwaysIcons  = true
+
+        if (!authUser.alwaysIcons)
+            if (eval('window.' + authUser.frameNm + '.record[0].always_text') == "Y")
+                authUser.alwaysText   = true
+
+        if (eval('window.' + authUser.frameNm + '.record[0].adm_do_stats') == "Y")
+            authUser.do_stats = true
+
+        if (eval('window.' + authUser.frameNm + '.record[0].adm_note') != "")
+            authUser.note = eval('window.' + authUser.frameNm + '.record[0].adm_note')
+
+        if (eval('window.' + authUser.frameNm + '.record[0].adm_logout_tmr') != "")
+            authUser.logout_tmr = eval('window.' + authUser.frameNm + '.record[0].adm_logout_tmr')
+    }
+    getAuthWebuser()
+}
+
+function getAuthWebuser()
+{
+    var dmeCall = new DMEObject("logan", "webuser")
+
+    if (host) 
+        dmeCall.host=host
+
+    dmeCall.out		= "JAVASCRIPT"
+    dmeCall.field	= "web-user;status;type;type,xlt;email;login;prodline;prodline2;access;company;employee;requester;"
+                    + "approve-cd;customer;vendor;vendor-group;buyer-code;cust-group;contact-id;acct-unit;view-contracts;vendor-loc;user-options.gif-text;"
+                    + "user-options.font-color;user-options.cell-color;user-options.bg-color;user-options.font-size;user-options.font-type;user-options.style;user-options.always-icons;user-options.always-text"
+//                    + "global-opts.font-color;global-opts.cell-color;global-opts.bg-color;global-opts.font-size;global-opts.font-type;global-opts.style;global-opts.always-icons;global-opts.always-text;"
+//                    + "global-opts.adm-do-stats;global-opts.adm-note;global-opts.adm-logout-tmr"
+    dmeCall.key		= "WEBUSER"
+    dmeCall.func	= "gettypeInfo()"
+    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+    DME(dmeCall,authUser.frameNm)
+}
+
+function gettypeInfo()
+{
+	if (eval('window.' + authUser.frameNm + '.NbrRecs == 0'))
+    {
+        authUser.FATALError = true
+    	authUser.ErrorMsg   = "Web User record does not exist."
+    }
+    else
+    {
+    	authUser.status  = eval('window.' + authUser.frameNm + '.record[0].status')
+		if (authUser.status != '1')
+        {
+            authUser.FATALError = true
+        	authUser.ErrorMsg   = "Web User has been inactivated, please contact your Administrator."
+        }
+        else
+        {
+            authUser.webuser      = eval('window.' + authUser.frameNm + '.record[0].web_user')
+            authUser.type  		  = eval('window.' + authUser.frameNm + '.record[0].type')
+            authUser.type_name	  = eval('window.' + authUser.frameNm + '.record[0].type_xlt')
+            authUser.email 		  = eval('window.' + authUser.frameNm + '.record[0].email')
+            authUser.login 		  = eval('window.' + authUser.frameNm + '.record[0].login')
+            authUser.prodline     = eval('window.' + authUser.frameNm + '.record[0].prodline')
+            authUser.access       = eval('window.' + authUser.frameNm + '.record[0].access')
+
+            authUser.company  	  = eval('window.' + authUser.frameNm + '.record[0].company')
+            authUser.employee	  = eval('window.' + authUser.frameNm + '.record[0].employee')
+            authUser.requester 	  = eval('window.' + authUser.frameNm + '.record[0].requester')
+            authUser.approve_cd	  = eval('window.' + authUser.frameNm + '.record[0].approve_cd')
+            authUser.vendor  	  = eval('escape(window.' + authUser.frameNm + '.record[0].vendor)')
+            authUser.vendor_group = eval('window.' + authUser.frameNm + '.record[0].vendor_group')
+            authUser.cust_group   = eval('escape(window.' + authUser.frameNm + '.record[0].cust_group)')
+            authUser.customer     = eval('escape(window.' + authUser.frameNm + '.record[0].customer)')
+            authUser.buyer_code   = eval('window.' + authUser.frameNm + '.record[0].buyer_code')
+            authUser.prospect     = eval('window.' + authUser.frameNm + '.record[0].prospect')
+            authUser.partner      = eval('window.' + authUser.frameNm + '.record[0].partner')
+
+            if (eval('window.' + authUser.frameNm + '.record[0].user_options_style') != "xxxxxxxxxx")
+            {
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_gif_text') != "")
+                    authUser.gif_text = eval('window.' + authUser.frameNm + '.record[0].user_options_gif_text')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_font_color') != "")
+                    authUser.font_color   = eval('window.' + authUser.frameNm + '.record[0].user_options_font_color')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_cell_color') != "")
+                    authUser.cell_color   = eval('window.' + authUser.frameNm + '.record[0].user_options_cell_color')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_bg_color') != "")
+                    authUser.bg_color     = eval('window.' + authUser.frameNm + '.record[0].user_options_bg_color')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_font_size') != "")
+                    authUser.font_size    = eval('window.' + authUser.frameNm + '.record[0].user_options_font_size')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_font_type') != "")
+                    authUser.font_type    = eval('window.' + authUser.frameNm + '.record[0].user_options_font_type')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_style') != "")
+                    authUser.style        = eval('window.' + authUser.frameNm + '.record[0].user_options_style')
+
+                if (eval('window.' + authUser.frameNm + '.record[0].user_options_always_icons') == "Y")
+                    authUser.alwaysIcons  = true
+
+                if (!authUser.alwaysIcons)
+                    if (eval('window.' + authUser.frameNm + '.record[0].user_options_always_text') == "Y")
+                        authUser.alwaysText   = true
+            }
+
+            if (authUser.prodline == "")
+                authUser.prodline = DefaultProductLine
+
+            editAuthType()
+    	}
+	}
+    if (authUser.FATALError)
+    	finishUp()
+}
+
+function editAuthType()
+{
+    if (authUser.type == "VN")
+    {
+        if ((authUser.vendor       == null || authUser.vendor.length       < 1)
+        ||  (authUser.vendor_group == null || authUser.vendor_group.length < 1))
+            authUser.editError = true
+    }
+    else
+    if (authUser.type == "CU")
+    {
+        if ((authUser.company  == null || authUser.company.length  < 1)
+        ||  (authUser.customer == null || authUser.customer.length < 1))
+            authUser.editError = true
+    }
+    else
+    if (authUser.type == "EM")
+    {
+        if ((authUser.company  == null || authUser.company.length  < 1)
+        ||  (authUser.employee == null || authUser.employee.length < 1))
+            authUser.editError = true
+    }
+    else
+    if (authUser.type == "BU")
+    {
+        if ((authUser.company    == null || authUser.company.length    < 1)
+        ||  (authUser.buyer_code == null || authUser.buyer_code.length < 1))
+            authUser.editError = true
+    }
+    else
+    if (authUser.type == "RQ")
+    {
+        if (authUser.requester == null || authUser.requester.length    < 1)
+            authUser.editError = true
+    }
+
+    if (editThis == null || editThis.length < 1)
+        editThis = authUser.type
+
+    if (editThis.toUpperCase() == "BU")  GetAuthBuyer()
+    if (editThis.toUpperCase() == "EM")  GetAuthEmployee()
+    if (editThis.toUpperCase() == "VN")  GetAuthVendor()
+    if (editThis.toUpperCase() == "CU")  GetAuthCustomer()
+    if (editThis.toUpperCase() == "BU")  GetAuthBuyer()
+    if (editThis.toUpperCase() == "RQ")  GetAuthRequester()
+    if (editThis.toUpperCase() == "AP")  GetAuthApprover()		//** Not a type on the Webuser File
+    if (editThis.toUpperCase() == "FN")  validateAuthData(true)
+    if (editThis.toUpperCase() == "AD")  validateAuthData(true)
+}
+
+function GetAuthEmployee()
+{
+    if ((authUser.company  == null || authUser.company.length  < 1)
+    ||  (authUser.employee == null || authUser.employee.length < 1))
+    	validateAuthData(false)
+    else
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"employee")
+
+		if (host) 
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.field	= "last-name;first-name;nick-name"
+    	dmeCall.key		= parseInt(authUser.company) + "=" + parseInt(authUser.employee)
+    	dmeCall.func	= "validateAuthData(true)"
+    	dmeCall.boolcond= "is-supervisor"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+	}
+}
+
+function GetAuthCustomer()
+{
+    if ((authUser.company  == null || authUser.company.length  < 1)
+    ||  (authUser.customer == null || authUser.customer.length < 1))
+    	validateAuthData(false)
+    else
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"arcustomer")
+
+		if (host) 
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.field	= "customerdesc.name"
+    	dmeCall.key		= parseInt(authUser.company) + "=" + escape(authUser.customer)
+    	dmeCall.func	= "validateAuthData(true)"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+    }
+}
+
+function GetAuthVendor()
+{
+    if ((authUser.vendor_group == null || authUser.vendor_group.length < 1)
+    ||  (authUser.vendor       == null || authUser.vendor.length       < 1))
+    	validateAuthData(false)
+    else
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"apvenmast")
+
+		if (host) 
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.field	= "vendor_vname"
+    	dmeCall.key		= escape(authUser.vendor_group) + "=" + authUser.vendor
+    	dmeCall.func	= "validateAuthData(true)"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+    }
+}
+
+function GetAuthBuyer()
+{
+    if ((authUser.company    == null || authUser.company.length    < 1)
+    ||  (authUser.buyer_code == null || authUser.buyer_code.length < 1))
+    	validateAuthData(false)
+    else
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"buyer")
+
+		if (host) 
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.field	= "name"
+    	dmeCall.key		= parseInt(authUser.company) + "=" + escape(authUser.buyer_code)
+    	dmeCall.func	= "validateAuthData(true)"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+    }
+}
+
+function GetAuthRequester()
+{
+	if (authUser.requester != null && authUser.requester.length > 0)
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"requester")
+
+		if (host)
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.index	= "reqset2"
+    	dmeCall.field	= "name"
+    	dmeCall.key		= escape(authUser.requester)
+    	dmeCall.func	= "validateAuthData(true)"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+    }
+    else
+    	validateAuthData(false)
+}
+
+function GetAuthApprover()
+{
+	if ((authUser.approve_cd == null || authUser.approve_cd.length < 1)
+    ||  (authUser.company    == null || authUser.company.length    < 1))
+    {
+    	var dmeCall = new DMEObject(authUser.prodline,"rqappcode")
+
+		if (host)
+			dmeCall.host=host
+
+		dmeCall.out		= "JAVASCRIPT"
+    	dmeCall.field	= "description"
+    	dmeCall.key		= parseInt(authUser.company) + "=" + escape(authUser.approve_cd)
+    	dmeCall.func	= "validateAuthData(true)"
+	    dmeCall.exclude = "DRILL;KEYS;SORTS"
+
+		DME(dmeCall,authUser.frameNm)
+    }
+    else
+    	validateAuthData(false)
+}
+
+function validateAuthData(associationMade)
+{
+	if (!associationMade)
+    {
+		authUser.ErrorMsg  = "Warning: An association to a " + editThis + " needs to be made on your Webuser record.\nPlease contact your Administrator."
+        authUser.editError = true
+    }
+    else
+    if (typeof eval('window.' + authUser.frameNm + '.NbrRecs') == "number")
+  	{	
+   		if (eval('window.' + authUser.frameNm + '.NbrRecs == 0')
+   		&& (authUser.type != "AD" || user.type != "FN"))
+        {
+	 		authUser.ErrorMsg  = "Warning: " + editThis + " record does not exist for web user.\nPlease contact your Administrator."
+            authUser.editError = true
+        }
+  	}
+
+	if (authUser.editError)
+    	authUser.name = '** ERROR **'
+    else
+    {
+        if (editThis == "EM")
+        {
+            if (eval('window.' + authUser.frameNm + '.record[0].nick_name != " "')) 
+                authUser.name = eval('window.' + authUser.frameNm + '.record[0].nick_name')
+            else 
+                authUser.name = eval('window.' + authUser.frameNm + '.record[0].first_name')				
+            authUser.name += " " + eval('window.' + authUser.frameNm + '.record[0].last_name')
+        	authUser.is_super = eval('window.' + authUser.frameNm + '.is_supervisor[0][0]')
+            authUser.editDone = "EM"
+        }
+        if (editThis == "VN")
+        {
+        	authUser.name = eval('window.' + authUser.frameNm + '.record[0].vendor_vname')
+            authUser.editDone = "VN"
+        }
+        if (editThis == "CU")
+        {
+        	authUser.name = eval('window.' + authUser.frameNm + '.record[0].customerdesc_name')
+            authUser.editDone = "CU"
+        }
+        if (editThis == "BU")
+        {
+        	authUser.name = eval('window.' + authUser.frameNm + '.record[0].name')
+            authUser.editDone = "BU"
+        }
+        if (editThis == "RQ")
+        {
+        	authUser.name = eval('window.' + authUser.frameNm + '.record[0].name')
+            authUser.editDone = "RQ"
+        }
+        if (editThis == "AP")
+        {
+        	authUser.name = eval('window.' + authUser.frameNm + '.record[0].description')
+            authUser.editDone = "AP"
+        }
+        if (editThis == "FN")
+        {
+        	authUser.name = "Finance"
+            authUser.editDone = "FN"
+        }
+        if (editThis == "AD")
+        {
+        	authUser.name = "Administrator"
+            authUser.editDone = "AD"
+        }
+    }
+
+	if (!quickEdit)
+   		getStyleDirectory()
+    else
+    	finishUp()
+}
+
+
+function getStyleDirectory()
+{
+	if (authUser.style == null || authUser.style.length < 1) 
+    	authUser.style = 'style1'
+   	window.open("/cgi-lawson/dirContents?" + WebDir + "/lawson/images/lawson/" + authUser.style + "&authDirContents()", authUser.frameNm)
+}
+
+function authDirContents()
+{
+var Icntr = 0
+var Bcntr = 0
+    authUser.styleIcons   = new Array()
+    authUser.styleButtons = new Array()
+	for (var i=0;i<eval('window.' + authUser.frameNm + '.NbrRecs');i++)
+    {
+    	var tmpStr = '0.gif'
+    	if (eval('window.' + authUser.frameNm + '.record[' + i + '].rw_file_name.indexOf("' + tmpStr + '")') != -1)
+        {
+        	var tmpLength = eval('window.' + authUser.frameNm + '.record[' + i + '].rw_file_name.length - 6')
+            if (eval('window.' + authUser.frameNm + '.record[' + i + '].rw_file_name.charAt(0)') == "I")
+            {
+    			authUser.styleIcons[Icntr] = eval('window.' + authUser.frameNm + '.record[' + i + '].rw_file_name.substring(0,' + tmpLength + ')')
+    			Icntr++
+            }
+            else
+            {
+    			authUser.styleButtons[Bcntr] = eval('window.' + authUser.frameNm + '.record[' + i + '].rw_file_name.substring(0,' + tmpLength + ')')
+    			Bcntr++
+        	}
+        }
+    }
+    authUser.nbrOfIcons   = Icntr
+    authUser.nbrOfButtons = Bcntr
+//	for (var z=0;z<authUser.nbrOfIcons;z++)
+//    	alert(authUser.styleIcons[z])
+	finishUp()
+}
+
+function finishUp()
+{
+var tmpStr = ''
+
+    if (authUser.func != "")
+    {
+    	tmpStr  = authUser.func.substring(0,authUser.func.lastIndexOf(")"))
+        if (tmpStr.charAt(tmpStr.length-1) != "(")
+        	tmpStr += ","
+        tmpStr += authUser.FATALError + ")"
+		eval(tmpStr)
+    }
+    else
+    	startApp(authUser.FATALError)
+}
+
+

@@ -1,0 +1,153 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/proppgags.htm,v 1.2.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Transaction Property Pages</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="proppgags.js"></script>
+</head>
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGen" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="ppgSwitchTab(this)">General</span>
+		<span id="tabValues" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="ppgSwitchTab(this)">Values</span>
+		<span id="tabKeys" class="dsTabButtonInactive" style="top:10;left:140;width:70px;" tabind="2" onclick="ppgSwitchTab(this)">Keys</span>
+	</div>
+	<div id="divGen" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+		<table>
+			<colgroup><col width="30%"></col><col width="70%"></col></colgroup>
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td><span id="lblAPI" class="dsLabel" style="position:relative;">API</span></td>
+				<td><nobr><input id="txtAPI" class="dsTextBox" style="position:relative;width:320;" onblur="ppgParseAgsApi()"></input>
+					<input type="button" class="dsButton" id="btnQryAPI" onclick="ppgInvokeAPIBuilder()"
+					style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input></nobr></td>
+			</tr>
+			<tr>
+				<td><span id="lblOverRideDa" class="dsLabel" style="position:relative;">Use Webuser PDL</span></td>
+				<td><input type="checkbox" id="chkPdlOvrde" style="position:relative;" onclick="btnApply.disabled=false"></input></td>
+			</tr>
+			<tr>
+				<td><span id="lblRepresent" class="dsLabel" style="position:relative;">Representation</span></td>
+				<td><select id="selRepresent" class="dsTextbox" style="position:relative;width:130" onchange="ppgOnChgRepresentation()">
+					<option value="agstable.xsl">Table</option>
+					<option value="xmlgraph_HBAR.xsl">Horizontal Bar Graph</option>
+					<option value="xmlgraph_VBAR.xsl">Vertical Bar Graph</option>
+					<option value="xmlgraph_PIE.xsl">Pie Chart</option>
+					<option value="xmlgraph_LINE.xsl">Line Graph</option>
+					</select>
+				</td>
+			</tr>
+			<tr rowspan="2" width="100%">
+				<table id="graphParam" style="display:none" width="100%">
+					<colgroup><col width="28%"></col><col width="72%"></col></colgroup>
+					<tr>
+						<td><span id="lblChartTitle" class="dsLabel" style="position:relative;">Chart Title</span></td>
+						<td><nobr><input id="txtChartTitle" class="dsTextBox" style="position:relative;width:100;" onblur="ppgTxtOnBlur(this)"></input>
+							<input type="button" class="dsButton" id="btnChtTit" onclick="ppgDataSrcDialog2('txtChartTitle', 1)"
+							style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input></nobr></td>
+					</tr>
+					<tr>
+						<td><span id="lblCatTitle" class="dsLabel" style="position:relative;">Category Title</span></td>
+						<td><nobr><input id="txtCatTitle" class="dsTextBox" style="position:relative;width:100;" onblur="ppgTxtOnBlur(this)"></input>
+							<input type="button" class="dsButton" id="btnCatTit" onclick="ppgDataSrcDialog2('txtCatTitle', 1)"
+							style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input></nobr></td>
+					</tr>
+					<tr>
+						<td><span id="lblValTitle" class="dsLabel" style="position:relative;">Value Title</span></td>
+						<td><nobr><input id="txtValTitle" class="dsTextBox" style="position:relative;width:100;" onblur="ppgTxtOnBlur(this)"></input>
+							<input type="button" class="dsButton" id="btnValTit" onclick="ppgDataSrcDialog2('txtValTitle', 1)"
+							style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input></nobr></td>
+					</tr>
+				</table>
+				<table id="tableParam" style="display:block" width="100%">
+					<colgroup><col width="28%"></col><col width="72%"></col></colgroup>
+					<tr>
+						<td><span id="lblNonStdDa" class="dsLabel" style="position:relative;">Non-Std Detail Area</span></td>
+						<td><input type="checkbox" id="chkNonStdDa" style="position:relative;" onclick="btnApply.disabled=false"></input></td>
+					</tr>
+					<tr>
+						<td><span id="lblRows" class="dsLabel" style="position:relative;">Rows</span></td>
+						<td><input id="txtRows" class="dsTextBox" style="position:relative;width:40;" value="1" onblur="ppgTxtOnBlur(this)"></input></td>
+					</tr>
+					<tr>
+						<td><span id="lblPaging" class="dsLabel" style="position:relative;">Enable Paging</span></td>
+						<td><input type="checkbox" id="chkPaging" style="position:relative;" onclick="btnApply.disabled=false"></input></td>
+					</tr>
+					<tr>
+						<td><span id="lblInitFC" class="dsLabel" style="position:relative;">Initial FC</span></td>
+						<td><input id="txtInitFC" class="dsTextBox" style="position:relative;width:40;" onblur="ppgTxtOnBlur(this)"></input></td>
+					</tr>
+				</table>
+			</tr>
+		</table>
+	</div>
+	<div id="divValues" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+		<table width="100%" CELLSPACING="1" CELLPADDING="1">
+			<colgroup><col width="50%"></col><col width="50%"></col></colgroup>
+			<tr><td colspan="2">&nbsp;</td></tr>
+			<tr>
+				<td align="right"><span id="lblAddRemove" class="dsLabel" style="position:relative;">Add/Remove Values</span></td>
+				<td align="left"><input id="btnAdd" type="button" class="dsDlgButton" style="position:relative;width:50px" value="Add" onclick="ppgAdd()"></input>
+				<input id="btnRemove" type="button" class="dsDlgButton" style="position:relative;width:50px" value="Remove" onclick="ppgRemove()"></input></td>
+			</tr>
+			<tr><td colspan="2">&nbsp;</td></tr>
+		</table>
+		<table id="tbValues" CELLSPACING="1" CELLPADDING="1"  align="center" style="position:relative;width:90%">
+		</table>
+	</div>
+	<div id="divKeys" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+		<table id="tbKeys" CELLSPACING="1" CELLPADDING="1"  align="center" style="position:relative;width:80%">
+			<tr>
+				<td colspan="3">&nbsp;</td>
+			</tr>
+			<tr>
+				<td align="center"><span id="lblKey" class="dsLabel" style="position:relative;text-decoration:underline;">Key</span></td>
+				<td align="center"><span id="lblValue" class="dsLabel" style="position:relative;text-decoration:underline;">Value</span></td>
+				<td align="center"><span id="lblRefresh" class="dsLabel" style="position:relative;text-decoration:underline;">Trigger Refresh</span></td>
+			</tr>
+		</table>
+	</div>
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:40;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="ppgOK()"
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" disabled onclick="ppgUpdate()"
+				style="position:relative;width:70px;" value="Apply">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+</body>
+</html>

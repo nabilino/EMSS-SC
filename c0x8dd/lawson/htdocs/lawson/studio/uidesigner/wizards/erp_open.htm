@@ -1,0 +1,126 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/wizards/erp_open.htm,v 1.3.28.2 2012/08/08 12:48:54 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Open Custom User Interface</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="erp_open.js"></script>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgDMEError">The web tier Data service reported an error:</phrase>
+		<phrase id="msgInvalidServerResponse">The web server returned an invalid response.</phrase>
+		<phrase id="msgOkToDelete">OK to delete</phrase>
+		<phrase id="msgErrorFormFileMissing">File associated with custom form entry not found:</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="dlgInit()" onkeydown="dlgOnKeyDown()" style="background-color:buttonface;visibility:hidden;">
+
+<!-- only method available for dynamic window title -->
+<script language="javascript">
+	bDeleteDlg = wndArguments[1] ? true : false;
+	if (bDeleteDlg)
+		window.document.title="Delete Remote UI Definition"
+</script>
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;padding-left:5px;">
+		<span id="tabOpen" class="dsLabel" tabind="0" style="top:10;left:10;width:90%;display:block;text-align:left;font-weight:bold;">Custom Form Selection</span>
+	</div>
+
+	<!-- Open tab pane -->
+	<div id="divOpen" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table width="100%">
+		<tr>
+			<td colspan="2">
+				<label class="dsLabel" style="position:relative;">Select the data area of the existing custom interface and perform 'Find' to list matching forms.</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td width="25%" align="right">
+				<label class="dsLabel" for="cboPDL" style="position:relative;">Data area:&nbsp;&nbsp;</label>
+			</td>
+			<td>
+				<select id="cboPDL" class="dsTextBox" size="1" style="position:relative;width:180px;"></select>
+			</td>
+		</tr>
+		<tr>
+			<td width="25%" align="right">
+				<label class="dsLabel" for="txtToken" style="position:relative;">Form:&nbsp;&nbsp;</label>
+			</td>
+			<td>
+				<input type="text" id="txtToken" class="dsTextBox" 
+						style="position:relative;width:90px;border-style:inset;border-width:2px;border-color:white;">
+				</input>
+				<input type="button" id="btnFind" class="dsDlgButton" onclick="dlgDoFind()" value="Find"
+						style="position:relative;width:60px;">
+				</input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td>
+				<label class="dsLabel" style="position:relative;text-align:left;">Matching Forms:</label>
+			</td>
+			<td>
+				<input id="btnDelete" type="button" class="dsDlgButton" onclick="dlgPerformDelete()" disabled
+					style="position:relative;width:60px;display:none;margin-left:96px;" value="Delete">
+				</input>
+				<BR>
+			</td>
+		<tr>
+			<td colspan="2">
+				<div id="listFiles"
+					style="background-color:white;border-style:inset;border-width:2px;border-color:grey;height:148px;width:360;overflow:auto;"> 
+				</div>
+			<td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input type="text" id="txtFile" style="visibility:hidden;"></input>
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="dlgOnClickOK(this)" 
+				style="position:relative;width:70px;" value="Open">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

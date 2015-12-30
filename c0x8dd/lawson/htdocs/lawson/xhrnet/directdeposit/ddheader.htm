@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Direct Deposit</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Transaction Library</title>
+<script>
+var gmsgnbr, gmsg, gfldnbr;
+var tkn = null;
+
+function V(fldnbr,fldval)
+{
+	if ((parent.MailEvent != "Add") || (parent.MailQueue.length > 1))
+		return;
+	if (fldnbr == "_TKN")
+		tkn = fldval;	
+	else if ((tkn == "PR12.1") && (fldnbr == "EAD-ACH-DIST-NBR"))
+	{
+		var distNbr = Number(fldval);
+		if (!isNaN(distNbr) && distNbr > 0)
+			parent.MailQueue[0].ach_dist_nbr = distNbr;
+	}	
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr	= msgnbr;
+	gmsg = msg;
+	gfldnbr = fldnbr;
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/directdeposit/ddheader.htm,v 1.3.6.8 2013/11/04 22:45:36 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

@@ -1,0 +1,352 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<HTML>
+<HEAD>
+<TITLE>Report Writer Drill Down</TITLE>
+
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+
+<script src=/lawson/javascript/sort.js></script>
+<script src=/lawson/javascript/waitalert.js></script>
+<script src=/lawson/javascript/leadingspaces.js></script>
+<script src=/lawson/javascript/chgcolor.js></script>
+<script src=/lawson/javascript/rndtodecimal.js></script>
+<script src=/lawson/javascript/formatcomma.js></script>
+<script src=/lawson/javascript/dme.js></script>
+
+<script language="javascript">
+
+var prmPassed=''
+var	prmPassed=unescape(window.location.hash)
+var	prmPassed=prmPassed.substring(1)
+var	arrayPassed = prmPassed.split("|")
+var	Gltrans_prodline=arrayPassed[0]
+var	Gltrans_Company=arrayPassed[1]
+var	Gltrans_Account=arrayPassed[2]
+var	Gltrans_Sub_Account=arrayPassed[3]
+var	Gltrans_Acct_Unit=arrayPassed[4]
+var	Gltrans_Fiscal_Year=arrayPassed[5]
+var	Gltrans_Fr_Period=arrayPassed[6]
+var	Gltrans_Th_Period=arrayPassed[7]
+var	Gltrans_Desc=arrayPassed[8]
+var	Gltrans_Amt=arrayPassed[9]
+
+var GLOBJ=''
+var lastcolor = 0
+var firsttime = true
+
+var protocol = location.protocol
+var host = location.host
+
+function SortGltrans(property)
+{
+	sortObjArray(self.GLTRANS.record,property,self.GLTRANS.NbrRecs)
+	DspGltrans()
+}
+
+function getGltrans()
+{
+   clearTimeout(LoadTimer)
+	//showWaitAlert('DataMining in Process - Please Wait')
+
+	var logan = new DMEObject(Gltrans_prodline, "gltrans")
+	logan.out="JAVASCRIPT"
+	logan.index="gltset3"
+	logan.field='Acct-Period'
+	 +';System'
+	 +';Source-Code'
+	 +';Control-Group'
+	 +';Je-Type'
+	 +';Description'
+	 +';Auto-Rev'
+	 +';Auto-Rev,xlt'
+	 +';Status'
+	 +';Status,xlt'
+	 +';Base-Amount'
+	 +';Units-Amount'
+	 +';Currency-Code'
+	logan.key=escape(Gltrans_Company)
+	 + "=" + escape(Gltrans_Account)
+	 + "=" + escape(Gltrans_Sub_Account)
+	 + "=" + escape(Gltrans_Acct_Unit)
+	 + "=" + escape(Gltrans_Fiscal_Year)
+	 + "=" + parseInt(Gltrans_Fr_Period,10).toString(10)
+	 + "->" + parseInt(Gltrans_Th_Period,10).toString(10)
+	logan.max="15"
+	DME(logan,'GLTRANS')
+}
+
+
+function regetGltrans()
+{
+
+    firsttime = false
+
+	//showWaitAlert('DataMining in Process - Please Wait')
+
+	var logan = new DMEObject(Gltrans_prodline, "gltrans")
+	logan.out="JAVASCRIPT"
+	logan.index="gltset3"
+	logan.field="Acct-Period"
+	 +';System'
+	 +';Source-Code'
+	 +';Control-Group'
+	 +';Je-Type'
+	 +';Description'
+	 +';Auto-Rev'
+	 +';Auto-Rev,xlt'
+	 +';Status'
+	 +';Status,xlt'
+	 +';Base-Amount'
+	 +';Units-Amount'
+	 +';Currency-Code'
+	logan.key = parseInt(DSPWIN.document.transparmForm.coTranp.value,10).toString(10)
+	 + "=" + parseInt(DSPWIN.document.transparmForm.acctTranp.value,10).toString(10)
+	 + "=" + parseInt(DSPWIN.document.transparmForm.subacctTranp.value,10).toString(10)
+	 + "=" + escape(DSPWIN.document.transparmForm.acctunitTranp.value)
+	 + "=" + parseInt(DSPWIN.document.transparmForm.yrTranp.value,10).toString(10)
+	 + "=" + parseInt(DSPWIN.document.transparmForm.frperTranp.value,10).toString(10)
+	 + "->" + parseInt(DSPWIN.document.transparmForm.toperTranp.value,10).toString(10)
+	logan.max="15"
+	DME(logan,'GLTRANS')
+}
+
+
+function DspGltrans()
+{
+var H2 = ''
+var M = ''
+
+	GL=self.GLTRANS
+	GLOBJ=self.GLTRANS.record
+	if (firsttime == true)
+	  {
+	   dspcompany  = Gltrans_Company
+	   dspacctunit = Gltrans_Acct_Unit
+	   dspacct     = Gltrans_Account
+       dspsubacct  = Gltrans_Sub_Account
+       dspyear     = Gltrans_Fiscal_Year
+	   dspfrper    = Gltrans_Fr_Period
+       dsptoper    = Gltrans_Th_Period
+      }
+	else
+	  {
+	  dspcompany  =  DSPWIN.document.transparmForm.coTranp.value
+	  dspacct     =  DSPWIN.document.transparmForm.acctTranp.value
+	  dspsubacct  =  DSPWIN.document.transparmForm.subacctTranp.value
+	  dspacctunit =  DSPWIN.document.transparmForm.acctunitTranp.value
+	  dspyear     =  DSPWIN.document.transparmForm.yrTranp.value
+	  dspfrper    =  DSPWIN.document.transparmForm.frperTranp.value
+	  dsptoper    =  DSPWIN.document.transparmForm.toperTranp.value
+	  }
+
+	Account = dspacctunit + " " + dspacct + '-' + dspsubacct
+
+	H2='<center><body link=maroon vlink=maroon  bgcolor=#ffffff>'
+	+ '<form name=transparmForm><table width=85% border=0 cellspacing=0 cellpadding=2><tr>'
+	+ '<br>'
+	+ '<tr><td></td><th>Year</th><th>Company</th><th colspan=2 align=center>Account</th>'
+    + '<th align=left>Description</th><th align=right>Amount</th>'
+	+ '</tr><tr><td></td>'
+	+ '<td align=center>' + dspyear + '</td>'
+    + '<td align=center>' + dspcompany + '</td>'
+    + '<td colspan=2 align=center>' + Account + '</a></td>'
+    + '<td align=left>' + Gltrans_Desc + '</td>'
+    + '<td align=right>' + Gltrans_Amt + '</td></tr>'
+	+ '</tr><tr><td align=center colspan=7 nowrap><hr></td></tr>'
+
+	+ '</table>'
+	+ '<table border=0 cellspacing=0 cellpadding=2>'
+	+ "<tr><th colspan=11 align=center>Transaction Detail</th></tr>"
+	+ "<tr><td>&nbsp;</td></tr>"
+	+ "<tr><th>&nbsp;</th><th><a target=WEBUSER href=javascript:parent.SortGltrans('Acct_Period');"
+	+ ' onMouseOver="window.status=\'Sort by Period\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Period</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('System');"
+	+ ' onMouseOver="window.status=\'Sort by System Code\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">System</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Control_Group');"
+	+ ' onMouseOver="window.status=\'Sort by Journal Number\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Journal</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Je_Type');"
+	+ ' onMouseOver="window.status=\'Sort by JE Type\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Type</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Source_Code');"
+	+ ' onMouseOver="window.status=\'Sort by Source Code\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Source</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Description');"
+	+ ' onMouseOver="window.status=\'Sort by Description\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Description</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Auto_Rev');"
+	+ ' onMouseOver="window.status=\'Sort by Auto_Rev\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Reverse</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Status');"
+	+ ' onMouseOver="window.status=\'Sort by Status\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Status</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Base_Amount');"
+	+ ' onMouseOver="window.status=\'Sort by Base_Amount\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Amount</a>"
+	+ "<th><a target=WEBUSER href=javascript:parent.SortGltrans('Units_Amount');"
+	+ ' onMouseOver="window.status=\'Sort by Units_Amount\';return true"'
+	+ ' onMouseOut="window.status=\' \';return true"'
+	+ ">Units</a>"
+	+ "<th>&nbsp</th>"
+	+ '</tr>'
+
+	self.DSPWIN.document.close()
+	self.DSPWIN.document.open()
+	self.DSPWIN.document.write(H2)
+
+	for (i=0;i<GL.NbrRecs;i++)
+	{
+
+        L='<tr bgcolor=#ffffff>'
+		self.DSPWIN.document.write(L)
+		lastcolor = i
+		minussign = 0
+		DetRecord_value = 0
+
+		minusSign = GLOBJ[i].Base_Amount.indexOf("-")
+     	if (minusSign > 0)
+       	{
+			DetRecord_value = GLOBJ[i].Base_Amount.substring(0,minusSign)
+			DetRecord_value = parseFloat(DetRecord_value) * (-1)
+		}
+     	else
+        {
+        	 DetRecord_value = parseFloat(GLOBJ[i].Base_Amount)
+        }
+
+		DetRecord_value = roundToDecimal(DetRecord_value,2)
+		DetRecord_value = formatComma(DetRecord_value)
+		GLOBJ[i].Sequence_Nbr = (GLOBJ[i].Sequence_Nbr) ? GLOBJ[i].Sequence_Nbr : i;
+
+		L =   '<td bgcolor=#ffffff>'
+		 	+ '<a target=WEBUSER href=javascript:parent.DrillTrans("' + GLOBJ[i].Sequence_Nbr + '")>'
+			+ '<img border=0 src=/lawson/jobdef/rwdrill/images/rdiamond.gif>'
+			+ '</a>'
+			+ '</td>'
+			+ '<td align=center>&nbsp;' + GLOBJ[i].Acct_Period + '</td>'
+			+ '<td align=center>&nbsp;' + GLOBJ[i].System + '</td>'
+			+ '<td align=right>&nbsp;' + GLOBJ[i].Control_Group + '</td>'
+			+ '<td align=center>&nbsp;' + GLOBJ[i].Je_Type + '</td>'
+			+ '<td align=center>&nbsp;' + GLOBJ[i].Source_Code + '</td>'
+			+ '<td nowrap align=left>&nbsp;' + GLOBJ[i].Description + '</td>'
+			+ '<td align=center>&nbsp;' + GLOBJ[i].Auto_Rev_xlt + '</td>'
+			+ '<td align=left>&nbsp;' + GLOBJ[i].Status_xlt + '</td>'
+			+ '<td align=right>&nbsp;' + DetRecord_value + '</td>'
+			+ '<td align=left nowrap>&nbsp;' + GLOBJ[i].Units_Amount + '</td>'
+			+ '<td align=center nowrap>&nbsp;' + GLOBJ[i].Currency_Code + '</td>'
+
+			self.DSPWIN.document.write(L)
+
+	}
+  	GlTotals()
+}
+
+function DrillTrans(prmRec)
+{
+	IDAOBJ=self.GLTRANS.DrillRef[prmRec]
+	IDAOBJ = protocol + "//" + host + IDAOBJ
+	wndIdaGLTRANS=window.open(IDAOBJ,"wndIdaGLTRANS",'width=500,height=350,directories=no,toolbar=no,menubar=no,status=yes,resizable=yes,scrollbars=yes')
+	wndIdaGLTRANS.focus;
+
+}
+
+function GlTotals()
+{
+var	TotAmt=0
+var minusSign = 0
+var Record_value = 0
+
+	for(i=0;i<GL.NbrRecs;i++)
+	{
+     minusSign = GLOBJ[i].Base_Amount.indexOf("-")
+     if (minusSign > 0)
+        {Record_value = GLOBJ[i].Base_Amount.substring(0,minusSign)
+         Record_value = parseFloat(Record_value) * (-1)
+        }
+     else
+        {
+         Record_value = parseFloat(GLOBJ[i].Base_Amount)
+        }
+	 TotAmt+=parseFloat(Record_value)
+	}
+
+	TotAmt = roundToDecimal(TotAmt,2)
+	TotAmt = formatComma(TotAmt)
+
+	x = "<tr bgcolor='eeeeee'><td>&nbsp</td><td>&nbsp</td><td>&nbsp</td>"
+	  + "<td>&nbsp</td><td>&nbsp</td><td>&nbsp</td><td align=left><strong>Total</td>"
+	  + "<td>&nbsp</td><td>&nbsp</td><td align=right>" + TotAmt + "</td>"
+	  + "<td>&nbsp</td><td>&nbsp</td>"
+	  + '</table></form></body>'
+	self.DSPWIN.document.write(x)
+
+	x = '<br><table><tr>'
+
+	if(GL.Prev !="")
+	{
+		x += '<th>'
+		  + '<a target=GLTRANS href="'
+		  + GL.Prev
+		  + '">Previous'
+		  + '</a>'
+		  + '&nbsp;&nbsp;'
+		  + '</th>'
+	}
+
+	if (GL.Next !="")
+	{
+		x += '<th>'
+		  + '<a target=GLTRANS href="'
+		  + GL.Next
+		  + '">Next'
+		  + '</a>'
+		  + '</th>'
+	}
+
+	x += "</tr></table>"
+
+	self.DSPWIN.document.write(x)
+	self.DSPWIN.document.close()
+	//self.removeWaitAlert()
+}
+
+LoadTimer = setTimeout("getGltrans()",3000)
+var theblank = (window.location.protocol=='http:')?"about:blank":"/lawson/dot.htm" //dpb 07-25-01
+var fram = ''
+	fram +='<frameset rows="100%,*,*" frameborder=no border=1 onLoad="getGltrans()">'
+	     + '<frame src="'+theblank+'" name=DSPWIN>'
+	     + '<frame src="'+theblank+'" name=GLTRANS>'
+	     + '<frame src="'+theblank+'" name=WEBUSER>'
+	     + '</frameset>'
+
+window.document.write(fram)
+window.document.close()
+
+</script>
+</HEAD>
+
+<!--
+<frameset rows="100%,*,*" frameborder=no border=1 onLoad="getGltrans()">
+	<frame src="about:blank" name=DSPWIN>
+	<frame src="about:blank" name=GLTRANS>
+	<frame src="about:blank" name=WEBUSER>
+</frameset>
+-->
+</HTML>

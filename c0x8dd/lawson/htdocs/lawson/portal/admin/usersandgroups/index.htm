@@ -1,0 +1,109 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/usersandgroups/index.htm,v 1.18.2.1.4.4.14.1.2.2 2012/08/08 12:37:23 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Users and Groups</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<script language="javascript" src="../../servenv.js"></script>
+<script language="javascript" src="../admincommon.js"></script>
+<script language="javascript" src="usersandgroups.js"></script>
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="usersandgroups.css" type="text/css" />
+</head>
+
+<body tabIndex="-1" onLoad="init()" onunload="unloadFunc()" onkeydown="ugKeyDown(event)" 
+		style="hidden;margin:0px;" onresize="sizeFind()">
+
+	<table cellpadding="0" cellspacing="0" style="width:100%">
+	<tr>
+	<td width="50%">
+		<div id="grouplist" class="xTTreeHeader" style="overflow:hidden;left:0px;top:0px;width:100%;height:32px;visibility:hidden;">
+			<table cellpadding="0" cellspacing="0" style="width:100%;height:100%;" nowrap>
+			<tr>
+				<td>
+					<label id="userGroups" class="xTTreeTitle" style="border-bottom:0px;" onselectstart="top.cmnBlockSelect(event)">Groups</label>
+				</td>
+				<td id="groupfindcell" align="right">
+					<table border="0" cellspacing="0" cellpadding="0" nowrap>
+					<tr style="vertical-align:center;">
+						<td nowrap><button id="groupprev" class="xTToolBarButton" onClick="loadGroups('previous');" style="white-space: nowrap;">Previous</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="groupnext" class="xTToolBarButton" onClick="loadGroups('next');" style="white-space: nowrap;">Next</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td width="0">
+							<label for="txtGroupSearch" id="lblGroupSearch" class="xTLabel" style="position:relative;visibility:hidden;display:none;">Find:&nbsp;</label>
+						</td>
+						<td width="100" align="center" nowrap>
+							<input type="text" id="txtGroupSearch" class="xTSearchInput" style="white-space: nowrap;">
+						</td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="groupsearch" class="xTToolBarButton" onclick="loadGroups('search');" style="white-space: nowrap;">Find</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="groupadd" class="xTToolBarButton" onclick="addNewGroup();" style="white-space: nowrap;">Add</button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</div>
+		<div id="lyrGroups" class="tree" style="overflow:auto;top:33px;"></div>
+	</td>
+	<td width="1"><img src="../../images/spacer.gif" width="1" border="0" /></td>
+	<td width="49%">
+		<div id="userlist" class="xTTreeHeader" style="overflow:hidden;left:0px;top:0px;width:100%;height:32px;visibility:hidden;">
+			<table cellpadding="0" cellspacing="0" style="width:100%;height:100%;" nowrap>
+			<tr style="vertical-align:center;">
+				<td>
+					<label id="webUsers" class="xTTreeTitle" style="border-bottom:0px;" onselectstart="top.cmnBlockSelect(event)">Users</label>
+				</td>
+				<td id="userfindcell" align="right">
+					<table border="0" cellspacing="0" cellpadding="0" nowrap>
+					<tr style="vertical-align:center;">
+						<td nowrap><button id="userprev" class="xTToolBarButton" onClick="loadUsers('previous');" style="white-space: nowrap;">Previous</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="usernext" class="xTToolBarButton" onClick="loadUsers('next');" style="white-space: nowrap;">Next</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td width="0">
+							<label for="txtUserSearch" id="lblUserSearch" class="xTLabel" style="position:relative;visibility:hidden;display:none;">Find:&nbsp;</label>
+						</td>
+						<td width="100" align="center" nowrap>
+							<input type="text" id="txtUserSearch" class="xTSearchInput" style="white-space: nowrap;">
+						</td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="usersearch" class="xTToolBarButton" onclick="loadUsers('search');" style="white-space: nowrap;">Find</button></td>
+						<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+						<td><button id="useradd" class="xTToolBarButton" onclick="addNewUser();" style="white-space: nowrap;">Add</button></td>
+					</tr>
+					</table>
+				</td>
+			</tr>
+			</table>
+		</div>
+		<div id="lyrUsers" class="tree" style="overflow:auto;top:33px;"></div>
+	</td>
+	</tr>
+	</table>
+	<iframe src="../../blank.htm" frameborder="no" scrolling="no" height="100%" width="100%" style="top:0px;left:0px;position:absolute;visibility:hidden;display:none;z-index:0" id="formFrame"></iframe>
+</body>
+</html>

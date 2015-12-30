@@ -1,0 +1,45 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/inbasket/pfdetail.htm,v 1.4.4.1.4.3.14.1.2.2 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+	<link type="text/css" href="inbasket.css" rel="stylesheet"></link>
+	<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+	<script language="javascript" src="pfdetail.js"></script>
+</head>
+<body onload="pfdtlOnLoad()" onkeydown="handleKeyDown(event)">
+	<div id="divPfDtl" style="position:absolute;left:0;top:0;height:25%;width:100%;visibility:visible;overflow:auto;"></div>
+	<div id="divPfDtl2" style="position:absolute;left:0;top:25%;height:74%;width:100%;visibility:hidden">
+		<span id="lblName" class="label" style="position:absolute;left:180px;top:20px;width:40px;height:20px">Name</span>
+    		<input id="txtName" type="text" class="textbox" style="position:absolute;left:230px;top:20px;width:100px;height:20px;"/>
+		<span id="lblUrl" class="label" style="position:absolute;left:180px;top:50px;width:40px:height:20px;visibility:hidden;">URL</span>
+		<input id="txtUrl" type="text" class="textbox" style="position:absolute;left:230px;top:50px;width:200px:height:20px;visibility:hidden;"/>
+		<span id="lblMsg" class="label" style="position:absolute;left:180px;top:50px;width:40px:height:20px;visibility:hidden;">Message</span>
+		<textarea id="txtMsg" wrap="off" style="position:absolute;left:230px;top:50px;width:50%;height:100px;visibility:hidden;font-size:8pt;font-family:tahoma,arial;"></textarea>
+		<input id="btnAdd" type="button" value="Add" class="button" style="position:absolute;top:150px;left:48%;width:40px;height:20px;visibility:hidden" onclick="pfdtlAdd()"/>
+		<input id="btnUpdate" type="button" value="Update" class="button" style="position:absolute;top:150px;left:48%;width:40px;height:20px;visibility:hidden" onclick=" pfdtlUpdateMessage()"/> 
+                <input id="btnDelete" type="button" value="Delete" class="button" style="position:absolute;top:180px;left:48%;width:40px;height:20px;visibility:hidden" onclick=" pfdtlDeleteMessage()"/> 
+	</div>
+	<iframe id="frmPfDtl" frameborder="0" style="position:absolute;left:10;top:25%;height:74%;width:100%;visibility:hidden;border:0px" src="../blank.htm"></iframe>
+</body>
+</html>

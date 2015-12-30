@@ -1,0 +1,40 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE> Career Management </TITLE>
+<META NAME="Generator" CONTENT="TextPad 4.0;Homesite">
+<META NAME="Author" CONTENT="Brent Dahlen;Chris Klecker">
+<META NAME="Keywords" CONTENT="Career Management, Lawson, SEA">
+<META NAME="Description" CONTENT="Career Management program">
+
+<META HTTP-EQUIV="Pragma" 	CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" 	CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+
+<SCRIPT LANGUAGE="JavaScript">
+
+var queryString = "";
+if (window.location.search) {
+	queryString = unescape(window.location.search);
+	queryString = queryString.split("?")[1];
+}
+else if (window.location.hash) {
+	queryString = unescape(window.location.hash);
+	queryString = queryString.split("#")[1];
+}
+
+var params = queryString.split("=");
+var ARGS = new Array();
+for (var i=0;i<params.length;i+=2)
+	ARGS[params[i]] = params[i+1];
+
+if (!isNaN(parseFloat(ARGS["valueKey"])))
+	ARGS["valueKey"] = parseInt(ARGS["valueKey"],10)
+parent.JChart_OnClick(ARGS["valueKey"]);
+
+</SCRIPT>
+</HEAD>
+<BODY>
+</BODY>
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/careermanagement/lib/chartdetail.htm,v 1.4 2003/09/08 19:49:20 brentd Exp $ -->

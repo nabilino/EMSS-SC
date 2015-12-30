@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/Attic/hotkeys.xml,v 1.1.2.1.4.1.24.2 2012/08/08 12:37:33 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<EVENTS context="portal" labelid="lblLawsonPortal">
+	<EVENT labelid="lblPerformSubmit" code="123" alt="0" ctrl="0" shift="0" action="doSubmit" incontext="0" />
+	<EVENT labelid="lblCloseCancel" code="27" alt="0" ctrl="0" shift="0" action="doCancel" incontext="0" />
+	<EVENT labelid="lblDoRefresh" code="116" alt="0" ctrl="1" shift="1" action="doRefresh" incontext="0" />
+	<EVENT labelid="lblDoDelete" code="68" alt="0" ctrl="1" shift="1" action="doDelete" incontext="0" />
+	<EVENT labelid="lblDoNext" code="78" alt="0" ctrl="1" shift="1" action="doNext" incontext="0" />
+	<EVENT labelid="lblDoPrev" code="80" alt="0" ctrl="1" shift="1" action="doPrev" incontext="0" />
+	<EVENT labelid="lblDoPageUp" code="33" alt="0" ctrl="0" shift="0" action="doPageUp" incontext="0" />
+	<EVENT labelid="lblDoPageDn" code="34" alt="0" ctrl="0" shift="0" action="doPageDn" incontext="0" />
+	<EVENT labelid="lblTabPageUp" code="33" alt="0" ctrl="1" shift="0" action="doTabPageUp" incontext="1" />
+	<EVENT labelid="lblTabPageDn" code="34" alt="0" ctrl="1" shift="0" action="doTabPageDn" incontext="1" />
+	<EVENT labelid="lblMoveToFirst" code="70" alt="1" ctrl="1" shift="0" action="posInFirstField" incontext="0" />
+	<EVENT labelid="lblShowFieldHelp" code="72" alt="0" ctrl="1" shift="1" action="doFieldHelp" incontext="1" />
+	<EVENT labelid="lblShowFormHelp" code="112" alt="0" ctrl="0" shift="1" action="doFormHelp" incontext="1" />
+	<EVENT labelid="lblShowHotkeys" code="75" alt="1" ctrl="0" shift="0" action="showHotkeys" incontext="1" />
+	<EVENT labelid="lblMoveToNavbar" code="118" alt="0" ctrl="0" shift="1" action="posInNavbar" incontext="1" />
+	<EVENT labelid="lblMoveToSearch" code="119" alt="0" ctrl="0" shift="1" action="posInSearch" incontext="1" />
+	<EVENT labelid="lblMoveToToolbar" code="120" alt="0" ctrl="0" shift="1" action="posInToolbar" incontext="1" />
+	<EVENT labelid="lblOpenNewWindow" code="78" alt="0" ctrl="1" shift="0" action="openNewWindow" incontext="1" />
+	<EVENT labelid="lblGoHomePage" code="36" alt="0" ctrl="1" shift="0" action="goHome" incontext="1" />
+	<EVENT labelid="lblContextMenu" code="121" alt="0" ctrl="0" shift="1" action="doContextMenu" incontext="1" />
+</EVENTS>

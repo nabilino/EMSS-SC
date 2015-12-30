@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Direct Reports</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/drill.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+//NOTE: The DISPLAY_REVIEWS_WITHIN_DAYS setting has been moved to the xhrnet/xml/config/emss_config.xml file.
+var PersonnelActionWindow = null;
+var emps = new Array();
+var allemps	= new Array();
+var thisMgrId = '';
+var thisMgrDesc	= '';
+var thisMgrOpenPos = false;
+var navcnt = 0;
+var employee;
+var company;
+var prodline;
+var Pcompany;
+var relatedLinks = new Array();
+var appObj;
+
+function OpenDirectReports()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitReports()'|officeObjects=true|desiredEdit='EM'");
+}
+
+function InitReports()
+{
+	stylePage();
+	var title = getSeaPhrase("DIRECT_REPORTS","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Manager");
+	StoreDateRoutines();
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), DisplayReports);
+}
+
+function DisplayReports()
+{
+	company = authUser.company;
+	employee = authUser.employee;
+	prodline = authUser.prodline;
+	Pcompany = company;
+	for (var i=company.toString().length; i<4; i++)
+	   Pcompany = "0" + Pcompany;
+	emps = new Array();
+	checkLawsonApplicationVersion();
+}
+
+function checkLawsonApplicationVersion()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       	setTimeout("checkLawsonApplicationVersion()", 10);
+       	return;
+	}
+	GetReports(employee);
+}
+
+function GetReports(empNo, isOpenPosition)
+{
+	thisMgrId = empNo;
+	var managerKey = "";
+	if (typeof(isOpenPosition)!="undefined" && isOpenPosition)
+	{
+		thisMgrOpenPos = true;
+		managerKey = "&PTF-CODE=" + escape(empNo);
+	}
+	else
+	{
+		thisMgrOpenPos = false;
+		managerKey = "&HSU-EMPLOYEE=" + escape(parseInt(empNo,10));
+  	}
+  	var obj = new AGSObject(prodline, "HS10.1");
+   	obj.event = "ADD";
+   	obj.rtn = "DATA";
+	obj.longNames = "ALL";
+	obj.tds = false;
+    obj.field = "FC=I"
+	+ "&HSU-COMPANY=" + escape(parseInt(company,10))
+	// + "&HSU-EMPLOYEE=" + escape(parseInt(empNo,10))
+	+ managerKey
+	+ "&OPEN-POS=Y"
+	+ "&DIR-RPT=Y";
+  	if (self.lawheader.pg)
+  	{
+  	  	obj.field += "&PT-FC=" + escape(self.lawheader.PT_FC)
+	  	+ "&PT-PTF-EMPLOYEE=" + escape(parseInt(self.lawheader.PT_PTF_EMPLOYEE,10));
+	  	if (NonSpace(self.lawheader.PT_HSU_CODE))
+			obj.field += "&PT-HSU-CODE=" + escape(self.lawheader.PT_HSU_CODE);
+	  	if (NonSpace(self.lawheader.PT_HSU_OP_CODE))
+			obj.field += "&PT-HSU-OP-CODE=" + escape(self.lawheader.PT_HSU_OP_CODE);
+  	}
+	obj.func = "parent.DrawReportsScreen()";
+	obj.debug = false;
+  	AGS(obj, "jsreturn");
+}
+
+function sortByName(obj1, obj2)
+{
+	var name1 = obj1.last_name+' '+obj1.first_name;
+	var name2 = obj2.last_name+' '+obj2.first_name;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function DrawReportsScreen()
+{
+	// Save off this page of reports.
+	emps = emps.concat(self.lawheader.e);
+	// Grab more reports, if they exist.
+	// This ensures that we will have all reports before we display.
+   	if (self.lawheader.pg)
+   	{
+   		var nextFunc = function(){GetReports(thisMgrId, thisMgrOpenPos);};
+   		showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc); 
+		return;
+   	}
+	emps.sort(sortByName);
+	thisMgrDesc = self.lawheader.HSU_FULL_NAME
+	allemps[navcnt] = new ManagerObj(thisMgrDesc,emps);
+   	DrawReportsTable(allemps[navcnt]);
+}
+
+function DrawReportsTable(thislevel)
+{
+	emps = thislevel.reports;
+	var ReportsContent = '';
+	var ReportsContent2 = '';
+	var ReportsStruct = new Array();
+	self.main.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REPORTS_OF","ESS")+'&nbsp;'+thislevel.manager;
+	if (!emps.length) 
+	{
+   		ReportsContent = '<div align="center" style="width:100%;text-align:center">'
+   		ReportsContent += '<p class="fieldlabelboldleft">'+getSeaPhrase("NO_DIRECT_REPORTS","ESS")+'</p>'
+		ReportsContent += '<p>'
+      	if (navcnt > 0)
+          	ReportsContent += uiButton(getSeaPhrase("BACK","ESS"),"parent.backOne();return false","margin-left:5px");
+      	if (navcnt > 1)
+			ReportsContent += uiButton(getSeaPhrase("START_OVER","ESS"),"parent.startOver();return false");
+		ReportsContent += '</p></div>'
+		self.main.document.getElementById("paneBody").innerHTML = ReportsContent;
+   	} 
+   	else 
+   	{
+		ReportsContent = '<table style="width:100%" role="presentation">'
+		for (var i=0; i<emps.length; i++) 
+		{
+			ReportsStruct[i] = '<tr>';
+			if (NonSpace(emps[i].super_code) == 0) 
+			{
+				var toolTip = emps[i].full_name+' - '+getSeaPhrase("EMP_PHOTO_FOR","SEA");
+				var newHire = (parseFloat(getDteDifference(emps[i].date_hired,ymdtoday)) <= 90) ? true : false;
+	       		if (newHire)
+    	        	ReportsStruct[i] += '<td class="plaintablecell" style="color:red">'+getSeaPhrase("NEW_HIRE","ESS")+'</td>'
+        	   	else
+        	   		ReportsStruct[i] += '<td>&nbsp;</td>'
+        	   	ReportsStruct[i] += '<td style="width:10px">&nbsp;</td>'	
+	           	+ '<td class="plaintablecell"><img alt="'+toolTip+'" title="'+toolTip+'" border="0" src="/lawson/xhrnet/images/employees/P'+Pcompany+Pemployee(emps[i].employee)+'.jpg" onerror="this.src=\''+uiNoPhotoPath+'\'"'
+				if (newHire)
+					ReportsStruct[i] += ' aria-label="'+getSeaPhrase("NEW_HIRE_EMP","SEA")+'"'
+				ReportsStruct[i] += '></td>'
+				toolTip = emps[i].full_name+' - '+getSeaPhrase("EMP_DRILL_FOR","SEA")+' '+getSeaPhrase("OPENS_WIN","SEA");
+				ReportsStruct[i] += '<td style="width:10px">&nbsp;</td><td class="plaintablecell" style="text-align:center;white-space:nowrap" nowrap="nowrap"><a href="javascript:parent.getDrill('+parseInt(emps[i].employee,10)+');" title="'+toolTip+'" aria-label="'+toolTip+'" aria-haspopup="true">'
+        	    + '<img border="0" src="/lawson/xhrnet/images/detail.gif" styler="drill" alt="'+toolTip+'" title="'+toolTip+'"></a>'				
+        	    toolTip = emps[i].full_name+' - '+getSeaPhrase("EMP_PROFILE_FOR","SEA");
+        	    ReportsStruct[i] += '<td style="width:10px">&nbsp;</td><td class="plaintablecell"><a href="javascript:parent.getProfile('+parseInt(i,10)+');" title="'+toolTip+'">'+emps[i].full_name+'<span class="offscreen"> - '+getSeaPhrase("EMP_PROFILE_FOR","SEA")+'</span></a></td>'
+        	    if (relatedLinkIsAccessible("PERSONNEL ACTIONS", "XMLHREMPPACTIONS"))
+        	    {
+					toolTip = emps[i].full_name+' - '+getSeaPhrase("SUBMIT_PACTION_FOR","SEA");
+        	    	ReportsStruct[i] += '<td style="width:10px">&nbsp;</td><td class="plaintablecell"><a href="javascript:parent.getPersAction('+parseInt(i,10)+');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("PERSONNELACTION","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SUBMIT_PACTION_FOR","SEA")+'</span></a></td>'
+       	   		}
+       	   		else
+       	   			ReportsStruct[i] += '<td>&nbsp;</td><td>&nbsp;</td>'
+       	   		toolTip = emps[i].full_name+' - '+getSeaPhrase("EMERG_CONT_FOR","SEA");	
+        	    ReportsStruct[i] += '<td style="width:10px">&nbsp;</td><td class="plaintablecell"><a href="javascript:parent.getEmergencyContacts('+parseInt(i,10)+');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("EMERGENCY_CONTACTS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("EMERG_CONT_FOR","SEA")+'</span></a></td>'
+        	    if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.02.00")
+        	    {
+        	    	toolTip = emps[i].full_name+' - '+getSeaPhrase("CONT_NBRS_FOR","SEA");
+        	    	ReportsStruct[i] += '<td style="width:10px"></td><td class="plaintablecell"><a href="javascript:parent.getAdditionalContacts('+parseInt(i,10)+');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("CONTNBR_0","SEA")+'<span class="offscreen"> - '+getSeaPhrase("CONT_NBRS_FOR","SEA")+'</span></a></td>'
+   				}
+   				else
+       	   			ReportsStruct[i] += '<td>&nbsp;</td><td>&nbsp;</td>'
+			} 
+			else
+				ReportsStruct[i] += '<td colspan="6">&nbsp;</td><td class="plaintablecell" style="white-space:nowrap" nowrap="nowrap">'+emps[i].full_name+'</td><td colspan="6">&nbsp;</td>';
+          	if (emps[i].direct_reports == "Y") 
+          	{
+				var managerID = "";
+				var isOpenPosition = false;
+				if (NonSpace(emps[i].super_code) != 0) 
+				{
+					managerID = '"' + escape(emps[i].employee,1) + '"';
+					isOpenPosition = true;
+				} 
+				else
+					managerID = parseInt(emps[i].employee,10);
+				toolTip = emps[i].full_name+' - '+getSeaPhrase("DIRECT_REPORTS_FOR","SEA");
+        	  	ReportsStruct[i] += '<td style="width:10px">&nbsp;</td><td class="plaintablecell"><a href="javascript:parent.nextReports('+isOpenPosition+','+managerID+',\''+escape(emps[i].full_name)+'\');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("DIRECT_REPORTS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("DIRECT_REPORTS_FOR","SEA")+'</span></a></td>'
+			} 
+			else	
+				ReportsStruct[i] += '<td>&nbsp;</td><td>&nbsp;</td>'
+			if (emps[i].next_review != "" && relatedLinkIsAccessible("PERFORMANCE MANAGEMENT", "XMLHRMGRPERFMGMT")) 
+			{
+            	if (emps[i].next_review < ymdtoday) 
+            	{
+            		toolTip = emps[i].full_name+' - '+getSeaPhrase("SUBMIT_REVIEW_FOR","SEA")+' '+getSeaPhrase("REVIEW_OVERDUE_EMP","SEA");
+            		ReportsStruct[i] += '<td style="width:10px">&nbsp;</td>'
+            		+ '<td class="plaintablecell"><a href="javascript:parent.getReview('+parseInt(i,10)+');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("OVERDUE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SUBMIT_REVIEW_FOR","SEA")+' '+getSeaPhrase("REVIEW_OVERDUE_EMP","SEA")+'</span></a></td>'
+				} 
+				else if (parseFloat(getDteDifference(ymdtoday,emps[i].next_review)) <= emssObjInstance.emssObj.reviewsWithinDays) 
+				{
+					toolTip = emps[i].full_name+' - '+getSeaPhrase("SUBMIT_REVIEW_FOR","SEA")+' '+getSeaPhrase("REVIEW_DUE_EMP","SEA",[emssObjInstance.emssObj.reviewsWithinDays]);
+					ReportsStruct[i] += '<td style="width:10px">&nbsp;</td>'
+              		+ '<td class="plaintablecell"><a href="javascript:parent.getReview('+parseInt(i,10)+');" title="'+toolTip+'"><span class="offscreen">'+emps[i].full_name+' - </span>'+getSeaPhrase("DUE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SUBMIT_REVIEW_FOR","SEA")+' '+getSeaPhrase("REVIEW_DUE_EMP","SEA",[emssObjInstance.emssObj.reviewsWithinDays])+'</span></a></td>'
+				} 
+				else	
+					ReportsStruct[i] += '<td>&nbsp;</td><td>&nbsp;</td>'
+            } 
+            else	
+            	ReportsStruct[i] += '<td>&nbsp;</td><td>&nbsp;</td>'
+           	ReportsStruct[i] += '</tr>'
+      	}
+		ReportsContent2 = '</table><p style="text-align:center">'
+		if (navcnt > 0)
+			ReportsContent2 += uiButton(getSeaPhrase("BACK","ESS"),"parent.backOne();return false","margin-right:5px");
+		if (navcnt > 1)
+			ReportsContent2 += uiButton(getSeaPhrase("START_OVER","ESS"),"parent.startOver();return false");
+		ReportsContent2 += '</p>'
+		self.main.document.getElementById("paneBody").innerHTML = ReportsContent+ReportsStruct.join("")+ReportsContent2;
+	}
+	self.main.stylePage();
+	self.document.getElementById("main").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+	fitToScreen();
+}
+
+function Pemployee(e)
+{
+	var Pemp = parseInt(e,10).toString();
+ 	for (var i=Pemp.length; i<9; i++)
+		Pemp = "0" + Pemp;
+	return Pemp;
+}
+
+function nextReports(isOpenPosition, id, name)
+{
+	var nextFunc = function()
+	{
+		// Navigate to next level of reports.
+		navcnt++;
+		if (navcnt != allemps.length && allemps[navcnt].manager == unescape(name))
+		{
+			// No need to re-create the AGS call: the user is trying to re-generate the same level.  Re-display the stored reports.
+			DrawReportsTable(allemps[navcnt]);
+		} 
+		else 
+		{
+			// Create a new level of reports.
+			thisMgrDesc = unescape(name);
+			id = unescape(id);
+			emps = new Array();
+			allemps = allemps.slice(0,navcnt);
+			GetReports(id, isOpenPosition); 
+		}
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc); 
+}
+
+function backOne()
+{
+   	// Navigate to previous level of reports.
+   	var nextFunc = function()
+   	{
+	   	navcnt--;
+		DrawReportsTable(allemps[navcnt]);
+   	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc); 
+}
+
+function startOver()
+{
+	var nextFunc = function()
+	{
+	  	navcnt = 0;
+	  	emps = new Array();
+	  	allemps = allemps.slice(0,navcnt+1);
+	  	DrawReportsTable(allemps[navcnt]);
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function goToSub(frame, urlStr)
+{
+	self.document.getElementById("main").style.visibility = "hidden";
+	self.document.getElementById("main").style.display = "none";
+	self.document.getElementById(frame).src = urlStr;
+	self.document.getElementById(frame).style.visibility = "visible";
+	self.document.getElementById(frame).style.display = "";
+	fitToScreen();
+}
+
+function backToMain(frame, updated)
+{
+	var nextFunc = function()
+	{
+		self.document.getElementById(frame).style.visibility = "hidden";
+		self.document.getElementById(frame).style.display = "none";
+		self.document.getElementById("main").style.visibility = "visible";
+		self.document.getElementById("main").style.display = "";
+		// if an employee review has been updated, refresh the report list to reflect the changes
+		if (frame == "review" && updated)
+		{
+			self.lawheader.e = new Array();
+			emps = new Array();
+			GetReports(employee);
+		}
+		else
+			removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+		fitToScreen();
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function getProfile(i)
+{
+	var thisEmp = allemps[navcnt].reports[i];
+   	var urlStr = "/lawson/xhrnet/empprofile.htm?number="+parseInt(thisEmp.employee,10)+"&from=directreports";
+	goToSub("profile", urlStr);
+}
+
+function getPersAction(i)
+{
+	var thisEmp = allemps[navcnt].reports[i];
+   	var urlStr = "/lawson/xhrnet/personnelactions/pactions.htm?index="+parseInt(i,10)+"&from=directreports";
+	goToSub("personnelactions", urlStr);
+}
+
+function getEmergencyContacts(i)
+{
+	var thisEmp = allemps[navcnt].reports[i];
+   	var urlStr = "/lawson/xhrnet/emergcnt.htm?number="+parseInt(thisEmp.employee,10)+"&name="+escape(thisEmp.full_name,1)+"&from=directreports";
+	goToSub("emergencycontacts", urlStr);
+}
+
+function getAdditionalContacts(i)
+{
+	var thisEmp = allemps[navcnt].reports[i];
+   	var urlStr = "/lawson/xhrnet/contactnumbers.htm?number="+parseInt(thisEmp.employee,10)+"&name="+escape(thisEmp.full_name,1)+"&from=directreports";
+	goToSub("additionalcontactnumbers", urlStr);
+}
+
+function getReview(i)
+{
+	var urlStr;
+	var thisEmp = allemps[navcnt].reports[i];
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	urlStr = "/lawson/xhrnet/performancemanagement.html?number=" + parseInt(thisEmp.employee,10) + "&name=" + escape(thisEmp.full_name,1) + "&from=directreports";
+	goToSub("review", urlStr);
+}
+
+function ManagerObj(manager, reports)
+{
+	this.manager = manager;
+	if (!reports)
+		this.reports = null;
+	else
+		this.reports = reports;
+}
+
+function getDrill(id)
+{
+	// Use new IDA library to call most recent version of drill service available
+	var idaObj = new IDAObject(prodline.toUpperCase(), "DT");
+	idaObj.out = "HTML";
+	idaObj.system = "HR";
+	idaObj.keynbr = "H07";
+	idaObj.keys = "01="+parseInt(company,10)+"&H07="+parseInt(id,10);
+	if (styler && (styler.showInfor || styler.showInfor3))
+	{
+		idaObj.theme = (styler.showInfor3) ? "10.3" : "10";
+		if (styler.textDir == "rtl")
+			idaObj.textDir = "rtl";
+	}	
+	else if (styler && styler.showLDS)
+		idaObj.theme = "9";
+	else		
+		idaObj.theme = "8";
+	idaObj.webappjsUrl = "/lawson/webappjs";
+	var drillStr = IDA(idaObj);
+	idaHandler.translateLabels = function(wnd)
+	{
+		if (!wnd)
+			wnd = window;
+		// labels
+		this.labelsAry[0] = getSeaPhrase("PREVIOUS","ESS");
+		this.labelsAry[1] = getSeaPhrase("NEXT","ESS");
+		this.labelsAry[2] = getSeaPhrase("BACK","ESS");
+		for (var i = 0; i<this.labelsAry.length; i++)
+		{
+			try { wnd.document.getElementById(this.labelsIDAry[i]).innerHTML = this.labelsAry[i]; } catch(e) {}
+		}
+	}	
+	var drillWindow = window.open(drillStr,"DRILLAROUND","toolbar=yes,location=no,menubar=no,status=no,scrollbars=yes,width=750,height=450,resizable=yes,left="+parseInt((screen.width/2)-375,10)+",top="+parseInt((screen.height/2)-250,10));
+	try { drillWindow.focus(); } catch(e) {}
+}
+
+function relatedLinkIsAccessible(bkName, bkLawName)
+{
+   	bkName = bkName.toUpperCase();
+   	bkLawName = bkLawName.toUpperCase();
+	if (relatedLinks[bkLawName])
+		return true;
+   	if ((typeof(authUser) != "undefined") && authUser.OfficeObject)
+   	{
+		var bkmks = authUser.OfficeObject;
+		var foundBkmk = false;
+		var bkLen = authUser.NbrOfOfficeObj;
+		var i = 0;
+		while ((i < bkLen) && (!foundBkmk))
+		{
+			var bkmkName = bkmks[i].name.toUpperCase(); // the Lawson-assigned task
+			var bkmkLawName = (bkmks[i].lawnm) ? bkmks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+			if ((bkName == bkmkName) || (bkLawName == bkmkLawName))
+			{
+				// grant access to this bookmark
+				relatedLinks[bkLawName] = true;
+				foundBkmk = true;
+			}
+			i++;
+		}
+	}
+	return foundBkmk;
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var frameAry = new Array("main", "profile", "review", "personnelactions", "emergencycontacts", "additionalcontactnumbers");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	document.getElementById("main").style.width = winWidth + "px";
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{	
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	for (var i=0; i<frameAry.length; i++)
+	{
+		var frmNm = frameAry[i];
+		var frmElm = document.getElementById(frmNm);
+		frmElm.style.width = winWidth + "px";
+		frmElm.style.height = (winHeight - 10) + "px";
+		try
+		{
+			if (window[frmNm].onresize && window[frmNm].onresize.toString().indexOf("setLayerSizes") >= 0)
+				window[frmNm].onresize = null;		
+		}
+		catch(e) {}		
+		try
+		{
+			window[frmNm].document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+			window[frmNm].document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+			window[frmNm].document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+			window[frmNm].document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+			window[frmNm].document.getElementById("paneBody").style.width = contentWidth + "px";
+			window[frmNm].document.getElementById("paneBody").style.height = contentHeight + "px";
+		}
+		catch(e) {}
+	}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenDirectReports()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe id="profile" name="profile" title="Secondary Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe id="review" name="review" title="Secondary Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe id="personnelactions" name="personnelactions" level="2" tabindex="0" title="Secondary Content" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe id="emergencycontacts" name="emergencycontacts" level="2" tabindex="0" title="Secondary Content" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe id="additionalcontactnumbers" name="additionalcontactnumbers" level="2" tabindex="0" title="Secondary Content" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/orglawheader.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/manager.htm,v 1.15.2.91 2014/02/13 22:48:37 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

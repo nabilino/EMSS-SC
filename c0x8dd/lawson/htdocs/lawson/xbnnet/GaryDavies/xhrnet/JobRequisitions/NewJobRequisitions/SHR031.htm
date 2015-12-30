@@ -1,0 +1,585 @@
+<HTML>
+<HEAD>
+<TITLE>New Job Requisition</TITLE>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" 	CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" 	CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<SCRIPT SRC="/lawson/webappjs/transaction.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/data.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/commonHTTP.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/waitalert.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/esscommon80.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmldateroutines.js"></SCRIPT>
+<script src="/lawson/webappjs/user.js"></script>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/ui/ui.js"></SCRIPT>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"> </script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"> </script>
+
+<!-- New Job Reqs specific files... -->
+<SCRIPT SRC="/lawson/xhrnet/JobRequisitions/NewJobRequisitions/SHR031_AGS.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/JobRequisitions/NewJobRequisitions/SHR031_DME.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/JobRequisitions/NewJobRequisitions/SHR031_CMN.js"></SCRIPT>
+
+<!-- Load any additional libraries here... -->
+<SCRIPT SRC="/lawson/xhrnet/JobRequisitions/Lib/PA42.js"></SCRIPT>
+
+<SCRIPT LANGUAGE="JavaScript">
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+
+var pBrowser = new BrowserInfo();
+var mX, mY;
+var PA42;
+var Selects;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Preload any images...
+//
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize function.
+//
+
+function Initialize()
+{
+	clearTimeout(Timer);
+	// Netscape 6.2+ does not properly size the iframes by percentages at load time
+	setLayerSizes();
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialization Complete function.
+//
+
+function AuthenticateFinished()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	setTaskHeader("header",getSeaPhrase("NEW_JOB_REQ","ESS"),"Manager");
+	document.title = getSeaPhrase("NEW_JOB_REQ","ESS");
+
+	Selects = new SelectObject();
+// PT 137097
+	GetDME_HRSUPER();
+	// PT 137097
+}
+
+function StartOver()
+{
+	self.right.document.newjobreqdtlform.reset();
+	document.getElementById("right").style.visibility = "hidden";
+	self.left.document.newjobreqform.reset();
+}
+
+function DrawLeftWindow()
+{
+	PA42 = new PA42Object();
+
+	var jobRecHtml = '<body>'
+	+ '<form name="newjobreqform">'
+	+ '<input class="inputbox" type="hidden" name="positioncode" value="">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+	+ '<tr><th class="fieldlabelbold" style="text-align:center" colspan="3">'+getSeaPhrase("ENTER_INFO_BELOW","ESS")+'</th></tr>'
+	+ '<tr><th class="plaintablerowheader" style="width:40%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" name="position" value="" size="30" maxlength="30" onfocus="this.select()" '
+	+ 'onkeyup="this.value=\'\';this.form.positioncode.value=\'\';parent.PA42.Position.Description=\'\';parent.PA42.Position.Code=\'\'">'
+	+ '<a href="javascript:parent.SelectOption(\'position\')" style="margin-left:5px">'
+	+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	+ '</td></tr>'
+	+ '<tr><th class="plaintablerowheader" style="width:40%">'+getSeaPhrase("JOB_PROFILE_9","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="jobcode" value="">'
+		+ '<input class="inputbox" type="text" name="job" value="" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.jobcode.value=\'\';parent.PA42.JobCode.Description=\'\';parent.PA42.JobCode.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'job\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="job">'+BuildJobSelect("")+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr><th class="plaintablerowheader" style="width:40%">'+getSeaPhrase("DATE_NEEDED","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="dateneeded" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'dateneeded\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a>'+uiRequiredIcon()+'<br/>'+uiDateFormatSpan2()+'</td></tr>'
+	+ '<tr><th class="plaintablerowheaderborderbottom" style="width:40%">'+getSeaPhrase("STATUS","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="statuscode" value="">'
+		+ '<input class="inputbox" type="text" name="status" value="" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.statuscode.value=\'\';parent.PA42.ReqStatus.Description=\'\';parent.PA42.ReqStatus.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'status\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ uiRequiredIcon()
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" id="status" nowrap><select class="inputbox" name="status">'+BuildStatusSelect("")+'</select>'+uiRequiredIcon()+'</td></tr>'
+	}
+	jobRecHtml += '<tr><th>&nbsp;</th><td class="plaintablecell">'
+	+ uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.Continue();return false","margin-top:10px")
+	+ '</td></tr></table>'
+	+ '</form>'
+	+ uiRequiredFooter()
+	+ '</body>'
+
+	try {
+		self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REQUISITION","ESS");
+		self.left.document.getElementById("paneBody").innerHTML = jobRecHtml;
+		self.left.stylePage();
+		self.left.setLayerSizes();
+    	self.left.document.newjobreqform.firstname.focus();
+	}
+	catch(e) {}
+
+	document.getElementById("left").style.visibility = "visible";
+
+	if (typeof(removeWaitAlert) == "function")
+		removeWaitAlert();
+}
+
+var jobCode;
+var statusCode;
+var jobForm;
+
+function Continue()
+{
+	jobForm = self.left.document.newjobreqform;
+
+	if (emssObjInstance.emssObj.filterSelect)
+		clearRequiredField(jobForm.status);
+	else
+		clearRequiredField(self.left.document.getElementById("status"));
+	clearRequiredField(jobForm.position);
+	clearRequiredField(jobForm.dateneeded);
+
+   	if (NonSpace(jobForm.dateneeded.value) == 0)
+   	{
+   		setRequiredField(jobForm.dateneeded);
+     	seaAlert(getSeaPhrase("DATE_REQUIRED","ESS"));
+       	jobForm.dateneeded.focus();
+       	jobForm.dateneeded.select();
+       	return;
+   	}
+
+  	if (ValidDate(jobForm.dateneeded) == false)
+   	{
+   		setRequiredField(jobForm.dateneeded);
+      	jobForm.dateneeded.focus();
+       	jobForm.dateneeded.select();
+      	return;
+  	}
+
+   	if ((!emssObjInstance.emssObj.filterSelect && (jobForm.status.selectedIndex == 0))
+   	|| (emssObjInstance.emssObj.filterSelect && (NonSpace(jobForm.statuscode.value) == 0)))
+   	{
+   		if (emssObjInstance.emssObj.filterSelect)
+   			setRequiredField(jobForm.status);
+   		else
+   			setRequiredField(self.left.document.getElementById("status"));
+     	seaAlert(getSeaPhrase("STATUS_REQUIRED","ESS"));
+       	jobForm.status.focus();
+       	return;
+   	}
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobCode = jobForm.jobcode.value;
+		statusCode = jobForm.statuscode.value;
+	}
+	else
+	{
+		jobCode = jobForm.job.options[jobForm.job.selectedIndex].value;
+		statusCode = jobForm.status.options[jobForm.status.selectedIndex].value;
+	}
+
+	if (NonSpace(jobForm.positioncode.value)) {
+
+		if (document.getElementById("right").style.visibility == "visible") {
+			if(seaConfirm(getSeaPhrase("REQUISITION_KEY_CHANGED","ESS"), "", FireFoxFillDefaults)){
+				fillDefaults();
+			}
+		}
+		else {
+
+			showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+			PA42.FillDefaults(jobForm.positioncode.value,
+				jobCode,
+				formjsDate(jobForm.dateneeded.value),
+				statusCode,
+				"FillDefaults_Done");
+		}
+	}
+	else {
+
+		if ((!emssObjInstance.emssObj.filterSelect && (jobForm.job.selectedIndex > 0))
+		|| (emssObjInstance.emssObj.filterSelect && NonSpace(jobCode) > 0)) {
+			showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+			DrawRightWindow();
+		}
+		else {
+			setRequiredField(jobForm.position);
+			MsgBox(getSeaPhrase("JOB_OR_POS_REQUIRED","ESS"));
+			jobForm.position.focus();
+		}
+	}
+}
+
+function fillDefaults()
+{
+	Selects.Schedule = new Array();
+	Selects.PayGrade = new Array();
+	Selects.PayStep = new Array();
+
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	PA42.FillDefaults(jobForm.positioncode.value,
+		jobCode,
+		formjsDate(jobForm.dateneeded.value),
+		statusCode,
+		"FillDefaults_Done");
+}
+
+function DrawRightWindow()
+{
+	// Job Code
+	// PT 147313. Override position with default value on a "Fill Defaults" action.
+	var jobForm = self.left.document.newjobreqform;
+	if (NonSpace(jobForm.position.value) > 0 && NonSpace(PA42.JobCode.Code) > 0)
+	{
+		SetJobCode(PA42.JobCode, jobForm);
+	}
+
+	// Process Level, Department, Location, Supervisor
+	var jobRecHtml = '<body>'
+	+ '<form name="newjobreqdtlform">'
+	+ '<input class="inputbox" type="hidden" name="payschedulecode" value="'+PA42.Schedule.Code+'">'
+	+ '<input class="inputbox" type="hidden" name="paygradecode" value="'+PA42.Grade+'">'
+	+ '<input class="inputbox" type="hidden" name="paystepcode" value="'+PA42.Step+'">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_PROFILE_3","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="plrecruitflag" value="'+PA42.RecruitingFlag+'">'
+		+ '<input class="inputbox" type="hidden" name="processlevelcode" value="'+PA42.ProcessLevel.Code+'">'
+		+ '<input class="inputbox" type="text" name="processlevel" value="'+PA42.ProcessLevel.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.processlevelcode.value=\'\';parent.PA42.ProcessLevel.Description=\'\';parent.PA42.ProcessLevel.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'processlevel\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="processlevel" style="width:205px" onclick="parent.GetProcessLevel()">'+BuildProcessLevelSelect(PA42.ProcessLevel.Code,PA42.ProcessLevel.Description)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_PROFILE_4","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="departmentcode" value="'+PA42.Department.Code+'">'
+		+ '<input class="inputbox" type="text" name="department" value="'+PA42.Department.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.departmentcode.value=\'\';parent.PA42.Department.Description=\'\';parent.PA42.Department.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'department\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="department" style="width:205px" onclick="parent.GetDepartment()">'+BuildDepartmentSelect(PA42.Department.Code,PA42.Department.Description)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_PROFILE_6","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="locationcode" value="'+PA42.Location.Code+'">'
+		+ '<input class="inputbox" type="text" name="location" value="'+PA42.Location.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.locationcode.value=\'\';parent.PA42.Location.Description=\'\';parent.PA42.Location.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'location\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="location" style="width:205px">'+BuildLocationSelect(PA42.Location.Code)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_PROFILE_7","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="supervisorcode" value="'+PA42.Supervisor.Code+'">'
+		+ '<input class="inputbox" type="text" name="supervisor" value="'+PA42.Supervisor.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.supervisorcode.value=\'\';parent.PA42.Supervisor.Description=\'\';parent.PA42.Supervisor.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'supervisor\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="supervisor" style="width:205px" onclick="parent.GetSupervisor()">'+BuildSupervisorSelect(PA42.Supervisor.Code,PA42.Supervisor.Description)+'</select></td></tr>'
+	}
+
+	// Union, Bargaining Unit, User Level
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_PROFILE_10","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="unioncode" value="'+PA42.Union.Code+'">'
+		+ '<input class="inputbox" type="text" name="union" value="'+PA42.Union.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.unioncode.value=\'\';parent.PA42.Union.Description=\'\';parent.PA42.Union.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'union\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="union" style="width:205px">'+BuildUnionSelect(PA42.Union.Code)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("BARGAINING_UNIT","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="bargainunitcode" value="'+PA42.BargainUnit.Code+'">'
+		+ '<input class="inputbox" type="text" name="bargainunit" value="'+PA42.BargainUnit.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.bargainunitcode.value=\'\';parent.PA42.BargainUnit.Description=\'\';parent.PA42.BargainUnit.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'bargainunit\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="bargainunit" style="width:205px">'+BuildBargainUnitSelect(PA42.BargainUnit.Code)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("USER_LEVEL","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="userlevelcode" value="'+PA42.UserLevel.Code+'">'
+		+ '<input class="inputbox" type="text" name="userlevel" value="'+PA42.UserLevel.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.userlevelcode.value=\'\';parent.PA42.UserLevel.Description=\'\';parent.PA42.UserLevel.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'userlevel\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="userlevel" style="width:205px">'+BuildUserLevelSelect(PA42.UserLevel.Code)+'</select></td></tr>'
+	}
+
+	// Employee Status, Temporary Dates
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("EMPLOYEE_STATUS","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="employeestatuscode" value="'+PA42.EmployeeStatus.Code+'">'
+		+ '<input class="inputbox" type="text" name="employeestatus" value="'+PA42.EmployeeStatus.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.employeestatuscode.value=\'\';parent.PA42.EmployeeStatus.Description=\'\';parent.PA42.EmployeeStatus.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'employeestatus\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="employeestatus" style="width:205px" onclick="parent.GetEmployeeStatus()">'+BuildEmpStatusSelect(PA42.EmployeeStatus.Code,PA42.EmployeeStatus.Description)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("TEMP_DATES","ESS")+'<br/><span class="fieldlabel" style="padding-left:5px">'+getSeaPhrase("IF_APPLICABLE_PARENS","ESS")+'</span></th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="tmpdatebeg" title="'+getSeaPhrase("TEMP_DATES","ESS")+' '+getSeaPhrase("IF_APPLICABLE_PARENS","ESS")+'" value="'+PA42.TemporaryDatesBegin+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'tmpdatebeg\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a><span style="width:10px"> </span>'
+	+ '<input class="inputbox" type="text" name="tmpdateend" title="'+getSeaPhrase("TEMP_DATES","ESS")+' '+getSeaPhrase("IF_APPLICABLE_PARENS","ESS")+'" value="'+PA42.TemporaryDatesEnd+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'tmpdateend\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a>'
+	+ '<br/>'+uiDateFormatSpan2()+'<span style="width:45px"> </span>'+uiDateFormatSpan2()+'</td></tr>'
+
+	// Salary Type, Salary, Currency, OT Exempt, Pay Schedule, Pay Step, Pay Grade
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("SALARY_TYPE","ESS")+'</th>'
+	jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="salarytype">'+BuildSalaryTypeSelect(PA42.SalaryClass.Code)+'</select></td></tr>'
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("SALARY","ESS")+'</th>'
+	jobRecHtml += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="salarybeg" value="'+PA42.SalaryBeginning+'" size="13" maxlength="13" onfocus="this.select()">'
+	jobRecHtml += '<span style="width:10px"> </span>'
+	jobRecHtml += '<input class="inputbox" type="text" name="salaryend" title="'+getSeaPhrase("SALARY","ESS")+'" value="'+PA42.SalaryEnd+'" size="13" maxlength="13" onfocus="this.select()"></td></tr>'
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("QUAL_16","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="currencycode" value="'+PA42.Currency.Code+'">'
+		+ '<input class="inputbox" type="text" name="currency" value="'+PA42.Currency.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.currencycode.value=\'\';parent.PA42.Currency.Description=\'\';parent.PA42.Currency.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'currency\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="currency" style="width:205px" onclick="parent.GetCurrency()">'+BuildCurrencySelect(PA42.Currency.Code,PA42.Currency.Description)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("OVERTIME_EXEMPT","ESS")+'</th>'
+	jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="otexempt">'+BuildYesNoSelect(PA42.ExemptFromOvertime.Code)+'</select></td></tr>'
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("PAY_SCHEDULE","ESS")+'</th>'
+	jobRecHtml += '<td class="plaintablecell" nowrap>'
+	jobRecHtml += '<input class="inputbox" type="text" name="payschedule" value="'+PA42.Schedule.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+	jobRecHtml += 'onkeyup="this.value=\'\';this.form.payschedulecode.value=\'\';this.form.paygradecode.value=\'\';this.form.paystepcode.value=\'\';parent.PA42.Schedule.Description=\'\';parent.PA42.Schedule.Code=\'\';document.getElementById(\'paygrade\').innerHTML=\'\';document.getElementById(\'paystep\').innerHTML=\'\'">'
+	jobRecHtml += '<a href="javascript:parent.SelectOption(\'payschedule\')" style="margin-left:5px">'
+	jobRecHtml += '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	jobRecHtml += '</td></tr>'
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("PAY_STEP","ESS")+'</th>'
+	jobRecHtml += '<td class="fieldlabel" id="paystep" style="text-align:left" nowrap>'
+	jobRecHtml += (PA42.Step)?PA42.Step:'&nbsp;'
+	jobRecHtml += '</td></tr>'
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("PAY_GRADE","ESS")+'</th>'
+	jobRecHtml += '<td class="fieldlabel" id="paygrade" style="text-align:left" nowrap>'
+	jobRecHtml += (PA42.Grade)?PA42.Grade:'&nbsp;'
+	jobRecHtml += '</td></tr>'
+
+	// Work Schedule, Shift
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="hidden" name="workschedulecode" value="'+PA42.WorkSchedule.Code+'">'
+		+ '<input class="inputbox" type="text" name="workschedule" value="'+PA42.WorkSchedule.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+		+ 'onkeyup="this.value=\'\';this.form.workschedulecode.value=\'\';parent.PA42.WorkSchedule.Description=\'\';parent.PA42.WorkSchedule.Code=\'\'">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'workschedule\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		jobRecHtml += '<td class="plaintablecell" nowrap><select class="inputbox" name="workschedule" style="width:205px" onclick="parent.GetWorkSchedule()">'+BuildWorkScheduleSelect(PA42.WorkSchedule.Code, PA42.WorkSchedule.Description)+'</select></td></tr>'
+	}
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("SHIFT","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="shift">'+BuildShiftSelect(PA42.Shift.Code)+'</select></td></tr>'
+
+	// Openings, FTE, Replacement
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_OPENINGS_4","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="openings" value="'+PA42.Openings+'" size="3" maxlength="3" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="fte" value="'+PA42.OpenFTE+'" size="8" maxlength="8" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("REPLACEMENT","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="replacement">'+BuildYesNoSelect(PA42.Replacement.Code)+'</select></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("REPLACEMENT_FOR","ESS")+'</th>'
+	
+	// Replacement For - always use Filter Select
+	jobRecHtml += '<td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="hidden" name="replacementforcode" value="'+PA42.ReplacementEmployee.Code+'">'
+	+ '<input class="inputbox" type="text" name="replacementfor" value="'+PA42.ReplacementEmployee.Description+'" size="30" maxlength="30" onfocus="this.select()" '
+	+ 'onkeyup="this.value=\'\';this.form.replacementforcode.value=\'\';parent.PA42.ReplacementEmployee.Description=\'\';parent.PA42.ReplacementEmployee.Code=\'\'">'
+	+ '<a href="javascript:parent.getMgrSuperCodes()" style="margin-left:5px">'
+	+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	+ '</td></tr>'	
+	
+	// Budgeted
+	jobRecHtml += '<tr style="padding-bottom:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("BUDGETED","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="budgeted">'+BuildYesNoSelect(PA42.Budgeted.Code)+'</select></td></tr>'
+
+	// Contact First Name, Contact Last Name, Phone Number, Extension, Phone Country Code
+	jobRecHtml += '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("CONTACT_FIRST_NAME","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="contactfirst" value="'+PA42.ContactFirst+'" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("CONTACT_LAST_NAME","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="contactlast" value="'+PA42.ContactLast+'" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="wkphonenbr" value="'+PA42.WorkPhoneNumber+'" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("JOB_OPENINGS_14","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="wkphoneext" value="'+PA42.WorkPhoneExt+'" size="5" maxlength="5" onfocus="this.select()"></td></tr>'
+	+ '<tr id="wkphonecntry" onmouseover="parent.displayHelpText(\'self.right\',\'wkphonecntry\',\'cntryCdHelpText\',true)" '
+	+ 'onmouseout="parent.displayHelpText(\'self.right\',\'wkphonecntry\',\'cntryCdHelpText\',false)">'
+	+ '<th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="wkphonecntry" value="'+PA42.WorkPhoneCountry+'" size="3" maxlength="3" onfocus="this.select()"></td></tr>'
+
+	// Internal and External Posting Dates
+	jobRecHtml += '<tr style="padding-top:20px"><th class="plaintablerowheaderlite" style="width:45%">'+getSeaPhrase("INTERNAL_POSTING_DATES","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="intpostdatebeg" value="'+PA42.InternalPostDateStart+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'intpostdatebeg\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a><span style="width:10px"> </span>'
+	+ '<input class="inputbox" type="text" name="intpostdateend" value="'+PA42.InternalPostDateStop+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'intpostdateend\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a>'
+	+ '<br/>'+uiDateFormatSpan2()+'<span style="width:45px"> </span>'+uiDateFormatSpan2()+'</td></tr>'
+	+ '<tr><th class="fieldlabelboldliteunderline" style="width:45%">'+getSeaPhrase("EXTERNAL_POSTING_DATES","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="extpostdatebeg" value="'+PA42.ExternalPostDateStart+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'extpostdatebeg\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a><span style="width:10px"> </span>'
+	+ '<input class="inputbox" type="text" name="extpostdateend" value="'+PA42.ExternalPostDateStop+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	+ '<a href="" onclick="parent.DateSelect(\'extpostdateend\');return false" onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+uiCalendarIcon()+'</a>'
+	+ '<br/>'+uiDateFormatSpan2()+'<span style="width:45px"> </span>'+uiDateFormatSpan2()+'</td></tr>'
+
+	// Form buttons
+	jobRecHtml += '<tr><th>&nbsp;</th><td class="plaintablecell" style="text-align:left">'
+	+ uiButton(getSeaPhrase("ADD_REQUISITION","ESS"),"parent.AddRequisition();return false","margin-top:10px;margin-bottom:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CancelAdd();return false","margin-top:10px;margin-bottom:10px")
+	+ '</td></tr></table>'
+	+ '</form>'
+	+ rolloverHelpText("cntryCdHelpText",getSeaPhrase("COUNTRY_CODE_HELP_TEXT","ESS"))
+	//+ uiRequiredFooter()
+	+ '</body>'
+
+	try {
+		self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = jobRecHtml;
+		self.right.setLayerSizes();
+		self.right.stylePage();
+		if (navigator.userAgent.toLowerCase().indexOf("ipad") == -1)
+    		self.right.document.newjobreqdtlform.processlevel.focus();
+	}
+	catch(e) {}
+
+	document.getElementById("right").style.visibility = "visible";
+
+	if (typeof(removeWaitAlert) == "function")
+		removeWaitAlert();
+}
+
+function CancelAdd()
+{
+	self.right.document.newjobreqdtlform.reset();
+	document.getElementById("right").style.visibility = "hidden";
+}
+
+function FireFoxFillDefaults(confirmWin)
+{
+    if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+    {
+		fillDefaults();
+	}
+}
+
+
+var Timer = setTimeout("Initialize()",3000);//Sets a timer to call the initialize function if
+											//the frameset fails to call it.
+
+</SCRIPT>
+</HEAD>
+
+<!-- Define your frameset here -->
+
+<body onload="Initialize()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="left" name="left" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;top:32px;width:363px;height:294px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;left:363px;top:32px;width:420px;height:474px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/JobRequisitions/Lib/SEA_LAW.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/JobRequisitions/NewJobRequisitions/SHR031.htm,v 1.17.2.24 2011/05/16 12:00:03 juanms Exp $ -->

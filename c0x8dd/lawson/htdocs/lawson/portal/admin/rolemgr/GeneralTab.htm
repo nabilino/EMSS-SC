@@ -1,0 +1,161 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/GeneralTab.htm,v 1.3.2.3.4.6.6.2.2.3 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<!-- the general tab HTML -->
+<table id="generalTbl" border="0" width="700px" cellpadding="0" cellspacing="0" style="margin:15px;">
+	<tr>
+		<td width="50%" align="left">
+			<label id="lblWelcomeMessage" for="txtWelcomeMessage" class="xTLabel" style="position:relative;">Welcome message:</label>
+		</td>
+		<td width="50%" align="left">
+			<label id="lblGeneralOptions" class="xTLabel" style="position:relative;">General options:</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">
+			<!-- use tab index force first column tabbing, then second column -->
+			<input type="text" id="txtWelcomeMessage" class="xTTextBox" style="position:relative;width:300px;"
+				onfocus="window.tabMgr.tabs['tabGeneral'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabGeneral'].onTextBlur(event,this)" tabIndex="1" value="">
+			</input>
+			<button id="btnInsertAttr" title="Select user attribute to insert" tabIndex="1" 
+				style="display:inline;position:relative;width:12px;height:18px;border:0px solid transparent;background-color:transparent;background-image:url('../images/ico_form_dropmenu.gif');background-position:center;background-repeat:no-repeat;"
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickAttributes(event,this)">&nbsp;
+			</button>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowSrch" tabIndex="2"
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowSrch" for="cbxAllowSrch" class="xTLabelForm" style="position:relative;">Allow use of search</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">
+			<label id="lblHomePage" for="txtHomePage" class="xTLabel" style="position:relative;">Home page:</label>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowMenus" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowMenus" for="cbxAllowMenus" class="xTLabelForm" style="position:relative;">Allow use of menus</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">
+			<input type="text" id="txtHomePage" class="xTTextBox" style="position:relative;width:300px;"
+				onfocus="window.tabMgr.tabs['tabGeneral'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabGeneral'].onTextBlur(event,this)" tabIndex="1" value="">
+			</input>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowFavorites" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowFavorites" for="cbxAllowFavorites" class="xTLabelForm" style="position:relative;">Allow use of My Shortcuts</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">&nbsp;</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowKeyboard" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowKeyboard" for="cbxAllowKeyboard" class="xTLabelForm" style="position:relative;">Allow keyboard customization</label>
+		</td>
+	</tr>
+</table>
+<table id="tblRoleOptions" border="0" width="700px" cellpadding="0" cellspacing="0" style="margin:15px;visibility:hidden;">
+	<tr>
+		<td width="50%" align="left">
+			<label id="lblERPApplications" class="xTLabel" style="position:relative;">ERP Applications:</label>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<label id="lblJobsReports" class="xTLabel" style="position:relative;">Jobs and Reports:</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">
+			<input type="checkbox"  id="cbxUseCompactTransaction" tabIndex="1" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblUseCompactTransaction" for="cbxUseCompactTransaction" class="xTLabelForm" style="position:relative;">
+				Use compact transaction
+			</label>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowJobList" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowJobList" for="cbxAllowJobList" class="xTLabelForm" style="position:relative;">
+				Allow Job List access
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">
+			<input type="checkbox"  id="cbxUseFormCache" tabIndex="1" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblUseCompactTransaction" for="cbxUseFormCache" class="xTLabelForm" style="position:relative;">
+				Use local form cache
+			</label>
+		</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowJobSchedule" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowJobSchedule" for="cbxAllowJobSchedule" class="xTLabelForm" style="position:relative;">
+				Allow Job Schedule access
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">&nbsp;</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowJobDef" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowJobDef" for="cbxAllowJobDef" class="xTLabelForm" style="position:relative;">Allow Multi-Step Job Definition access</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">&nbsp;</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowPrintFiles" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowPrintFiles" for="cbxAllowPrintFiles" class="xTLabelForm" style="position:relative;">Allow Print Files access</label>
+		</td>
+	</tr>
+	<tr>
+		<td width="50%" align="left">&nbsp;</td>
+		<td width="50%" align="left" valign="bottom">
+			<input type="checkbox"  id="cbxAllowJobPolling" tabIndex="2" 
+				onclick="window.tabMgr.tabs['tabGeneral'].onClickCbx(event,this)">
+			</input>&nbsp;
+			<label id="lblAllowJobPolling" for="cbxAllowJobPolling" class="xTLabelForm" style="position:relative;">Allow Job polling (Auto Monitor)</label>
+		</td>
+	</tr>
+</table>

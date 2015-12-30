@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Time Entry Reporting</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/timeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/rpttimeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StringBuffer.js"></script>
+<script language="JavaScript">
+var Statuses = new Array();
+var Details = new DetailObject();
+var ReportsDetail;
+
+function DetailObject()
+{
+	this.StartDate = null;
+	this.EndDate = null;
+	this.EmployeeNumbers = new Array();
+	this.Statuses = new Array();
+}
+
+function OpenProgram()
+{
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+		return;
+	authenticate("frameNm='jsreturn'|funcNm='InitReporting()'|sysenv=true|desiredEdit='EM'")
+}
+
+function InitReporting()
+{
+	stylePage();
+	self.printFm.stylePage();
+	LoadReporting();	
+}
+
+function LoadReporting()
+{
+	startProcessing(getSeaPhrase("LOADING_REPORTING","TE"), StartReporting);
+}
+
+function StartReporting()
+{
+	var title = getSeaPhrase("TE_REPORTING","TE");
+	setWinTitle(title);
+	setTaskHeader("taskheader", title, "TimeEntry");
+	document.getElementById("paneBorder").style.visibility = "visible";
+	Reports = null;
+	if (!self.main.document || !self.main.document.getElementById("paneBody1"))
+	{
+		setTimeout("StartReporting()", 5);
+		return;
+	}
+	Statuses = new Array(getSeaPhrase("STATUS_M1","TE"),getSeaPhrase("STATUS_0","TE"),getSeaPhrase("STATUS_1","TE"),
+	getSeaPhrase("STATUS_2","TE"),getSeaPhrase("STATUS_3","TE"),getSeaPhrase("STATUS_4","TE"),getSeaPhrase("STATUS_5","TE"),
+	getSeaPhrase("STATUS_6","TE"),getSeaPhrase("STATUS_7","TE"),getSeaPhrase("STATUS_8","TE"),getSeaPhrase("STATUS_9","TE"));
+	var rptTypeLbl = getSeaPhrase("WHICH_REPORT_TYPE","TE");
+	var html = '<div style="width:100%;text-align:center">'
+	html += '<form name="frmReportType" onsubmit="return false;">'
+	html += '<table border="0" border="0" align="center" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+	html += '<tr><td class="plaintablecell">'+rptTypeLbl+'</td></tr>'
+	html += '<tr><td class="plaintablecell">'
+	html += '<div role="radiogroup" aria-labelledby="rptTypeLbl">'
+	html += '<span id="rptTypeLbl" class="offscreen">'+rptTypeLbl+'</span>'
+	html += '<input type="radio" id="detailRpt" name="radReportType" role="radio"><label for="detailRpt" style="display:inline-block;padding-bottom:5px">'+getSeaPhrase("DETAIL","TE")+'</label><br/>'
+	html += '<input type="radio" id="missingRpt" name="radReportType" role="radio"><label for="missingRpt" style="display:inline-block;padding-bottom:5px">'+getSeaPhrase("MISSING_CARD","TE")+'</label><br/>'
+	html += '<input type="radio" id="summaryRpt" name="radReportType" role="radio"><label for="summaryRpt" style="display:inline-block;padding-bottom:5px">'+getSeaPhrase("PAY_PERIOD_SUMMARY","TE")+'</label><br/>'
+	html += '</div></td></tr></table>'
+	html += '<p style="text-align:center">'
+	try
+	{
+		if (opener)
+			html += uiButton(getSeaPhrase("CANCEL","TE"), "parent.close();return false");
+	}
+	catch(e) {}
+	html += uiButton(getSeaPhrase("CONTINUE","TE"), "parent.ReportTypeClicked();return false","margin-left:5px")
+	html += '</p></form></div>'
+	self.main.document.getElementById("paneBody1").innerHTML = html;
+	self.main.stylePage();
+	setWinTitle(getSeaPhrase("REPORT_TYPE","TE"), self.main);
+	document.getElementById("main").style.visibility = "visible";
+	stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.main)]));
+	fitToScreen();
+}
+
+function ReportTypeClicked()
+{
+	var TypeClicked;
+	for (var i=0; i<self.main.document.frmReportType.radReportType.length; i++)
+	{
+		if (self.main.document.frmReportType.radReportType[i].checked)
+			TypeClicked = i;
+	}
+	if (typeof(TypeClicked) == "undefined")
+	{
+		seaAlert(getSeaPhrase("SELECT_REPORT_TYPE","TE"), null, null, "error");
+		return;
+	}
+	if (TypeClicked == 0 || TypeClicked == 2)
+	{
+		startProcessing(getSeaPhrase("GATHERING_DATA","TE"), function(){CallHS221ForDetailView(TypeClicked);});
+	}
+	else if (TypeClicked == 1)
+	{
+		var nextFunc = function()
+		{
+			var toolTip;
+			var html = '<div style="width:100%;text-align:center">'
+			html += '<form name="frmReportType" onsubmit="return false;">'
+			html += '<table border="0" border="0" align="center" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+			html += '<tr><td class="plaintablecell">'+getSeaPhrase("ENTER_PERIOD_START_RANGE","TE")+' '+getSeaPhrase("PERIODS_START_DATE_FALLS_FOLLOWING","TE")+'</td></tr>'
+			html += '<tr><td style="text-align:center"><table border="0" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+			toolTip = uiDateToolTip(getSeaPhrase("START_DATE","TE"));
+			html += '<tr><td class="fieldlabelboldleft"><label id="startdateLbl" for="startdate">'+getSeaPhrase("START_DATE","TE")+'</label><br/>'
+			html += '<input class="inputbox" type="text" id="startdate" name="startdate" size="10" maxlength="10" aria-labelledby="startdateLbl startdateFmt">'
+			html += '<a href="javascript:;" onclick="parent.DateSelect(\'startdate\');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("startdateFmt")+'</td>'
+			toolTip = uiDateToolTip(getSeaPhrase("END_DATE","TE"));
+			html += '<td class="plaintablecell"> - </td><td class="fieldlabelboldleft"><label id="enddateLbl" for="enddate">'+getSeaPhrase("END_DATE","TE")+'</label><br/>'
+			html += '<input class="inputbox" type="text" id="enddate" name="enddate" size="10" maxlength="10" aria-labelledby="enddateLbl enddateFmt">'
+			html += '<a href="javascript:;" onclick="parent.DateSelect(\'enddate\');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("enddateFmt")+'</td>'
+			html += '</td></tr></table>'
+			html += '</td></tr></table>'
+			html += '<p style="text-align:center">'
+			html += uiButton(getSeaPhrase("BACK","TE"), "parent.LoadReporting();return false")
+			html += uiButton(getSeaPhrase("CONTINUE","TE"), "parent.MissedTimeCards();return false","margin-left:5px")
+			html += '</p></form></div>'
+			self.main.document.getElementById("paneBody1").innerHTML = html;
+			self.main.stylePage();
+			setWinTitle(getSeaPhrase("REPORT_DATE_RANGE","TE"), self.main);
+			stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.main)]));
+		};
+		startProcessing(getSeaPhrase("GATHERING_DATA","TE"), nextFunc);
+	}
+}
+
+function CallHS221ForDetailView(TypeClicked)
+{
+	if (Reports == null)
+	{
+		Reports = new ReportsObject(authUser.company, authUser.employee);
+		PlanCodes = new PlanCodeObject(authUser.company, authUser.employee);
+		self.lawheader.linecount = 0;
+		self.lawheader.formlinecount = 0;
+	}
+	self.lawheader.UpdateType = "HS22.1";
+	var obj = new AGSObject(authUser.prodline, "HS22.1");
+	obj.event = "ADD";
+	obj.rtn = "DATA";
+	obj.longNames = true;
+	obj.tds = false;
+	obj.func = "parent.DrawDetailReport("+TypeClicked+")";
+	if (arguments.length && arguments[1])
+		obj.field = "FC=%2B";
+	else
+		obj.field = "FC=I";
+	obj.field += "&HSU-COMPANY="+authUser.company
+	+ "&HSU-EMPLOYEE="+authUser.employee;
+	if (arguments.length && arguments[1])
+	{
+		obj.field += "&LAST-EMPLOYEE="+Reports.LastEmployee;
+		obj.field += "&LAST-HSU-CODE="+Reports.LastHsuCode;
+		obj.field += "&LAST-LAST-NAME="+escape(Reports.LastLastName);
+		obj.field += "&LAST-FIRST-NAME="+escape(Reports.LastFirstName);
+		obj.field += "&LAST-MIDDLE-INIT="+escape(Reports.LastMiddleInit);
+	}
+	obj.out = "JAVASCRIPT";
+	obj.debug = false;
+	AGS(obj, "jsreturn");
+}
+
+function DrawDetailReport(TypeClicked)
+{
+	if (typeof(ReportsDetail) == "undefined" || ReportsDetail.length == 0)
+		ReportsDetail = Reports.Detail;
+	if (!ReportsDetail.length)
+	{
+		stopProcessing();
+		var alertResponse = seaAlert(getSeaPhrase("NO_DIRECT_REPORT_CONTACT_HR","TE"), "", null, "error", StartReporting);
+		if (typeof(alertResponse) == "undefined" || alertResponse == null)
+		{				
+			if (seaAlert == window.alert)
+				LoadReporting();
+			return;
+		}		
+		LoadReporting();
+		return;
+	}
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		stopProcessing();
+		return;
+	}
+	if (self.lawheader.gmsgnbr == "000" && self.lawheader.gmsg == "More records exist, use PageDown")
+	{
+		CallHS221ForDetailView(TypeClicked, true);
+		return;
+	}
+	var toolTip;
+	var html = '<div style="width:100%;text-align:center">'
+	html += '<form name="frmReportType" onsubmit="return false;">'
+	html += '<table border="0" border="0" align="center" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+	html += '<tr><td class="plaintablecell">'+getSeaPhrase("WHICH_EMPLOYEE_TO_INCLUDE","TE")+'</td></tr>'
+	html += '<tr><td style="text-align:center"><table cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+	html += '<tr><td class="plaintablecell"><input class="inputbox" type="checkbox" id="alldirectreports" name="alldirectreports" checked onclick="parent.AllDirectReportsClicked();"></td>'
+	html += '<td class="plaintablecell" colspan="2"><label for="alldirectreports">'+getSeaPhrase("ALL_DIRECT_REPORTS","TE")+'</label></td></tr>'
+	html += '<tr><td class="plaintablecell" style="text-align:center" colspan="2">'+getSeaPhrase("ENCLOSED_OR","TE")+'</td></tr>'
+	for (var i=0; i<ReportsDetail.length; i++)
+	{
+		html += '<tr><td class="plaintablecell"><input class="inputbox" type="checkbox" id="directreports'+i+'" name="directreports'+i+'" onclick="parent.SingleDirectReportsClicked();">'
+		html += '</td><td class="plaintablecell" colspan="2"><label for="directreports'+i+'">'+ReportsDetail[i].FullName+'</label></td></tr>'
+	}	
+	html += '</table></td></tr>'
+	html += '<tr><td class="plaintablecell">'
+	if (TypeClicked == 2)
+		html += getSeaPhrase("ENTER_PAY_PERIOD_DATES","TE")
+	else
+		html += getSeaPhrase("ENTER_TO_FROM_DATES","TE")
+	html += '</td></tr>'
+	html += '<tr><td style="text-align:center"><table cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+	toolTip = uiDateToolTip(getSeaPhrase("START_DATE","TE"));
+	html += '<tr><td class="fieldlabelboldleft"><label id="startdateLbl" for="startdate">'+getSeaPhrase("START_DATE","TE")+'</label><br/>'	
+	html += '<input class="inputbox" type="text" id="startdate" name="startdate" size="10" maxlength="10" aria-labelledby="startdateLbl startdateFmt">'
+	html += '<a href="javascript:;" onclick="parent.DateSelect(\'startdate\');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("startdateFmt")+'</td>'
+	html += '<td class="plaintablecell"> - </td>'
+	toolTip = uiDateToolTip(getSeaPhrase("END_DATE","TE"));
+	html += '<td class="fieldlabelboldleft"><label id="enddateLbl" for="enddate">'+getSeaPhrase("END_DATE","TE")+'</label><br/>'
+	html += '<input class="inputbox" type="text" id="enddate" name="enddate" size="10" maxlength="10" aria-labelledby="enddateLbl enddateFmt">'
+	html += '<a href="javascript:;" onclick="parent.DateSelect(\'enddate\');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("enddateFmt")+'</td>'
+	html += '</tr></table>'
+	html += '</td></tr></table>'
+	html += '<p style="text-align:center">'
+	html += uiButton(getSeaPhrase("BACK","TE"),"parent.LoadReporting();return false")
+	html += uiButton(getSeaPhrase("CONTINUE","TE"),"parent.DetailStatuses("+TypeClicked+");return false","margin-left:5px")
+	html += '</p></form></div>'
+	self.main.document.getElementById("paneBody1").innerHTML = html;
+	self.main.stylePage();
+	setWinTitle(getSeaPhrase("DETAIL_REPORT_CRITERIA","TE"), self.main);
+	stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.main)]));
+}
+
+function AllDirectReportsClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	for (var i=0; i<ReportsDetail.length; i++)
+	{
+		var checkBox = formObj.elements["directreports" + i];
+		checkBox.checked = false;
+		self.main.styleElement(checkBox);
+	}
+}
+
+function SingleDirectReportsClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	var checkBox = formObj.elements["alldirectreports"];
+	checkBox.checked = false;
+	self.main.styleElement(checkBox);
+}
+
+function ReturnDate(date)
+{
+  	self.main.document.frmReportType.elements[date_fld_name].value = date
+}
+
+function MissedTimeCards()
+{
+	if (NonSpace(self.main.document.frmReportType.startdate.value) > 0 && ValidDate(self.main.document.frmReportType.startdate) == false)
+       	return;
+ 	if (NonSpace(self.main.document.frmReportType.enddate.value) > 0 && ValidDate(self.main.document.frmReportType.enddate) == false)
+   		return;
+  	if (getDteDifference(formjsDate(formatDME(self.main.document.frmReportType.startdate.value)),formjsDate(formatDME(self.main.document.frmReportType.enddate.value))) <= 0)
+  	{
+  		setRequiredField(self.main.document.frmReportType.startdate, getSeaPhrase("START_MUST_BEFORE_END","TE"));
+		return;
+	}
+	var periodstart = self.main.document.frmReportType.startdate.value;
+	var periodend = self.main.document.frmReportType.enddate.value;
+	DrawMissingWindow(periodstart, periodend);
+}
+
+function GoToDetailReport(TypeClicked)
+{
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){DrawDetailReport(TypeClicked);});
+}
+
+function DetailStatuses(TypeClicked)
+{
+	if (typeof(self.main.document.forms["frmReportType"]) != "undefined")
+	{
+		if (NonSpace(self.main.document.frmReportType.startdate.value) > 0 && ValidDate(self.main.document.frmReportType.startdate) == false)
+    	   	return;
+ 		if (NonSpace(self.main.document.frmReportType.enddate.value) > 0 && ValidDate(self.main.document.frmReportType.enddate) == false)
+   			return;
+  		if (getDteDifference(formjsDate(formatDME(self.main.document.frmReportType.startdate.value)),formjsDate(formatDME(self.main.document.frmReportType.enddate.value))) <= 0)
+  		{
+  			setRequiredField(self.main.document.frmReportType.startdate, getSeaPhrase("START_MUST_BEFORE_END","TE"));
+			return;
+		}
+		Details.EmployeeNumbers = new Array(0);
+		Details.StartDate = self.main.document.frmReportType.startdate.value;
+		Details.EndDate = self.main.document.frmReportType.enddate.value;
+		Details.ShowBlankRecords = false;
+		Details.ShowAllRecords = false;
+		if (self.main.document.forms["frmReportType"].alldirectreports.checked)
+		{
+			for (var i=0; i<ReportsDetail.length; i++)
+				Details.EmployeeNumbers[Details.EmployeeNumbers.length] = ReportsDetail[i].Employee;
+		}
+		else
+		{
+			var formObj = self.main.document.forms["frmReportType"];
+			for (var i=0; i<ReportsDetail.length; i++)
+			{
+				if (eval("formObj.directreports"+i).checked)
+					Details.EmployeeNumbers[Details.EmployeeNumbers.length] = ReportsDetail[i].Employee;
+			}
+		}
+	}
+	var nextFunc = function()
+	{
+		var html = '<div style="width:100%;text-align:center">'
+		html += '<form name="frmReportType" onsubmit="return false;">'
+		html += '<table border="0" align="center" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+		html += '<tr><td class="plaintablecell">'+getSeaPhrase("SELECT_STATUS_TO_INCLUDE","TE")+'</td></tr>'
+		html += '<tr><td><table border="0" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+		html += '<tr><td class="plaintablecell"><input class="inputbox" type="checkbox" id="allstatuses" name="allstatuses" checked onclick="parent.AllStatusesClicked();"></td>'
+		html += '<td class="plaintablecell"><label for="allstatuses">'+getSeaPhrase("ALL","TE")+'</label></td></tr>'
+		html += '<tr><td class="plaintablecell" style="text-align:center" colspan="2">'+getSeaPhrase("ENCLOSED_OR","TE")+'</td></tr>'
+		for (var i=0; i<Statuses.length; i++)
+		{
+			html += '<tr><td class="plaintablecell"><input class="inputbox" type="checkbox" id="statuses'+i+'" name="statuses'+i+'" onclick="parent.StatusesClicked();">'
+			html += '</td><td class="plaintablecell"><label for="statuses'+i+'">'+Statuses[i]+'</label></td></tr>'
+		}
+		html += '</table></td></tr></table>'
+		html += '<p style="align:center">'
+		html += uiButton(getSeaPhrase("BACK","TE"),"parent.GoToDetailReport("+TypeClicked+");return false")
+		html += uiButton(getSeaPhrase("CONTINUE","TE"),"parent.DrawDetail("+TypeClicked+");return false","margin-left:5px")
+		html += '</p></form></div>'
+		self.main.document.getElementById("paneBody1").innerHTML = html;
+		self.main.stylePage();
+		setWinTitle(getSeaPhrase("CARD_STATUS_SEL","TE"), self.main);
+		stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.main)]));
+	};
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function AllStatusesClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	for (var i=0; i<Statuses.length; i++)
+	{
+	    var checkBox = formObj.elements["statuses" + i];
+	    checkBox.checked = false;
+	    self.main.styleElement(checkBox);
+	}
+}
+
+function StatusesClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	var checkBox = formObj.elements["allstatuses"];
+	checkBox.checked = false;
+	self.main.styleElement(checkBox);
+}
+
+function DrawDetail(TypeClicked)
+{
+	Details.Statuses = new Array(0);
+	if (self.main.document.forms["frmReportType"].allstatuses.checked)
+	{
+		Details.ShowAllRecords = true;
+		for (var i=0; i<Statuses.length; i++)
+			Details.Statuses[Details.Statuses.length] = true;
+	}
+	else
+	{
+		Details.ShowAllRecords = false; //PT116112
+		var formObj = self.main.document.forms["frmReportType"];
+		for (var i=0; i<Statuses.length; i++)
+		{
+			if (eval("formObj.statuses"+i).checked)
+				Details.Statuses[i] = true;
+			else
+				Details.Statuses[i] = false;
+		}
+	}
+	Details.ShowBlankRecords = (Details.Statuses.length > 0 && Details.Statuses[0]);
+	if (TypeClicked == 2)
+		DrawSummaryWindow();
+	else
+		DrawDetailWindow();
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var headerHeight = 0;
+	var outerPane = self.main.document.getElementById("outerPane");
+	var paneBody1 = self.main.document.getElementById("paneBody1");
+	var paneBody2 = self.main.document.getElementById("paneBody2");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentHeight;
+	if (winWidth > 17)
+		outerPane.style.width = (winWidth - 17) + "px";
+	outerPane.setAttribute("tabindex", "0");
+	outerPane.style.overflow = "auto";
+	if (winHeight > (headerHeight + 122))
+		outerPane.style.height = (winHeight - headerHeight - 122) + "px";
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 : winWidth - 22;
+		contentHeight = winHeight - headerHeight - 122;
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 35;
+		contentHeight = winHeight - headerHeight - 95;		
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 15 : winWidth - 20;
+		contentHeight = winHeight - headerHeight - 95;			
+	}
+	var tblFrame = document.getElementById("main");
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+		self.main.onresize = null;
+	if (winHeight > (headerHeight + 95))
+		tblFrame.style.height = (winHeight - headerHeight - 95) + "px";
+	if (winWidth > 15)
+		tblFrame.style.width = (winWidth - 15) + "px";
+	var paneBorder = document.getElementById("paneBorder");
+	if (winHeight > headerHeight)
+		paneBorder.style.height = (winHeight - headerHeight) + "px";
+	if (winWidth > 10)
+		paneBorder.style.width = (winWidth - 10) + "px";
+	if (outerPane)
+	{	
+		if (window.styler && window.styler.showInfor3)
+		{
+			outerPane.removeAttribute("styler");
+			outerPane.style.paddingTop = "10px";
+		}	
+		else
+			outerPane.setAttribute("styler", "groupbox");
+		if (contentWidth > 0)
+			outerPane.style.width = contentWidth + "px";
+		outerPane.style.marginTop = "1px";
+		if (contentHeight > 0)
+			outerPane.style.height = contentHeight + "px";
+	}
+	if (paneBody1 && paneBody2)
+	{
+		paneBody1.style.height = "auto";
+		paneBody1.style.width = "100%";
+	}
+}
+
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenProgram()" onresize="fitToScreen()">
+<iframe id="taskheader" name="taskheader" title="Header" level="1" tabindex="0" src="/lawson/xhrnet/ui/header.htm" style="visibility:visible;position:absolute;height:34px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+<div id="paneBorder" class="panebordertimeentry" style="position:absolute;top:34px;left:0px;visibility:hidden;height:560px;overflow:hidden">
+	<table id="paneTable" border="0" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr style="height:16px" styler="hidden">
+	<td>
+		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%" role="presentation">
+		<tr>
+		<td>
+			<div id="paneHeader" class="paneheadertimeentry" width="100%" height="100%" role="heading" aria-level="1">&nbsp;</div>
+		</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="main" id="main" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;position:relative;width:100%;height:490px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="footer" title="Footer" level="3" tabindex="0" src="/lawson/xhrnet/ui/plain.htm" style="visibility:visible;position:relative;width:100%;height:31px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td>
+		<iframe name="printFm" title="Empty" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="jsreturn" title="Empty" src"/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="lawheader" title="Empty" src="/lawson/xhrnet/timeentry/reporting/reportinglaw.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/reporting/reporting.htm,v 1.18.2.81 2014/02/25 22:49:17 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

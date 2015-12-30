@@ -1,0 +1,173 @@
+<!-- $Header: /cvs/cvs_archive/applications/webtier/webappjs/data.htm,v 1.3.2.4.2.3 2014/02/18 16:42:32 brentd Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+<html lang="en">
+<script>
+// Extract a parameter value from a string.
+function getVarFromString(varName, str, delim)
+{
+	var url = str;
+	var ptr = url.indexOf(varName + "=");
+	var ptr2;
+	var val1 = "";
+	var delim = (delim) ? delim : "&";
+
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1,url.length);
+		var ptr2;
+
+		if ((ptr2 = val1.indexOf(delim)) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0,ptr2);
+		}
+	}
+	return val1;
+}
+
+// Construct a DMEObject from a DME query string.
+function getDMEObjectFromString(str, dmeFileInstance)
+{
+	var object = new dmeFileInstance.DMEObject();
+
+	var hostStr = object.protocol + "//" + object.host;
+	if (str.indexOf(hostStr) >= 0)
+		object.progName = str.substring(str.indexOf(hostStr)+hostStr.length,str.indexOf("?"));
+	else
+		object.progName = str.substring(0,str.indexOf("?"));
+
+	var params = str.substring(str.indexOf("?")+1).split("&");
+	var keyVal = new Array();
+
+	for (var i=0; i<params.length; i++)
+	{
+		keyVal = params[i].split("=");
+		switch(keyVal[0])
+		{
+			case "PROD": object.prod = getVal(keyVal); break;
+			case "FILE": object.file = getVal(keyVal); break;
+			case "OUT":	object.out = getVal(keyVal); break;
+			case "FILENAME": object.filename = getVal(keyVal); break;
+			case "SYSTEM": object.system = getVal(keyVal); break;
+			case "TOTAL": object.total = getVal(keyVal); break;
+			case "PERIOD": object.period = getVal(keyVal); break;
+			case "DELIM": object.delim = getVal(keyVal); break;
+			case "DATEFIELD": object.datefield = getVal(keyVal); break;
+			case "PERIODEND": object.periodend = getVal(keyVal); break;
+			case "NOHEADER": object.noheader = true; break;
+			case "INDEX": object.index = getVal(keyVal); break;
+			case "FIELD": object.field = getVal(keyVal); break;
+			case "KEY": object.key = getVal(keyVal); break;
+			case "SELECT": object.select = getVal(keyVal); break;
+			case "COND": object.cond = getVal(keyVal); break;
+			case "BOOLCOND": object.boolcond = getVal(keyVal); break;
+			case "EXCLUDE": object.exclude = getVal(keyVal); break;
+			case "MAX": object.max = getVal(keyVal); break;
+			case "OTMMAX": object.otmmax = getVal(keyVal); break;
+			case "OTMDELIM": object.otmdelim = getVal(keyVal); break;
+			case "FUNC": object.func = getVal(keyVal); break;
+			case "SORTDESC": object.sortdesc = getVal(keyVal); break;
+			case "SORTASC": object.sortasc = getVal(keyVal); break;
+			case "PUB": object.pub = true; break;
+			case "URL": object.url = getVal(keyVal); break;
+			case "BEGIN": object.begin = getVal(keyVal); break;
+			case "PREV": object.prev = true; break;
+			case "WEBUSER": object.webuser = getVal(keyVal); break;
+			case "LOGAN": object.logan = getVal(keyVal); break;
+			case "ALLOWEQUALS": object.allowequals = getBoolVal(keyVal); break;
+			case "NOFILTER": object.noFilter = getBoolVal(keyVal); break;
+			case "XRELS": object.xrels = getBoolVal(keyVal); break;
+			case "XKEYS": object.xkeys = getBoolVal(keyVal); break;
+			case "XIDA": object.xida = getBoolVal(keyVal); break;
+		}
+	}
+	return object;
+}
+
+// Get the value of a non-boolean DME parameter.
+function getVal(valArr)
+{
+	if (valArr.length > 1)
+	{
+		var valArr2 = valArr.slice(1);
+		return valArr2.join("=");
+	}
+	else
+		return "";
+}
+
+// Get the value of a boolean DME parameter.
+function getBoolVal(valArr)
+{
+	if (valArr.length > 1)
+		return ((valArr[1].toUpperCase() == "TRUE") ? true : false);
+	else
+		return false;
+}
+
+// Run a Next or Previous DME call on the clientside.
+function runDME()
+{
+	if (window.location.search)
+	{
+		// next/previous query string
+		var dataStr = getVarFromString("query",window.location.search,"|");
+		// frame to write the output to
+		var frameStr = getVarFromString("frame",window.location.search,"|");
+
+		// Get a reference to the window this request came from (data.js).
+		// Warning: this assumes that the DME has been run in a child frame or iframe.
+		var dmeFileInstance = self;
+		var frames = frameStr.split(".");
+		var i = 0;
+		while (i < frames.length)
+		{
+			dmeFileInstance = dmeFileInstance.parent;
+			i++;
+		}
+
+		// Re-construct the DMEObject from the query string, because the logic
+		// in data.js to parse the XML output needs to reference it.
+		var object = getDMEObjectFromString(dataStr, dmeFileInstance);
+		var is810 = (object.progName == dmeFileInstance.dmeHandler.dmeUrl_810) ? true : false;
+		try
+		{
+			object.encoding = dmeFileInstance.iosHandler.getEncoding();
+		}
+		catch(e) {}	
+		if (is810)
+			dmeFileInstance.callDME_810(frameStr, object, dataStr);
+		else
+			dmeFileInstance.callDME_803_XML(frameStr, object, dataStr);
+	}
+	else
+	{
+		alert('Unable to execute DME next/previous call');
+	}
+}
+</script>
+<body onload="runDME()">
+</body>
+</html>

@@ -1,0 +1,944 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/workspace.htc,v 1.7.2.2.26.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<PUBLIC:COMPONENT id="wksp" tagname="WORKSPACE">
+<PUBLIC:DEFAULTS viewLinkContent/>
+
+<PUBLIC:METHOD name="activate"/>
+<PUBLIC:METHOD name="addView"/>
+<PUBLIC:METHOD name="checkPlacement"/>
+<PUBLIC:METHOD name="constructViews"/>
+<PUBLIC:METHOD name="enableView"/>
+<PUBLIC:METHOD name="getElementById"/>
+<PUBLIC:METHOD name="getElementsByTagName"/>
+<PUBLIC:METHOD name="registerView"/>
+<PUBLIC:METHOD name="setActive"/>
+<PUBLIC:METHOD name="setActiveWindow"/>
+<PUBLIC:METHOD name="setButtonStatus"/>
+<PUBLIC:METHOD name="setInactiveWindow"/>
+<PUBLIC:METHOD name="setModifiedTitle"/>
+<PUBLIC:METHOD name="setScrolling"/>
+<PUBLIC:METHOD name="setTitle"/>
+<PUBLIC:METHOD name="setWindowState"/>
+<PUBLIC:METHOD name="switchNextView"/>
+<PUBLIC:METHOD name="switchView"/>
+
+<PRIVATE:METHOD name="initialize"/>
+<PRIVATE:METHOD name="onActivate"/>
+<PRIVATE:METHOD name="onDragGo"/>
+<PRIVATE:METHOD name="onDragStart"/>
+<PRIVATE:METHOD name="onDragStop"/>
+<PRIVATE:METHOD name="onSwitchView"/>
+<PRIVATE:METHOD name="onWindowClick"/>
+<PRIVATE:METHOD name="onWindowClose"/>
+<PRIVATE:METHOD name="onWindowDblClick"/>
+<PRIVATE:METHOD name="saveWindowSettings"/>
+<PRIVATE:METHOD name="saveInitialWindowSettings"/>
+<PRIVATE:METHOD name="setFrame"/>
+<PRIVATE:METHOD name="setInactive"/>
+
+<PUBLIC:PROPERTY name="activated" get="isActivated" put="setActivate"/>
+<PUBLIC:PROPERTY name="button" get="getButton" put="setButton"/>
+<PUBLIC:PROPERTY name="buttons" get="getButtons"/>
+<PUBLIC:PROPERTY name="docName" get="getDocName" put="setDocName"/>
+<PUBLIC:PROPERTY name="editor" get="getEditor" put="setEditor"/>
+<PUBLIC:PROPERTY name="editors" get="getEditors"/>
+<PUBLIC:PROPERTY name="maximized" get="isMaximized"/>
+<PUBLIC:PROPERTY name="minimized" get="isMinimized"/>
+<PUBLIC:PROPERTY name="view" get="getView" put="setView"/>
+<PUBLIC:PROPERTY name="views" get="getViews"/>
+
+<PRIVATE:PROPERTY name="modified" get="isModified"/>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<SCRIPT language="javascript">
+//-----------------------------------------------------------------------------
+// initialization
+wksp.editors = new parent.LawCollection();
+wksp.views = new parent.LawCollection();
+wksp.buttons = new parent.LawCollection();
+
+wksp.editor = null;
+wksp.view = "";
+wksp.button = null;
+wksp.activated = false;
+
+var bFirst = true;
+var frTop = null;
+var frLeft = null;
+var frHeight = null;
+var frWidth = null;
+
+//-----------------------------------------------------------------------------
+function getEditor()
+{
+	return wksp.editor;
+}
+
+//-----------------------------------------------------------------------------
+function setEditor(viewId)
+{
+	var ed = wksp.editors.item(viewId);
+	wksp.editor = ed;
+	return wksp.editor;
+}
+
+//-----------------------------------------------------------------------------
+function getEditors()
+{
+	return wksp.editors;
+}
+
+//-----------------------------------------------------------------------------
+function getViews()
+{
+	return wksp.views;
+}
+
+//-----------------------------------------------------------------------------
+function getView()
+{
+	return wksp.view;
+}
+
+//-----------------------------------------------------------------------------
+function setView(viewId)
+{
+	wksp.view = viewId;
+	return wksp.view;
+}
+
+//-----------------------------------------------------------------------------
+function getButton()
+{
+	return wksp.button;
+}
+
+//-----------------------------------------------------------------------------
+function setButton(viewId)
+{
+	wksp.button = viewId;
+	return wksp.button;
+}
+
+//-----------------------------------------------------------------------------
+function getButtons()
+{
+	return wksp.buttons;
+}
+
+//-----------------------------------------------------------------------------
+function getElementById(id)
+{
+	return document.getElementById(id);
+}
+
+//-----------------------------------------------------------------------------
+function getElementsByTagName(id)
+{
+	return document.getElementsByTagName(id);
+}
+
+//-----------------------------------------------------------------------------
+function setButtonStatus(id, status)
+{
+	document.getElementById(id).disabled = status;
+	return status;
+}
+
+//-----------------------------------------------------------------------------
+function setScrolling(id, value)
+{
+	if (typeof(value) != "string")
+		value = "no";
+	document.getElementById("view_" + id).scrolling = value;
+	return value;
+}
+
+//-----------------------------------------------------------------------------
+function isMaximized()
+{
+	return wksp.maximized;
+}
+
+//-----------------------------------------------------------------------------
+function isMinimized()
+{
+	return wksp.minimized;
+}
+
+//-----------------------------------------------------------------------------
+function isModified()
+{
+	return wksp.modified;
+}
+
+//-----------------------------------------------------------------------------
+function isActivated()
+{
+	return wksp.activated;
+}
+
+//-----------------------------------------------------------------------------
+function setActivate(value)
+{
+	wksp.activated = value;
+	return wksp.activated;
+}
+
+//-----------------------------------------------------------------------------
+function getDocName()
+{
+	return wksp.docName;
+}
+
+//-----------------------------------------------------------------------------
+function setDocName(value)
+{
+	wksp.docName = value;
+	return wksp.docName;
+}
+
+//-----------------------------------------------------------------------------
+function initialize()
+{
+	wksp.editors.removeAll();
+	wksp.views.removeAll();
+	wksp.buttons.removeAll();
+	wksp.editor = null;
+	wksp.button = "";
+	wksp.view = "";
+	wksp.maximized = false;
+	wksp.minimized = false;
+	wksp.modified = false;
+}
+
+//-----------------------------------------------------------------------------
+function constructViews(designerInfo)
+{
+	var view = null;
+	var viewFrame, viewButton, viewEditor;
+	var viewCell, btnCell;
+
+	initialize();
+	viewCell = document.getElementById("views");
+	btnCell = document.getElementById("buttons");
+
+	for (var i=0; i<designerInfo.views.count; i++)
+	{
+		view = designerInfo.views.item(i);
+		viewButton = document.createElement("INPUT");
+		viewButton.type = "button";
+		viewButton.id = "btn_"+ view.id;
+		viewButton.className = "dsViewButton";
+		viewButton.style.width = "50px";
+		viewButton.value = view.name;
+		viewButton.onclick = onSwitchView;
+		viewButton.onmouseover = vuOnMouseOverBtn;
+		viewButton.onmouseout = vuOnMouseOutBtn;
+		btnCell.appendChild(viewButton);
+
+		wksp.buttons.add(view.id, viewButton);
+
+		viewFrame = document.createElement("IFRAME");
+		viewFrame.id = "view_" + view.id;
+		viewFrame.frameBorder = "no";
+		viewFrame.className = (view.defaultView == "y") ? "dsViewFrameActive" : "dsViewFrame";
+		viewFrame.scrolling = "yes";
+		viewCell.appendChild(viewFrame);
+
+		viewFrame.src = parent.studioPath + "/" + designerInfo.folder + "/" + view.src + "?" +
+			view.editor + "&" + view.defaultView;
+	}
+
+ 	if (parent.designStudio.activeDesigner.toolBox)
+ 	{
+ 		var propView = new parent.PropertyView("PROPERTYAREA");
+ 		wksp.views.add(propView.id, propView);
+ 	}
+
+ 	if (designerInfo.views.count)
+ 	{
+		var windowIcon = document.getElementById("windowIcon");
+		if (designerInfo.icon && designerInfo.icon.length > 0)
+		{
+			var img = document.createElement("IMG");
+			img.id = "titleImage";
+			img.src = top.designStudio.path + "/" + designerInfo.folder + "/" + designerInfo.icon;
+			windowIcon.appendChild(img);
+		}
+
+		setDocName(parent.designStudio.activeDesigner.activeDocument.qualifiedName);
+		setTitle(parent.designStudio.activeDesigner.activeDocument.qualifiedName);
+
+ 		viewCell.style.visibility = "visible";
+ 		btnCell.style.visibility = "visible";
+ 		document.getElementById("resizeButton").style.visibility = "visible";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function registerView(view, editor, defaultView)
+{
+	wksp.editors.add(view, editor);
+	editor.id = view;
+
+	if (defaultView && typeof(defaultView) != "undefined" && defaultView == "y")
+	{
+		wksp.editor = wksp.editors.item(view);
+		wksp.button = view;
+		wksp.view = view;
+		var ab = wksp.buttons.item(view);
+		ab.className = "dsViewButtonActive";
+	}
+	if (wksp.buttons.count == wksp.editors.count)
+		parent.designStudio.loadDesignerComplete2();
+}
+
+//-----------------------------------------------------------------------------
+function addView(viewId, view)
+{
+	return (wksp.views.add(viewId, view));
+}
+
+//-----------------------------------------------------------------------------
+function switchView(viewId)
+{
+	if (wksp.view == viewId) return;
+
+	try {
+		if (!wksp.views.item(viewId).isEnabled()) return;
+	} catch (e) { }
+
+	var extraInfo = new Object();
+	extraInfo.activeView = wksp.view;
+	extraInfo.newView = viewId;
+
+	var evtObj = parent.designStudio.createEventObject(parent.ON_BEFORE_SWITCH_VIEW, null, null, extraInfo);
+	if (!parent.designStudio.activeDesigner.eventHandler.processEvent(evtObj))
+		return;
+
+	setInactive(wksp.button);
+	setActive(viewId);
+
+	var ed = wksp.editors.item(viewId);
+	if (ed)
+		ed.setActive();
+
+	var extraInfo1 = new Object();
+	extraInfo1.activeView = viewId;
+	extraInfo1.prevView = wksp.view;
+
+	wksp.editor = ed;
+	wksp.view = viewId;
+	wksp.button = viewId;
+
+	var vu = wksp.views.item(viewId);
+	with (vu)
+	{
+		setActive();
+		setToolboxState();
+		setContent();
+	}
+	var evtObj = parent.designStudio.createEventObject(parent.ON_SWITCH_VIEW, null, null, extraInfo1);
+	parent.designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+}
+
+//-----------------------------------------------------------------------------
+function vuOnMouseOverBtn()
+{
+	var btn=window.event.srcElement
+	if (btn.className=="dsViewButtonActive"	|| btn.disabled) return
+	btn.className="dsViewButtonHover"
+}
+
+//-----------------------------------------------------------------------------
+function vuOnMouseOutBtn()
+{
+	var btn=window.event.srcElement
+	if (btn.className=="dsViewButtonActive"	|| btn.disabled) return
+	btn.className="dsViewButton"
+}
+
+//-----------------------------------------------------------------------------
+function enableView(viewId, bEnable)
+{
+	if (typeof(bEnable) != "boolean")
+		bEnable = true;
+	var btn = document.getElementById("btn_" + viewId);
+	if (btn) btn.disabled = !bEnable;
+
+	wksp.views.item(viewId).enabled = bEnable;
+}
+
+//-----------------------------------------------------------------------------
+function switchNextView(dir)
+{
+	var bHandled=false;
+	try {
+		var count = wksp.views.count;
+		var i=0;
+		for ( ; i < count; i++)
+		{
+			var view = wksp.views.item(i);
+			if (view.id == wksp.view)
+				break;
+		}
+		if (dir=="dn")
+		{
+			for (var j=i+1; j < count; j++)
+			{
+				var view = wksp.views.item(j);
+				if (!wksp.views.item(view.id).isEnabled()) continue;
+				switchView(view.id)
+				bHandled=true;
+				break;
+			}
+		}
+		else		// if (dir=="up")
+		{
+			for (var j=i-1; j > -1; j--)
+			{
+				var view = wksp.views.item(j);
+				if (!wksp.views.item(view.id).isEnabled()) continue;
+				switchView(view.id)
+				bHandled=true;
+				break;
+			}
+		}
+
+	} catch (e) { }
+	return (bHandled);
+}
+
+//-----------------------------------------------------------------------------
+function setActive(viewId)
+{
+	var oView = wksp.views.item(viewId);
+	if (oView.active) return;
+
+	var view = document.getElementById("view_" + viewId);
+	var button = document.getElementById("btn_" + viewId);
+
+	view.className = "dsViewFrameActive";
+	button.className = "dsViewButtonActive";
+
+	if (bFirst)
+	{
+		// Show the left bar and right bar.
+		var viewProp = parent.designStudio.activeDesigner.designerInfo.views.item(viewId);
+		var ui = parent.designStudio.ui;
+
+		if(parseInt(viewProp.leftBarWidth) > 0)
+		{
+			ui.leftBar.style.width = parseInt(parent.designStudio.getUserPreference("LEFTBARWIDTH","15")) + "%";
+			ui.leftBar.style.display = "block";
+		}
+		if(parseInt(viewProp.rightBarWidth) > 0)
+		{
+			ui.rightBar.style.width = parseInt(parent.designStudio.getUserPreference("RIGHTBARWIDTH","15")) + "%";
+			ui.rightBar.style.display = "block";
+		}
+
+		ui.workSpace.style.width =
+			(100 - (parseInt(ui.leftBar.style.width) + parseInt(ui.rightBar.style.width)))+"%";
+		ui.workSpace.style.cursor = "default";
+
+		var fr = document.parentWindow.frameElement;
+		with (fr)
+		{
+			setWindowState("maximize");
+			saveInitialWindowSettings();
+		}
+		bFirst = !bFirst;
+	}
+	oView.active = true;
+	oView.opened = true;
+	eval("setFrame()");
+}
+
+//-----------------------------------------------------------------------------
+function setInactive(viewId)
+{
+	var oView = wksp.views.item(viewId);
+	if (!oView.active) return;
+
+	var view = document.getElementById("view_" + viewId);
+	var button = document.getElementById("btn_" + viewId);
+
+	view.className = "dsViewFrame";
+	button.className = "dsViewButton";
+	oView.active = false;
+}
+
+//-----------------------------------------------------------------------------
+function onSwitchView()
+{
+	var viewId = window.event.srcElement.id.substr(4);
+	switchView(viewId);
+}
+
+//-----------------------------------------------------------------------------
+function checkPlacement()
+{
+	var ui = parent.designStudio.ui;
+	var obj = document.parentWindow.frameElement.parentElement;
+	if (obj.offsetLeft + obj.offsetWidth > ui.workSpace.offsetWidth)
+	{
+		var diff = (obj.offsetLeft + obj.offsetWidth) - ui.workSpace.offsetWidth;
+		var left = obj.offsetLeft - diff - 1;
+
+		if (left < 0)
+		{
+			obj.style.pixelLeft = -2;
+			obj.style.pixelWidth = ui.workSpace.offsetWidth - 5;
+		}
+		else
+			obj.style.pixelLeft = left;
+
+		var frm = obj.getElementsByTagName("IFRAME");
+		frm = frm[0];
+		frm.style.pixelWidth = obj.style.pixelWidth;
+		saveWindowSettings();
+	}
+}
+
+var	dragObj = new Object();
+dragObj.zIndex = 0;
+
+//-----------------------------------------------------------------------------
+function onDragStart(evt, type)
+{
+	activate();
+	if (isMaximized() || (evt.srcElement.id != null && evt.srcElement.id.indexOf("btn_") >= 0))
+	{
+		evt.cancelBubble = true;
+		evt.returnValue = false;
+		return;
+	}
+
+	if (typeof(type) != "string")
+		type = "move";
+
+	dragObj.elNode = document.parentWindow.frameElement.parentElement;
+	dragObj.type = type;
+
+	if (dragObj.elNode.nodeType == 3)
+		dragObj.elNode = dragObj.elNode.parentNode;
+
+	dragObj.screenX = evt.screenX;
+	dragObj.screenY = evt.screenY;
+
+	dragObj.elStartLeft = dragObj.elNode.offsetLeft;
+	dragObj.elStartTop = dragObj.elNode.offsetTop;
+
+	dragObj.elStartWidth = dragObj.elNode.offsetWidth;
+	dragObj.elStartHeight = dragObj.elNode.offsetHeight;
+	dragObj.minWidth = Math.floor(window.screen.availWidth * .28);
+
+	if (isNaN(dragObj.elStartLeft)) dragObj.elStartLeft = 0;
+	if (isNaN(dragObj.elStartTop)) dragObj.elStartTop = 0;
+
+	dragObj.elNode.setCapture();
+	dragObj.elNode.document.attachEvent("onmousemove", onDragGo);
+	dragObj.elNode.document.attachEvent("onmouseup", onDragStop);
+	evt.cancelBubble = true;
+	evt.returnValue = false;
+}
+
+//-----------------------------------------------------------------------------
+function onDragGo(evt)
+{
+	// Get cursor position with respect to the page.
+	var ui = parent.designStudio.ui;
+
+	// Move drag element by the same amount the cursor has moved.
+	if (dragObj.type == "resize")
+	{
+		try
+		{
+			var x = evt.screenX;
+			var y = evt.screenY;
+			var width = (dragObj.elStartWidth + x - dragObj.screenX);
+
+			if (width <= dragObj.minWidth)
+				width = dragObj.minWidth;
+			else if ((dragObj.elStartLeft + width - 2) > ui.workSpace.offsetWidth - 8)
+				width = ui.workSpace.offsetWidth - dragObj.elNode.offsetLeft - 7;
+
+			dragObj.elNode.style.pixelWidth = width;
+
+			var height = (dragObj.elStartHeight + y - dragObj.screenY);
+			if (height <= 100)
+				height = 100;
+			else if ((dragObj.elStartTop + height - 2) > ui.workSpace.offsetHeight - 4)
+				height = ui.workSpace.offsetHeight - dragObj.elNode.offsetTop - 3;
+
+			dragObj.elNode.style.pixelHeight = height;
+
+			var frm = dragObj.elNode.getElementsByTagName("IFRAME");
+			frm = frm[0];
+			frm.style.pixelWidth = width;
+			frm.style.pixelHeight = height;
+		} catch(e)
+		{
+		// size error
+		}
+	}
+	else
+	{
+		var x = evt.screenX;
+		var y = evt.screenY;
+		var left = dragObj.elStartLeft + x - dragObj.screenX;
+
+		if (left < 0)
+			left = -2;
+		else if (left + dragObj.elNode.offsetWidth > ui.workSpace.offsetWidth)
+			left = ui.workSpace.offsetWidth - dragObj.elNode.offsetWidth - 1;
+
+		var top = dragObj.elStartTop + y - dragObj.screenY;
+		if (top < 0)
+			top = -2;
+		else if (top + dragObj.elNode.offsetHeight > ui.workSpace.offsetHeight)
+			top = ui.workSpace.offsetHeight - dragObj.elNode.offsetHeight + 3;
+
+		dragObj.elNode.style.pixelLeft = left;
+		dragObj.elNode.style.pixelTop = top;
+	}
+	evt.cancelBubble = true;
+	evt.returnValue = false;
+}
+
+//-----------------------------------------------------------------------------
+function onDragStop(evt)
+{
+	var ui = parent.designStudio.ui;
+
+	// Stop capturing mousemove and mouseup events.
+	if (dragObj.elNode.style.pixelTop < 0)
+		dragObj.elNode.style.pixelTop = -2;
+
+	if (dragObj.elNode.style.pixelLeft < 0)
+		dragObj.elNode.style.pixelLeft = -2;
+
+	if (dragObj.type == "resize")
+	{
+		var ui = parent.designStudio.ui;
+		var frm = dragObj.elNode.getElementsByTagName("IFRAME");
+		frm = frm[0];
+
+		if (dragObj.elNode.offsetWidth > ui.workSpace.offsetWidth - 6)
+		{
+			dragObj.elNode.style.pixelWidth = ui.workSpace.offsetWidth - 5;
+			frm.style.pixelWidth = dragObj.elNode.style.pixelWidth;
+		}
+
+		if (dragObj.elNode.offsetHeight > ui.workSpace.offsetHeight - 3)
+		{
+			dragObj.elNode.style.pixelHeight = ui.workSpace.offsetHeight - 1;
+			frm.style.pixelHeight = dragObj.elNode.style.pixelHeight;
+		}
+	}
+
+	dragObj.elNode.document.detachEvent("onmousemove", onDragGo);
+	dragObj.elNode.document.detachEvent("onmouseup",   onDragStop);
+	dragObj.elNode.document.releaseCapture();
+
+	if (!isMinimized())
+		saveWindowSettings();
+}
+
+//-----------------------------------------------------------------------------
+function onWindowClose(evt)
+{
+	parent.designStudio.explorer.closeFile(getDocName());
+}
+
+//-----------------------------------------------------------------------------
+function onWindowDblClick(evt)
+{
+	activate();
+	setWindowState((isMaximized()) ? "restore" : "maximize");
+}
+
+//-----------------------------------------------------------------------------
+function onWindowClick(evt)
+{
+	activate();
+	setWindowState(evt.srcElement.title);
+}
+
+//-----------------------------------------------------------------------------
+function setWindowState(state)
+{
+	var btn1 = document.getElementById("btn_1");
+	var btn2 = document.getElementById("btn_2");
+
+	switch (state.toLowerCase())
+	{
+		case "minimize":
+			if (!isMinimized())
+			{
+				wksp.minimized = true;
+				wksp.maximized = false;
+
+				with (btn1)
+				{
+					title = "Restore";
+					style.backgroundImage = "url(../images/restore.gif)"
+				}
+
+				with (btn2)
+				{
+					title = "Maximize";
+					style.backgroundImage = "url(../images/maximize.gif)";
+				}
+
+				var ui = parent.designStudio.ui;
+				var fr = document.parentWindow.frameElement;
+				with (fr)
+				{
+					parentElement.style.border = "outset threedface 2px";
+					parentElement.style.top = "-3000";
+				}
+				setFrame();
+				document.getElementById("resize").style.visibility = "hidden";
+				parent.designStudio.explorer.minimizeWindow(getDocName());
+			}
+			break;
+
+		case "maximize":
+			wksp.maximized = true;
+			wksp.minimized = false;
+			with (btn1)
+			{
+				title = "Minimize";
+				style.backgroundImage = "url(../images/minimize.gif)"
+			}
+
+			with (btn2)
+			{
+				title = "Restore";
+				style.backgroundImage = "url(../images/restore.gif)";
+			}
+
+			var ui = parent.designStudio.ui;
+			var fr = document.parentWindow.frameElement;
+			with (fr)
+			{
+				parentElement.style.border = "outset threedface 2px";
+				parentElement.style.top = -2;
+				parentElement.style.left = -2;
+				parentElement.style.height = ui.workSpace.offsetHeight - 1;
+				parentElement.style.width = top.document.body.clientWidth - (ui.leftBar.style.pixelWidth + ui.rightBar.style.pixelWidth + 5);
+			}
+			setFrame();
+			document.getElementById("resize").style.visibility = "hidden";
+
+			var elem = document.getElementById("views_buttons");
+			if (elem)
+				elem.focus();
+			break;
+
+		case "restore":
+			var fr = document.parentWindow.frameElement;
+			fr.parentElement.style.border = "outset threedface 2px";
+
+			if (frTop != null)
+			{
+				with (fr)
+				{
+					parentElement.style.top = frTop;
+					parentElement.style.left = frLeft;
+					parentElement.style.height = frHeight;
+					parentElement.style.width = frWidth;
+				}
+				setFrame();
+			}
+
+			wksp.maximized = false;
+			wksp.minimized = false;
+
+			with (btn1)
+			{
+				title = "Minimize";
+				style.backgroundImage = "url(../images/minimize.gif)"
+			}
+
+			with (btn2)
+			{
+				title = "Maximize";
+				style.backgroundImage = "url(../images/maximize.gif)";
+			}
+			document.getElementById("resize").style.visibility = "visible";
+
+			if (!parent.designStudio.explorer.bRestoring)
+			{
+				parent.designStudio.explorer.restoreAll(getDocName());
+				var elem = document.getElementById("views_buttons");
+				if (elem)
+					elem.focus();
+			}
+			break;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function saveWindowSettings()
+{
+	var fr = document.parentWindow.frameElement;
+	frTop = fr.parentElement.style.top;
+	frLeft = fr.parentElement.style.left;
+	frHeight = fr.parentElement.style.height;
+	frWidth = fr.parentElement.style.width;
+}
+
+//-----------------------------------------------------------------------------
+function saveInitialWindowSettings()
+{
+	var fr = document.parentWindow.frameElement;
+	frTop = fr.parentElement.style.top;
+	frLeft = fr.parentElement.style.left;
+	frHeight = Math.floor(fr.parentElement.style.pixelHeight * .80);
+	frWidth = Math.floor(fr.parentElement.style.pixelWidth * .80);
+}
+
+//-----------------------------------------------------------------------------
+function setFrame()
+{
+	var fr = document.parentWindow.frameElement;
+	with (fr)
+	{
+		style.pixelHeight = parentElement.style.pixelHeight;
+		style.pixelWidth = parentElement.style.pixelWidth;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function setModifiedTitle(modified)
+{
+	if (isModified() == modified) return;
+
+	var windowTitle = document.getElementById("windowTitle");
+	if (!windowTitle) return;
+
+	if (modified)
+		windowTitle.innerText = windowTitle.innerText + " *";
+	else
+	{
+		var text = windowTitle.innerText;
+		if (text.substr(text.length - 2, text.length) == " *")
+			windowTitle.innerText = text.substr(0, text.length - 2);
+	}
+
+	wksp.modified = modified;
+	document.getElementById("titleBar").title = windowTitle.innerText;
+	return;
+}
+
+//-----------------------------------------------------------------------------
+function setTitle(title)
+{
+	var windowTitle = document.getElementById("windowTitle");
+	if (!windowTitle) return;
+
+	title = title.replace(/\\/g, "/");
+	title = title.replace(/\/\//g, "/");
+	windowTitle.innerText = parent.designStudio.activeDesigner.designerInfo.name + " - " + title;
+	document.getElementById("titleBar").title = windowTitle.innerText;
+	return;
+}
+
+//-----------------------------------------------------------------------------
+function setActiveWindow()
+{
+	var activate = setActivate(true);
+	document.parentWindow.frameElement.parentElement.style.zIndex = "100";
+
+	var elem = document.getElementById("titleBar");
+	with (elem)
+	{
+		style.backgroundColor = "activecaption";
+		style.color = "captiontext";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function setInactiveWindow()
+{
+	var activate = setActivate(false);
+	document.parentWindow.frameElement.parentElement.style.zIndex = "1";
+
+	var elem = document.getElementById("titleBar");
+	with (elem)
+	{
+		style.backgroundColor = "inactivecaption";
+		style.color = "inactivecaptiontext";
+	}
+}
+
+//-----------------------------------------------------------------------------
+function onActivate(evt)
+{
+	activate();
+}
+
+//-----------------------------------------------------------------------------
+function activate()
+{
+	if (!isActivated())
+		parent.designStudio.explorer.setActiveWindow(getDocName());
+}
+
+//-----------------------------------------------------------------------------
+</SCRIPT>
+
+</PUBLIC:COMPONENT>
+<link type="text/css" id="dsStyle" href="studio.css" rel="stylesheet"></link>
+
+<BODY onactivate="onActivate(event)">
+	<div id="titleBar" class="dsWindowTitle" style="left:0px;top:0px;height:18px;" onmousedown="onDragStart(event, 'move')" ondblclick="onWindowDblClick(event)" onselectstart="return false;">
+		<nobr>
+			<span id="windowIcon" style="position:absolute;top:1px;left:2px;overflow:none;"></span>
+			<span id="windowTitle" style="position:absolute;top:2px;left:24px;width:expression(document.body.clientWidth-100);text-overflow:ellipsis;overflow:hidden;"></span>
+			<span id="windowButtons" style="position:absolute;margin:2px;top:0px;left:expression(document.body.clientWidth-60);width:60px;">
+				<INPUT type="button" id="btn_1" class="dsWindowButton" style="position:relative;height:15px;width:16px;background-position:center;background-repeat:no-repeat;background-image:url(../images/minimize.gif);margin:0px;" title="Minimize" onclick="onWindowClick(event)"></INPUT>
+				<INPUT type="button" id="btn_2" class="dsWindowButton" style="position:relative;height:15px;width:16px;background-position:center;background-repeat:no-repeat;background-image:url(../images/restore.gif);margin:0px;" title="Restore" onclick="onWindowClick(event)"></INPUT>
+				<INPUT type="button" id="btn_close" class="dsWindowButton" style="position:relative;height:15px;width:16px;background-position:center;background-repeat:no-repeat;background-image:url(../images/close.gif);margin:0px;" title="Close" onclick="onWindowClose(event)"></INPUT>
+			</span>
+		</nobr>
+	</div>
+	<table id="views_buttons" width="100%" style="left:0;top:20px;height:expression(document.body.clientHeight-17);" border="0" cellpadding="0" cellspacing="0">
+		<tr>
+			<td id="views" style="visibility:hidden;height:expression(views_buttons.height-20);" colspan="2">
+			<!-- Workspace area -->
+			</td>
+		</tr>
+		<tr id="buttonRow" class="dsButtonBar">
+			<td id="buttons" style="height:20px;visibility:hidden;" nowrap="true" onmousedown="onDragStart(event, 'resize')">
+			</td>
+			<td id="resizeButton" style="height:20px;visibility:hidden;" align="right" valign="bottom" onmousedown="onDragStart(event, 'resize')">
+				<img id="resize" src="../images/resize.gif" style="margin-right:2px;visibility:hidden;cursor:nw-resize;"></img>
+			</td>
+		</tr>
+	</table>
+</BODY>

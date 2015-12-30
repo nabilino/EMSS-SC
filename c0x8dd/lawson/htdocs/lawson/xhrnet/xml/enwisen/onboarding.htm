@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Onboarding</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/UserManager.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<!--script src="/sso/sso.js"></script-->
+<script>
+//-----------------------------------------------------------------------------
+function onboarding_init()
+{
+	// what version of IOS are we running on?
+	if (!iosFileInstance || !iosFileInstance.iosHandler || (iosFileInstance.iosHandler.getIOS() == null && !iosFileInstance.iosHandler.calledWhat))
+	{
+		if (!iosFileInstance)
+			iosFileInstance = window;
+		if (!iosFileInstance.iosHandler)	
+			iosFileInstance.iosHandler = new IOSHandler();
+		iosFileInstance.iosHandler.createIOS();
+		setTimeout("onboarding_init()", 5);
+		return;			
+	}
+	if (iosFileInstance.iosHandler.getIOS() == null || iosFileInstance.iosHandler.getIOSVersionNumber() == null)
+	{
+		setTimeout("onboarding_init()", 5);
+		return;
+	}
+	if (iosFileInstance.iosHandler.getIOSVersionNumber() >= "09.00.00")
+	{
+		if (!iosFileInstance.iosHandler.isSSOFileLoaded())
+		{
+			iosFileInstance.iosHandler.loadSSOFile();
+			setTimeout("onboarding_init()", 5);
+			return;
+		}
+	}
+	else
+	{
+		alert("Error: You must be running Lawson System Foundation version 9.0.0 or newer to access Enwisen.");
+		if (opener)
+			self.close();
+		return;		
+	}
+	// get user profile data	
+	getUserProfileData();
+	if (isEnwisenEnabled())
+	{		
+		if (!emssObj.employeeGroups)
+		{
+			alert("Error: To access Onboarding, you must configure EMSS to send employee groups to Enwisen in emss_config.xml.");
+			return;
+		}		
+		getLawsonEmployeeGroups();	
+	}
+	else
+		alert("Error: Access to Enwisen has not been enabled in emss_config.xml.");
+}
+
+//-----------------------------------------------------------------------------
+function getUserProfileData()
+{
+	// get user values from the Profile servlet - use the cached object if we can find and reference it
+	try
+	{
+		if (parent.authUser && parent.authUser.webuser)
+		{
+			userObj = parent.authUser;
+			setAuthUserData(parent.authUser);	
+		}
+		else if (opener && opener.authUser && opener.authUser.webuser)
+		{
+			userObj = opener.authUser;
+			setAuthUserData(opener.authUser);	
+		}		
+		else
+		{
+			// a cached user profile object cannot be found - call the Profile servlet to get the user values
+			makeUserProfileCall();
+		}
+	}
+	catch(e)
+	{
+		// an error occurred trying to get a cached user profile object - call the Profile servlet to get the user values
+		makeUserProfileCall();	
+	}
+}
+
+function setAuthUserData(authObj)
+{
+	if (typeof(authUser) != "object" || !authUser)
+		authUser = authObj;
+}
+
+//-----------------------------------------------------------------------------
+function makeUserProfileCall()
+{	
+	userObj = new UserManager(UserManager.TECHNOLOGY_900, SSORequest, false);
+	if (userObj.errorMsg)
+		return;
+	if (!userObj.webuser)	
+		userObj.webuser = userObj.id;
+	setAuthUserData(userObj);
+}
+
+//-----------------------------------------------------------------------------
+function getLawsonEmployeeGroups()
+{
+	if (!userObj && userObj.prodline && userObj.company && userObj.employee)
+	{
+		alert("Error: Could not find employee information.");
+		return null;
+	}
+	dataObj = new DataObject(window, DataObject.TECHNOLOGY_900, SSORequest, storeLawsonEmployeeGroups);
+	dataObj.setEncoding(userObj.encoding);
+	dataObj.setParameter("PROD", userObj.prodline);
+	dataObj.setParameter("FILE", "PGEMPLOYEE");
+	dataObj.setParameter("INDEX", "PGESET2");
+	dataObj.setParameter("FIELD", "group-name");
+	dataObj.setParameter("KEY", userObj.company + "=" + userObj.employee);
+	dataObj.setParameter("MAX", "600");
+	dataObj.setParameter("OTMMAX", "1");
+	dataObj.setParameter("XRELS", "FALSE");
+	dataObj.setParameter("XKEYS", "FALSE");
+	dataObj.setParameter("XIDA", "FALSE");
+	if (dataObj.callData() == null)
+		return;
+}
+
+//-----------------------------------------------------------------------------
+function storeLawsonEmployeeGroups()
+{
+	var empGroups = new Array();
+	var nbrGroups = dataObj.getNbrRecs();
+	if (nbrGroups > 0)
+	{
+		var groupName = "";		
+		for (var i=0; i<nbrGroups; i++)
+		{	
+			var record = dataObj.getRecord(i);
+			var groupName = record.getFieldValue("group-name");
+			empGroups[i] = groupName.toUpperCase();
+		}		
+	}
+	// check if employee belongs to an Onboarding group
+	var isAdmin = isMemberOfGroup(empGroups, emssObj.onboardingAdminGroups);
+	var isDay1NewHire = isMemberOfGroup(empGroups, emssObj.onboardingDay1NewHireGroups);
+	var alias = null;
+	if (isDay1NewHire)
+		alias = "onboard";
+	else if (isAdmin)
+		alias = "adminboarding";
+	else
+	{
+		alert("Error: You do not have access to Onboarding.  You must belong to an Onboarding employee group.  Please contact your HR administrator.");
+		return;
+	}	
+	self.location.replace("enwisen.htm?alias=" + alias);
+}
+
+//-----------------------------------------------------------------------------
+function isMemberOfGroup(assignedGroups, otherGroups)
+{
+	var len1 = assignedGroups.length;
+	var len2 = otherGroups.length;
+	var i = 0;
+	var found = false;
+	if (len1 == 0 || len2 == 0)
+		return false;
+	while (i < len1 && !found)
+	{
+		var j = 0;
+		while (j < len2 && !found)
+		{
+			if (assignedGroups[i].toUpperCase() == otherGroups[j].toUpperCase())
+				found = true;
+			j++;
+		}
+		i++;
+	}
+	return found;
+}
+</script>
+</head>
+<body onload="onboarding_init()">
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/onboarding.htm,v 1.1.2.14 2014/02/17 23:01:52 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

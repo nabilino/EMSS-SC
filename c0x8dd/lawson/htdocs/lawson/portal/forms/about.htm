@@ -1,0 +1,62 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/about.htm,v 1.7.2.1.4.3.14.1.2.2 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Support Information</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css">
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="about.js"></script>
+</head>
+
+<body tabIndex="-1" onload="aboutInit()" onunload="aboutUnload()" onkeydown="aboutKeyDown(event)" 
+			onbeforeunload="aboutOnBeforeUnload()" onresize="aboutOnResize(event)">
+
+	<div id="btnDiv" style="position:absolute;left:10px;top:0px;height:30px;padding:8px;border:1px solid black;">
+		<button id="FormXML" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('FormXML')">Form XML</button>
+		<button id="FormHTML" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('FormHTML')">Form HTML</button>
+		<button id="TranMagic" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('TranMagic')">Trans XML</button>
+		<button id="AgsReturn" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('AgsReturn')">Ags Return</button>
+		<button id="FormObj" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('FormObj')">Form Objs</button>
+		<button id="FormVars" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('FormVars')">Form Vars</button>
+		<button id="XSLScript" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('XSLScript')">XSL Script</button>
+		<button id="CustomScript" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('CustomScript')">Cust Script</button>
+		<button id="Workflow" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('Workflow')">Workflow</button>
+		<button id="KeysColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('KeysColl')">Keys Coll</button>
+		<button id="KeysData" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('KeysData')">Keys Data</button>
+		<button id="ReqColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('ReqColl')">Req Coll</button>
+		<button id="ListColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('ListColl')">List Coll</button>
+		<button id="DefColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('DefColl')">Def Coll</button>
+		<button id="PushColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('PushColl')">Push Coll</button>
+		<button id="NameColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('NameColl')">Name Coll</button>
+		<button id="IdColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('IdColl')">Id Coll</button>
+		<button id="WfColl" class="anchorActive" style="position:relative;width:80px;" onclick="switchView('WfColl')">Wf Coll</button>
+	</div>
+
+	<textarea type="text" id="textWindow" wrap="off" border="0" onkeydown="textKeyDown(event)"
+		style="position:absolute;left:10px;top:40px;width:100px;height:100px;font-size:9pt;font-family:courier new;font-weight:normal;border:1px solid black;padding:8px;">
+	</textarea>
+
+</body>
+
+</html>

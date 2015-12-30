@@ -1,0 +1,88 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<script type="text/javascript">
+function writeContents()
+{
+	document.title = opener.getSeaPhrase("401K_TIPS", "ESS");
+
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel" style="text-align:center">'
+	+ opener.getSeaPhrase("HELP","BEN")
+	+ '</div>'
+
+	self.main.document.getElementById("paneBody").innerHTML =
+	'<table border="0" cellspacing="0" cellpadding="0" width="100%" >'
+	+ '<tr><td class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_1", "ESS")+'</th></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("BEGINNING_BALANCE", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_2", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("ANNUAL_EMPLOYEE_CONTRIBUTION", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_3", "ESS")+'</td></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_4", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("ANNUAL_COMPANY_CONTRIBUTION", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_5", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("COMPOUND_INTEREST", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_6", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("YEARS", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_7", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("INTEREST_RATE", "ESS")+'</td></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_8", "ESS")+'</td></tr>'
+	+ '<tr><th class="helpwindowtableheader" style="padding-top:10px">'+opener.getSeaPhrase("ESTIMATED_INFLATION_RATE", "ESS")+'</th></tr>'
+	+ '<tr><td class="plaintablecell" style="padding-top:10px">'+opener.getSeaPhrase("401K_TIPS_9", "ESS")+'</td></tr>'
+	+ '</table>';
+	self.main.stylePage();
+	self.main.setLayerSizes();
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winHeight = 0;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+	}
+
+	if (winHeight >= 35)
+	{
+		try
+		{
+			self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		}
+		catch(e)
+		{}
+	}
+}
+</script>
+</head>
+<frameset rows="100%" frameborder="no" border="0" onload="fitToScreen();writeContents()" onresize="fitToScreen()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" id="main" marginwidth="0" marginheight="0" scrolling="no">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/401k/401ktips.htm,v 1.8.2.10 2012/06/29 17:12:18 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

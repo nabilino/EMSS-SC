@@ -1,0 +1,302 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Print Time Entry</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/printtimeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StringBuffer.js"></script>
+<script language="JavaScript">
+
+var entry;
+var HS36;
+var printFlag = false;
+var FrameNm, WindowNm
+var ExceptionFlag = false;
+
+function CallBack()
+{
+	// Exit if lawheader is not defined
+	if(typeof(self.lawheader.gmsgnbr) == "undefined")
+		return;
+	authenticate("frameNm='jsreturn'|funcNm='OpenWind()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Open and draw the date selection window
+//
+
+function OpenWind()
+{
+	stylePage();
+	setTaskHeader("header", getSeaPhrase("PRINT_TE_CARD","TE"), "TimeEntry");
+	document.title = getSeaPhrase("PRINT_TE_CARD","TE");
+	showWaitAlert(getSeaPhrase("LOADING_TE","TE"));
+	writeTimeRange();
+	//entry = window.open("/lawson/xhrnet/ui/plain.htm?func=opener.writeTimeRange()","Print","width=350,height=200,resizable=no,scrollbars=yes,toolbar=no")
+}
+
+function writeTimeRange()
+{
+	var html = ""
+	html += '<div style="padding:10px">'
+	html += '<form name="day">'
+	html += '<p align="center" class="plaintablecell">'+getSeaPhrase("ENTER_DATES_FOR_PRINT_CARD","TE")+'</p>'
+	html += '<table border="0" cellspacing="0" cellpadding="0">'
+	html += '<tr><td class="fieldlabelbold">'+getSeaPhrase("START_DATE","TE")+'</td>'
+	html += '<td class="plaintablecell"><input class="inputbox" type=text name=startdate value="" size=10 maxlength=10>'
+	html += '<a href="" onClick="parent.DateSelect(\'startdate\');return false;">' + uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+	html += uiRequiredIcon()+'</td></tr>'
+	html += '<tr><td class="fieldlabelbold">'+getSeaPhrase("END_DATE","TE")+'</td>'
+	html += '<td class="plaintablecell"><input class="inputbox" type=text name=lastdate value="" size=10 maxlength=10>'
+	html += '<a href="" onClick="parent.DateSelect(\'lastdate\');return false;">'+ uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+	html += uiRequiredIcon()+'</td></tr>'
+	html += '<tr><td class="fieldlabelbold">&nbsp;</td>'
+	html += '<td class="plaintablecell">'+uiButton(getSeaPhrase("CONTINUE","TE"),"parent.Processdays();return false")+'</center>'
+	html += '</td></tr>'
+	html += '</table>'
+	html += '</form></div>'
+
+	self.INPUTDATES.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PRINT_TE_CARD","TE");
+	self.INPUTDATES.document.getElementById("paneBody").innerHTML = html;
+	self.INPUTDATES.setLayerSizes();
+	self.INPUTDATES.stylePage();
+	document.getElementById("INPUTDATES").style.visibility = "visible";
+	removeWaitAlert();
+	//entry.document.body.innerHTML = html;
+	//entry.focus();
+}
+
+function ReturnDate(date)
+{
+   	self.INPUTDATES.document.day.elements[date_fld_name].value = date
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Process the information given and verify that there are no errors. If none then send the
+// call to HS36 and process.
+//
+
+function Processdays()
+{
+	var obj = self.INPUTDATES.document.day;
+	var tDate;
+
+	clearRequiredField(obj.startdate);
+	clearRequiredField(obj.lastdate);
+
+	tDate = dateIsValid(obj.startdate.value, defaultDateSep);
+	if(!tDate) {
+		setRequiredField(obj.startdate);
+		seaAlert(getSeaPhrase("INVALID_ACQUIRED_DAT","TE"));
+		//obj.startdate.focus();
+		//obj.startdate.select();
+		//ProcessFormError(self.INPUTDATES, obj, "startdate", "Invalid Acquired Date");
+		return;
+	}
+	else if(NonSpace(obj.startdate.value) == 0) {
+		setRequiredField(obj.startdate);
+		seaAlert(getSeaPhrase("ACQUIRED_DAT_REQUIRED","TE"));
+		//obj.startdate.focus();
+		//obj.startdate.select();
+		//ProcessFormError(self.INPUTDATES, obj, "startdate", "Acquired Date is a required field");
+		return;
+	}
+	else
+		obj.startdate.value = tDate;
+
+	tDate = dateIsValid(obj.lastdate.value, defaultDateSep);
+	if(!tDate) {
+		setRequiredField(obj.lastdate);
+		seaAlert(getSeaPhrase("INVALID_LAST_DAT","TE"));
+		//obj.lastdate.focus();
+		//obj.lastdate.select();
+		//ProcessFormError(self.INPUTDATES, obj, "lastdate", "Invalid Last Date Used");
+		return;
+	}
+	else if(NonSpace(obj.lastdate.value) == 0) {
+		setRequiredField(obj.lastdate);
+		seaAlert(getSeaPhrase("LAST_DAT_REQUIRED","TE"));
+		//obj.lastdate.focus();
+		//obj.lastdate.select();
+		//ProcessFormError(self.INPUTDATES, obj, "lastdate", "Last Date Used is a required field");
+		return;
+	}
+	else
+		obj.lastdate.value = tDate;
+
+	if(getDteDifference(formjsDate(obj.startdate.value),formjsDate(obj.lastdate.value))<0) {
+		setRequiredField(obj.startdate);
+		seaAlert(getSeaPhrase("START_MUST_BEFORE_END","TE"));
+		//obj.startdate.focus();
+		//obj.startdate.select();
+		//ProcessFormError(self.INPUTDATES, obj, "startdate", "Start date must be before end date");
+	}
+	else
+	{
+		showWaitAlert(getSeaPhrase("RETRIEVE_REC_IN_PERIOD","TE"))
+		document.getElementById("INPUTDATES").style.visibility = "hidden";
+		StartPrintTime(formjsDate(obj.startdate.value),formjsDate(obj.lastdate.value))
+		//self.INPUTDATES.close()
+	}
+}
+
+function StartPrintTime(StartDate, EndDate)
+{
+	HS36 = new HS36Object(StartDate, EndDate, authUser.employee, false)
+	HS36.printtime();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Print the buttons and then call the common function in timeentryclass to paint the
+// information returned in HS36.
+//
+
+function PrintScreen()
+{
+	if(!TimeCard.Records.length)
+	{
+		seaAlert(getSeaPhrase("NO_REC_DISP","TE"))
+		self.location.replace("/lawson/xhrnet/timeentry/timeentrysplash.htm")
+	}
+	else
+	{
+		var html = '<table style="text-align:center;width:100%;height:100%"><tr><td>'
+		html += uiButton(getSeaPhrase("PRINT","TE"),"parent.OnPrintClicked_PrintTime();return false")
+		if (opener)
+		{
+			html += uiButton(getSeaPhrase("QUIT","TE"),"parent.close();return false","margin-left:5px")
+		}
+		html += '</td></tr></table>'
+		self.BUTTONS.document.body.innerHTML = html
+		self.BUTTONS.stylePage();
+		PrintTimeCard("TABLE", "self");
+		//self.TABLE.stylePage();
+		document.getElementById("TABLE").style.visibility = "visible";
+		document.getElementById("BUTTONS").style.visibility = "visible";
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// return function for the standard time entry calendar
+//
+
+function ReturnCalendarDate(dte, TextField)
+{
+	obj = eval("self.INPUTDATES.document.day."+TextField)
+	obj.value = FormatDte4(dte)
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// event handler if the user clicks the print button
+//
+
+function OnPrintClicked_PrintTime()
+{
+	printFlag = true
+	PrintTimeCard_Finished(FrameNm, WindowNm)
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// function called when the standard print function in timeentryclass is finished. We can use
+// this function as well if the user presses the print button. However since we have already
+// called the print routine for HS36 we have the information except we have not set the focus
+// or called the print routine which is done in the timeentryclass routine. So we must do that
+// here in a conditional statement.
+//
+
+function PrintTimeCard_Finished(FrameName, WindowName)
+{
+	FrameNm = FrameName
+	WindowNm = WindowName
+
+	if(printFlag)
+	{
+		eval(WindowNm+"."+FrameNm+".focus()")
+		//try{
+		eval(WindowNm+"."+FrameNm+".print()")
+		//} catch(e){}
+	}
+
+	removeWaitAlert()
+	printFlag = false;
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+
+	var tableHeight = 500;
+	var tableWidth = 800;
+	var buttonHeight = 40;
+	var titleBarHeight = 32;
+
+	// resize the table frame to the screen dimensions
+	// position the button frame immediately below the table frame
+	if (document.body.clientHeight)
+	{
+		tableHeight = document.body.clientHeight - buttonHeight - titleBarHeight;
+		tableWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		tableHeight = window.innerHeight - buttonHeight - titleBarHeight;
+		tableWidth = window.innerWidth;
+	}
+
+	var tblFrame = document.getElementById("TABLE");
+	var btnFrame = document.getElementById("BUTTONS");
+
+	tblFrame.style.height = tableHeight + "px";
+	tblFrame.style.width = tableWidth + "px";
+
+	if (navigator.appName.indexOf("Microsoft") >= 0)
+	{
+		var paneBody1 = self.TABLE.document.getElementById("paneBody1");
+		paneBody1.style.width = (tableWidth - 25) + "px";
+	}
+
+	btnFrame.style.top = tableHeight + titleBarHeight + "px";
+	btnFrame.style.width = tableWidth + "px";
+}
+
+</script>
+</head>
+
+<body style="overflow:hidden" onload="fitToScreen();CallBack()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="INPUTDATES" name="INPUTDATES" style="visibility:hidden;position:absolute;height:350px;width:350px;left:0px;top:32px;z-index:2" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+	<iframe id="TABLE" name="TABLE" style="visibility:hidden;position:absolute;height:574px;width:803px;left:0px;top:32px" src="/lawson/xhrnet/ui/plain.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+	<!--PT 158146 removed scolling bar from timenentry page-->
+	<iframe id="BUTTONS" name="BUTTONS" style="visibility:hidden;position:absolute;height:30px;width:803px;left:0px;top:606px" src="/lawson/xhrnet/ui/plain.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/timeentry/employee/timeentrylaw.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/employee/printtime.htm,v 1.12.2.21 2011/05/04 21:10:17 brentd Exp $ -->

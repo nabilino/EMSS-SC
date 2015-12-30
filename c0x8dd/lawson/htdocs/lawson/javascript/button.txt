@@ -1,0 +1,810 @@
+//** DESCRIPTION:
+//** 	This object will control graphic buttons for swapping graphics. Three different graphic locations are properties of 
+//** 	the object and are controlled by several methods
+//**	The button routine uses a split command to gather passed values, when calling buttonObj send it in a 
+//**	string field in this format "variable1Name='Value'|variable2Name='Value'".  I prefer to create a variable with 
+//**   	my 'stringed' parameters.  And remember the button routine returns a string such as described below!
+//**    Button Location and '.gif' are created for you when 'useStyle'=true.  Try to create all Buttons using this method
+//**    so all the applications can have the same look and feel.  A list a valid Button names used with Styles are listed below
+//**    You might want print this list for future reference.  A capital 'I' before the name will return the Icon equivalent
+//**    of that type of button with text.  For example 'add' will return a Button with the actual Text 'Add' on it, 'Iadd' will 
+//**    return the Icon of an Add action.  There is logic to determine if an Icon doesn't exist use the Button and vice-versa.
+//**    The user also has the option of always showing Icons or Textual Buttons and the logic is built into the Button Object.
+
+//**    For example: 
+//**		var param  = "Name='Iadd'|"
+//**		    param += "ObjectLoc='mainFrame'|"
+//**		    param += "Func=\"bldForm('A',0)\"|"
+//**		    param += "AltMsg='Add A New Requester'"
+//**		ldframe += ButtonObj(param)
+
+//**	Pressed 	     - display OnGraphic (Only if Dim property is false)
+//**	Unpressed        - display OffGraphic (Only if Dim property is false)
+//**	Shaded           - display DimGraphic
+//**	Unshaded         - display either OnGraphic or OffGraphic depending on On property
+
+//**	Here is the list of Button Names used with Styles.  Just add a capital 'I' to return an Icon.
+//**    Try to use generic Buttons, in other words if the current Button says 'View My Requisitions' use 'View' instead
+//**    so we can use a style.  The Bubble Text and Stat Bar Text can expand it by saying 'View My Requisitions'.  When we
+//**    move away from 3.0 we can create on the fly Buttons using Layers.  To see a list of button names and graphics 
+//**    go to http://spi/lawson/office/imagelibrary.htm and check out the styles.
+
+//**    add				- Add Record
+//**    addmult         - Add Multiple (Used when Adding records through a window) ex:/lawson/office/webuser.htm
+//**    addexit         - Add and Exit (Used when Adding records through a window) ex:/lawson/office/webuser.htm
+//**    back			- Back
+//**    cancel          - Cancel 
+//**    change          - Change Record
+//**    clear           - Clear Form
+//**    comments        - Comments
+//**    delete          - Delete Record
+//**    detail          - Details
+//**    exit            - Exit
+//**    find            - Find or Search
+//**    goto            - Go To  
+//**    graphit         - Show in a graph
+//**    help            - Help
+//**    inquire         - Inquire on a record
+//**    logout          - Logout
+//**    next            - Next Record or Set of Records
+//**    ok              - O.K.
+//**    prev            - Previous Record or Set of Records
+//**    print           - Print
+//**    release         - Release (A Common Special Action)
+//**    restore         - Restore to original Values
+//**    review          - Review
+//**    select          - Select
+//**    search          - Search or Find
+//**    update          - Update
+//**    view            - View
+//**    pics            - Pictures (A Toggle between pictures/no pictures)
+//**    nopics          - No Pictures
+//**    bulleta         - Smaller type of Bullet
+//**    bulletb			- Larger type of Bullet
+//**    uparrow			- Up Arrow 
+//**    dnarrow         - Down Arrow
+//**    rarrow          - Right Arrow
+//**    larrow          - Left Arrow
+//**    drill           - Drill Around
+//**    blank           - A Blank Textual Button (Can Be Used With CGI if you know the width and height)
+//** DO NOT ADD TO THIS LIST UNLESS YOU TALK WITH THE INTERNET PRODUCTS DIVISION **//
+
+//**	DisplayButtonObj - returns string of graphic, details below: 
+//**	** Used in initial creation of Button object, returns a string that looks somewhat like this
+//**    ** depending on the parameter values sent:
+//**    ** i.e.		"<A href="javascript:parent.NxtPrev('P')" 
+//** 				 onMouseOver="parent.IprevButton.Pressed();window.status='Previous Requester';return true" 
+//**				 onMouseOut="parent.IprevButton.UnPressed();window.status='';return true">
+//**                 <IMG src="/lawson/images/lawson/style1/Iprev0.gif" name=IprevB alt="Previous Requester" border=0>
+//**				 </A>"
+//**
+//** ARGUMENTS:  And their corresponding defaults
+//** 	1)  Name (required) 
+//**		Description: The name the button graphic will have, used as the button src when using styles
+//** 	2)  Index (required if multiple) 
+//**		Description: if multiple uses of same image send a unique identifier
+//** 	3)  ObjectLoc (required) 	
+//**		Description: The location of the image, most likely a frame name
+//** 	4)  ObjectType (optional default='F') 	
+//**		Description: Type of Object Loc.  3 Values 'F'=Frame, 'W'=Window, 'S'=Self.  This determines how to call functions
+//**					 within your program with attached 'parent.', 'opener.', or whatever you send!
+//** 	5)  Func (optional no default) 
+//**		Description: The function on a click, use escape('func()')
+//** 	6)  AltMsg (optional no default) 
+//**		Description: The message to be displayed on Mouseover, in bubble and stat bar
+//** 	7)  overrideStyle (optional default=false) 	
+//**		Description: Will Over Ride the Style selected by User, rarely should be used.
+//** 	8)  useStyle (optional default=true) 
+//**		Description: Will find image in corresponding style, from user object.
+//** 	9)  useMouse (optional default=true) 
+//**		Description: Will do corresponding Mouseover functions.   
+//** 	10) useStatBar (optional default=true) 
+//**		Description: Will change text (AltMsg) on Mouseover in Statbar 
+//** 	11) doBorder (optional default=false) 
+//**		Description: Will draw border around the image 
+//** 	12) startDim (optional default=false) 
+//**		Description: When image first appears use Dim version
+//** 	13) GraphicLoc (optional default='', unless 'useStyle=true') 
+//**		Description: directory image(s) are located, use '' when useStyle=true
+//** 	14) OnGraphic (optional) 
+//**		Description: name of ON image (i.e. button.gif), will ignore when useStyle=true
+//** 	15) OffGraphic (optional/required if 'useStyle=true' default='', unless 'useStyle=true') 
+//**		Description: name of OFF image (i.e. button.gif), will ignore when useStyle=true
+//** 	16) DimGraphic (optional default='', unless 'useStyle=true') 
+//**		Description: name of DIM image (i.e. button.gif), will ignore when useStyle=true
+//** 	17) Width (optional default='none specified') 
+//**		Description: Graphic width in pixels
+//** 	18) Height (optional default='none specified') 
+//**		Description: Graphic width in pixels
+//** 	19) useCGI (optional default=false) 
+//**		Description: If you would like to use the TextGif CGI to create your button, a width and height Needed.
+//**					 Used with Styles if a button cannot be found.  When We Move from 3.0 this will be changed
+//**					 to use Layers.  As will most Text Styled Buttons.
+//** 	20) useCGI (optional default='AA0039' [A maroonish color]) 
+//**		Description: The Color of the text on a MouseOver.
+//** 	21) text (optional default='') 
+//**		Description: The text on the button. Name will default if left blank. Only used when useCGI=true.
+//** 	22) onTxtColor (optional default='AA0039' [A maroonish color]) 
+//**		Description: The Color of the text on a MouseOver. Only used when useCGI=true.
+//** 	23) offTxtColor (optional default='000000' [black]) 
+//**		Description: The Color of the text on a MouseOut (Inactive). Only used when useCGI=true.
+//** 	24) dimTxtColor (optional default='808080' [medium grey]) 
+//**		Description: The Color of the text on a Dim. Only used when useCGI=true.
+//** 	25) textFont (optional default='medium') 
+//**		Description: The size of the font. Only used when useCGI=true.
+//** 	26) textFont (optional default='center') 
+//**		Description: The alignment of the font. Only used when useCGI=true.
+
+//** Function to call when creating a Button Object
+		ButtonObj('Parameter String')
+//** Will Return a STRING
+function ButtonObj(param)
+{
+var Name       = ''
+var Index      = 0
+var ObjectType = 'F'
+var ObjectLoc  = ''
+var Func       = ''
+var AltMsg     = ''
+var overrideStyle = ''
+var useStyle   = true
+var useMouse   = true
+var useStatBar = true
+var border     = false
+var startDim   = false
+var GraphicLoc = ''
+var OnGraphic  = ''
+var OffGraphic = ''
+var DimGraphic = ''
+var Width      = 0
+var Height     = 0
+var useCGI     = false
+var text	   = ''
+var onTxtColor = 'AA0039'
+var offTxtColor= '000000'
+var dimTxtColor= '808080'
+var textFont   = 'medium'
+var textAlign  = 'center'
+
+var paramLst  = param.split('|')
+var NbrParams = paramLst.length
+
+    for (var i=0;i<NbrParams;i++)
+		if (paramLst[i].indexOf("=") != -1)
+           	eval(paramLst[i])
+
+var ButtonErr = false
+var srcNm     = ''
+    if (Name == '')
+    {
+    	alert("ERROR:  Need a Name for the Button Object")
+        ButtonErr = true
+    }
+    if (ObjectLoc == '')
+    {
+    	alert("ERROR:  Need a location (most likely a frame name) of the Button Object")
+        ButtonErr = true
+    }
+    if (!useStyle
+    &&  OffGraphic == '')
+    {
+    	alert("ERROR:  If Styles are not being used need at least a OFF Graphic Image")
+        ButtonErr = true
+    }
+    
+    if (!ButtonErr)
+    {
+    	srcNm  = Name
+		if (Index > 0)
+    		srcNm = srcNm + Index
+
+		eval(srcNm + 'Button = new Button("' + Name + '",' + Index + ',"' + ObjectType + '","' + ObjectLoc + '","' + Func + '","' + AltMsg + '",' + useStyle + ',"' + overrideStyle + '",' + useMouse + ',' + useStatBar + ',' + border + ',' + startDim + ',"' + GraphicLoc + '","' + OnGraphic + '","' + OffGraphic + '","' + DimGraphic + '",' + Width + ',' + Height + ',' + useCGI + ',"' + text + '","' + onTxtColor + '","' + offTxtColor + '","' + dimTxtColor + '","' + textFont + '","' + textAlign + '")')
+
+		return eval('window.' + srcNm + 'Button.DisplayButton()')
+	}
+    else
+    	return "ERROR"
+}
+
+function Button(Name, Index, ObjectType, ObjectLoc, Func, AltMsg, useStyle, overrideStyle, useMouse, useStatBar, border, startDim, GraphicLoc, OnGraphic, OffGraphic, DimGraphic, Width, Height, useCGI, text, onTxtColor, offTxtColor, dimTxtColor, textFont, textAlign)
+{
+var tmpL = 0
+
+	this.On = false
+	this.Dim = startDim
+    this.ObjectLoc = ObjectLoc
+
+	this.useStyle = useStyle
+    this.overrideStyle = overrideStyle
+    this.Style = 'style1'
+    if (this.useStyle == true)
+    {
+    	if (this.overrideStyle != '')
+        	this.Style = this.overrideStyle
+        else
+    	if (typeof(authUser) != 'undefined')
+    	{
+    		if (authUser.style != null
+    		&&  authUser.style.length > 0)
+    			this.Style = authUser.style
+    	}
+    }
+	this.Name = Name
+    this.Index = Index
+    this.ObjectType = ObjectType
+	this.Width = Width
+	this.Height = Height
+    this.border = border
+    this.useCGI = useCGI
+    this.text = text
+    this.onTxtColor = onTxtColor
+    this.offTxtColor = offTxtColor
+    this.dimTxtColor = dimTxtColor
+    this.textFont = textFont
+    this.textAlign = textAlign
+    if (this.useStyle == true)
+    {
+		this.GraphicLoc = '/lawson/images/lawson'
+       	this.OffGraphic = getGraphic(this) 
+        if (this.OffGraphic == 'Error')
+        {
+        	this.useCGI = true
+            this.OffGraphic = 'FFFFFF'
+            this.OnGraphic = 'FFFFFF'
+            this.DimGraphic = 'FFFFFF'
+            this.border = true
+        	if (this.text == '')
+            	this.text = this.Name
+        }
+        else
+        {
+        	tmpL = this.OffGraphic.length - 5
+       		this.OnGraphic = this.OffGraphic.substring(0,tmpL) + "1.gif" 
+       		this.DimGraphic = this.OffGraphic.substring(0,tmpL) + "2.gif"   
+    	}
+    }
+    else
+    {
+		this.GraphicLoc = GraphicLoc
+		this.OnGraphic  = OnGraphic
+		this.OffGraphic = OffGraphic
+		this.DimGraphic	= DimGraphic
+    }
+    this.AltMsg = AltMsg
+    this.func = unescape(Func)
+    this.useMouse = useMouse
+    this.useStatBar = useStatBar
+
+	this.Pressed = Pressed
+	this.UnPressed = UnPressed
+	this.Shaded = Shaded
+	this.Unshaded = Unshaded
+	this.ToggleShades = ToggleShades
+	this.ToggleOnOff = ToggleOnOff
+	this.DisplayButton = DisplayButton
+}
+
+function getGraphic(obj)
+{
+var graphicStr = ''	
+var tmpI       = ''
+var tmpB	   = ''
+var IconG      = false
+var ButtG      = false
+var passedType = ''
+
+   	graphicStr = obj.Name 
+
+   	if (typeof(authUser) != 'undefined')
+   	{
+    	if (graphicStr.charAt(0) != "I")
+        {
+        	tmpI = "I" + graphicStr
+            passedType = "B"
+        }
+        else
+        {
+        	tmpI = graphicStr
+        	passedType = "I"
+        }
+		for (var z=0;z<authUser.nbrOfIcons;z++)
+        	if (authUser.styleIcons[z] == tmpI)
+            {
+                IconG = true
+              	z = authUser.nbrOfIcons
+            }
+
+    	if (graphicStr.charAt(0) == "I")
+        	tmpB = graphicStr.substring(1,graphicStr.length)
+        else
+        	tmpB = graphicStr
+        for (z=0;z<authUser.nbrOfButtons;z++)
+        	if (authUser.styleButtons[z] == tmpB)
+            {
+            	ButtG = true
+            	z = authUser.nbrOfButtons
+            }
+
+        if (passedType == "I"
+        &&  !IconG
+        &&  ButtG)
+        	graphicStr = tmpB
+        if (passedType == "B"
+        &&  !ButtG
+        &&  IconG)
+        	graphicStr = tmpI
+
+        if (authUser.alwaysIcons
+        &&  IconG)
+        	graphicStr = tmpI
+        if (authUser.alwaysText
+        &&  ButtG)
+        	graphicStr = tmpB
+   	}
+      
+    if (!ButtG)
+     	if (!IconG)
+    		return 'Error'
+
+   	graphicStr += "0.gif"
+
+    return graphicStr
+}
+
+
+function Pressed()
+{
+var theSrc = ''
+var theName = this.Name
+	if (this.Index > 0)
+    	theName += this.Index
+
+  	this.On = true
+	if (this.Dim == false)
+    {
+        if (this.useCGI)
+        {
+            theSrc  = "/cgi-lawson/textgif/"
+            theSrc += escape(this.text)
+            theSrc += "?"
+
+            theSrc += "color="
+            if (this.onTxtColor != '')
+                theSrc += this.onTxtColor
+            else
+                theSrc += '000000'
+                     
+            if (this.OnGraphic != '')
+            {
+                if (this.OnGraphic.indexOf(".gif") == -1)
+                    theSrc += "&bgcolor=" + this.OnGraphic
+                else
+                {
+                    theSrc += "&background=" 
+                    if (this.GraphicLoc != '')
+                        theSrc += this.GraphicLoc + '/'
+                    if (this.useStyle)
+                    {
+                        if (theSrc    == ''
+                        &&  this.Style != '')
+                            theSrc += '/'
+                        theSrc += this.Style + '/'
+                    }
+                    theSrc += this.OnGraphic
+                }
+            }
+
+            theSrc += "&align=" + this.textAlign
+            if (this.Width > 0)
+                theSrc += "&width=" + this.Width
+            if (this.Height > 0)
+                theSrc += "&height=" + this.Height
+            theSrc += "&font=" + this.textFont
+        }
+        else
+        {
+            if (this.GraphicLoc != '')
+                theSrc = this.GraphicLoc + '/'
+            if (this.useStyle)
+            {
+                if (theSrc    == ''
+                &&  this.Style != '')
+                    theSrc += '/'
+                theSrc += this.Style + '/'
+            }
+        	theSrc += this.OnGraphic
+        }
+        //alert(eval('window.' + this.ObjectLoc + ".document." + theName + "B.src"))
+        //alert(theSrc)
+	    eval('window.' + this.ObjectLoc + ".document." + theName + "B.src=" + "'" + theSrc + "'")
+	}
+}
+
+function UnPressed()
+{
+var theSrc = ''
+var theName = this.Name
+	if (this.Index > 0)
+    	theName += this.Index
+
+  	this.On = false
+	if (this.Dim == false)
+    {
+        if (this.useCGI)
+        {
+            theSrc  = "/cgi-lawson/textgif/"
+            theSrc += escape(this.text)
+            theSrc += "?"
+
+            theSrc += "color="
+            if (this.offTxtColor != '')
+                theSrc += this.offTxtColor
+            else
+                theSrc += '000000'
+                     
+            if (this.OffGraphic != '')
+            {
+                if (this.OffGraphic.indexOf(".gif") == -1)
+                    theSrc += "&bgcolor=" + this.OffGraphic
+                else
+                {
+                    theSrc += "&background=" 
+                    if (this.GraphicLoc != '')
+                        theSrc += this.GraphicLoc + '/'
+                    if (this.useStyle)
+                    {
+                        if (theSrc    == ''
+                        &&  this.Style != '')
+                            theSrc += '/'
+                        theSrc += this.Style + '/'
+                    }
+                    theSrc += this.OffGraphic
+                }
+            }
+
+            theSrc += "&align=" + this.textAlign
+            if (this.Width > 0)
+                theSrc += "&width=" + this.Width
+            if (this.Height > 0)
+                theSrc += "&height=" + this.Height
+            theSrc += "&font=" + this.textFont
+        }
+        else
+        {
+            if (this.GraphicLoc != '')
+                theSrc = this.GraphicLoc + '/'
+            if (this.useStyle)
+            {
+                if (theSrc    == ''
+                &&  this.Style != '')
+                    theSrc += '/'
+                theSrc += this.Style + '/'
+            }
+        	theSrc += this.OffGraphic
+        }
+	    eval(this.ObjectLoc +  ".document." + theName + "B.src=" + "'" + theSrc + "'")
+    }
+}
+
+function Shaded()
+{
+var theSrc = ''
+var theName = this.Name
+	if (this.Index > 0)
+    	theName += this.Index
+
+	this.Dim = true
+    if (this.useCGI)
+    {
+        theSrc  = "/cgi-lawson/textgif/"
+        theSrc += escape(this.text)
+        theSrc += "?"
+
+        theSrc += "color="
+        if (this.dimTxtColor != '')
+            theSrc += this.dimTxtColor
+        else
+            theSrc += '000000'
+                 
+        if (this.DimGraphic != '')
+        {
+            if (this.DimGraphic.indexOf(".gif") == -1)
+                theSrc += "&bgcolor=" + this.DimGraphic
+            else
+            {
+                theSrc += "&background=" 
+                if (this.GraphicLoc != '')
+                    theSrc += this.GraphicLoc + '/'
+                if (this.useStyle)
+                {
+                    if (theSrc    == ''
+                    &&  this.Style != '')
+                        theSrc += '/'
+                    theSrc += this.Style + '/'
+                }
+                theSrc += this.DimGraphic
+            }
+        }
+
+        theSrc += "&align=" + this.textAlign
+        if (this.Width > 0)
+            theSrc += "&width=" + this.Width
+        if (this.Height > 0)
+            theSrc += "&height=" + this.Height
+        theSrc += "&font=" + this.textFont
+    }
+    else
+    {
+        if (this.GraphicLoc != '')
+            theSrc = this.GraphicLoc + '/'
+        if (this.useStyle)
+        {
+            if (theSrc    == ''
+            &&  this.Style != '')
+                theSrc += '/'
+            theSrc += this.Style + '/'
+        }
+        theSrc += this.DimGraphic
+    }
+    eval(this.ObjectLoc +  ".document." + theName + "B.src=" + "'" + theSrc + "'") 
+}
+
+function Unshaded()
+{
+var theSrc = ''
+var theGraphic = ''
+var theTxtColor = ''
+var theName = this.Name
+	if (this.Index > 0)
+    	theName += this.Index
+
+	this.Dim = false
+    if (this.On)
+    {
+	    theGraphic  = this.OnGraphic
+        theTxtColor = this.onTxtColor
+    }
+	else
+    {
+	    theGraphic  = this.OffGraphic
+        theTxtColor = this.offTxtColor
+    }
+    if (this.useCGI)     
+    {
+        theSrc += "/cgi-lawson/textgif/"
+        theSrc += escape(this.text)
+        theSrc += "?"
+
+        theSrc += "color="
+        if (theTxtColor != '')
+            theSrc += theTxtColor
+        else
+            theSrc += '000000'
+                 
+        if (this.DimGraphic != '')
+        {
+            if (this.DimGraphic.indexOf(".gif") == -1)
+                theSrc += "&bgcolor=" + theGraphic
+            else
+            {
+                theSrc += "&background=" 
+                if (this.GraphicLoc != '')
+                    theSrc = this.GraphicLoc + '/'
+                if (this.useStyle)
+                {
+                    if (theSrc    == ''
+                    &&  this.Style != '')
+                        theSrc += '/'
+                    theSrc += this.Style + '/'
+                }
+                theSrc += theGraphic
+            }
+        }
+
+        theSrc += "&align=" + this.textAlign
+        if (this.Width > 0)
+            theSrc += "&width=" + this.Width
+        if (this.Height > 0)
+            theSrc += "&height=" + this.Height
+        theSrc += "&font=" + this.textFont
+    }
+    else
+    {
+        if (this.GraphicLoc != '')
+            theSrc = this.GraphicLoc + '/'
+        if (this.useStyle)
+        {
+            if (theSrc    == ''
+            &&  this.Style != '')
+                theSrc += '/'
+            theSrc += this.Style + '/'
+        }
+        theSrc += theGraphic
+    }
+    eval(this.ObjectLoc +  ".document." + theName + "B.src=" + "'" + theSrc + "'")
+}
+
+function ToggleShades()
+{
+	if (this.Dim)
+    	this.Unshaded()
+    else
+    	this.Shaded()
+}
+
+function ToggleOnOff()
+{
+	if (this.On)
+    	this.Unpressed()
+    else
+    	this.Pressed()
+}
+
+function DisplayButton()
+{
+var obj           = this;
+var GraphicString = '';
+var	needSlashA    = false
+var theSrc        = ''
+var textColor     = ''
+var bgColor       = ''
+var wObj          = ''
+
+var srcNm  = obj.Name
+	if (obj.Index > 0)
+    	srcNm += obj.Index
+
+	if (obj.Name == null || obj.Name.length < 1)
+    {
+    	alert("Improper Button Name.\n Please refer to the 'button.js' document for more information.")
+        return "Error";
+    }
+
+	if (obj.ObjectType != null && obj.ObjectType.length > 0)
+    {
+		if (obj.ObjectType.toUpperCase() == "W")
+    		wObj = 'opener.'
+    	else
+    	if (obj.ObjectType.toUpperCase() == "S")
+    		wObj = ''
+    	else
+    		wObj = 'parent.'
+    }
+    else
+    	wObj = 'parent.'
+
+	if ((obj.useMouse)
+	||  (obj.func != null && obj.func.length > 0))
+    {
+    	needSlashA = true
+		GraphicString  = '<a href=\"javascript:'
+
+		if (obj.func != null && obj.func.length > 0)
+			GraphicString += obj.func + '\" ' 
+        else
+        	GraphicString += 'void(true)\" '
+
+        if (obj.useMouse
+        ||  obj.useStatbar)
+        {
+    		GraphicString += 'onMouseOver=\"'
+            if (obj.useMouse)
+    			GraphicString += wObj + srcNm + 'Button.Pressed();'
+			if ((obj.useStatBar)
+			&&  (obj.AltMsg != null && obj.AltMsg.length > 0))
+    	    	GraphicString += "window.status=\'" + obj.AltMsg + "\';return true"
+            GraphicString += '" '
+    		GraphicString += 'onMouseOut=\"'
+            if (obj.useMouse)
+    			GraphicString += wObj + srcNm + 'Button.UnPressed();'
+			if ((obj.useStatBar)
+			&&  (obj.AltMsg != null && obj.AltMsg.length > 0))
+    	    	GraphicString += "window.status=\'\';return true"
+            GraphicString += '"'
+        }
+        GraphicString += '>'
+    }
+
+    GraphicString += '<img src='  
+    if (!obj.useCGI)
+    {
+    	theSrc = ''
+        if (obj.GraphicLoc != '')
+        	theSrc = obj.GraphicLoc + '/'
+        if (obj.useStyle)
+        {
+        	if (theSrc    == ''
+        	&&  obj.Style != '')
+            	theSrc += '/'
+            theSrc += obj.Style + '/'
+        }
+        if (obj.Dim)
+            theSrc += obj.DimGraphic
+        else
+        if (obj.On)
+            theSrc += obj.OnGraphic
+        else
+            theSrc += obj.OffGraphic
+        GraphicString += '"' + theSrc + '"'
+
+        if (obj.Width > 0)
+            GraphicString += ' width=' + obj.Width
+
+        if (obj.Height > 0)
+            GraphicString += ' height=' + obj.Height
+    }
+    else
+    {
+        GraphicString += "/cgi-lawson/textgif/"
+        GraphicString += escape(obj.text)
+        GraphicString += "?"
+
+        GraphicString += "color="
+        if (obj.Dim)
+            textColor += obj.dimTxtColor
+        else
+        if (obj.On)
+            textColor += obj.onTxtColor
+        else
+            textColor += obj.offTxtColor
+        if (textColor != '')
+        	GraphicString += textColor
+        else
+        	GraphicString += '000000'
+        		 
+        if (obj.Dim)
+            bgColor += obj.DimGraphic
+        else
+        if (obj.On)
+            bgColor += obj.onGraphic
+        else
+            bgColor += obj.OffGraphic
+        if (bgColor != '')
+        {
+			if (bgColor.indexOf(".gif") == -1)
+        		GraphicString += "&bgcolor="
+        	else
+            {
+        		GraphicString += "&background=" 
+    			theSrc = ''
+        		if (obj.GraphicLoc != '')
+        			theSrc = obj.GraphicLoc + '/'
+        		if (obj.useStyle)
+        		{
+        			if (theSrc    == ''
+        			&&  obj.Style != '')
+            			theSrc += '/'
+            		theSrc += obj.Style + '/'
+        		}
+                GraphicString += theSrc
+            }
+        	GraphicString += bgColor
+        }
+
+        GraphicString += "&align=" + obj.textAlign
+        if (obj.Width > 0)
+	        GraphicString += "&width=" + obj.Width
+        if (obj.Height > 0)
+        	GraphicString += "&height=" + obj.Height
+        GraphicString += "&font=" + obj.textFont
+    }
+
+	GraphicString += ' name=' + srcNm + 'B'
+
+    if (obj.AltMsg != null && obj.AltMsg.length > 0) 
+    	GraphicString += ' alt=\"' + obj.AltMsg + '\"'
+
+    if (obj.border == true) 
+    	GraphicString += ' border=1'
+    else
+    	GraphicString += ' border=0'
+
+	GraphicString += '>'
+
+	if (needSlashA)
+    	GraphicString += '</a>'
+
+	return(GraphicString)
+}
+
+

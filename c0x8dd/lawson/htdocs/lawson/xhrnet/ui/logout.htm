@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />	
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="expires" content="0">
+<meta http-equiv="pragma" content="no-cache">
+<title>Logged Out</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="/sso/login.css"></link>
+<script src="/sso/domain.js"></script>
+<script src="/sso/sso.js"></script>
+<script src="/sso/login.js"></script>
+<script src="/sso/version.js"></script>
+<style type="text/css">
+body
+{
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+	color: #555555;
+	background-color: #ffffff;
+	background-image: none;
+	background-repeat: repeat-y;
+	margin: 0px;
+	visibility: hidden;
+}
+.largeFont 
+{
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 24px;
+	font-weight: normal;
+}		
+.smallFont 
+{
+	font-family: Helvetica, Arial, sans-serif;
+	font-size: 12px;
+	font-weight: normal;
+}
+</style>
+<script>
+function initLogout()
+{
+	browser = new SSOBrowser();
+	if (browser.isIE && browser.version < 10)
+		document.getElementById("imgDiv").style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/lawson/webappjs/infor3/images/login.png',sizingMethod='scale')";
+	else
+		document.getElementById("imgDiv").style.backgroundImage = "url('/lawson/webappjs/infor3/images/login.png')";
+}
+function sizeLogin()
+{
+	var scrWidth = 0;
+	var scrHeight = 0;
+	if (typeof(window.innerWidth) == "number") 
+	{
+	    //non-IE
+		scrHeight = window.innerHeight;
+		scrWidth = window.innerWidth;
+	} 
+	else if (document.documentElement && (document.documentElement.offsetWidth || document.documentElement.offsetHeight)) 
+	{
+	    //IE 6+ in 'standards compliant mode'
+		scrHeight = document.documentElement.offsetHeight;
+		scrWidth = document.documentElement.offsetWidth;
+	} 
+	else if (document.body && (document.body.offsetWidth || document.body.offsetHeight)) 
+	{
+	    //IE 4 compatible
+	   	scrHeight = document.body.offsetHeight;
+	    scrWidth = document.body.offsetWidth;
+	}
+	var imgDiv = document.getElementById("imgDiv");
+	var bgDiv = document.getElementById("bgDiv");
+	imgDiv.style.left = parseInt((scrWidth-604)/2, 10) + "px";
+	if (scrHeight - 404 > 110)
+		imgDiv.style.top = parseInt((scrHeight-404)*.35, 10) + "px";
+	else
+		imgDiv.style.top = parseInt((scrHeight-404)*.5, 10) + "px";
+	bgDiv.style.left = imgDiv.style.left;
+	bgDiv.style.top = imgDiv.style.top;
+	document.body.style.visibility = "visible";
+}		
+</script>
+</head>
+<body onload="initLogout();sizeLogin();try{getVersionInfo();}catch(e){}" onresize="sizeLogin();setFocus();" onunload="pageClosing()">
+	<div id="imgDiv" style="position:absolute;width:604px;height:404px;"></div>
+	<div id="bgDiv" style="position:absolute;width:604px;height:404px;">
+		<div id="fieldsDiv" class="largeFont" style="position:absolute;left:15px;top:195px;width:574px;text-align:center;">You have been logged out.</div>
+		<div id="lwsnCpyDiv" class="smallFont" style="position:absolute;left:15px;top:373px;width:574px;">Copyright &copy; 2014 Infor. All rights reserved. www.infor.com</div>
+		<div id="lwsnVerDiv" class="smallFont" style="position:absolute;left:15px;top:373px;width:574px;text-align:right;"></div>
+	</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/logout.htm,v 1.1.2.15 2013/11/05 23:03:36 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

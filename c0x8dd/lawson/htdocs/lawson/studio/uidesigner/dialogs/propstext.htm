@@ -1,0 +1,180 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/propstext.htm,v 1.2.6.3.16.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Text Field Properties</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></SCRIPT>
+<script language="javascript" src="propstext.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgRequiredValue">Please enter the required value.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="txtInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="txtOnKeyDown()">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGeneral" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="txtSwitchTab(this)">General</span>
+		<span id="tabEdits" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="txtSwitchTab(this)">Edit</span>
+	</div>
+
+	<!-- General tab pane -->
+	<div id="divGeneral" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblTextId" for="txtTextId" class="dsLabel" style="position:relative;">
+					Text Id:&nbsp;
+				</label>
+		    </td>
+		   <td align="left">
+				<label id="txtTextId" class="dsLabel" style="position:relative;width:200px;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblIsOutput" for="cbxIsOutput" class="dsLabel" style="position:relative;text-align:left;">Output Only:</label>
+			</td>
+			<td align="left">
+				<input type="checkbox" id="cbxIsOutput" onclick="txtOnClickOutput()" class="dsLabel" style="position:relative;" ></input>
+			</td>
+		</tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblIsSelect" for="cbxIsSelect" class="dsLabel" style="position:relative;text-align:left;">Allow Select:</label>
+			</td>
+			<td align="left">
+				<input type="checkbox" id="cbxIsSelect" onclick="ppgEnableApply()" class="dsLabel" style="position:relative;" ></input>
+			</td>
+		</tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblAllowDrill" for="cbxAllowDrill" class="dsLabel" style="position:relative;text-align:left;">Allow Drill:</label>
+			</td>
+			<td align="left">
+				<input type="checkbox" id="cbxAllowDrill" onclick="ppgEnableApply()" class="dsLabel" style="position:relative;" ></input>
+			</td>
+		</tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblHasRule" for="cbxHasRule" class="dsLabel" style="position:relative;text-align:left;">Has Rule:</label>
+			</td>
+			<td align="left">
+				<input type="checkbox" id="cbxHasRule" onclick="ppgEnableApply()" class="dsLabel" style="position:relative;" ></input>
+			</td>
+		</tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblHasDefine" for="cbxHasDefine" class="dsLabel" style="position:relative;text-align:left;">Has Define:</label>
+			</td>
+			<td align="left">
+				<input type="checkbox" id="cbxHasDefine" onclick="txtOnClickDefine()" class="dsLabel" style="position:relative;" ></input>
+				&nbsp;<label id="lblURI" for="txtDefineURI" class="dsLabel" style="position:relative;text-align:left;">URI:</label>
+				<input id="txtDefineURI" class="dsTextBox" disabled
+					style="position:relative;width:70px;border-style:inset;border-width:2px;border-color:white;">
+				</input>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+	</table>
+	</div>
+
+	<!-- Edits tab pane -->
+	<div id="divEdits" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td width="20%" align="right" style="height:20px;">
+				<label id="lblTextId2" for="txtTextId2" class="dsLabel" style="position:relative;">
+					Text Id:&nbsp;
+				</label>
+		    </td>
+		   <td align="left">
+				<label id="txtTextId2" class="dsLabel" style="position:relative;width:200px;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2" valign="top">
+				<input id="rbNone" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblNone" for="rbNone" class="dsLabel" style="position:relative;text-align:left;">None</label><br>
+
+				<input id="rbdate" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblDate" for="rbdate" class="dsLabel" style="position:relative;text-align:left;">Date</label><br>
+
+				<input id="rbtime" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblTime" for="rbtime" class="dsLabel" style="position:relative;text-align:left;">Time</label><br>
+
+				<input id="rbupper" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblUpper" for="rbupper" class="dsLabel" style="position:relative;text-align:left;">Upper Case</label><br>
+
+				<input id="rbnumeric" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblNumeric" for="rbnumeric" class="dsLabel" style="position:relative;text-align:left;">Numeric</label><br>
+
+				<input id="rbsigned" type="radio" onclick="txtRadioClick()" name="radio" style="margin-left:20px;"></input>
+				<label id="lblSigned" for="rbsigned" class="dsLabel" style="position:relative;text-align:left;">Signed</label>
+
+				<label id="lblDecsz" for="txtDecsz" class="dsLabel" style="position:relative;text-align:left;margin-left:20px;">Decimal size:</label>
+				<input id="txtDecsz" class="dsTextBox" maxlength="1" onkeydown="decszOnKeyDown()" onchange="ppgEnableApply(true)"
+					style="position:relative;width:20px;border-style:inset;border-width:2px;border-color:white;">
+				</input>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="txtOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="txtUpdate()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="txtReturn()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

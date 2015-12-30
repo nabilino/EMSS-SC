@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>GoalView</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/xhrnet/goalAttachment.js"></script>
+<script src="/lawson/xhrnet/careermanagement/lib/getattach.js"></script>
+<script src="/lawson/xhrnet/careermanagement/lib/writeattach.js"></script>
+<script src="/lawson/xhrnet/goalUtils.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var CURRENT = 'current';
+var HISTORICAL = 'historical';
+var ONHOLD = 'onhold';
+var INACTIVE = 'inactive';
+var UPDATEACTION = 'update';
+var ADDACTION = 'add';
+var completeCodesArray = new Array();
+var priorities = new Array();
+var weights   = new Array(1, 1.25, 1, .75);
+var paHistorical = new Array();
+var paCurrent = new Array();
+var paOnHold = new Array();
+var paInactive = new Array();
+var pcodes = new Array();
+var currentpaempgoalrecords;
+var ascending = false;
+var authUser;
+var fromTask = (window.location.search) ? unescape(window.location.search) : "";
+var parentTask = "";
+var objType;
+
+function CallBack()
+{
+	if (fromTask)
+		parentTask = getVarFromString("from", fromTask);
+	if (parentTask == "")
+		authenticate("frameNm='jsreturn'|funcNm='user=authUser;initialSetup()'|officeObjects=true|desiredEdit='EM'");
+	else
+		authenticate("frameNm='jsreturn'|funcNm='user=authUser;initialSetup()'|desiredEdit='EM'");
+}
+
+function initialSetup() 
+{
+	stylePage();
+	self.printframe.stylePage();	
+	var title = getSeaPhrase("GOAL_MANAGEMENT","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Goal Management","");
+	document.getElementById("top1").style.visibility = "visible";
+	priorities = [getSeaPhrase("0_NOT_APPLICABLE","ESS"), getSeaPhrase("1_HIGH","ESS"), getSeaPhrase("2_MEDIUM","ESS"), getSeaPhrase("3_LOW","ESS")];
+	completeCodesArray = [getSeaPhrase("0_NOT_COMPLETE","ESS"), getSeaPhrase("1_EMPLOYEE_COMPLETE","ESS"), getSeaPhrase("2_MANAGER_COMPLETE","ESS"),getSeaPhrase("3_ON_HOLD","ESS"), getSeaPhrase("4_INACTIVE","ESS")];
+	var nextFunc = function()
+	{
+		if (fromTask && (parentTask != ""))
+			document.getElementById("relatedlinks").style.visibility = "hidden";
+		initEmployeeRelatedLinks();
+		GetPcodesSelect(authUser.prodline,"SG","displayTop()","Active");
+	}	
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);	
+}
+
+function displayTop() 
+{
+	pcodes = PcodesInfo;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("MY_OBJECTIVES","ESS");
+	document.getElementById("paneBody").innerHTML = '<table style="padding-left:10px" border="0" cellspacing="0" cellpadding="0" role="presentation">'
+	+ '<tr><td class="plaintablecell">'+uiRequiredFooter()+'</td></tr>'
+	+ '<tr><td class="fieldlabelboldleft" style="padding-top:2px"><label for="objectiveType">'+getSeaPhrase("SELECT_OBJECTIVE_TYPE","ESS")+'</label><br/>'
+	+ '<span><select id="objectiveType" name="objectiveType" onchange="objectiveTypeChanged()">'+drawObjectiveTypeSelect()+'</select>'+uiRequiredIcon()+'</span></td></tr></table>';
+	stylePage();
+	removeWaitAlert();
+	fitToScreen();
+}
+
+function displayCalendar(isChg, whichDate, fldLbl) 
+{
+	var dateString = '';
+	// on an update disable date fields
+	if (!isChg)
+	{
+		var toolTip = uiDateToolTip(fldLbl);
+		dateString = '<a href="javascript:parent.DateSelect(\''+whichDate+'\')" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan(whichDate+"Fmt")+uiRequiredIcon();
+	}	
+	return dateString;
+}
+
+function objectiveTypeChanged() 
+{
+	objType = document.getElementById("objectiveType");
+	if (objType.value == "") 
+	{
+		closeView('left');
+		closeView('right');
+	}
+	else
+		showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){openView(objType.value);});
+}
+
+function getPaempgoal(whichView) 
+{
+	paCurrent = new Array();
+	paHistorical = new Array();
+	paOnHold = new Array();
+	paInactive = new Array();
+	var obj = new DMEObject(authUser.prodline, "paempgoal");
+	obj.out = "JAVASCRIPT";
+	obj.index = "pgoset3";
+	obj.field = "company;employee;priority;objective;start-date;end-date;pct-completed;complete-date;complete,xlt;complete;weighting;accepted,xlt;accepted;seq-nbr;type,xlt;type;employee.label-name-1";
+	obj.key = authUser.company+"="+authUser.employee;
+	obj.debug = false;
+	obj.otmmax = "1";
+	obj.max = "600";
+	if (whichView == CURRENT) 
+	{
+		obj.func = "DspCurrentPaempgoal()";
+		//obj.cond = "current";
+		obj.select = "complete=0|complete=1";
+	}
+	else if (whichView == HISTORICAL) 
+	{
+		obj.func = "DspHistoricalPaempgoal()";
+		obj.cond = "mgr-complete";
+	}
+	else if (whichView == ONHOLD) 
+	{
+		obj.func = "DspOnHoldPaempgoal()";
+		obj.select = "complete=6";
+	}
+	else if (whichView == INACTIVE) 
+	{
+		obj.func = "DspInactivePaempgoal()";
+		obj.cond = "inactive";
+	}
+  	DME(obj, "jsreturn");
+}
+
+function DspCurrentPaempgoal() 
+{
+	paCurrent = paCurrent.concat(self.jsreturn.record);
+	displayObjectiveView(CURRENT, paCurrent, null);
+}
+
+function DspHistoricalPaempgoal() 
+{
+	paHistorical = paHistorical.concat(self.jsreturn.record);
+	displayObjectiveView(HISTORICAL, paHistorical, null);
+}
+
+function DspOnHoldPaempgoal() 
+{
+	paOnHold = paOnHold.concat(self.jsreturn.record);
+	displayObjectiveView(ONHOLD, paOnHold, null);
+}
+
+function DspInactivePaempgoal() 
+{
+	paInactive = paInactive.concat(self.jsreturn.record);
+	displayObjectiveView(INACTIVE, paInactive, null);
+}
+
+function editObjective(i, whichView, type)
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){editWindow(i, whichView, type);});
+}
+
+function editWindow(i, whichView, type) 
+{
+	var bufC = new myStringBuffer();
+	var bufH = new myStringBuffer();
+	var paempgoalrecord = '';
+	var authType = (type != "add") ? paempgoalrecord.type : null;
+	if (whichView == CURRENT)
+		paempgoalrecord = paCurrent[i];
+	else if (whichView == HISTORICAL)
+		paempgoalrecord = paHistorical[i];
+	else if (whichView == ONHOLD)
+		paempgoalrecord = paOnHold[i];
+	else if (whichView == INACTIVE)
+		paempgoalrecord = paInactive[i];
+	/*Is also true if clicking on completed objectives*/
+	var isChg = (typeof(i) != "undefined") ? true : false;
+	var inputString;
+	bufC.append('<form name="goalform"><table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">')
+	bufC.append('<tr style="padding-top:5px"><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label for="objective">'+getSeaPhrase("OBJECTIVE","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><input')
+	bufC.append(((isChg) ? ' class="inputboxdisabled" disabled="disabled" ' : ' class="inputbox" '))
+	bufC.append('type="text" id="objective" name="objective" value="')
+	bufC.append(((isChg) ? paempgoalrecord.objective : ''))
+	bufC.append('" size="30" maxlength="30" onfocus="this.select()">')
+	bufC.append(uiRequiredIcon()+'</td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label for="detailedDesc">'+getSeaPhrase("DETAIL_DESC","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><textarea')
+	bufC.append(((isChg) ? ' class="inputboxdisabled" readonly ' : ' class="inputbox" '))
+	bufC.append('id="detailedDesc" name="detailedDesc" value="')
+	bufC.append('" rows="4" cols="31" onfocus="this.select()"></textarea></td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label for="priority">'+getSeaPhrase("PRIORITY","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><select')
+	bufC.append(((isChg) ? ' class="inputboxdisabled" disabled="disabled" ' : ' class="inputbox" '))
+	bufC.append('id="priority" name="priority">')
+	bufC.append(((isChg) ? drawSelectNoBlankStart(Number(paempgoalrecord.priority), priorities) : drawSelectNoBlankStart('none',priorities)))
+	bufC.append('</select>'+uiRequiredIcon()+'</td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label id="startDateLbl" for="startDate">'+getSeaPhrase("START_DATE","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><input')
+	bufC.append(((isChg) ? ' class="inputboxdisabled" disabled="disabled" ' : ' class="inputbox" '))
+	bufC.append('type="text" id="startDate" name="startDate" value="')
+	bufC.append(((isChg) ? paempgoalrecord.start_date : ''))
+	bufC.append('" size="10" maxlength="10" onfocus="this.select()" aria-labelledby="startDateLbl startDateFmt">')
+	bufC.append(displayCalendar(isChg,'startDate',getSeaPhrase("START_DATE","ESS"))+'</td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label id="endDateLbl" for="endDate">'+getSeaPhrase("DUE_DATE","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><input')
+	bufC.append(((isChg) ? ' class="inputboxdisabled" disabled="disabled" ' : ' class="inputbox" '))
+	bufC.append('type="text" id="endDate" name="endDate" value="')
+	bufC.append(((isChg) ? paempgoalrecord.end_date : ''))
+	bufC.append('" size="10" maxlength="10" onfocus="this.select()" aria-labelledby="endDateLbl endDateFmt">')
+	bufC.append(displayCalendar(isChg,'endDate',getSeaPhrase("DUE_DATE","ESS"))+'</td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label for="pctComplete">'+getSeaPhrase("PCT_COMPLETE2","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="pctComplete" name="pctComplete" value="')
+	bufC.append(((isChg) ? paempgoalrecord.pct_completed : ''))
+	bufC.append('" size="3" maxlength="3" onfocus="this.select()"></td></tr>')
+	bufC.append('<tr><td class="fieldlabelboldlite"><label for="compComments">'+getSeaPhrase("COMP_COMMENTS","ESS")+'</label></td>')
+	bufC.append('<td class="plaintablecell" nowrap><textarea class="inputbox" id="compComments" name="compComments" value="')
+	bufC.append('" rows="4" cols="31" onfocus="this.select()"></textarea></td></tr>')
+	if (type != "add") 
+	{
+		bufC.append('<tr><td class="fieldlabelboldlite"><label for="complete">'+getSeaPhrase("COMPLETE","ESS")+'</label></td>')
+		bufC.append('<td class="plaintablecell" nowrap><select class="inputboxdisabled" disabled="disabled" id="complete" name="complete">'+((isChg) ? drawSelect(paempgoalrecord.complete,completeCodesArray) : drawSelect('none',completeCodesArray))+'</select></td></tr>')
+		bufC.append('<tr><td class="fieldlabelboldliteunderlineleft"><label id="completeDateLbl" for="completeDate">'+getSeaPhrase("COMPLETE_DATE","ESS")+'</label></td>')
+		bufC.append('<td class="plaintablecell" nowrap><input')
+		bufC.append(((isChg) ? ' class="inputboxdisabled" disabled="disabled" ' : ' class="inputbox" '))
+		bufC.append('type="text" id="completeDate" name="completeDate" value="')
+		bufC.append(((isChg) ? paempgoalrecord.complete_date : ''))
+		bufC.append('" size="10" maxlength="10" onfocus="this.select()" aria-labelledby="completeDateLbl completeDateFmt">')
+		bufC.append(displayCalendar(isChg,'completeDate',getSeaPhrase("COMPLETE_DATE","ESS"))+'</td></tr>')
+	}
+	bufC.append('<tr><td>&nbsp;</td><td class="plaintablecell">')
+	bufC.append(uiButton(((isChg) ? getSeaPhrase("UPDATE","ESS") : getSeaPhrase("ADD","ESS")),"parent.updateObjective("+i+",false,'"+whichView+"');return false","margin-top:5px"))
+	bufC.append(uiButton(getSeaPhrase("CANCEL","ESS"),"parent.closeView('right');return false","margin-top:5px;margin-left:5px"))
+	bufC.append('</td></tr>')
+	bufC.append((((type == "update") && (paempgoalrecord.accepted == 0)) ? '<tr><td><p class="fieldlabelbold"><span style="font-weight:bold">'+getSeaPhrase("ACK_SECTION","ESS")+'</span><br/>'+getSeaPhrase("ACCEPT_WAIVER","ESS")+'</td><td class="plaintablecell">'+uiButton(getSeaPhrase("ACCEPT","ESS"),"parent.updateObjective("+i+",true,'"+whichView+"');return false","margin-top:5px")+'</td></tr>':''))
+	bufC.append('</table>')
+	bufC.append('<input class="inputbox" type="hidden" name="seqnbr" value="TESTING">')
+	bufC.append('<input class="inputbox" type="hidden" name="fc" value="C">')
+	bufC.append('</form>')
+	var currentFormData = bufC.toString();
+	bufH.append('<form name="goalform"><table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">')
+	bufH.append('<tr style="padding-top:5px"><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="objective">'+getSeaPhrase("OBJECTIVE","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input class="inputboxdisabled" disabled="disabled" type="text" id="objective" name="objective" value="')
+	bufH.append(((isChg) ? paempgoalrecord.objective : ''))
+	bufH.append('" size="30" maxlength="30" onfocus="this.select()">')
+	bufH.append(uiRequiredIcon()+'</td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="detailedDesc">'+getSeaPhrase("DETAIL_DESC","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><textarea class="inputboxdisabled" readonly id="detailedDesc" name="detailedDesc" value="" rows="4" cols="45" onfocus="this.select()"></textarea></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="priority">'+getSeaPhrase("PRIORITY","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><select class="inputboxdisabled" disabled="disabled" id="priority" name="priority">')
+	bufH.append(((isChg) ? drawSelectNoBlankStart(Number(paempgoalrecord.priority), priorities) : drawSelectNoBlankStart('none',priorities)))
+	bufH.append('</select></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="startDate">'+getSeaPhrase("START_DATE","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input class="inputboxdisabled" disabled="disabled" type="text" id="startDate" name="startDate" value="')
+	bufH.append(((isChg) ? paempgoalrecord.start_date : ''))
+	bufH.append('" size="10" maxlength="10" onfocus="this.select()"></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="endDate">'+getSeaPhrase("DUE_DATE","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input class="inputboxdisabled" disabled="disabled" type="text" id="endDate" name="endDate" value="')
+	bufH.append(((isChg) ? paempgoalrecord.end_date : ''))
+	bufH.append('" size="10" maxlength="10" onfocus="this.select()"></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="pctComplete">'+getSeaPhrase("PCT_COMPLETE2","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input')
+	bufH.append(((whichView == CURRENT) ? ' class="inputbox" ' : ' class="inputboxdisabled" disabled="disabled" '))
+	bufH.append('type="text" id="pctComplete" name="pctComplete" value="')
+	bufH.append(((isChg) ? paempgoalrecord.pct_completed : ''))
+	bufH.append('" size="3" maxlength="3" onfocus="this.select()"></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="compComments">'+getSeaPhrase("COMP_COMMENTS","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><textarea')
+	bufH.append(((whichView == CURRENT) ? ' class="inputbox" ' : ' class="inputboxdisabled" readonly '))
+	bufH.append('id="compComments" name="compComments" value="" rows="4" cols="45" onfocus="this.select()"></textarea></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldlite"><label for="complete">'+getSeaPhrase("COMPLETE","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input class="inputboxdisabled" disabled="disabled" type="text" id="complete" name="complete" value="')
+	bufH.append(((isChg) ? paempgoalrecord.complete_xlt : ''))
+	bufH.append('" size="30" maxlength="30" onfocus="this.select()"></td></tr>')
+	bufH.append('<tr><td class="fieldlabelboldliteunderline"><label for="completeDate">'+getSeaPhrase("COMPLETE_DATE","ESS")+'</label></td>')
+	bufH.append('<td class="plaintablecell" nowrap><input class="inputboxdisabled" disabled="disabled" type="text" id="completeDate" name="completeDate" value="')
+	bufH.append(((isChg) ? paempgoalrecord.complete_date : ''))
+	bufH.append('" size="30" maxlength="30" onfocus="this.select()"></td></tr>')
+	bufH.append('<tr><td>&nbsp;</td><td class="plaintablecell">')
+	bufH.append(((whichView == CURRENT) ? uiButton(getSeaPhrase("UPDATE","ESS"),"parent.updateObjective("+i+",false,'"+whichView+"');return false","margin-top:5px") : ''))
+	bufH.append(uiButton(getSeaPhrase("CLOSE","ESS"),"parent.closeView('right');return false","margin-top:5px;margin-left:5px")+'</td></tr>')
+	bufH.append((((authType == "M") && (paempgoalrecord.accepted == 0)) ? '<tr><td><p class="fieldlabelbold"><span style="font-weight:bold">'+getSeaPhrase("ACK_SECTION","ESS")+'</span> <br/>'+getSeaPhrase("ACCEPT_WAIVER","ESS")+'</td><td class="plaintablecell">'+uiButton(getSeaPhrase("ACCEPT","ESS"),"parent.updateObjective("+i+",true,'"+whichView+"');return false","margin-top:5px")+'</td></tr>':''))
+	bufH.append('</table>')
+	bufH.append('<input class="inputbox" type="hidden" name="seqnbr" value="TESTING">')
+	bufH.append('<input class="inputbox" type="hidden" name="fc" value="C">')
+	bufH.append('</form>')
+	var historicalFormData = bufH.toString();
+	if (whichView != HISTORICAL && (authType == "E" || authType == null)) 
+	{
+		if (isChg)
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EDIT_OBJ","ESS");
+		else 
+		{
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("ADD_OBJ","ESS");
+			atts[0] = null;
+			atts[1] = null;
+		}
+		self.right.document.getElementById("paneBody").innerHTML = currentFormData;
+		if (isChg)
+			refreshForm(authUser.prodline,paempgoalrecord.company,paempgoalrecord.employee,paempgoalrecord.seq_nbr);
+	} 
+	else if (whichView == HISTORICAL && (authType == "E" || authType == null)) 
+	{
+		if (whichView == HISTORICAL)
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMPLETED_DETAIL","ESS");
+		else
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = historicalFormData;
+		refreshForm(authUser.prodline,paempgoalrecord.company,paempgoalrecord.employee,paempgoalrecord.seq_nbr);
+	} 
+	else if (authType == "M") 
+	{
+		if (whichView == HISTORICAL)
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMPLETED_DETAIL","ESS");
+		else
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = historicalFormData;
+		refreshForm(authUser.prodline,paempgoalrecord.company,paempgoalrecord.employee,paempgoalrecord.seq_nbr);
+	} 
+	else 
+	{
+		if (isChg)
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EDIT_OBJ","ESS");
+		else 
+		{
+			self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("ADD_OBJ","ESS");
+			atts[0] = null;
+			atts[1] = null;
+		}
+		self.right.document.getElementById("paneBody").innerHTML = currentFormData;
+		if (isChg)
+			refreshForm(authUser.prodline,paempgoalrecord.company,paempgoalrecord.employee,paempgoalrecord.seq_nbr);
+	}
+	self.right.stylePage();
+	document.getElementById("right").style.visibility = "visible";	
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	fitToScreen();
+}
+
+function sortObjectives(whichView, paTableRecords, sort)
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){displayObjectiveView(whichView,paTableRecords,sort);});
+}
+
+function displayObjectiveView(whichView, paTableRecords, sort) 
+{
+	var paempgoalrecords;
+	var bufQ = new myStringBuffer();
+	if (paTableRecords == null)
+		paempgoalrecords = currentpaempgoalrecords;
+	else 
+	{
+		paempgoalrecords = paTableRecords;
+		currentpaempgoalrecords = paempgoalrecords;
+	}
+	switch (sort)
+	{
+		case 'priority':
+			if (!ascending) 
+			{
+				paempgoalrecords.sort(sortByAPriority);
+				ascending = true;
+			}
+			else 
+			{
+				paempgoalrecords.sort(sortByDPriority);
+				ascending = false;
+			}
+			break;
+		case 'pct_complete':
+			if (!ascending) 
+			{
+				paempgoalrecords.sort(sortByAPctComplete);
+				ascending = true;
+			}
+			else 
+			{
+				paempgoalrecords.sort(sortByDPctComplete);
+				ascending = false;
+			}
+			break;
+		case 'end_date':
+			if (!ascending) 
+			{
+				paempgoalrecords.sort(sortByAEndDate);
+				ascending = true;
+			}
+			else 
+			{
+				paempgoalrecords.sort(sortByDEndDate);
+				ascending = false;
+			}
+			break;
+		default:
+			break;
+	}
+	var titleStr = getSeaPhrase("OBJECTIVES","ESS");
+	if (whichView == CURRENT)
+		titleStr = getSeaPhrase("CURRENT_VIEW","ESS");
+	else if (whichView == ONHOLD)
+		titleStr = getSeaPhrase("ONHOLD_VIEW","ESS");
+	else if (whichView == INACTIVE)
+		titleStr = getSeaPhrase("INACTIVE_VIEW","ESS");
+	else if (whichView == HISTORICAL)
+		titleStr = getSeaPhrase("COMPLETED_VIEW","ESS");
+	var objTypeDesc = objType.options[objType.selectedIndex].text || "";
+	var toolTip = getSeaPhrase("DUE_DATE","ESS")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	var len = paempgoalrecords.length;
+	var completeOrAcceptedDisplay;
+	var viewContents = '';
+	if (whichView == CURRENT && len > 0)
+		viewContents += '<div id="overdueLbl" class="plaintablecellred floatRight">'+getSeaPhrase("OVERDUE_GOAL","ESS")+'</div>';
+	viewContents += '<table id="objTbl" class="plaintableborder" style="margin-left:auto;margin-right:auto;width:100%;text-align:center" border="0" cellspacing="0" cellpadding="0" styler="list" summary="'+getSeaPhrase("TSUM_40","SEA",[objTypeDesc])+'">'
+	+ '<caption class="offscreen">'+titleStr+'</caption>'
+	+ '<tr><th id="c1" scope="col" class="plaintableheaderborder" style="max-width:50px;text-align:center">'+getSeaPhrase("OBJECTIVE","ESS")+'</th>'
+	+ '<th id="c2" scope="col" class="plaintableheaderborder" style="text-align:center;">'+getSeaPhrase("START_DATE","ESS")+'</th>'
+	+ '<th id="c3" scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortObjectives(\''+whichView+'\',null,\'end_date\');return false;" title="'+toolTip+'">'+getSeaPhrase("DUE_DATE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	if (whichView != HISTORICAL)
+		viewContents += '<th id="c4" scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("GOAL_STATUS","ESS")+'</th>'
+	toolTip = getSeaPhrase("PRIORITY","ESS")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	viewContents += '<th id="c5" scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortObjectives(\''+whichView+'\',null,\'priority\');return false;" title="'+toolTip+'">'+getSeaPhrase("PRIORITY","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("PCT_COMPLETE","ESS")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	viewContents += '<th id="c6" scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortObjectives(\''+whichView+'\',null,\'pct_complete\');return false;" title="'+toolTip+'">'+getSeaPhrase("PCT_COMPLETE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th></tr>';
+	for (var i=0; i<len; i++) 
+	{
+		tip = paempgoalrecords[i].objective+' - '+getSeaPhrase("EDIT_DTL_FOR_GOAL","SEA");
+	   	bufQ.append('<tr><td headers="c1" class="plaintablecellborder" style="padding:5px"><a href="javascript:;" onclick="parent.editObjective('+i+',\''+whichView+'\',\''+UPDATEACTION+'\');parent.doRowFormating('+i+');return false;" title="'+tip+'">'+paempgoalrecords[i].objective+'<span class="offscreen"> - '+getSeaPhrase("EDIT_DTL_FOR_GOAL","SEA")+'</span></a></td>');
+		bufQ.append('<td headers="c2" class="plaintablecellborder" style="text-align:center">'+paempgoalrecords[i].start_date+'</td>');
+		if (whichView == CURRENT && overDueNotice(paempgoalrecords[i].end_date))
+			bufQ.append('<td headers="c3" class="plaintablecellborder" style="text-align:center"><span style="color:red" aria-label="'+getSeaPhrase("OVERDUE_GOAL","ESS")+'" title="'+getSeaPhrase("OVERDUE_GOAL","ESS")+'" aria-labelledby="overdueLbl">'+paempgoalrecords[i].end_date+'*</span></td>');
+		else
+			bufQ.append('<td headers="c3" class="plaintablecellborder" style="text-align:center">'+paempgoalrecords[i].end_date+'</td>');
+		if (whichView != HISTORICAL)
+			bufQ.append('<td headers="c4" class="plaintablecellborder" style="text-align:center" nowrap>'+paempgoalrecords[i].accepted_xlt+'</td>');
+		bufQ.append('<td headers="c5" class="plaintablecellborder" style="text-align:center" nowrap>'+priorities[Number(paempgoalrecords[i].priority)]+'</td>');
+		bufQ.append('<td headers="c6" class="plaintablecellborder" style="text-align:center">'+paempgoalrecords[i].pct_completed+'</td></tr>');
+	}
+	viewContents += bufQ.toString();
+	if (len == 0) 
+	{
+		var nbrCols = (whichView != HISTORICAL) ? 6 : 5;
+		viewContents += '<tr><td class="plaintablecell" colspan="'+nbrCols+'">'+getSeaPhrase("NO_GOALS","ESS")+'</td></tr>'
+	}
+	var t;
+	if (whichView != HISTORICAL) 
+	{
+		viewContents += '</table><table width="100%"><tr><td class="plaintablecell" role="presentation">'
+		+ uiButton(getSeaPhrase("ADD_OBJ","ESS"),"parent.undoRowFormatting();parent.editObjective("+t+","+"'"+whichView+"'"+","+"'"+ADDACTION+"'"+");return false","margin-top:5px");
+		if (window.print && len > 0)
+			viewContents += uiButton(getSeaPhrase("PRINT","BEN"),"parent.printForm();return false","margin-left:5px;margin-top:5px","printbtn");
+		viewContents += '</td></tr></table>';
+	}
+	else 
+	{
+		viewContents += '</table>'
+		if (window.print && len > 0)
+		{
+			viewContents += '<table role="presentation"><tr><td class="plaintablecell">';
+			viewContents += uiButton(getSeaPhrase("PRINT","BEN"),"parent.printForm();return false","margin-top:5px","printbtn");
+			viewContents += '</td></tr></table>';
+		}
+	}
+	self.left.document.getElementById("paneHeader").innerHTML = titleStr;
+	self.left.document.getElementById("paneBody").innerHTML = viewContents;
+	self.left.stylePage();
+	if (sort) 
+	{
+		var sortDirection = (ascending) ? "ascending" : "descending";
+		self.left.styleSortArrow("objTbl", sort, sortDirection);
+	}
+	document.getElementById("left").style.visibility = "visible";
+	var msg = getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]);
+	if (!sort && parentTask == "")
+		msg += ' '+getSeaPhrase("CNT_UPD_FRM","SEA",[self.relatedlinks.getWinTitle()]);
+	removeWaitAlert(msg);
+	fitToScreen();
+}
+
+function updateObjective(i, acceptButton, whichView)
+{
+	var isChg = (typeof(i) != "undefined") ? true : false;
+	var formData = self.right.document.forms["goalform"];
+	// perform clientside validation here
+	// objective, priority, start date, end date, and status are required
+	clearRequiredField(formData.objective);
+	clearRequiredField(formData.priority);
+	clearRequiredField(formData.startDate);
+	clearRequiredField(formData.endDate);
+	clearRequiredField(formData.pctComplete);
+	if (isChg)
+		clearRequiredField(formData.completeDate);
+	if (NonSpace(formData.objective.value) == 0)
+	{
+		setRequiredField(formData.objective, getSeaPhrase("OBJECTIVE_REQUIRED","ESS"));
+	   	return;
+	}
+	if (NonSpace(formData.priority.value) == 0)
+	{
+		setRequiredField(formData.priority, getSeaPhrase("PRIORITY_REQUIRED","ESS"));
+	   	return;
+	}
+	if (NonSpace(formData.startDate.value) == 0)
+	{
+		setRequiredField(formData.startDate, getSeaPhrase("START_DATE_REQUIRED","ESS"));
+	   	return;
+	}
+ 	if (ValidDate(formData.startDate) == false)
+	   	return;
+	if (NonSpace(formData.endDate.value) == 0)
+	{
+		setRequiredField(formData.endDate, getSeaPhrase("END_DATE_REQUIRED","ESS"));
+	   	return;
+	}
+ 	if (ValidDate(formData.endDate) == false)
+	   	return;
+	// explicity blank out the rest of the fields, where appropriate
+	// we need to do a separate update using writeattach.exe to update the detailed objective
+	// once the form data has been validated, update it on HS08.1
+	if (NonSpace(formData.pctComplete.value) > 0)
+	{
+        // strip off trailing decimal point
+        if (formData.pctComplete.value.charAt(formData.pctComplete.value.length-1) == ".")
+            formData.pctComplete.value = formData.pctComplete.value.substring(0,formData.pctComplete.value.length-1);
+		if (isNaN(formData.pctComplete.value))
+		{
+			setRequiredField(formData.pctComplete, getSeaPhrase("PERCENT_COMPLETE","ESS"));
+			return;
+		}
+		else if (ValidNumber(formData.pctComplete,3,0,false) == false)
+		{
+			setRequiredField(formData.pctComplete, getSeaPhrase("INVALID_INTEGER","ESS"));
+			return;
+		}
+	}
+	if (isUpdating)
+		return;
+	isUpdating = true;
+	var agsObj = new AGSObject(authUser.prodline, "HS08.1");
+   	agsObj.event = "CHG"; // this needs to be "CHG" when FC=C
+    agsObj.rtn = "DATA";
+    agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+   	agsObj.field = "FC=C"
+	+ "&PGO-COMPANY=" + escape(parseInt(authUser.company,10))
+	+ "&PGO-EMPLOYEE=" + escape(parseInt(authUser.employee,10))
+	+ "&LINE-FC1=" + ((isChg) ? "C" : "A")
+	+ "&PGO-OBJECTIVE1=" + escape(formData.objective.value,1)
+	+ "&PGO-PRIORITY1=" + escape(Number(formData.priority.value),1)
+	+ "&PGO-START-DATE1=" + escape(formjsDate(formatDME(formData.startDate.value)),1)
+	+ "&PGO-END-DATE1=" + escape(formjsDate(formatDME(formData.endDate.value)),1)
+	+ "&PGO-PCT-COMPLETED1=" + ((NonSpace(formData.pctComplete.value) == 0) ? "000" : escape(formData.pctComplete.value,1));
+	if (isChg)
+	{
+		var paempgoalrecord = null;
+		if(whichView == CURRENT)
+			paempgoalrecord = paCurrent[i];
+		else if (whichView == HISTORICAL)
+			paempgoalrecord = paHistorical[i];
+		else if (whichView == ONHOLD)
+			paempgoalrecord = paOnHold[i];
+		else if (whichView == INACTIVE)
+			paempgoalrecord = paInactive[i];
+		// keep the same values for seq-nbr, type, and accepted as found in the PAEMPGOAL table
+		// position this record to the first detail line in order to do the change
+		agsObj.field += "&PGO-SEQ-NBR1=" + Number(paempgoalrecord.seq_nbr)
+		+ "&PGO-TYPE1=" + escape(paempgoalrecord.type,1)
+		+ ((acceptButton) ? "&PGO-ACCEPTED1=1" : "&PGO-ACCEPTED1=" + Number(paempgoalrecord.accepted))
+		+ "&PT-PGO-END-DATE=" + escape(formjsDate(formatDME(paempgoalrecord.end_date)),1)
+		+ "&PT-PGO-PRIORITY=" + escape(paempgoalrecord.priority,1)
+		+ "&PT-PGO-SEQ-NBR=" + Number(paempgoalrecord.seq_nbr)
+		+ "&PGO-COMPLETE-DATE1=" + ((NonSpace(formData.completeDate.value) == 0) ? "00000000" : escape(formjsDate(formatDME(formData.completeDate.value)),1))
+		+ ((escape(formData.pctComplete.value,1) == "100") ? "&PGO-COMPLETE1=1" : "&PGO-COMPLETE1=" + ((NonSpace(formData.complete.value) == 0) ? "0" : escape(formData.complete.value,1)));
+	}
+	else
+	{
+		agsObj.field += "&PGO-SEQ-NBR1=0" // we are added a new objective, so leave the seq-nbr blank
+		+ "&PGO-TYPE1=E" // <-- this should be E for Employee GoalView
+		+ "&PGO-COMPLETE1=0"
+		+ "&PGO-ACCEPTED1=1"; // initially, an objective should be in an accepted status
+	}
+	agsObj.debug = false;
+	agsObj.func = ((isChg) ? "parent.updateDetailedDesc1('"+authUser.prodline+"',"+paempgoalrecord.company+","+paempgoalrecord.employee+","+paempgoalrecord.seq_nbr+",'"+whichView+"')" : "parent.updateDetailedDesc1('"+authUser.prodline+"',"+authUser.company+","+authUser.employee+",0,'"+whichView+"')"); // refresh the list following an update
+  	self.lawheader.formCheck = "HS08";
+  	showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){AGS(agsObj,"jsreturn");});
+}
+
+function refreshObjectives(whichView)
+{
+	removeWaitAlert();
+	var refreshData = function()
+	{
+		showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){openView(whichView);});
+	}
+	var alertResponse = seaPageMessage(getSeaPhrase("UPDATE_COMPLETE","ESS"), "", "info", null, refreshData, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+	if (typeof(alertResponse) == "undefined" || alertResponse == null)
+	{	
+		if (seaPageMessage == window.alert)
+			refreshData();
+	}
+}
+
+function updateDetailedDesc1(prodline, company, employee, seqNbr, whichView) 
+{
+	updateDetailedDesc(prodline, company, employee, seqNbr, "updateCompletionComments('"+prodline+"',"+company+","+employee+","+seqNbr+",'"+whichView+"')", "P");
+}
+
+function updateCompletionComments(prodline, company, employee, seqNbr, whichView) 
+{
+	updateDetailedDesc(prodline, company, employee, seqNbr, "refreshObjectives('"+whichView+"')", "C");
+}
+
+function ReturnDate(date)
+{
+	try { self.right.document.forms["goalform"].elements[date_fld_name].value = date; } catch(e) {}
+}
+
+function OpenHelpDialogEdit()
+{
+	openHelpDialogWindow("/lawson/xhrnet/dateinquirytips.htm");
+}
+
+function printForm()
+{
+	var headerHtml = '<table summary="'+getSeaPhrase("TSUM_12","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_9","SEA")+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'
+	+ '<tr><th scope="row" class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">'+getSeaPhrase("EMPLOYEE_NAME","ESS")+':</span></th>'
+	+ '<td class="plaintablecell">'+currentpaempgoalrecords[0].employee_label_name_1+'</td></tr>'	
+	+ '<tr><th scope="row" class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">'+getSeaPhrase("EMPLOYEE_NUMBER","ESS")+':</span></th>'
+	+ '<td class="plaintablecell">'+authUser.employee+'</td></tr>'							
+	+ '</table><div style="height:20px">&nbsp;</div>'
+	+ '<table role="presentation"><tr><td class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">'+self.left.document.getElementById("paneHeader").innerHTML+'</span></td></tr></table>';		
+    self.printframe.document.title = getSeaPhrase("GOAL_MANAGEMENT","ESS");
+	self.printframe.document.body.innerHTML = headerHtml+self.left.document.getElementById("paneBody").innerHTML;
+	self.printframe.stylePage();
+	self.printframe.document.body.style.overflow = "visible";
+	self.printframe.focus();
+	self.printframe.print();
+}
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentLeftWidth;
+	var contentLeftBorderWidth;
+	var contentRightWidth;
+	var contentRightBorderWidth;
+	var contentTopHeight;
+	var contentTopBorderHeight;
+	var contentMiddleHeight;
+	var contentMiddleBorderHeight;
+	var contentBottomHeight;
+	var contentBottomBorderHeight;
+	var contentRightHeight;
+	var contentRightBorderHeight;
+	if (window.styler && window.styler.showInfor)
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 10;
+		var elmPad = 2;
+		if ((navigator.appName.indexOf("Microsoft") >= 0) && (!document.documentMode || document.documentMode < 8))
+			elmPad = 7;		
+		contentLeftBorderWidth = contentLeftWidth + elmPad;
+		contentRightWidth = parseInt(winWidth*.40,10) - 10;
+		contentRightBorderWidth = contentRightWidth + elmPad;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentTopHeight + 30 : contentTopHeight + 25;
+		if (fromTask && (parentTask != ""))
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 60;
+		else
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 60;	
+		contentMiddleBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentMiddleHeight + 30 : contentMiddleHeight + 25;
+		contentBottomHeight = parseInt(winHeight*.25,10) - 35;
+		contentBottomBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentBottomHeight + 30 : contentBottomHeight + 25;
+		contentRightHeight = winHeight - 75;
+		contentRightBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightHeight + 30 : contentRightHeight + 25;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 20;
+		contentLeftBorderWidth = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.40,10) - 20;
+		contentRightBorderWidth = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentTopHeight + 30 : contentTopHeight + 25;
+		if (fromTask && (parentTask != ""))
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 75;
+		else
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 75;
+		contentMiddleBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentMiddleHeight + 30 : contentMiddleHeight + 25;
+		contentBottomHeight = parseInt(winHeight*.25,10) - 35;
+		contentBottomBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentBottomHeight + 30 : contentBottomHeight + 25;
+		contentRightHeight = winHeight - 75;
+		contentRightBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightHeight + 30 : contentRightHeight + 25;				
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 10;
+		contentLeftBorderWidth = contentLeftWidth;
+		contentRightWidth = parseInt(winWidth*.40,10) - 10;
+		contentRightBorderWidth = contentRightWidth;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = contentTopHeight + 24;
+		if (fromTask && (parentTask != ""))
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 60;
+		else
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 60;
+		contentMiddleBorderHeight = contentMiddleHeight + 24;
+		contentBottomHeight = parseInt(winHeight*.25,10) - 40;
+		contentBottomBorderHeight = contentBottomHeight + 24;
+		contentRightHeight = winHeight - 77;
+		contentRightBorderHeight = contentRightHeight + 24;				
+	}
+	try
+	{
+		document.getElementById("top1").style.width = parseInt(winWidth*.60,10) + "px";
+		document.getElementById("top1").style.height = (parseInt(winHeight*.25,10) - 5) + "px";
+		document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		document.getElementById("paneBorder").style.height = contentTopBorderHeight + "px";		
+		document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		document.getElementById("paneBody").style.width = contentLeftWidth + "px";		
+		document.getElementById("paneBody").style.height = contentTopHeight + "px";
+		document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e) {}	
+	if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+		self.left.onresize = null;
+	try
+	{
+		if	(fromTask && (parentTask != ""))
+		{
+			document.getElementById("left").style.top = (parseInt(winHeight*.25,10) + 25) + "px";
+			document.getElementById("left").style.height = (parseInt(winHeight*.75,10) - 30) + "px";	
+		}			
+		else
+		{	
+			document.getElementById("left").style.top = (parseInt(winHeight*.25,10) + 25) + "px";
+			document.getElementById("left").style.height = (parseInt(winHeight*.50,10) - 30) + "px";
+		}
+		self.left.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentMiddleBorderHeight + "px";		
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentMiddleHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentMiddleHeight + "px";
+		self.left.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e) {}	
+	if (self.relatedlinks.onresize && self.relatedlinks.onresize.toString().indexOf("setLayerSizes") >= 0)
+		self.relatedlinks.onresize = null;	
+	try
+	{
+		document.getElementById("relatedlinks").style.top = (parseInt(winHeight*.75,10) - 5) + "px";
+		document.getElementById("relatedlinks").style.height = parseInt(winHeight*.25,10) + "px";
+		self.relatedlinks.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.relatedlinks.document.getElementById("paneBorder").style.height = contentBottomBorderHeight + "px";		
+		self.relatedlinks.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.relatedlinks.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e) {}	
+	if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+		self.right.onresize = null;
+	try
+	{
+		document.getElementById("right").style.height = winHeight + "px";
+		self.right.document.getElementById("paneBorder").style.width = contentRightBorderWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentRightBorderHeight + "px";		
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentRightHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentRightHeight + "px";
+		self.right.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e) {}	
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		document.getElementById("top1").style.left = "";
+		document.getElementById("top1").style.right = "0px";
+		document.getElementById("left").style.left = "";
+		document.getElementById("left").style.right = "0px";
+		document.getElementById("relatedlinks").style.left = "";
+		document.getElementById("relatedlinks").style.right = "0px";					
+		document.getElementById("right").style.left = "0px";
+	}
+	else
+		document.getElementById("right").style.left = parseInt(winWidth*.60,10) + "px";
+}
+</script>
+</head>
+<body style="width:100%;height:100%;overflow:hidden" onload="CallBack()" onresize="fitToScreen()">
+	<div id="top1" style="visibility:hidden;position:absolute;left:0px;width:40%;top:32px;height:160px;z-index:2">
+		<div id="paneBorder" class="paneborder">
+			<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+			<tr><td style="height:16px;vertical-align:top">
+				<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+			</td></tr>
+			<tr><td style="vertical-align:top">
+				<div id="paneBodyBorder" class="panebodyborder" styler="groupbox">
+					<div id="paneBody" class="panebody" tabindex="0"></div>
+				</div>
+			</td></tr>
+			</table>
+		</div>
+	</div>
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:10px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="left" name="left" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;position:absolute;left:0px;width:60%;top:187px;height:300px;z-index:1" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" title="Secondary Content" level="3" tabindex="0" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelplite.htm" style="visibility:hidden;position:absolute;left:60%;width:40%;top:32px;height:455px;" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="relatedlinks" name="relatedlinks" title="Secondary Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;width:60%;top:487px;height:100px;z-index:0;padding:0px;margin:0px" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="printframe" name="printframe" title="Empty" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="7" marginheight="7" frameborder="0" scrolling="no"></iframe>
+	<iframe id="jsreturn2" name="jsreturn2" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="7" marginheight="7" frameborder="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/nerrmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/goalmanagementemployee.html,v 1.1.2.121 2014/02/25 22:49:13 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

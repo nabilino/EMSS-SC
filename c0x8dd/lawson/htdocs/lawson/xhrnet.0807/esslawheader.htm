@@ -1,0 +1,401 @@
+<html>
+<head>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script>
+var gmsg;
+var gfldnbr;
+var gmsgnbr;
+
+function V(fldnbr,fldval)
+{
+	if (parent.updatetype == "EDM")
+	{
+		if (fldnbr == "PT-EDM-DED-CODE") {
+			parent.next_ded_code = fldval;
+		}
+	}
+	if (parent.updatetype == "REV")
+	{
+		if (fldnbr == "FC") {
+			parent.fc = fldval;
+			parent.sched_date = "";
+			parent.rev_code = "";
+			parent.rev_schedule = "";
+			parent.rev_employee = 0;
+			parent.rev_seq_nbr = "";
+		}
+		if (fldnbr == "REV-SEQ-NBR") {
+			parent.rev_seq_nbr = fldval;
+		}
+		if (fldnbr == "REV-EMPLOYEE") {
+			parent.rev_employee = fldval;
+		}
+		if (fldnbr == "REV-SCHED-DATE") {
+			parent.sched_date = fldval;
+		}
+		if (fldnbr == "REV-CODE") {
+			parent.rev_code = fldval;
+		}
+		if (fldnbr == "PEM-REV-SCHEDULE") {
+			parent.rev_schedule = fldval;
+		}
+	}
+	if (parent.updatetype == "PAT")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.fc = fldval
+			parent.pct_value[1] = ""
+			parent.pct_value[2] = ""
+			parent.pct_value[3] = ""
+			parent.pct_value[4] = ""
+			parent.pct_value[5] = ""
+			parent.pct_value[6] = ""
+			parent.pct_value[7] = ""
+			parent.pct_value[8] = ""
+			parent.pct_value[9] = ""
+			parent.pct_value[10] = ""
+		}
+		if (parent.fc == "I")
+		{
+			if (fldnbr == "PCT-PRE-VALUE1")
+				parent.pct_value[1] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE2")
+				parent.pct_value[2] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE3")
+				parent.pct_value[3] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE4")
+				parent.pct_value[4] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE5")
+				parent.pct_value[5] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE6")
+				parent.pct_value[6] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE7")
+				parent.pct_value[7] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE8")
+				parent.pct_value[8] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE9")
+				parent.pct_value[9] = fldval.substring(0,fldval.indexOf("  "))
+			if (fldnbr == "PCT-PRE-VALUE10")
+				parent.pct_value[10] = fldval.substring(0,fldval.indexOf("  "))
+		}
+	}
+	if (parent.updatetype == "BEN")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.TC_val = ""
+			parent.HK_val = ""
+		}
+		if (fldnbr == "TC")
+			parent.TC_val = fldval
+		if (fldnbr == "_HK")
+			parent.HK_val = fldval
+		if (fldnbr == "BEN-PLAN-TYPE1")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE1")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC1")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE1")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE2")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE2")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC2")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE2")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE3")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE3")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC3")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE3")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE4")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE4")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC4")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE4")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE5")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE5")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC5")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE5")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE6")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE6")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC6")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE6")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE7")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE7")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC7")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE7")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE8")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE8")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC8")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE8")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE9")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE9")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC9")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE9")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE10")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE10")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC10")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE10")
+			parent.elg_start_date[parent.elg_count] = fldval
+		if (fldnbr == "BEN-PLAN-TYPE11")
+		{
+			++parent.elg_count
+			parent.elg_plan_type[parent.elg_count] = fldval
+		}
+		if (fldnbr == "BEN-PLAN-CODE11")
+			parent.elg_plan_code[parent.elg_count] = fldval
+		if (fldnbr == "PLN-DISPLAY-DESC11")
+			parent.elg_desc[parent.elg_count] = fldval
+		if (fldnbr == "ELIGIBLE-DATE11")
+			parent.elg_start_date[parent.elg_count] = fldval
+	}
+	if (parent.updatetype == "PMTA" || parent.updatetype == "PMTC")
+	{
+		if (fldnbr == "FC")
+		{
+			parent.grosspay = ""
+			parent.fedtaxamt = ""
+			parent.netpay = ""
+			parent.stataxamt = ""
+			parent.hours = ""
+			parent.ficataxamt = ""
+			parent.payrate = ""
+			parent.medtaxamt = ""
+			parent.dedamt125 = ""
+			parent.dcdedamt = ""
+			parent.otherdedamt = ""
+			parent.exemptdedamt = ""
+			parent.payfrequency = ""
+			parent.salaryclass = ""
+			parent.exemptions = ""
+			parent.marstatus = ""
+			parent.taxstate = ""
+			parent.fdtaxperc = ""
+			parent.fdexmptaddl = ""
+			parent.sttaxperc = ""
+			parent.stexmptaddl = ""
+			parent.countytaxamt = ""
+			parent.citytaxamt = ""
+			parent.schooltaxamt = ""
+		}
+		if (fldnbr == "EMP-PAY-FREQUENCY")
+			parent.payfrequency = fldval
+		if (fldnbr == "EMP-SALARY-CLASS")
+			parent.salaryclass = fldval
+		if (fldnbr == "EMP-FD-EXEMPTS")
+			parent.exemptions = parseFloat(fldval)
+		if (fldnbr == "EMP-FD-MAR-STATUS")
+			parent.marstatus = eval(fldval)
+		if (fldnbr == "EMP-FD-EXMPT-ADDL")
+			parent.fdexmptaddl = fldval
+		if (fldnbr == "EMP-FD-TAX-PERC")
+			parent.fdtaxperc = parent.FormatDecimalField(fldval,3)
+		if (fldnbr == "EMP-ST-EXMPT-ADDL")
+			parent.stexmptaddl = fldval
+		if (fldnbr == "EMP-ST-TAX-PERC")
+			parent.sttaxperc = parent.FormatDecimalField(fldval,3)
+		if (fldnbr == "EMP-TAX-STATE")
+			parent.taxstate = fldval
+		if (fldnbr == "RESULT-GROSS-PAY")
+			parent.grosspay = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "FED-TAX-AMT")
+			parent.fedtaxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "RESULT-NET-PAY")
+			parent.netpay = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "STA-TAX-AMT")
+			parent.stataxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "RESULT-HOURS")
+			parent.hours = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "FICA-TAX-AMT")
+			parent.ficataxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "RESULT-PAY-RATE")
+			parent.payrate = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "MED-TAX-AMT")
+			parent.medtaxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "CNTY-TAX-AMT")
+			parent.countytaxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "CITY-TAX-AMT")
+			parent.citytaxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "SCHL-TAX-AMT")
+			parent.schooltaxamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "125-DED-AMT")
+			parent.dedamt125 = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "DC-DED-AMT")
+			parent.dcdedamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "OTHER-DED-AMT")
+			parent.otherdedamt = parent.FormatDecimalField(fldval,2)
+		if (fldnbr == "EXEMPT-DED-AMT")
+			parent.exemptdedamt = parent.FormatDecimalField(fldval,2)
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsg = msg;
+	gfldnbr = fldnbr;
+    gmsgnbr = msgnbr;
+
+	if (msgnbr != "000")
+	{
+		parent.msg = msg
+		parent.fldnbr = fldnbr
+		parent.msgnbr = msgnbr
+		if (parent.updatetype == "REV" || parent.updatetype == "PAC")
+			parent.rev_error = true
+		if (parent.updatetype == "PJR")
+		{
+			parent.seaAlert(parent.getSeaPhrase("ERROR","ESS")+":\n\n"+msg+"\n("+fldnbr+", "+msgnbr+")")
+			if ((parseInt(msgnbr,10) == 143 || parseInt(msgnbr,10) == 144)
+			&& parent.CONTROLITEM && parent.CONTROLITEM.document.newpajobreq
+			&& parent.CONTROLITEM.document.newpajobreq.fte)
+			{
+				parent.CONTROLITEM.document.newpajobreq.fte.select()
+				parent.CONTROLITEM.document.newpajobreq.fte.focus()
+			}
+			if (parseInt(msgnbr,10) == 147
+			&& parent.CONTROLITEM && parent.CONTROLITEM.document.newpajobreq
+			&& parent.CONTROLITEM.document.newpajobreq.openings)
+			{
+				parent.CONTROLITEM.document.newpajobreq.openings.select()
+				parent.CONTROLITEM.document.newpajobreq.openings.focus()
+			}
+		}
+	}
+	else
+	{
+		parent.msg = msg
+		parent.msgnbr = ""
+		if (parent.updatetype == "PAE")
+		{
+			parent.parent.removeWaitAlert();
+			parent.parent.seaAlert(parent.getSeaPhrase("UPDATE_COMPLETE","ESS"));
+			parent.GetPaemergcnt();
+		}
+		if (parent.updatetype == "EMP")
+		{
+			parent.seaAlert(parent.getSeaPhrase("UPDATE_COMPLETE","ESS"))
+			parent.GetEmployee()
+		}
+		if (parent.updatetype == "EMD")
+			parent.GetEmdepend()
+		if (parent.updatetype == "EMDNEW")
+			parent.close()
+		if (parent.updatetype == "PCTN")
+		{
+			parent.seaAlert(parent.getSeaPhrase("PERSONNEL_ACTION_ADDED","ESS"))
+			parent.removeWaitAlert()
+			parent.ClearControlItem()
+		}
+		if (parent.updatetype == "PCTY")
+		{
+			parent.seaAlert(parent.getSeaPhrase("PERSONNEL_ACTION_COMPLETED","ESS"))
+			parent.removeWaitAlert()
+			parent.ClearControlItem()
+		}
+		if (parent.updatetype == "REG")
+		{
+			parent.seaAlert(parent.getSeaPhrase("REGIS_COMPLETE","ESS"))
+			parent.GetPacourse()
+		}
+		if (parent.updatetype == "PJR")
+		{
+			parent.seaAlert(parent.getSeaPhrase("REQUISITION_ADDED","ESS"))
+		}
+		if (parent.updatetype == "PMTA")
+			parent.DisplayResults()
+		if (parent.updatetype == "PMTC")
+			parent.ReturnDefaults()
+		if (parent.updatetype == "BN31")
+			parent.DisplayMessage()
+	}
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/esslawheader.htm,v 1.4.2.11 2012/06/29 17:12:05 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

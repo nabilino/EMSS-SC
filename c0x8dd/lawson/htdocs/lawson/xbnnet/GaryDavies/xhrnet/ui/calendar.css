@@ -1,0 +1,147 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/calendar.css,v 1.1.2.1 2011/05/04 21:10:14 brentd Exp $ */
+/* Version: 8-)@(#)@(201111) 09.00.01.06.00 */
+div.calendarOuter
+{ 
+	position : absolute; 
+	background-color: transparent; 
+	visibility : hidden; 
+	width: auto; 
+	height : auto; 
+	z-index : 999; 
+	padding : 0px; 
+	margin : 0px; 
+	border : 0px; 
+}  
+div.calendarInner 
+{ 
+	background-color : #9DC0E3; 
+	position : relative; 
+	padding : 5px; 
+	border : 1px solid #707070; 
+	text-align : center; 
+}
+div div span.calendarHeading
+{
+	background-color : #9DC0E3;
+	color : #000000;
+	font-size : 12px;
+	font-weight : bold;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+}
+div div table td.calendarDayHeader
+{
+	background-color : #9DC0E3;
+	color : #000000;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	width : 25px;
+	text-decoration : none;
+	text-align : center;
+	padding : 1px;
+	border : 0px;
+}
+div div table td.calendarDay
+{
+	background-color : #9DC0E3;
+	color : #454545;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : default;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #9DC0E3;
+}
+div div table td.calendarDayRight
+{
+	background-color : #9DC0E3;
+	color : #454545;
+	font-size :	12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : default;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #9DC0E3;
+}
+div div table td.calendarDayToday
+{
+	background-color : #DFDFDF;
+	color : #676767;
+	font-size :	12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : default;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #9DC0E3;
+}
+div div table td.calendarDayOver
+{
+	background-color : #F3F3F3;
+	color : #454545;
+	font-size :	12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : pointer;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #676767;
+}
+div div table td.calendarDayRightOver
+{
+	background-color : #F3F3F3;
+	color : #454545;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : pointer;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #676767;
+}
+div div table td.calendarDayTodayOver
+{
+	background-color : #676767;
+	color : #9DC0E3;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : pointer;
+	text-align : center;
+	padding : 1px;
+	border : 0px solid #676767;
+}
+button.calendarArrow
+{
+	background-color : #9DC0E3;
+	color : #000000;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : default;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #9DC0E3;
+}
+button.calendarArrowOver
+{
+	background-color : #F3F3F3;
+	color : #000000;
+	font-size : 12px;
+	font-family : Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight : bold;
+	text-decoration : none;
+	cursor : pointer;
+	text-align : center;
+	padding : 1px;
+	border : 1px solid #676767;
+}

@@ -1,0 +1,81 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script>
+function startProgram()
+{
+	var html = '<form>'	
+
+	html += '<div class="plaintablecell" style="padding:5px;text-align:center">'
+	html += '<p>' + getSeaPhrase("SMOKER_QUESTION","BEN")
+	html += '<input type="radio" name="yesorno" value="Y">'+getSeaPhrase("YES","BEN")+'</input>'
+	html += '<input type="radio" name="yesorno" value="N">'+getSeaPhrase("NO","BEN")+'</input>'
+	html += '</p>'
+	html += '</div>'
+
+	html += '<div class="plaintablecellright" style="padding:5px">'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.setSmokerStatus(this.form);return false","margin-left:5px","closebtn")
+	html += uiButton(getSeaPhrase("PREVIOUS","BEN"), "parent.document.getElementById('main').src='"+parent.LastDoc[parent.currentdoc]+"';parent.currentdoc--;return false", "margin-left:5px")
+	html += uiButton(getSeaPhrase("EXIT","BEN"), "parent.quitEnroll(self.location.href);return false", "margin-left:5px")
+	html += '</div>'
+
+	html += '</form>'
+	
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("SMOKER_STATUS","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+
+	try
+	{
+		if (typeof(parent.removeWaitAlert) == "function")
+			parent.removeWaitAlert();
+		if (typeof(parent.parent.removeWaitAlert) == "function")
+			parent.parent.removeWaitAlert();	
+	}
+	catch(e) {}	
+	
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td style="vertical-align:top">
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/Attic/smoker.htm,v 1.1.2.6 2012/07/19 14:42:24 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

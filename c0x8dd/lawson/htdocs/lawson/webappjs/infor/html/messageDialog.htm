@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<!-- $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/html/messageDialog.htm,v 1.1.2.16.2.4 2014/02/18 16:42:33 brentd Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+<html lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+	<meta charset="utf-8">
+	<title></title>
+	<script src="../../javascript/objects/StylerBase.js"></script>
+	<script src="../javascript/messageDialog.js"></script>
+	<link id="LinkStyle" type="text/css" rel="stylesheet" href="../css/base/inforCommon.css"></link>
+	<link id="LinkStyle" type="text/css" rel="stylesheet" href="../css/base/inforDialog.css"></link>
+	<link id="LinkStyle" type="text/css" rel="stylesheet" href="../css/base/inforTextButton.css"></link>
+</head>
+
+<body onload="initMsgDlg();" onkeydown="msgOnKeyDown(event);" onunload="onUnload();" style="visibility:hidden;background-color:transparent;padding:0px;margin:0px;">
+
+<div id="msgBg" style="position:absolute;background-color:#ffffff;z-index:-1;display:none;"></div>
+<div id="leftBorder" class="inforDialogLeftBorder"><div class="inforDialogLeft">&nbsp;</div></div>
+<div id="rightBorder" class="inforDialogRightBorder"><div class="inforDialogRight">&nbsp;</div></div>
+<div id="msgContent" class="inforDialogContent">
+	<table id="msgTable" border="0" cellspacing="0" cellpadding="0">
+	<tr>
+		<td width="60px" align="center" valign="top">
+			<img id="imgGraphic"></img>
+		</td>
+		<td valign="center">
+			<div id="lblPrompt" class="inforDialogText"></div>
+		</td>
+	</tr>
+	<tr style="padding-top:5px">
+		<td width="60px" align="center" valign="top">
+			&nbsp;
+		</td>
+		<td valign="center">
+			<div id="lblSecondaryPrompt" class="inforDialogSecondaryText"></div>
+		</td>
+	</tr>
+	</table>
+</div>
+<div class="inforDialogTopLeft">
+	<div class="inforDialogTopCenter"><div class="inforDialogTop"><div id="lblTitleBar" class="inforDialogTitleBar">&nbsp;</div></div></div>
+	<div class="inforDialogTopRight"><div class="inforDialogCloseIcon"><button id="btnClose" name="close" class="inforDialogCloseIcon" onclick="onClick(this);" onmouseover="this.className='inforDialogCloseIconOver';" onmouseout="this.className='inforDialogCloseIcon';"></button></div></div>	
+	<div id="bottomLeft" class="inforDialogBottomLeft"><div class="inforDialogBottomCenter"><div class="inforDialogBottom">&nbsp;</div></div></div>
+	<div id="bottomRight" class="inforDialogBottomRight">
+		<table id="btnTable" border="0" cellspacing="0" cellpadding="0" align="center" style="width:auto;text-align:center;padding-top:5px;padding-left:10px;padding-right:10px">
+		<tr>
+			<td valign="top" align="right" style="white-space:nowrap;padding-right:15px">
+				<button id="btnYes" name="yes" styler="pushbutton" onclick="onClick(this)" style="width:auto;margin:0px;padding:0px"><!-- Yes --></button>
+				<button id="btnNo" name="no" styler="pushbutton" onclick="onClick(this)" style="width:auto;margin:0px 0px 0px 5px;padding:0px"><!-- No --></button>
+				<button id="btnCancel" name="cancel" styler="pushbutton" onclick="onClick(this)" style="width:auto;margin:0px 0px 0px 5px;padding:0px"><!-- Cancel --></button>
+				<button id="btnPrint" name="print" styler="pushbutton" onclick="onClick(this)" style="width:auto;margin:0px 0px 0px 5px;padding:0px;display:none;"><!-- Print --></button>
+			</td>
+		</tr>
+		</table>	
+	</div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/wizard.htm,v 1.4.26.1.2.2 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+	<script language="javascript" src="servenv.js"></script>
+	<script language="javascript" src="wizard.js"></script>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="wizard.css"></link>
+</head>
+
+<body onload="wizShowWizard()" style="margin:0;">
+	<div id="wizardDiv" class="wizard">
+
+		<div id="wizardInstr" class="wizData" style="width:296px;"></div>
+		<div id="wizardNav" class="wizNav" style="width:300px">
+		    <div id="wizCancel" class="wizImages" onmouseover="wizChgCursor(this)" onclick="wizClickCancel()">
+	    		<div class="wizCancelImage" style="width:15px;height:15px;display:inline"></div>
+		    	<label id="lblCancel" style="vertical-align:top;">Cancel</label>
+		    </div>
+		    <div id="wizBack" class="wizImages" onmouseover="wizChgCursor(this)" onclick="wizMoving('Back')">
+		    	<div class="wizBackImage" style="width:15px;height:15px;display:inline;"></div>
+		    	<label id="lblBack" style="vertical-align:top;">Back</label>
+		    </div>
+		    <div id="wizContinue" class="wizImages" onmouseover="wizChgCursor(this)" onclick="wizMoving('Forward')">
+		    	<label id="lblContinue" style="vertical-align:top;">Continue</label>
+		    	<div class="wizContinueImage" style="width:15px;height:15px;display:inline;"></div>
+		    </div>
+		    <div id="wizFinish" class="wizImages" onmouseover="wizChgCursor(this)" onclick="wizClickFinish()">
+		    	<label id="lblFinish" style="vertical-align:top;">Finish</label>
+		    	<div class="wizFinishImage" style="width:15px;height:15px;display:inline;"></div>
+		    </div>
+		</div>
+
+		<div id="wizLeftArrow" class="wizImages">
+			<div class="wizLeftArrowImage" style="width:12px;height:12px"></div>
+		</div>
+		<div id="wizRightArrow" class="wizImages">
+			<div class="wizRightArrowImage" style="width:12px;height:12px"></div>
+		</div>
+		<div id="wizUpArrow" class="wizImages">
+			<div class="wizUpArrowImage" style="width:12px;height:12px"></div>
+		</div>
+		<div id="wizDownArrow" class="wizImages">
+			<div class="wizDownArrowImage" style="width:12px;height:12px"></div>
+		</div>
+	</div>
+</body>
+
+</html>

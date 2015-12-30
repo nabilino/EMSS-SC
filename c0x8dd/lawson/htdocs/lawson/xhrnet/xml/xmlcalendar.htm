@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Calendar</title>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script language="JavaScript">
+function buildPage()
+{
+	try 
+	{
+		if (typeof(self.getSeaPhrase) != "undefined" && self.getSeaPhrase("JAN","ESS") != "")
+	   			camefrom = self;
+		else if (opener && opener.getSeaPhrase("JAN","ESS") != "")
+	    	camefrom = opener;
+	    else if (opener && opener.opener && opener.opener.getSeaPhrase("JAN","ESS") != "")
+	    	camefrom = opener.opener;
+	    else
+	    	camefrom = self;
+	} 
+	catch (e) 
+	{
+    	camefrom = self;
+	}
+	var calTitle = camefrom.getSeaPhrase("CALENDAR","ESS");
+	setWinTitle(calTitle);
+	var pageHtml = '<!DOCTYPE html>'
+	+ '<html lang="en"><head><title>'+calTitle+'</title>'
+	+ '<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8"><meta charset="utf-8">'
+	+ '<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>'
+	+ '</head>'
+	+ '<body class="calendarPopup" onload="parent.setDate()">'
+	+ '<div align="center"><form name="calControl" onsubmit="return false;">'
+	+ '<table cellpadding="2" cellpadding="0" border="0" style="align:center;margin-top:5px;margin-left:7px" role="presentation">'
+	+ '<tr height="25"><td align="center">'
+	+ '<select class="calendaritem" name="month" onchange="parent.selectDate()">'
+	+ '<option>'+camefrom.getSeaPhrase("JAN","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("FEB","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("MAR","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("APR","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("MAY","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("JUN","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("JUL","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("AUG","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("SEP","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("OCT","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("NOV","ESS")+'</option>'
+	+ '<option>'+camefrom.getSeaPhrase("DEC","ESS")+'</option>'
+	+ '</select>&nbsp;'
+	+ '<input class="calendaritem" name="year" type="text" size="4" maxlength="4" onchange="parent.selectDate()" onblur="parent.refreshYear()">'
+	+ '</td></tr>'
+	+ '<tr height="25px">'
+	+ '<td height="25px" align="center">'
+	+ '<input class="calendarButton" style="width:20px;border:0" type="button" name="previousYear" value="<<" onclick="parent.setPreviousYear()">'
+	+ '<input class="calendarButton" style="width:20px;border:0" type="button" name="previousYear" value=" < " onclick="parent.setPreviousMonth()">'
+	+ '<input class="calendarButton" style="font-weight:bold;width:60px;border:0" type="button" name="today" value="'+camefrom.getSeaPhrase("TODAY","ESS")+'" onclick="parent.setToday()">'
+	+ '<input class="calendarButton" style="width:20px;border:0" type="button" name="previousYear" value=" > " onclick="parent.setNextMonth()">'
+	+ '<input class="calendarButton" style="width:20px;border:0" type="button" name="previousYear" value=">>" onclick="parent.setNextYear()">'
+	+ '</td></tr>'
+	+ '</table></form></div>'
+	+ '<div align="center"><form name="calButtons">'
+	+ '<table class="calendarBody" cellpadding="0" cellpadding="0" border="0" style="margin-left:7px;" role="presentation">'
+	+ '<tr height="25px" align="center">'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("SUN","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("MON","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("TUE","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("WED","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("THU","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("FRI","ESS")+'</td>'
+	+ '<td class="calendarHeader">'+camefrom.getSeaPhrase("SAT","ESS")+'</td></tr>'
+	+ '<tr align="center">'
+	+ '<td><input class="calendarButton" type="button" name="but0" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but1" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but2" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but3" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but4" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but5" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but6" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '<tr align="center">'
+	+ '<td><input class="calendarButton" type="button" name="but7" value="  " onclick="parent.returnDate(this.value)"></td>'
+ 	+ '<td><input class="calendarButton" type="button" name="but8" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but9" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but10" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but11" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but12" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but13" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '<tr align="center">'
+	+ '<td><input class="calendarButton" type="button" name="but14" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but15" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but16" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but17" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but18" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but19" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but20" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '<tr align="center">'
+   	+ '<td><input class="calendarButton" type="button" name="but21" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but22" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but23" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but24" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but25" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but26" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but27" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '<tr align="center">'
+	+ '<td><input class="calendarButton" type="button" name="but28" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but29" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but30" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but31" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but32" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but33" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but34" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '<tr align="center">'
+	+ '<td><input class="calendarButton" type="button" name="but35" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but36" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but37" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but38" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but39" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but40" value="  " onclick="parent.returnDate(this.value)"></td>'
+	+ '<td><input class="calendarButton" type="button" name="but41" value="  " onclick="parent.returnDate(this.value)"></td></tr>'
+	+ '</table></form></div></body></html>'
+	self.CALENDAR.document.write(pageHtml);
+	self.CALENDAR.document.close();
+	try { setDate(); } catch(e) {}
+	fitToScreen();
+}
+
+function refreshYear()
+{
+	if ((self.CALENDAR.document.calControl.year.value.length == 4) && (calYear != self.CALENDAR.document.calControl.year.value))
+		selectDate();
+}
+
+function setDate()
+{
+    authUser = opener.authUser;
+	DateFmt = authUser.datefmt;
+	DateSep = authUser.date_separator;
+	Century = authUser.century;
+	DATE = authUser.date;
+	inDate = "";
+	try
+	{
+	    if (opener && opener.dateField)
+	    {
+	    	dateField = opener.dateField;
+			if (ValidDate(dateField))
+			    inDate = dateField.value;
+			else
+				inDate = "";
+		}
+	}
+	catch(e) {}
+    // SET DAY MONTH AND YEAR TO TODAY'S DATE
+    var now = new Date();
+    calDay = now.getDate();
+    calMonth = now.getMonth();
+    calYear = now.getFullYear();
+    // IF A DATE WAS PASSED IN THEN PARSE THAT DATE
+	if (inDate != "")
+	{
+		var dateAry = inDate.split(DateSep);
+		calYear = (DateFmt == "YYYYMMDD" ? dateAry[0] : dateAry[2]);
+        if (calYear.length < 4)
+        {
+        	if (Number(calYear) < Number(Century))
+            	calYear = "20" + calYear;
+            else
+            	calYear = "19" + calYear;
+        }
+		calMonth = (DateFmt == "MMDDYYYY" ? dateAry[0] : dateAry[1]);
+		calDay = (DateFmt == "MMDDYYYY" ? dateAry[1] : (DateFmt == "DDMMYYYY" ? dateAry[0] : dateAry[2]));
+		calYear = Number(calYear);
+		calMonth = Number(calMonth) - 1;
+		calDay = Number(calDay);
+	}
+    focusDay = calDay;
+    self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+    self.CALENDAR.document.calControl.year.value = calYear;
+    displayCalendar(calDay, calMonth, calYear);
+}
+
+function setToday() 
+{
+    // SET DAY MONTH AND YEAR TO TODAY'S DATE
+    var now = new Date();
+    calDay = now.getDate();
+    calMonth = now.getMonth();
+    calYear = now.getFullYear();
+    focusDay = calDay;
+    self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+    self.CALENDAR.document.calControl.year.value = calYear;
+    displayCalendar(calDay, calMonth, calYear);
+    returnDate(calDay);
+}
+
+function isFourDigitYear(year) 
+{
+    if (year.length != 4) 
+    {
+        alert(camefrom.getSeaPhrase("CAL_0","ESS"));
+        self.CALENDAR.document.calControl.year.select();
+        self.CALENDAR.document.calControl.year.focus();
+    }
+    else
+        return true;
+}
+
+function selectDate() 
+{
+    calYear = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) 
+    {
+        calDay = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setPreviousYear() 
+{
+    calYear = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) 
+    {
+        calDay = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        calYear--;
+        self.CALENDAR.document.calControl.year.value = calYear;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setPreviousMonth() 
+{
+    calYear = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) 
+    {
+        calDay = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        if (calMonth == 0) 
+        {
+            calMonth = 11;
+            if (calYear > 1000) 
+            {
+                calYear--;
+                self.CALENDAR.document.calControl.year.value = calYear;
+            }
+        }
+        else
+            calMonth--;
+        self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setNextMonth() 
+{
+    calYear = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) 
+    {
+        calDay   = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        if (calMonth == 11) 
+        {
+            calMonth = 0;
+            calYear++;
+            self.CALENDAR.document.calControl.year.value = calYear;
+        }
+        else
+            calMonth++;
+        self.CALENDAR.document.calControl.month.selectedIndex = calMonth;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function setNextYear() 
+{
+    calYear = self.CALENDAR.document.calControl.year.value;
+    if (isFourDigitYear(calYear)) 
+    {
+        calDay = 0;
+        calMonth = self.CALENDAR.document.calControl.month.selectedIndex;
+        calYear++;
+        self.CALENDAR.document.calControl.year.value = calYear;
+        displayCalendar(calDay, calMonth, calYear);
+    }
+}
+
+function displayCalendar(day, month, year) 
+{	
+    day = Number(day);
+    month = Number(month);
+    year = Number(year);
+    var i = 0;
+    var now = new Date();
+	var nowDay = (day == 0) ? now.getDate() : day;
+    var days = getDaysInMonth(month+1,year);
+    var firstOfMonth = new Date (year, month, 1);
+    var startingPos  = firstOfMonth.getDay();
+    days += startingPos;
+    // MAKE BEGINNING NON-DATE BUTTONS BLANK
+    for (i=0; i<startingPos; i++) 
+    {
+		var aButton = self.CALENDAR.document.calButtons[i];
+        aButton.value = "  ";
+        aButton.style.display = "none";
+    	aButton.style.fontWeight = "normal";
+		aButton.style.border = "0";
+		aButton.style.backgroundColor = "";
+    }
+    // SET VALUES FOR DAYS OF THE MONTH
+    for (i=startingPos; i<days; i++)
+    {
+		var val = i - startingPos + 1;
+		if (val < 10)
+			val = " " + val;
+		var aButton = self.CALENDAR.document.calButtons[i];
+		aButton.value = val;
+		aButton.onClick = "returnDate";
+		aButton.style.display = "";
+		aButton.style.fontWeight = "normal";
+		aButton.style.border = "0";
+		aButton.style.backgroundColor = "";
+	}    
+    // MAKE REMAINING NON-DATE BUTTONS BLANK
+    for (i=days; i<42; i++)  
+	{
+		var aButton = self.CALENDAR.document.calButtons[i];
+        aButton.value = "  ";
+        aButton.style.display = "none";
+    	aButton.style.fontWeight = "normal";
+		aButton.style.border = "0";
+		aButton.style.backgroundColor = "";
+	}
+	// Only highlight and focus on "day" if we are on the current month and year [dko 8/25/2003]
+	var nowMonth = now.getMonth();
+	var nowYear = now.getFullYear();
+	var compareMonth = Number(self.CALENDAR.document.calControl.month.selectedIndex);
+	var compareYear = Number(self.CALENDAR.document.calControl.year.value);
+	if (day != 0 || ((nowMonth == compareMonth) && (nowYear == compareYear)))
+	{
+		// GIVE FOCUS TO CORRECT DAY
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].focus();
+		// [dko 8/21/03] additional decoration
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.fontWeight = "bold";
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.border = "1px solid black";
+		self.CALENDAR.document.calButtons.elements[focusDay+startingPos-1].style.backgroundColor = "#E2ECE1";
+	}
+}
+
+// GET NUMBER OF DAYS IN MONTH
+function getDaysInMonth(month, year) 
+{
+    var days;
+    if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12)
+    	days = 31;
+    else if (month == 4 || month == 6 || month == 9 || month == 11) 
+    	days = 30;
+    else if (month == 2)
+    {
+        if (isLeapYear(year))
+            days = 29;
+        else
+            days = 28;
+    }
+    return (days);
+}
+
+// CHECK TO SEE IF YEAR IS A LEAP YEAR
+function isLeapYear (Year) 
+{
+    if (((Year % 4) == 0) && ((Year % 100) != 0) || ((Year % 400) == 0))
+        return (true);
+    else
+        return (false);
+}
+
+// SET FORM FIELD VALUE TO THE DATE SELECTED
+function returnDate(inDay)
+{
+	if (Number(inDay) == 0)
+		return;
+    var day = Number(inDay);
+    var month = (self.CALENDAR.document.calControl.month.selectedIndex) + 1;
+    var year  = self.CALENDAR.document.calControl.year.value;
+	var dateValue = "";
+    if ((""+month).length == 1)
+        month = "0" + month;
+    if ((""+day).length == 1)
+        day = "0" + day;
+    if (day != "  ")
+    {
+		if (DateFmt == "MMDDYYYY")
+	       	dateValue = month + DateSep + day + DateSep + year;
+		else if (DateFmt == "DDMMYYYY")
+	       	dateValue = day + DateSep + month + DateSep + year;
+		else if (DateFmt == "YYYYMMDD")
+	       	dateValue = year + DateSep + month + DateSep + day;
+	    window.opener.ReturnDate(dateValue);
+		window.close();
+    }
+}
+
+function fitToScreen()
+{
+	var calFrame = document.getElementById("CALENDAR");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	calFrame.style.width = winWidth + "px";
+	calFrame.style.height = winHeight + "px";	
+}
+// -->
+</script>
+</head>
+<body style="overflow:hidden" onload="buildPage()" onresize="fitToScreen()">
+	<iframe id="CALENDAR" name="CALENDAR" title="Content" level="1" tabindex="0" style="position:absolute;top:0px;height:500px;left:0px;width:803px" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/xmlcalendar.htm,v 1.14.2.20 2014/02/17 23:01:53 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

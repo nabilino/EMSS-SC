@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>Marital Status Help</title>
+<meta name="viewport" content="width=device-width" />
+<script>
+function writeContents()
+{
+	document.title = opener.getSeaPhrase("MARITAL_STATUS_HELP","ESS");
+
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'+
+				opener.getSeaPhrase("HELP","ESS")+
+				'</div>'
+	self.main.stylePage();
+	self.main.setLayerSizes();
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winHeight = 0;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+	}
+
+	if (winHeight >= 35)
+	{
+		try
+		{
+			self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		}
+		catch(e)
+		{}
+	}
+}
+</script>
+</head>
+<frameset rows="100%" frameborder="no" border="0" onload="fitToScreen();writeContents()" onresize="fitToScreen()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" marginwidth="0" marginheight="0" scrolling="no">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/maritalstatustip.htm,v 1.5.2.5 2011/05/04 21:10:12 brentd Exp $ -->
+

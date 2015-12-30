@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/functions.xml,v 1.1.4.2.4.3.16.2 2012/08/08 12:48:51 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<FUNCTIONS methodslabel="Methods" parmslabel="Parameters">
+	<FUNCTION name="getDataValue" display="" returns="">
+		<PARAMETER name="name" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getDataValueById" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setDataValue" display="" returns="">
+		<PARAMETER name="name" typ="string"/>
+		<PARAMETER name="value" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setDataValueById" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="value" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getElement" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getElementValue" display="" returns="string">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setElementValue" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="value" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getFormElement" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getFormValue" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setFormValue" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="value" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getMessage" display="" returns="string" >
+	</FUNCTION>
+	<FUNCTION name="setMessage" display="" returns="">
+		<PARAMETER name="value" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="getMessageNbr" display="" returns="string" >
+	</FUNCTION>
+	<FUNCTION name="getPhrase" display="" returns="string">
+		<PARAMETER name="pId" typ="string"/>
+		<PARAMETER name="type" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setActiveTab" display="" returns="">
+		<PARAMETER name="tabNbr" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="setTabState" display="" returns="">
+		<PARAMETER name="tabNbr" typ="string"/>
+		<PARAMETER name="status" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="positionInField" display="" returns="">
+		<PARAMETER name="fld" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="positionInFieldById" display="" returns="">
+		<PARAMETER name="id" typ="string"/>
+		<PARAMETER name="row" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="positionInFirstField" display="" returns="">
+	</FUNCTION>
+	<FUNCTION name="pushFormWindow" display="" returns="">
+		<PARAMETER name="tkn" typ="string"/>
+		<PARAMETER name="pdl" typ="string"/>
+		<PARAMETER name="hkey" typ="string"/>
+		<PARAMETER name="id" typ="string"/>
+	</FUNCTION>
+	<FUNCTION name="showFieldInfo" display="" returns="">
+		<PARAMETER name="fld" typ="string"/>
+	</FUNCTION>
+</FUNCTIONS>

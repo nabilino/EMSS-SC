@@ -1,0 +1,112 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/pages.css,v 1.1.8.1.22.2 2012/08/08 12:48:53 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */
+Body
+{
+	background-color:window;
+	font-family: Tahoma, Arial;
+	font-weight: normal;
+	margin: 0px;
+	overflow: hidden;
+}
+.nugglet
+{
+	background-color:window;
+	padding:3px;
+	font-family: Tahoma, Arial;
+	font-weight: normal;
+	font-size: 8pt;
+	margin: 0px;
+	overflow: hidden;
+	border:1px solid black;
+}
+.navlet
+{
+	background-color:window;
+	padding:3px;
+	font-family: Tahoma, Arial;
+	font-weight: normal;
+	font-size: 8pt;
+	margin: 0px;
+	overflow: hidden;
+	border-bottom:1px solid black;
+}
+.uiTextBox
+{
+    background-color: white;
+    border-bottom: #006699 1px solid;
+    border-left: #006699 1px solid;
+    border-right: #006699 1px solid;
+    border-top: #006699 1px solid;
+    color: #336699;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 8pt;
+    position: absolute;
+    highlightcolor: blue;
+}
+.uiViewErrorMsg
+{
+	color: white;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 7pt;
+    font-weight: bold;
+    padding-left: 10px;
+}
+.uiViewToolbar
+{
+    background-color: #336699;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	height: 100%;
+	width: 100%;
+    color: white;
+    padding-bottom: 2px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 2px;
+	overflow: hidden;
+}
+.uiViewToolbarLabel
+{
+	color: white;
+    font-family: Verdana, Tahoma, Arial;
+    font-size: 7pt;
+}
+.uiScriptViewRightbar
+{
+    font-family: Verdana, Tahoma, Arial;
+    font-size:70%;
+    background-color:threedface;
+    color:black;
+    border-color:threedhighlight threedshadow threedshadow threedhighlight;
+    border-width:1px;
+    border-style:solid;
+    padding-bottom: 3px;
+    padding-left: 3px;
+    padding-right: 3px;
+    padding-top: 2px;
+	top:0px;
+	left:0px;
+	width:100%;
+}

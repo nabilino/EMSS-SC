@@ -1,0 +1,179 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/css/calendar.css,v 1.4.2.4.2.3 2014/01/10 14:29:57 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+div.calendarOuter
+ { 
+      position:             absolute; 
+      background-color:     transparent; 
+      visibility:           hidden; 
+      width:               	auto; 
+      height:               auto; 
+      z-index:              999999; 
+      padding:             	0px; 
+      margin:               0px; 
+      border:               0px; 
+ } 
+  
+div.calendarInner 
+{ 
+      background-color:     #FBFBF8; 
+      position:             relative; 
+      padding:              5px; 
+      border:               1px solid #000000; 
+      text-align:           center; 
+} 
+
+div div span.calendarHeading
+{
+	background-color:	#FBFBF8;
+	color:				#000000;
+	font-size:			smaller;
+	font-weight:		bold;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+}
+
+div div table td.calendarDayHeader
+{
+	background-color:	#FBFBF8;
+	color:				#000000;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	width:				25px;
+	text-decoration:	none;
+	text-align:			center;
+	padding:			1px;
+	border:				0px;
+}
+
+div div table td.calendarDay
+{
+	background-color:	#FBFBF8;
+	color:				#454545;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				default;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #FBFBF8;
+}
+
+div div table td.calendarDayRight
+{
+	background-color:	#FBFBF8;
+	color:				#454545;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				default;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #FBFBF8;
+}
+
+div div table td.calendarDayToday
+{
+	background-color:	#DFDFDF;
+	color:				#676767;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				default;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #FBFBF8;
+}
+
+div div table td.calendarDayOver
+{
+	background-color:	#F3F3F3;
+	color:				#454545;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				pointer;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #676767;
+}
+
+div div table td.calendarDayRightOver
+{
+	background-color:	#F3F3F3;
+	color:				#454545;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				pointer;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #676767;
+}
+
+div div table td.calendarDayTodayOver
+{
+	background-color:	#676767;
+	color:				#FBFBF8;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				pointer;
+	text-align:			center;
+	padding:			1px;
+	border:				0px solid #676767;
+}
+
+button.calendarArrow
+{
+	background-color:	#FBFBF8;
+	color:				#000000;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				default;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #FBFBF8;
+}
+
+button.calendarArrowOver
+{
+	background-color:	#F3F3F3;
+	color:				#000000;
+	font-size:			xx-small;
+	font-family:		Tahoma, Verdana, Arial, Sans-Serif;
+	font-weight:		bold;
+	text-decoration:	none;
+	cursor:				pointer;
+	text-align:			center;
+	padding:			1px;
+	border:				1px solid #676767;
+}

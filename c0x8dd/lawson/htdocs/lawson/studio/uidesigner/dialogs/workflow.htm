@@ -1,0 +1,347 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/workflow.htm,v 1.2.2.2.26.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="keyhandlers.js"></SCRIPT>
+<SCRIPT language="javascript" src="workflow.js"></SCRIPT>
+<TITLE>Work Flow</TITLE>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="wfInit()" onkeydown="wfOnKeyDown()"
+	style="background-color:buttonface;margin:10px;visibility:hidden">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;padding-left:5px;">
+		<span id="tabService" class="dsLabel" tabind="0"
+			style="top:10px;left:10px;width:90%;display:block;text-align:left;font-weight:bold;">
+				Trigger Service Selection
+		</span>
+		<span id="tabTriggerInfo" class="dsLabel" tabind="1"
+			style="top:10px;left:10px;width:90%;display:none;text-align:left;font-weight:bold;">
+				Trigger Service Information
+		</span>
+		<span id="tabVariables" class="dsLabel" tabind="2"
+			style="top:10px;left:10px;width:90%;display:none;text-align:left;font-weight:bold;">
+				Trigger Criteria and Variables Selection
+		</span>
+	</div>
+	
+	<!-- service step pane -->
+	<div id="divService" style="top:30px;display:block;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2">
+				<label id="lblServiceInst" class="dsLabel" style="position:relative;">
+					Select the work flow service.  Use 'Find' to list matching services.
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td align="right" valign="center" style="width:10%;">
+				<label id="lblService" class="dsLabel" for="txtToken" style="position:relative;">
+					Service:&nbsp;
+				</label>
+			</td>
+			<td align="left">
+				<input type="text" id="txtService" class="dsTextBox" 
+						style="position:relative;width:120px;border-style:inset;border-width:2px;border-color:white;">
+				</input>
+				<input type="button" id="btnFind" class="dsDlgButton" onclick="wfBuildService()" value="Find"
+						style="position:relative;width:60px;">
+				</input>
+			</td>
+		</tr>			
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<label id="lblServiceList" class="dsLabel" for="selService" style="position:relative;text-align:left;">
+					Service list:
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<select id="selService" class="dsListText" size="12"
+					style="font-family:courier new;width:100%;height:expression(this.size*17);"
+					onchange="wfSelect(this)" ondblclick="wfOnClickNext()" >
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="left">
+				<label id="lblDesc" class="dsLabel" for="lblDescText" style="position:relative;">Description:</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="dsActiveControl" style="height:40px;width:100%;padding-left:0px;overflow:auto;">
+					<label id="lblDescText" class="dsLabel" style="text-align:left;position:relative;top:0px;left:0px;width:100%;height:100%;vertical-align:middle;">&nbsp;</label>
+				</span>
+			</td>
+		</tr>
+		</table>
+	</div>
+	
+	<!-- trigger info step pane -->
+	<div id="divTriggerInfo" style="top:30px;display:none;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2">
+				<label id="lblTriggerInfoInst" class="dsLabel" style="position:relative;">
+					Specify information regarding the Work Flow Trigger.
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td nowrap width="25%">
+				<label id="lblServiceTriggerInfo" class="dsLabel" for="txtToken" style="position:relative;text-align:left;">
+					Service:&nbsp;
+				</label>
+			</td>
+			<td nowrap>
+				<input type="text" id="txtSelServiceTriggerInfo" class="dsTextBox" disabled="true"
+					style="position:relative;top:0px;left:0px;font-family:courier new;width:50%;">
+				</input>
+			</td>
+		</tr>	
+		<tr>
+			<td nowrap width="25%">
+				<label id="lblProductLine" class="dsLabel" style="position:relative;width:100%;text-align:left;">Product Line:</label>
+			</td>
+			<td nowrap>
+				<select id="selProductLine" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;width:50%;">
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td nowrap width="25%">
+				<label id="lblWorkCategoryValue" class="dsLabel" style="position:relative;width:100%;text-align:left;">Work Category Value:</label>
+			</td>
+			<td nowrap>
+				<input type="text" id="txtWorkCategoryValue" class="dsTextBox"
+					style="position:relative;top:0px;left:0px;font-family:courier new;width:50%;" >
+				</input>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- variables step pane -->
+	<div id="divVariables" style="top:30px;display:none;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="6">&nbsp;</td></tr>
+		<tr>
+			<td colspan="6">
+				<label id="lblVariablesInst" class="dsLabel" style="position:relative;">
+					You can send criteria and variables to the Work Flow Trigger.
+					The current criteria and variables are shown below.
+					To edit, click on them and update their name or values.
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="6"><HR style="color:black;height:1px;"></td>
+		</tr>
+		
+		<!-- service -->
+		<tr>
+			<td>
+				<label id="lblServiceVariables" class="dsLabel" for="txtToken" style="position:relative;text-align:left;">
+					Service:&nbsp;
+				</label>
+			</td>
+			<td>
+				<input type="text" id="txtSelServiceVariables" class="dsTextBox" disabled="true"
+					style="position:relative;top:0px;left:0px;font-family:courier new;width:100%;"
+					onchange="wfSelect(this)">
+				</input>
+			</td>
+			<td colspan="4">&nbsp;</td>
+		</tr>			
+		<tr>
+			<td colspan="6"><HR style="color:black;height:1px;"></td>
+		</tr>
+		
+		<!-- criteria -->
+		<tr>
+			<td colspan="6">
+				<label id="lblCriteria" for="selCriteria" class="dsLabel" style="position:relative;text-align:left;">Criteria:</label>
+		    </td>
+		</tr>
+		<tr>
+			<td colspan="6">
+				<select id="selCriteria" class="dsListText" size="3"
+					style="font-family:courier new;width:expression(document.body.clientWidth-40)"
+					onchange="wfSelect(this)">
+				</select>
+			</td>
+		</tr>
+		
+		<!-- variables -->
+		<tr>
+			<td colspan="6">
+				<label id="lblVariables" for="selVariables" class="dsLabel" style="position:relative;text-align:left;">Variables:</label>
+		    </td>
+		</tr>
+		<tr>
+			<td colspan="6">
+				<select id="selVariables" class="dsListText" size="10"
+					style="font-family:courier new;width:expression(document.body.clientWidth-40)"
+					onchange="wfSelect(this)">
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="center" colspan="6">
+				<input id="btnAdd" type="button" class="dsDlgButton" onclick="wfOnClickAdd()" 
+					style="position:relative;width:100px;" value="Add Variable">
+				</input>
+				<input id="btnDelete" type="button" class="dsDlgButton" onclick="wfOnClickDelete()" disabled="true"
+					style="position:relative;width:100px;" value="Delete">
+				</input>
+				<input id="btnDeleteAll" type="button" class="dsDlgButton" onclick="wfOnClickDeleteAll()"
+					style="position:relative;width:100px;" value="Delete All">
+				</input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="6"><HR style="color:black;height:1px;"></td>
+		</tr>
+		
+		<!-- Add or Edit -->
+		<tr>
+			<td colspan="2">
+				<label id="lblEditName" class="dsLabel" style="position:relative;width:100%;text-align:center;visibility:hidden;border-bottom:1px solid black;">Name</label>
+			</td>
+			<td>&nbsp;</td>
+			<td colspan="2">
+				<label id="lblEditValue" class="dsLabel" style="position:relative;width:100%;text-align:center;visibility:hidden;border-bottom:1px solid black;">Value</label>
+			</td>
+		</tr>
+		<tr>
+			<td width="22%">
+				<select id="selSource" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;"
+					onchange="wfSelectSource(this.options[this.selectedIndex].value)" >
+					<option value="Literal">Literal</option>
+					<option value="Field">Form Field</option>
+					<option value="UserEnv">User Variable</option>
+					<option value="Variable">Service Variable</option>
+				</select>
+			</td>
+			<td width="22%">
+				<!--  maxlength 15 for criteria, 20 for variables -->
+				<input type="text" id="txtName" class="dsTextBox"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;" maxlength="20"
+					onchange="wfSelectName(this)">
+				</input>
+				<select id="selNameField" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;"
+					onchange="wfSelectName(this)">
+				</select>
+				<select id="selNameUserEnv" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;"
+					onchange="wfSelectName(this)">
+				</select>
+				<select id="selNameCriterion" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;"
+					onchange="wfSelectName(this)">
+				</select>
+				<select id="selNameVariable" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;"
+					onchange="wfSelectName(this)">
+				</select>
+			</td>
+			<td>&nbsp;</td>
+			<td width="22%">
+				<select id="selTypeList" class="dsListText"
+					style="font-family:courier new;visibility:hidden;width:100%;"
+					onchange="wfSelectType(this.options[this.selectedIndex].value)" >
+					<option value="Literal">Literal</option>
+					<option value="Field">Form Field</option>
+					<option value="UserEnv">User Variable</option>
+				</select>
+			</td>
+			<td width="22%">
+				<input type="text" id="txtValue" class="dsTextBox"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;" >
+				</input>
+				<select id="selField" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;">
+				</select>
+				<select id="selUserEnv" class="dsListText"
+					style="position:relative;top:0px;left:0px;font-family:courier new;display:none;width:100%;">
+				</select>
+		    </td>
+			<td width="10%">
+				<input id="btnUpdate" type="button" class="dsDlgButton" onclick="wfOnClickUpdate()" 
+					style="position:relative;width:80px;visibility:hidden;" value="Update">
+				</input>
+		    </td>
+		</tr>
+		<tr>
+			<td colspan="6"><HR style="color:black;height:1px;"></td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-60);height:10%;width:100%;">
+		<table border="0" width="100%" height="100%">
+		<tr>
+			<td align="center">
+				<input id="btnBack" type="button" class="dsDlgButton" onclick="wfOnClickBack()" 
+					style="position:relative;width:100px;" disabled value="< Back">
+				</input>
+				<input id="btnNext" type="button" class="dsDlgButton" onclick="wfOnClickNext()" 
+					style="position:relative;width:100px;" value="Next >">
+				</input>
+				<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" 
+					style="position:relative;width:100px;" value="Cancel">
+				</input>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+</BODY>
+</HTML>

@@ -1,0 +1,434 @@
+<HTML>
+<HEAD>
+<meta name="viewport" content="width=device-width" />
+<TITLE>Savings Plan Modeling</TITLE>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/401k/401kfiles/401k.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var Scenerios;
+var m_hwd_summary, m_hwd_tips;
+var Frequency = new Array();
+
+function Start401K()
+{
+	Scenerios = new Array(0);
+	authenticate("frameNm='jsreturn'|funcNm='GetSalaryInformation()'|desiredEdit='EM'")
+}
+
+function InitFrequency()
+{
+	Frequency = new Array(new FrequencyObject("MO", getSeaPhrase("MONTHLY","ESS"), "12"),
+		new FrequencyObject("QU", getSeaPhrase("QUARTERLY","ESS"), "4"),
+		new FrequencyObject("SA", getSeaPhrase("SEMI_ANNUALLY","ESS"), "2"),
+ 		new FrequencyObject("AN", getSeaPhrase("ANNUALLY","ESS"), "1"))
+}
+
+function GetSalaryInformation()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	document.title = getSeaPhrase("SAVINGS_PLAN_MODELING","ESS");
+	setTaskHeader("header",getSeaPhrase("SAVINGS_PLAN_MODELING","ESS"),"Retirement");
+	InitFrequency();
+	var pDmeObj = new DMEObject(authUser.prodline, "PRRATEHIST");
+		pDmeObj.out = "JAVASCRIPT";
+		pDmeObj.index = "prhset2";
+		pDmeObj.field = "employee.work-country;company;employee;pos-level;annual-hours;beg-date;pay-rate;annual-salary;salary-class;nbr-fte;"
+		pDmeObj.key = parseInt(authUser.company,10)+ "=" +parseInt(authUser.employee,10)
+		pDmeObj.max = "1";
+		pDmeObj.debug = false;
+		pDmeObj.func = "Paint()"
+	DME(pDmeObj, "jsreturn");
+}
+
+function Paint()
+{
+	removeWaitAlert();
+	if(!self.jsreturn.NbrRecs) {
+		seaAlert(getSeaPhrase("NO_SALARY_INFO","ESS"));
+		return;
+	}
+
+	if(self.jsreturn.record[0].employee_work_country != "US") {
+		seaAlert(getSeaPhrase("NOT_AVAILABLE_LOCATION","ESS"));
+		return;
+	}
+
+	var html = '<form name="savingModel">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="width:60%">'+getSeaPhrase("BEGINNING_BALANCE","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id="beg_bal" type=text size=15 name=bb maxlength=15'
+		+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,2);" onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader">'+getSeaPhrase("ANNUAL_EMPLOYEE_CONTRIBUTION","ESS")+'</td>'
+		+ '<td></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("AMOUNT","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=emp_amt type=text name=employeeamount size=15 maxlength=15'
+		+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,2);parent.SetPctAmt(\'savingModel\',this.name,\'employeepercent\')"'
+		+ ' onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal;height:5px">'+getSeaPhrase("OR","ESS")+'</td><td></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("PERCENT_SALARY","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=emp_pct type=text name=employeepercent size=10 maxlength=10'
+		+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,1);parent.SetPctAmt(\'savingModel\',this.name,\'employeeamount\')"'
+		+ ' onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+	if (self.jsreturn.record[0].salary_class == "S")
+		html += WritePortion(getSeaPhrase("SALARY","ESS"), self.jsreturn.record[0].annual_salary, '')
+	else
+		html += WritePortion(getSeaPhrase("PAY_RATE","ESS"), self.jsreturn.record[0].pay_rate, getSeaPhrase("PER_HOUR","ESS"))
+	html += '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader">'+getSeaPhrase("ANNUAL_COMPANY_CONTRIBUTION","ESS")+'</td>'
+		+ '<td class="plaintablecell"></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("AMOUNT","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=cmp_amt type=text size=15 name=companyamount maxlength=15'
+		+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,2);parent.SetPctAmt(\'savingModel\',this.name,\'companypercent\')"'
+		+ ' onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal;height:5px">'+getSeaPhrase("OR","ESS")+'</td><td></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("PERCENT_OF_EE_CONT","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=cmp_pct type=text size=10 name=companypercent maxlength=10'
+		+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,1);parent.SetPctAmt(\'savingModel\',this.name,\'companyamount\')"'
+		+ ' onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader">'+getSeaPhrase("INVEST_FACTOR","ESS")+'</td>'
+		+ '<td class="plaintablecell"></td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("COMPOUND_INTEREST","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<select class="inputbox" name="compoundInterest">'
+	for(var i=0;i<Frequency.length;i++) {
+		html += '<option '
+		if (Frequency[i].description == "Annually")
+			html += 'selected'
+		html += '>'+Frequency[i].description+'</option>'
+	}
+	html += '</select>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("YEARS","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=years type=text size=2 maxlength=2 name=years onchange=parent.checkYears(this.name) onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("INTEREST_RATE","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=int_rate type=text size=10 name=anticipatedInterestRate onchange=parent.ActionTaken(\"savingModel\",this.name,1) onfocus="this.select()">'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheaderborderbottom" style="font-weight:normal">'+getSeaPhrase("ESTIMATED_INFLATION_RATE","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=inf_rate type=text size=10 name=estimatedInflationRate onchange=parent.ActionTaken(\"savingModel\",this.name,1) onfocus="this.select()">'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablecell">&nbsp;</td>'
+		+ '<td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("CALCULATE","ESS"), "parent.GetData();return false;", "margin-top:5px")
+		+ uiButton(getSeaPhrase("RESET","ESS"), "parent.Reset();return false;", "margin-top:5px")
+		+ '</td>'
+		+ '</tr>'
+		+ '</table>'
+		+ '</form>'
+
+	self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CALCULATOR","ESS");
+	self.MAIN.document.getElementById("paneBody").innerHTML = html;
+	self.MAIN.stylePage();
+	self.document.getElementById("MAIN").style.visibility = "visible";
+}
+
+function WritePortion(myString,myArg,YetAnotherString)
+{
+	var arg = '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">' + myString + '&nbsp;' + FormatNumber(myArg) + '</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=salary type=text name=salary size=15 maxlength=15 value=""'
+		+ ' onchange=parent.ActionTaken(\"savingModel\",this.name,2) onfocus=this.select()>'
+		+ '</td>'
+		+ '</tr>'
+		+ '<tr>'
+		+ '<td class="plaintablerowheader" style="font-weight:normal">'+getSeaPhrase("PROJECTED_INCREASE","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<input class="inputbox" id=proj_inc type=text name=projectedIncrease size=10 value="" maxlength=10'
+		+ ' onchange=parent.ActionTaken(\"savingModel\",this.name,3) onfocus=this.select()>&nbsp;'
+		+ YetAnotherString
+		+ '</td>'
+		+ '</tr>'
+	return arg;
+}
+
+function ActionTaken(theForm,myObj,formatFlag)
+{
+	var Field;
+
+	if(typeof(eval('self.MAIN.document.'+theForm)) == "undefined")
+		Field = eval('self.MAIN.document.'+theForm+'.'+myObj)
+	else
+		Field = eval('self.MAIN.document.'+theForm+'.'+myObj)
+
+	var parentTd = Field.parentNode;
+
+	clearRequiredField(Field);
+
+	var fldVal = CheckField(Field.value,Field,formatFlag);
+
+	if(fldVal != 0 && !fldVal)
+	{
+		setRequiredField(parentTd);
+		if(typeof(eval('self.MAIN.document.'+theForm)) == "undefined")
+			Error(eval('self.MAIN.document.'+theForm+'.'+myObj))
+		else
+			Error(eval('self.MAIN.document.'+theForm+'.'+myObj))
+		return false;
+	}
+	return true;
+}
+
+function CheckField(val,obj,flag)
+{
+    if(flag==2 || (flag==3 && (self.jsreturn.record[0].salary_class=="H" || self.jsreturn.record[0].salary_class=="")))
+    {
+        var charBalance = FormatNumber(val);
+        obj.value = charBalance;
+    }
+    else if(flag==1 || (flag==3 && self.jsreturn.record[0].salary_class=="S"))
+    {
+        var charBalance = FormatPercent(val);
+        obj.value = charBalance;
+    }
+    return charBalance;
+}
+
+function Error(obj)
+{
+	seaAlert(getSeaPhrase("INVALID_FIELD","ESS"));
+	obj.focus();
+	obj.select();
+}
+
+function SetPctAmt(theForm, myObj1, myObj2)
+{
+	var Field1;
+	var Field2;
+
+	if(typeof(eval('self.MAIN.document.'+theForm)) == "undefined")
+	{
+		Field1 = eval('self.MAIN.document.'+theForm+'.'+myObj1)
+		Field2 = eval('self.MAIN.document.'+theForm+'.'+myObj2)
+	}
+	else
+	{
+		Field1 = eval('self.MAIN.document.'+theForm+'.'+myObj1)
+		Field2 = eval('self.MAIN.document.'+theForm+'.'+myObj2)
+	}
+
+	if (NonSpace(Field1.value) > 0 && parseFloat(Field1.value) != 0)
+	{
+		Field2.value = 0;
+	}
+	else if (NonSpace(Field2.value) > 0 && parseFloat(Field2.value) != 0 && (NonSpace(Field1.value) == 0 || parseFloat(Field1.value) == 0))
+	{
+		Field1.value = 0;
+	}
+}
+
+function Reset()
+{
+	self.MAIN.document.savingModel.reset();
+	self.MAIN.document.savingModel.bb.focus();
+}
+
+function ClearAll()
+{
+	Scenerios = new Array(0);
+}
+
+function GetData()
+{
+	var formObj = self.MAIN.document.savingModel;
+
+	// Check required fields
+	clearRequiredField(formObj.bb);
+	clearRequiredField(formObj.employeeamount);
+	clearRequiredField(formObj.employeepercent);
+	clearRequiredField(formObj.salary);
+	clearRequiredField(formObj.projectedIncrease);
+	clearRequiredField(formObj.companyamount);
+	clearRequiredField(formObj.companypercent);
+	clearRequiredField(formObj.anticipatedInterestRate);
+	clearRequiredField(formObj.estimatedInflationRate);
+
+	if(!ActionTaken("savingModel","bb",2)) return;
+	if(!ActionTaken("savingModel","employeeamount",2)) return;
+	if(!ActionTaken("savingModel","employeepercent",1)) return;
+	if(!ActionTaken("savingModel","salary",2)) return;
+	if(!ActionTaken("savingModel","projectedIncrease",3)) return;
+	if(!ActionTaken("savingModel","companyamount",2)) return;
+	if(!ActionTaken("savingModel","companypercent",1)) return;
+	if(!ActionTaken("savingModel","anticipatedInterestRate",1)) return;
+	if(!ActionTaken("savingModel","estimatedInflationRate",1)) return;
+
+	var sal 		= breakdown(self.MAIN.document.savingModel.salary.value);
+	var AnnualSalary= self.jsreturn.record[0].annual_salary;
+	var SalaryClass = self.jsreturn.record[0].salary_class
+	var AnnualHours = self.jsreturn.record[0].annual_hours;
+	var FTE 		= self.jsreturn.record[0].nbr_fte;
+	var payRate		= (sal) ? sal : self.jsreturn.record[0].pay_rate
+	var	WithFTE 	= payRate * AnnualHours * FTE;
+	var	WithoutFTE 	= payRate * AnnualHours;
+   	var mySal 		= (SalaryClass=="S") ? ((sal) ? sal : AnnualSalary) : ((FTE) ? WithFTE : WithoutFTE);
+	if(!mySal)
+		mySal = payRate * 2080 * 1.0;
+	CreateNewScenerio(mySal)
+}
+
+function CreateNewScenerio(s)
+{
+	var poo	= self.MAIN.document.savingModel
+	if((!breakdown(poo.employeepercent.value) && !breakdown(poo.employeeamount.value)) &&
+	(breakdown(poo.companypercent.value) || breakdown(poo.companyamount.value))) {
+		seaAlert(getSeaPhrase("ENTER_EMPLOYEE_CONTRIBUTION","ESS"))
+		return;
+	}
+
+	try {
+		index = Scenerios.length;
+	} catch(e) {
+		ClearAll()
+	}
+
+	index = Scenerios.length;
+	Scenerios[Scenerios.length] = new Object();
+	Scenerios[index].beginningBalance 	= breakdown(self.MAIN.document.savingModel.bb.value);
+	Scenerios[index].employeeAmount	 	= breakdown(poo.employeeamount.value)
+	Scenerios[index].employeePercent	= breakdown(poo.employeepercent.value)
+	Scenerios[index].Salary			 	= s
+	Scenerios[index].projectedIncrease	= breakdown(poo.projectedIncrease.value);
+	Scenerios[index].companyAmount	 	= breakdown(poo.companyamount.value);
+	Scenerios[index].companyPercent	 	= breakdown(poo.companypercent.value);
+	Scenerios[index].Frequency		 	= Frequency[poo.compoundInterest.selectedIndex]
+	Scenerios[index].Years			 	= breakdown(poo.years.value)
+	Scenerios[index].anticipatedInterestRate 	= breakdown(poo.anticipatedInterestRate.value)
+	Scenerios[index].estimatedInflationRate 	= breakdown(poo.estimatedInflationRate.value)
+	Scenerios[index].Year						= 0
+	Scenerios[index].employeeContributionTotal 	= 0
+	Scenerios[index].companyContributionTotal	= 0
+	Scenerios[index].interestEarned 			= 0
+	Scenerios[index].Total 						= 0
+	Scenerios[index].inflationAdjustedTotal 	= 0
+	Scenerios[index].payRate					= (parseFloat(poo.salary.value)) ? parseFloat(poo.salary.value) : self.jsreturn.record[0].pay_rate;
+	Scenerios[index].contrib 					= new Array(0)
+	Scenerios[index].match 						= new Array(0)
+	Scenerios[index].total 						= new Array(0)
+	Scenerios[index].inftotal					= new Array(0)
+	Scenerios[index].Class 						= self.jsreturn.record[0].salary_class;
+	Scenerios[index].AnnualHours 				= self.jsreturn.record[0].annual_hours;
+	Scenerios[index].FTE 						= (parseFloat(self.jsreturn.record[0].nbr_fte)) ? self.jsreturn.record[0].nbr_fte : 1;
+	if (Scenerios[index].employeeAmount)
+		Scenerios[index].employeeContribution = Scenerios[index].employeeAmount
+	else
+		Scenerios[index].employeeContribution = Scenerios[index].employeePercent
+	if (Scenerios[index].companyAmount)
+		Scenerios[index].companyContribution = Scenerios[index].companyAmount
+	else
+		Scenerios[index].companyContribution = Scenerios[index].companyPercent
+
+	prepareResults();
+}
+
+function Open401KTips()
+{
+	m_hwd_tips = window.open(tipsLoc,"401KTIPS")
+}
+
+function CloseAllWindows()
+{
+	if(opener)
+	{
+		if(opener.m_hwd_graph && !opener.m_hwd_graph.closed)
+			opener.m_hwd_graph.close();
+
+		if(opener.m_hwd_tips && !opener.m_hwd_tips.closed)
+			opener.m_hwd_tips.close();
+	}
+
+	if(m_hwd_tips && !m_hwd_tips.closed)
+		m_hwd_tips.close();
+
+
+	if(m_hwd_summary && !m_hwd_summary)
+		m_hwd_summary.close()
+
+	self.close()
+}
+
+function GetSalaryfromFTE(mySalary)
+{
+	if(FTE)
+		return(mySalary*Hours*FTE)
+	else
+		return(mySalary*Hours)
+}
+
+function OpenHelpDialog()
+{
+	openHelpDialogWindow("/lawson/xhrnet/401k/401ktips.htm");
+}
+</script>
+</head>
+<body onload="Start401K();">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" style="visibility:hidden;position:absolute;top:32px;left:0px;width:400px;height:484px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpanehelp.htm"></iframe>
+	<iframe id="RESULTS" name="RESULTS" style="visibility:hidden;position:absolute;top:32px;left:400px;width:392px;height:484px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe id="GRAPH" name="GRAPH" style="visibility:hidden;position:absolute;top:32px;left:0px;width:800px;height:484px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/401k/401k.htm,v 1.16.2.15 2011/05/04 21:10:19 brentd Exp $ -->
+

@@ -1,0 +1,195 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<script SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<script language="JavaScript">
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+
+var gfldnbr = '';
+var gmsgnbr = '';
+var gmsg = '';
+var formlinecount = 0;
+var linecount = 0;
+var arraycount = 0;
+var UpdateType
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// V function defintion
+//
+
+function V(fld,val)
+{
+	switch(UpdateType)
+	{
+		case "HS22.2":	HS222V(fld,val); break;
+		case "HS22.1":	HS221V(fld, val); break
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// HS222V function defintion
+//
+
+function HS222V(fld, val)
+{
+	switch(fld)
+	{
+		case "NUMBER-OF-PLANS": parent.PlanCodes.NumberOfPlans = val; break;
+		default: 				GetDetailForHS222V(fld, val)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// HS222V detailline function defintion
+//
+
+function GetDetailForHS222V(fld,val)
+{
+	if (fld.indexOf("PRO-PLAN-CODE") >= 0)
+	{
+		linecount++;
+		if (val == "")
+		{
+			return;
+		}
+	}
+
+	if ("PRO-PLAN-CODE"+linecount == fld)
+	{
+		parent.PlanCodes.Detail[linecount-1] = new parent.PlanCodeDetailObject(val)
+	}
+	else if ("PRO-DESCRIPTION"+linecount == fld && parent.PlanCodes.Detail[linecount-1])
+	{
+		parent.PlanCodes.Detail[linecount-1].Description = val;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// HS221V function defintion
+//
+
+function HS221V(fld, val)
+{
+	switch (fld)
+	{
+		case "OT-PLAN-CODE": 		parent.Reports.PlanCode 			= val;break
+		case "PYT-PAY-PER-START": 	parent.Reports.PeriodStart 			= val;break;
+		case "PYT-PAY-PER-END": 	parent.Reports.PeriodEnd 			= val;break;
+		case "VIEW-ID": 			parent.Reports.View 				= val;break;
+		case "PRO-DESCRIPTION": 	parent.Reports.PlanCodeDescription 	= val;break;
+		case "HSU-EMAIL-ADDRESS": 	parent.Reports.Email 				= val;break;
+		case "HSU-EMAIL-PERSONAL":	parent.Reports.EmailPersonal 		= val;break;
+		case "HSU-FULL-NAME":		parent.Reports.EmployeeName			= val;break;
+		case "HSU-CODE":			parent.Reports.HsuCode				= val;break;
+		case "LAST-HSU-CODE":		parent.Reports.LastHsuCode			= val;break;
+		case "LAST-LAST-NAME":		parent.Reports.LastLastName			= val;break;
+		case "LAST-FIRST-NAME":		parent.Reports.LastFirstName		= val;break;
+		case "LAST-MIDDLE-INIT":	parent.Reports.LastMiddleInit		= val;break;
+		case "LAST-EMPLOYEE":		parent.Reports.LastEmployee			= val;break;
+		case "EXCEPTION-FLAG":		parent.Reports.ExceptionFlag		= val;break;
+		default: GetDetailForHS221V(fld, val)
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+//  HS221V detailline function defintion
+//
+
+function GetDetailForHS221V(fld, val)
+{
+	if(fld.indexOf("PYT-EMPLOYEE")>=0)
+	{
+		formlinecount++
+		linecount++;
+	}
+
+	if("PYT-EMPLOYEE"+linecount == fld)
+		parent.Reports.Detail[formlinecount] = new parent.ReportsDetailObject(val)
+	else if("PYT-TIMECARD-TYPE"+linecount == fld)
+	{
+		parent.Reports.Detail[formlinecount].TimecardType 	  = val
+		switch(val)
+		{
+		case "1":
+			parent.Reports.Detail[formlinecount].TimecardTypeDesc = "Normal"
+			break;
+		case "2":
+			parent.Reports.Detail[formlinecount].TimecardTypeDesc = "Exception";
+			break;
+		case "3":
+			parent.Reports.Detail[formlinecount].TimecardTypeDesc = "Normal";
+			break;
+		default:
+			parent.Reports.Detail[formlinecount].TimecardTypeDesc = "Not Defined";
+		}
+	}
+	else if("EMP-OT-PLAN-CODE"+linecount == fld)
+		parent.Reports.Detail[formlinecount].PlanCode 		= val
+	else if("ECM-EXIST"+linecount == fld)
+		parent.Reports.Detail[formlinecount].CommentsExist 	= val
+	else if("PTF-FULL-NAME"+linecount == fld)
+		parent.Reports.Detail[formlinecount].FullName 		= val
+	else if("PTF-LAST-NAME"+linecount == fld)
+		parent.Reports.Detail[formlinecount].LastName 		= val
+	else if("PYT-TOTAL-HOURS"+linecount == fld && (typeof(parent.FormatHours) != "undefined"))
+		parent.Reports.Detail[formlinecount].TotalHours 	= parent.FormatHours(val,2)
+	else if("PYT-STATUS"+linecount == fld)
+		parent.Reports.Detail[formlinecount].Status 		= parent.setValue(val)
+	else if("EMAIL-ADDRESS"+linecount == fld)
+		parent.Reports.Detail[formlinecount].Email 			= val
+	else if("EMAIL-PERSONAL"+linecount == fld)
+		parent.Reports.Detail[formlinecount].EmailPersonal 	= val		
+	else if("DATES-EXIST"+linecount == fld)
+		parent.Reports.Detail[formlinecount].DatesExist		= val
+	else if("PERIOD-STARTS-AT"+linecount == fld)
+		parent.Reports.Detail[formlinecount].PeriodStartsAt = val;
+	else if("PERIOD-STOPS-AT"+linecount == fld)
+		parent.Reports.Detail[formlinecount].PeriodStopsAt = val;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// DataReturned function defintion
+//
+
+function DataReturned(fldNbr,msgNbr,msg)
+{
+	gfldnbr = fldNbr
+	gmsgnbr = msgNbr
+	gmsg 	= msg
+	count = 0;
+}
+</script>
+</head>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/manager/managerlaw.htm,v 1.7.2.5 2012/06/29 17:12:22 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

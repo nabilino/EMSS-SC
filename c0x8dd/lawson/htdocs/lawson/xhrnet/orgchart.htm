@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Organization Chart</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script language="JavaScript">
+// Global variables.
+var chainBossColor = "#fffacd"; // Lemon Chiffon
+var bossFoundColor = "#aec8d5"; // Only for employee search option.
+var bossColor = "#e2ece1"; //"#e0eee0"  // Honeydew 2
+var empFoundColor = "#c8d5ae"; // Only for employee search option.
+var empColor = "#ffffff"; //"#eff7ff"  //"#b4cdcd"  // Light Cyan 3
+var emps = new Array();
+var boss = new Array();
+var mgrnames = new Array();
+var lines = new Array();
+var lastbosslines = new Array();
+var fulllevel = new Array();
+var maxCols	= 2; // Table columns displayed = maxCols + 1
+var level = 0;
+var resizeAtLevel = 0;
+var n = 0;
+var pics = false;
+var startOver = false;
+var halt = false;
+var pageMode = false;
+var resize = false;
+var pageHead = '';
+var pageFoot = '';
+var thisEmp;
+var employee;
+var company;
+var prodline;
+var supervisor;
+var jpgCompany;
+var superName;
+var appObj;
+
+// Get the user's global info from the splash window.
+function OpenOrgChart()
+{
+	clearTimeout(loadTimer);
+	authUser = null;
+	try
+	{
+		if (opener && opener.authUser)
+			authUser = opener.authUser;
+	}
+	catch(e)
+	{
+		authUser = null;
+	}
+	if (authUser)
+	{
+		prodline = authUser.prodline;
+		company = authUser.company;
+		employee = authUser.employee;
+		StartProgram();	
+	}
+	else
+		authenticate("frameNm='jsreturn'|funcNm='SetUser()'|desiredEdit='EM'")
+}
+
+function SetUser()
+{
+	company  = authUser.company;
+	employee = authUser.employee;
+	prodline = authUser.prodline;
+	StartProgram();
+}
+
+function StartProgram()
+{
+	stylePage();
+	var title = getSeaPhrase("ORGANIZATION_CHART","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"OrgChart");
+	// Format company to full 4-digit representation for image reference.
+	jpgCompany = company;
+	for (var i=company.toString().length; i<4; i++)
+		jpgCompany = "0" + jpgCompany;
+	// Generate the first level of the chart.
+	GoToLevel(0,0,"");
+}
+
+// Retrieve the top level employees for the user's company.
+function GetTopBosses()
+{
+  	// If the user is viewing this level after aborting, redo the top reports; otherwise, use the page down index to get the next set of records, if they exist.
+ 	var pg = false;
+  	if (!startOver) 
+  		pg = self.lawheader.pg;
+  	var agsObj = new AGSObject(prodline, "HS10.1");
+   	agsObj.event = "ADD";
+   	agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	//PT 152345 added TOP=Y flag for higer level chart with inquire only code
+   	agsObj.field = "FC=I&TOP=Y"
+	+ "&HSU-COMPANY=" + escape(parseInt(company,10))
+	+ "&OPEN-POS=Y"
+	+ "&DIR-RPT=Y";
+   if (pg)
+   {
+     	agsObj.field += "&PT-FC=" + escape(self.lawheader.PT_FC)
+	  	if (NonSpace(self.lawheader.PT_PTF_EMPLOYEE))
+	 		agsObj.field += "&PT-PTF-EMPLOYEE=" + escape(parseInt(self.lawheader.PT_PTF_EMPLOYEE,10))
+	  	if (NonSpace(self.lawheader.PT_HSU_CODE))
+			agsObj.field += "&PT-HSU-CODE=" + escape(self.lawheader.PT_HSU_CODE)
+	  	if (NonSpace(self.lawheader.PT_HSU_OP_CODE))
+			agsObj.field += "&PT-HSU-OP-CODE=" + escape(self.lawheader.PT_HSU_OP_CODE)
+   }
+   agsObj.func = "parent.WriteText()";
+   agsObj.debug = false;
+   AGS(agsObj, "jsreturn");
+}
+
+// Use the manager's employee number or supervisor code to retrieve direct reports for that manager.  These reports will make up the next level in the organizational chart.
+function GetNextReports(empn, fc)
+{
+ 	var pg = false;
+  	if (!startOver) pg = self.lawheader.pg;
+  	if (!fc) fc = "I";
+  	thisEmp = empn;
+  	var agsObj = new AGSObject(prodline, "HS10.1");
+    agsObj.event = "ADD";
+   	agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+   	agsObj.field = "FC=" + escape(fc)
+	+ "&HSU-COMPANY=" + escape(parseInt(company,10));
+  	if (typeof(empn) == "number")
+		agsObj.field += "&HSU-EMPLOYEE=" + escape(parseInt(empn,10));
+  	else
+  	  	agsObj.field += "&PTF-CODE=" + escape(empn);
+  	agsObj.field += "&OPEN-POS=Y"
+	+ "&DIR-RPT=Y";
+  	if (pg)
+  	{
+  	 	agsObj.field += "&PT-FC=" + escape(self.lawheader.PT_FC)
+	  	+ "&PT-PTF-EMPLOYEE=" + escape(parseInt(self.lawheader.PT_PTF_EMPLOYEE,10))
+	  	if (NonSpace(self.lawheader.PT_HSU_CODE))
+			agsObj.field += "&PT-HSU-CODE=" + escape(self.lawheader.PT_HSU_CODE)
+	  	if (NonSpace(self.lawheader.PT_HSU_OP_CODE))
+			agsObj.field += "&PT-HSU-OP-CODE=" + escape(self.lawheader.PT_HSU_OP_CODE)
+  	}
+	agsObj.func	= "parent.WriteText()";
+	agsObj.debug = false;
+  	AGS(agsObj, "jsreturn");
+}
+
+// Re-color the table cell corresponding to the manager that the user
+// has just clicked.  This shows the chain of command, or the user's
+// manager click path, down the organizational chart.
+function PaintBossColor(level)
+{
+	var headLine = '';
+	var colorLine = '';
+	var tailLine = '';
+	var searchStr = 'name="'+boss[level-1]+'"';
+	if (lines[level] && boss[level-1] != '')
+	{
+    	lastbosslines[level] = lines[level]
+		var index = lines[level].indexOf(searchStr);
+	   	if (NonSpace(lines[level].substring(index+searchStr.length,index+searchStr.length+1)))
+		{
+			headLine = getFront(lines[level],searchStr,index+searchStr.length+1);
+			colorLine = getEnd(lines[level],searchStr,index+searchStr.length+1);
+			tailLine = getEnd(colorLine, ">");
+		}
+		else
+		{
+			headLine = getFront(lines[level],searchStr);
+			colorLine = getEnd(lines[level],searchStr);
+			tailLine = getEnd(colorLine, ">");
+		}
+		if (typeof(headLine) == "null") 
+			headLine = '';
+		if (typeof(tailLine) == "null") 
+			tailLine = '';
+		lines[level] = headLine+searchStr+' class="tablecellborderyellowbg">'+tailLine;
+	}
+}
+
+function GoToLevel(empn, lev, mgr)
+{
+	// Tell the user we're loading reports.
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){NextLevel(empn, lev, mgr);});	
+}
+
+// Proceed to generate the next level down the organizational chart.
+function NextLevel(empn, lev, mgr)
+{
+	emps = new Array();
+	prevLev = lev - 1;
+	n = 0;
+	if (typeof(empn) == "string")
+		empn = unescape(empn);
+	// Reset boss color when going back a level.
+	if (level >= lev)
+	{
+		for (var i=lev; i<level; i++)
+		{
+			if (typeof(lastbosslines[i]) != "undefined")
+				lines[i] = lastbosslines[i];
+		}
+	}
+	level = lev;
+	if (prevLev >= 0)
+	{
+		var thisMgr = unescape(mgr);
+		if (prevLev == 0 && typeof(thisMgr) != "undefined")
+			mgrnames[prevLev] = thisMgr;
+		else if (prevLev == 0)
+			mgrnames[prevLev] = "???";
+		// If user has requested direct reports and we are
+		// in page mode, force a level break.
+		n = 0;
+		if (pageMode && lines[level].indexOf(getSeaPhrase("REPORTS_OF","ESS")) == -1)
+			lines[level] += LevelDivider(mgrnames[prevLev]);
+		// The user is requesting a new level, so reset pageMode flag.
+		pageMode = false;
+		// Store the supervisor employee number and name in arrays boss and mgrnames. Supervisor is the current supervisor 
+		// for the last level and superName is that supervisor's name.
+		if (typeof(empn) != "null")
+			boss[prevLev] = empn;
+		else
+			boss[prevLev] = '';
+		if (typeof(thisMgr) != "null")
+			mgrnames[prevLev] = thisMgr;
+		else
+			mgrnames[prevLev] = "???";
+		supervisor = boss[prevLev];
+		superName = mgrnames[prevLev];
+		// Re-color the selected supervisor so she becomes part of the user's manager click path.
+		PaintBossColor(level);
+	}
+	if (level == 0)
+		GetTopBosses();
+	else
+		GetNextReports(empn);
+}
+
+// Collapse the level down to only the currently clicked manager, or expand the level in full.  Note:  A manager's level is automatically
+// collapsed after the user has clicked on that manager to generate reports.
+function ResizeLevel(lev, openorShut, levelBreak)
+{
+	resizeAtLevel = lev;
+	if (!levelBreak)
+	{
+		resize = true;
+		n = 0;
+		pageMode = false;
+	}
+	// Expand this level.
+	if (openorShut == "-")
+	{
+		lines[lev] = fulllevel[lev];
+		PaintBossColor(lev);
+		var toolTip = getSeaPhrase("DISPLAY_SUPERVISOR","ESS");
+		lines[lev] = '<table border="0" cellspacing="0" cellpadding="0" role="presentation"><tr>'
+		+ '<td nowrap><div styler="expander" styler_state="expanded" styler_init="StylerEMSS.initExpanderControl" styler_click="StylerEMSS.expanderControlOnClick"><a href="javascript:parent.ResizeLevel('+lev+',\'+\');"'
+		+ ' title="'+toolTip+'">'
+		+ '&lt;&lt; '+getSeaPhrase("COLLAPSE_THIS_LEVEL","ESS")+'<span class="offscreen"> - '+toolTip+'</span></a></div></td></tr></table><br/>'
+		+ lines[lev] // <- this level
+		+ LevelDivider(mgrnames[lev-1]);
+	}
+	// Collapse this level.
+	else
+	{
+		// If we only have one manager on this level, disable expand/collapse option and add on the level break "Direct Reports of..." heading.
+		if (lines[lev].lastIndexOf("<td") == lines[lev].indexOf("<td")) 
+		{
+			lines[lev] += LevelDivider(mgrnames[lev-1]);
+			DspTable();
+			return;
+		}
+    	var searchStr = 'name="'+boss[lev-1]+'"';
+    	var index = lines[lev].indexOf(searchStr);
+    	var endLine;
+	   	if (NonSpace(lines[lev].substring(index+searchStr.length, index+searchStr.length+1)))
+			endLine = getEnd(lines[lev],searchStr, index+searchStr.length+1);
+		else
+			endLine = getEnd(lines[lev],searchStr);
+		var bossLine = getFront(endLine,"<td");
+		if (typeof(bossLine) != "string")
+		   bossLine = getFront(endLine,"</tr>");
+		line = '<td '+searchStr+bossLine;
+		var toolTip = getSeaPhrase("DISPLAY_EMPLOYEES","ESS");
+		lines[lev] = '<table border="0" cellspacing="0" cellpadding="0" role="presentation"><tr>'
+		+ '<td nowrap><div styler="expander" styler_state="collapsed" styler_init="StylerEMSS.initExpanderControl" styler_click="StylerEMSS.expanderControlOnClick"><a href="javascript:parent.ResizeLevel('+lev+',\'-\');" title="'+toolTip+'">'
+		+ '&gt;&gt; '+getSeaPhrase("EXPAND_THIS_LEVEL","ESS")+'<span class="offscreen"> - '+toolTip+'</span></a></div></td></tr></table><br/>'
+		+ '<table class="tableborder" border="0" cellspacing="0" cellpadding="0" role="presentation">'
+		+ '<tr>'+line+'</tr></table>' // <- this level
+		+ LevelDivider(mgrnames[lev-1])
+	}
+	DspTable();
+}
+
+// Check if we need to halt or resize the current level before proceeding to show the next level of reports.
+function WriteText()
+{
+   	// If the user has halted the report load remove the wait window and return.
+   	if (halt || self.lawheader.abort)
+   	{
+   		halt = false;
+		startOver = true;
+		self.lawheader.abort = false;
+		removeWaitAlert();
+		return;
+   	}
+   	emps = emps.concat(self.lawheader.e) // Save off this page of reports.
+   	// Grab more reports, if they exist.  This ensures that we will have all reports before we display.
+   	// Currently, the user cannot perform a manual "Page Down".
+   	if (self.lawheader.pg)
+   	{
+   		// Continue to get more reports for this level.
+   		if (level == 0)
+			GetTopBosses();
+		else
+   			GetNextReports(thisEmp,"I");
+		return;
+   	}
+   	// Default to display reports.
+   	halt = false;
+   	startOver = false;
+   	self.lawheader.abort = false;
+   	// If we don't need to load more reports for this level, collapse it before display. Otherwise continue to get reports.  If we don't need to get more reports, format the level and write it out to the frame with all other levels.
+   	if (!pageMode && level > 0) 
+   	{
+   		ResizeLevel(level,"+","forcelevelbreak");
+		resizeAtLevel = 0;
+   	}
+   	else
+   		DspTable();
+}
+
+// Create the next level of direct reports for the organizational chart and paint them to the main document frame.
+function DspTable()
+{
+  	var dsp = '';
+  	var line = '';
+  	// Save a pointer to the reports returned for this level.
+  	//emps = self.lawheader.e;
+  	// If we don't need to get more reports and we haven't resized the level, create a new level for these reports.
+  	if (!pageMode && !resize) 
+  		level++;
+  	if (emps.length > 0)
+  	{
+  		// If we've resized already, point to all reports for the level. Otherwise, fill the new level with the reports.
+		if (resize)
+			line = fulllevel[level];
+		else
+			line = GenerateLevel();
+  	}
+  	else
+  	{
+  	   	if (level > 1)
+	   		line += '<span class="fieldlabelbold" style="text-align:left">'+getSeaPhrase("NO_REPORTS","ESS")+'</span><br/>';
+	   	else
+	   		line += '<span class="fieldlabelbold" style="text-align:left">'+getSeaPhrase("NO_TOP_EMPLOYEES","ESS")+'</span><br/>';
+	   	line += '<br/>'
+  	}
+  	// Array lines holds each level of full reports.
+  	lines[level] = line;
+  	pageMode = self.lawheader.pg;
+  	// If the user is moving back up the organizational chart, clear out the old levels remaining below.
+  	if (level+1 < lines.length)
+  	{
+	 	for (var i=level+1; i<lines.length; i++)
+	  	 	lines[i] = "";
+  	}
+  	// If we have our full set of direct reports for the level, write each level out the the main chart frame.  (Note: pageMode is only true if we wish to allow the user to page at some point - future change?)
+  	if (!pageMode)
+  	{
+		fulllevel[level] = lines[level];
+  		dsp = pageHead;
+  		for (var i=1; i<lines.length; i++)
+  		{
+			if (lines[i] != "")
+			{
+				var toolTip = getSeaPhrase("ORG_CHART_LEVEL","SEA",[''+i]);
+				// Include a reference to each chart level for auto-scrolling to the current level after retrieving reports.
+			 	dsp += '\n<a class="offscreen" href="javascript:;" style="visibility:hidden" name="RPTS'+i+'" styler="none" title="'+toolTip+'"></a><meta name="RPTS'+i+'"/>\n'+lines[i]
+			}
+  		}
+  		dsp += pageFoot;
+		if (resize)
+			resize = false;
+		var strHtml = "";
+		if (pics)
+			strHtml += CheckBoxHtml("checked");
+		else
+			strHtml += CheckBoxHtml("");
+		strHtml += dsp;
+		try 
+		{
+			self.MainFrame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CHART","ESS");
+			self.MainFrame.document.getElementById("paneBody").innerHTML = '<div style="padding-right:5px">'+strHtml+'</div>';
+		}
+		catch(e) {}
+		self.MainFrame.document.body.onload = function()
+		{
+			GoToRpts();
+		}
+		self.MainFrame.stylePage();
+		self.MainFrame.setLayerSizes();
+		fitToScreen();
+		document.getElementById("MainFrame").style.visibility = "visible";
+		removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MainFrame.getWinTitle()]));
+ 	}
+ 	else
+ 	{
+   		if (level == 0)
+			GetTopBosses();
+		else
+   			GetNextReports(thisEmp,"I");
+ 	}
+}
+
+// Return a full level of direct reports in tabular format.
+function GenerateLevel()
+{
+	var line = '';
+	var employee = '';
+	var employee_quotes = '';
+	var cellalign = "top";
+	var len = emps.length;
+	// If we're in page mode, continue adding reports to the previous table.
+	// Otherwise begin a new table for the level.
+	if (pageMode && lines[level]) 
+	{
+		// Strip off the ending table tag.
+		line = getFront(lines[level],"<\/tr><\/table>");
+		if (typeof(line) == "null")
+			line = '';
+		if (n > maxCols)
+		{
+			n = 0;
+			line += '</tr><tr>';
+		}
+	}
+	else
+   		line += '<table class="tableborder" border="0" cellspacing="0" cellpadding="0" width="99%" role="presentation"><tr>'
+	for (var i=0; i<len; i++)
+	{
+		// At the top level, ignore the previous supervisor record, since there isn't one.  We only wish to display reports that don't match the current supervisor.
+	  	if (emps[i].employee != supervisor || level == 1)
+	  	{
+	  		var tip;
+			// The employee id may store the supervisor code if there is no employee number attached.  Pass the string code to functions within quotes.
+			if (typeof(emps[i].employee) == "number") 
+			{
+				employee = parseInt(emps[i].employee,10);
+				employee_quotes = employee;
+			}
+			else if (typeof(emps[i].employee) == "string") 
+			{
+				employee = emps[i].employee;
+				employee_quotes = '\''+escape(employee,1)+'\'';
+			}
+			// If the employee is a supervisor, paint that table cell with the bossColor. Display profile, image, name, and job description.
+			if (emps[i].direct_reports == "Y")
+			{
+				line += '<td name="'+employee+'" class="tablecellbordergreenbg" valign="'+cellalign+'" nowrap>'
+				if (typeof(emps[i].employee) == "number")
+				{
+					tip = emps[i].full_name+' - '+getSeaPhrase("VIEW_MGR_PROFILE","SEA");
+					line += '<a href="javascript:parent.GetProfile('+employee+');" title="'+tip+'">'+emps[i].full_name+'<span class="offscreen"> - '+getSeaPhrase("VIEW_MGR_PROFILE","SEA")+'</span></a>';
+				}	
+				else
+					line +=	emps[i].full_name;
+				if (emps[i].work_desc)
+					line += '<br/>'+emps[i].work_desc;
+				else
+					line += '<br/>&nbsp;'
+				if (pics) 
+				{
+					tip = emps[i].full_name+' - '+getSeaPhrase("EMP_PHOTO_FOR","SEA");
+			        emps[i].thumbnail = "/lawson/xhrnet/images/employees/P"+jpgCompany+jpgEmployee(emps[i].employee) + ".jpg";
+					line += '<br/><img border="0" align="middle" src="'+emps[i].thumbnail+'" alt="'+tip+'" title="'+tip+'" name="img'+employee+'" onerror="parent.ReplaceImage(this)">&nbsp;';
+				}
+				else
+					line += '<br/>';
+				tip = emps[i].full_name+' - '+getSeaPhrase("VIEW_SUBORDINATES","SEA");	
+				line += '<a href="javascript:parent.GoToLevel('+employee_quotes+','+level+',\''+escape(emps[i].full_name)+'\');" title="'+tip+'"><span class="offscreen">'+emps[i].full_name+'</span>'+getSeaPhrase("MY_REPORTS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("VIEW_SUBORDINATES","SEA")+'</span></a></td>'
+			}
+			// Not a supervisor.  Display profile, image, name, and job description.
+			else
+			{
+				line += '<td class="tablecellborder" valign="'+cellalign+'" nowrap>'
+				if (typeof(emps[i].employee) == "number")	
+				{
+					tip = emps[i].full_name+' - '+getSeaPhrase("VIEW_EMP_PROFILE","SEA");
+					line += '<a href="javascript:parent.GetProfile('+employee_quotes+');" title="'+tip+'">'+emps[i].full_name+'<span class="offscreen"> - '+getSeaPhrase("VIEW_EMP_PROFILE","SEA")+'</span></a>';
+				}	
+				else
+					line += emps[i].full_name;
+				if (emps[i].work_desc)
+					line += '<br/>'+emps[i].work_desc;
+				else
+					line += '<br/>';
+				if (pics) 
+				{
+					tip = emps[i].full_name+' - '+getSeaPhrase("EMP_PHOTO_FOR","SEA")
+					emps[i].thumbnail = "/lawson/xhrnet/images/employees/P"+jpgCompany+jpgEmployee(emps[i].employee)+".jpg";
+					line += '<br/><img border="0" align="center" src="'+emps[i].thumbnail+'" alt="'+tip+'" title="'+tip+'" name=img'+employee+' onerror="parent.ReplaceImage(this)">'
+				}
+				line += '</td>'
+			}
+			n++;
+			// If we've reached the last column of the table row, start a new row.
+			if (n > maxCols) 
+			{
+				line += '</tr><tr>'
+				n = 0;
+			}
+		}
+	}
+    for (var t=n; t<(maxCols+1); t++)
+   		line += '<td class="tablecellborder">&nbsp;</td>';
+	line += '</tr></table>';  // <- This should be the last line of the level.
+	return (line);
+}
+
+// Pass in the manager the user has just clicked and display a divider between
+// the manager's level and her direct reports level.
+function LevelDivider(mgr)
+{
+	var text = '<br/><table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="99%" role="presentation">'
+	+ '<tr><td class="plaintableheaderborder" style="text-align:center">'
+	//+ '&#151;&#151;&#151;&#151;&#151;&#151;&#151;&#151;&#151;'
+	+ '<img border="0" src="/lawson/xhrnet/images/blkdn.gif" alt="" title="" styler="downarrow">&nbsp;'
+	+ getSeaPhrase("REPORTS_OF","ESS")+' '
+	+ mgr + '&nbsp;'
+	+ '<img border="0" src="/lawson/xhrnet/images/blkdn.gif" alt="" title="" styler="downarrow">'
+	//+ '&#151;&#151;&#151;&#151;&#151;&#151;&#151;&#151;&#151;'
+	+ '</td></tr></table><br/>'
+	return text;
+}
+
+// Show link on top frame that initiates the chart display beginning from the top.
+// Set the employee picture display property to "yes" or "no" for all subsequent reports.
+function CheckBoxHtml(checkedValue)
+{
+	var toolTip = getSeaPhrase("BEGIN_AT_TOP_OF_CHART","ESS");
+	var strHtml = '<div style="padding-top:5px;padding-bottom:5px">'
+	+ '<form name="checkboxform"><table border="0" cellspacing="0" cellpadding="0" role="presentation">'
+	+ '<tr><td class="plaintablecell" style="width:45%;text-align:right;padding-right:10px;white-space:nowrap" nowrap="nowrap">'
+	+ '<a href="javascript:parent.GoToLevel(0,0,\'\');" title="'+toolTip+'">'+getSeaPhrase("BEGIN_AT_TOP","ESS")+'<span class="offscreen"> - '+toolTip+'</span></a>'
+	+ '</td><td class="plaintablecell" style="width:55%;text-align:left;padding-left:10px">'
+	+ '<input class="inputbox" type="checkbox" id="showPics" name="showPics" onclick="parent.SelectPics()"'
+	if (checkedValue)
+		strHtml += ' '+checkedValue;
+	strHtml += '>&nbsp;<label for="showPics">'+getSeaPhrase("SHOW_PICTURES","ESS")+'</label>'
+	+ '</td></tr></table></form></div>'
+	+ '<div style="padding-bottom:5px;width:100%" styler="groupline" class="groupLineStyler"></div>'
+	return strHtml;
+}
+
+// If the user has toggled the radio buttons, make sure we reset them and
+// set the global flag pics accordingly.
+function SelectPics()
+{
+	var choice = self.MainFrame.document.checkboxform.showPics.checked;
+	if (choice)
+	{
+		if (!pics)
+		{
+			pics = true;
+			if (level > 0)
+			{	
+				if (!seaConfirm(getSeaPhrase("PICTURES_ADDED","ESS"), "", handleConfirmNoPicsResponse))
+					showPictures(false);
+			}	
+		}
+	}
+	else
+	{
+		if (pics)
+		{
+			pics = false;
+			if (level > 0)
+			{	
+				if (!seaConfirm(getSeaPhrase("PICTURES_REMOVED","ESS"), "", handleConfirmPicsResponse))
+					showPictures(true);
+			}	
+		}
+	}
+}
+
+// Firefox will call this function
+function handleConfirmNoPicsResponse(confirmWin)
+{
+	if (confirmWin.returnValue != "ok" && confirmWin.returnValue != "continue")
+		showPictures(false);
+	else
+		showPictures(true);
+}
+
+// Firefox will call this function
+function handleConfirmPicsResponse(confirmWin)
+{
+	if (confirmWin.returnValue != "ok" && confirmWin.returnValue != "continue")
+		showPictures(true);
+	else
+	    showPictures(false);
+}
+
+function showPictures(flag)
+{
+	flag = (!flag) ? false : true;
+	pics = flag;
+	var checkBox = self.MainFrame.document.checkboxform.showPics;
+	checkBox.checked = flag;
+	styleElement(checkBox);
+}
+
+// Load an employee's profile info.
+function GetProfile(empn)
+{
+  	if (typeof(empn) == "number" && empn != -1)
+  	{
+		showWaitAlert(getSeaPhrase("WAIT","ESS"));  	
+  		if (!appObj)
+  			appObj = new AppVersionObject(authUser.prodline, "HR");
+  	    // if you call getAppVersion() right away and the IOS object isn't set up yet,
+  		// then the code will be trying to load the sso.js file, and your call for
+  		// the appversion will complete before the ios version is set
+  		if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+  		{
+  			setTimeout(function(){ GetProfile(empn); }, 10);
+  			return;
+  		}
+  		var dmeObj = new DMEObject(prodline, "EMPLOYEE");
+    	dmeObj.out = "JAVASCRIPT";
+      	dmeObj.index = "empset1";
+      	dmeObj.field = "label-name-1;nick-name;email-address;process-level.name;department.name;"
+		+ "job-code;job-code.description;position.position;supervisor.description;"
+		+ "position.description;paemployee.wk-phone-nbr;paemployee.wk-phone-ext;"
+		+ "location.description;correspondence.fax-nbr";
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00")
+			dmeObj.field += ";email-personal";
+      	dmeObj.key = parseInt(company,10) + "=" + parseInt(empn,10);
+      	dmeObj.max = "1";
+   		DME(dmeObj, "jsreturn");
+  	}
+  	else
+  		seaAlert(getSeaPhrase("POSITION_EMPTY","ESS"), null, null, "alert");
+}
+
+// Display a window with the employee's profile info.
+function DspEmployee()
+{
+	var obj = self.jsreturn.record[0];
+	if (!obj)
+	{
+		seaAlert(getSeaPhrase("ERR_EMP_RECORD","ESS"), null, null, "error");
+		removeWaitAlert();
+		return;
+	}
+	var strHtml = '<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_48","SEA",[obj.label_name_1])+'">';
+	strHtml += '<caption class="offscreen">'+getSeaPhrase("TCAP_31","SEA",[obj.label_name_1])+'</caption>';
+	strHtml += '<tr><th scope="col" colspan="2"></th></tr>';
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("NAME","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.label_name_1)>0)?obj.label_name_1:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("PREFERRED_NAME","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.nick_name)>0)?obj.nick_name:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_11","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_wk_phone_nbr)>0)?obj.paemployee_wk_phone_nbr:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("WORK_PHONE_EXTENSION","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.paemployee_wk_phone_ext)>0)?obj.paemployee_wk_phone_ext:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_12","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'
+	if (NonSpace(obj.email_address) > 0)
+	{
+		var toolTip = obj.email_address+' - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA");
+		strHtml += '<a href="mailto:'+obj.email_address+'" title="'+toolTip+'">'+obj.email_address+'<span class="offscreen"> - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA")+'</span></a>'
+	}	
+	else
+		strHtml += '&nbsp;'
+	strHtml += '</td></tr>'
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00")
+	{
+		strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("PERSONAL_EMAIL","SEA")
+		+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'
+		if (NonSpace(obj.email_personal) > 0)
+		{	
+			var toolTip = obj.email_personal+' - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA");
+			strHtml += '<a href="mailto:'+obj.email_personal+'" title="'+toolTip+'">'+obj.email_personal+'<span class="offscreen"> - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA")+'</span></a>'
+		}	
+		else
+			strHtml += '&nbsp;'
+		strHtml += '</td></tr>'
+	}
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("FAX_NUMBER","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.fax_number)>0)?obj.fax_number:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_7","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.supervisor_description)>0)?obj.supervisor_description:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_8","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.position_description)>0)?obj.position_description:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_9","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.job_code_description)>0)?obj.job_code_description:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_3","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.process_level_name)>0)?obj.process_level_name:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_4","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.department_name)>0)?obj.department_name:'&nbsp;')+'</td></tr>'
+	strHtml += '<tr><th scope="row" class="plaintablerowheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_6","ESS")
+	+ '</th><td class="plaintablecellborderdisplay" style="width:50%" nowrap>'+((NonSpace(obj.location_description)>0)?obj.location_description:'&nbsp;')+'</td></tr>'
+	strHtml += '</table><p style="text-align:center"/>'
+	+ uiButton(getSeaPhrase("CLOSE","ESS"),"parent.CloseProfile();return false",false,"closebtn");
+	try 
+	{
+		self.ProfileFrame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PROFILE","ESS");
+		if (self.jsreturn.NbrRecs == 0)
+			self.ProfileFrame.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="padding-top:5px;padding-left:5px">'+getSeaPhrase("NO_EMPLOYEE_PROFILE","ESS")+'</div>';
+		else
+			self.ProfileFrame.document.getElementById("paneBody").innerHTML = strHtml;
+	}
+	catch(e) {}
+	self.ProfileFrame.stylePage();
+	self.ProfileFrame.setLayerSizes();
+	fitToScreen();
+	document.getElementById("MainFrame").style.visibility = "hidden";
+	document.getElementById("ProfileFrame").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.ProfileFrame.getWinTitle()]));
+}
+
+function CloseProfile()
+{
+	document.getElementById("ProfileFrame").style.visibility = "hidden";
+	document.getElementById("MainFrame").style.visibility = "visible";
+}
+
+// Get the next alternating color for the employee profile table.
+function getNxtClr(clr)
+{
+	if (clr == "#ffffff")
+		return bossColor;
+	else
+		return "#ffffff";
+}
+
+// Scroll down to the current level of reports (i.e., the one that was most recently created).
+function GoToRpts()
+{
+	var aindex;
+	if (resizeAtLevel != level && resizeAtLevel != 0)
+	{
+		aindex = resizeAtLevel - 1;
+		resizeAtLevel = 0;
+	}
+	else
+		aindex = level - 1;
+	if (typeof(self.MainFrame.document.anchors[aindex]) == "object")
+	{
+		// Must use element definitions in IE to gain access to object coordinate properties.
+		if (navigator.appName != "Netscape")
+		{
+			var tgs = self.MainFrame.document.getElementsByTagName("meta");
+			for (var j=0; j<tgs.length; j++)
+			{
+				if (tgs[j].name == self.MainFrame.document.anchors[aindex].name)
+				{
+					xcoord = tgs[j].offsetLeft;
+					ycoord = tgs[j].offsetTop;
+					break;
+				}
+			}
+		}
+		else
+		{
+			xcoord = self.MainFrame.document.anchors[aindex].x;
+			ycoord = self.MainFrame.document.anchors[aindex].y;
+		}
+		// Make sure the "Direct Reports of ..." heading displays after scrolling.
+		self.MainFrame.scroll(xcoord, ycoord-20);
+	}
+	return true;
+}
+
+// Halt the current load of reports.
+function Stop()
+{
+	// Since stop() doesn't consistently halt the ags, let it go and
+	// halt the display instead.
+	halt = true;
+	removeWaitAlert();
+}
+
+// If no employee image exists, provide a default.
+function ReplaceImage(image)
+{
+	image.src = uiNoPhotoPath;
+	image.className = "nophotoicon";
+}
+
+// Format employee number to full 9-digit representation for image reference.
+function jpgEmployee(emp)
+{
+	var jpgEmp = parseInt(emp,10).toString();
+ 	for (var i=jpgEmp.length; i<9; i++)
+		jpgEmp = "0" + jpgEmp;
+	return jpgEmp;
+}
+
+function getFront(mainStr, srchStr, Start)
+{
+	if (typeof(Start) == "undefined")
+		Start = 0;
+	fndOffset = mainStr.indexOf(srchStr, Start);
+	if (fndOffset == -1)
+		return null;
+	else
+		return mainStr.substring(0, fndOffset);
+}
+
+function getEnd(mainStr, srchStr, Start)
+{
+	if (typeof(Start) == "undefined")
+		Start = 0;
+	fndOffset = mainStr.indexOf(srchStr, Start);
+	if (fndOffset == -1)
+		return null;
+	else
+		return mainStr.substring(fndOffset+srchStr.length, mainStr.length);
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MainFrame");
+	var profileFrame = document.getElementById("ProfileFrame");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MainFrame.onresize && self.MainFrame.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MainFrame.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MainFrame.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MainFrame.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MainFrame.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MainFrame.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MainFrame.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MainFrame.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+	profileFrame.style.width = winWidth + "px";
+	profileFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.ProfileFrame.onresize && self.ProfileFrame.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.ProfileFrame.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.ProfileFrame.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.ProfileFrame.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.ProfileFrame.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.ProfileFrame.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.ProfileFrame.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.ProfileFrame.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		profileFrame.style.left = "";
+		profileFrame.style.right = "0px";
+	}		
+}
+var loadTimer = setTimeout("OpenOrgChart()", 3000);
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenOrgChart()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MainFrame" name="MainFrame" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;height:464px;width:803px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="ProfileFrame" name="ProfileFrame" title="Secondary Content" level="3" tabindex="0" style="visibility:hidden;position:absolute;height:325px;width:375px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/orglawheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/orgchart.htm,v 1.15.2.57 2014/02/13 22:48:37 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

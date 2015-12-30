@@ -1,0 +1,84 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/dialogs/foldersel.htm,v 1.2.20.2.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Select a Folder</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="foldersel.js"></script>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="dlg.css"></link>
+</head>
+
+<body onload="dlgInit()" onunload="dlgOnUnload()" onkeydown="dlgOnKeyDown()" style="background-color:buttonface;visibility:hidden">
+
+	<table width="95%" cellspacing="4" style="margin-left:8px;">
+	<tr>
+		<td>
+			<label id="lblCurrentFolder" class="dlgLabel"  style="position:relative;text-align:left;">Current folder</label><br/>
+			<input id="txtFolder" type="text" disabled class="dlgTextBox" style="position:relative;width:210px;"></input>
+			<button id="btnGoRootFolder" class="dlgButton" title="Go to root folder"
+				style="position:relative;width:22px;height:22px;padding:1px;margin-left:4px;border:2px solid buttonshadow;border-top:2px solid buttonhighlight;border-left:2px solid buttonhighlight;background-position:center;background-repeat:no-repeat;background-image:url('');"
+				onclick="dlgOnGoHome()">
+				&nbsp;
+			</button>
+			<button id="btnUpOneLevel" class="dlgButton" title="Move up one folder"
+				style="position:relative;width:22px;height:22px;padding:1px;margin-left:2px;border:2px solid buttonshadow;border-top:2px solid buttonhighlight;border-left:2px solid buttonhighlight;background-position:center;background-repeat:no-repeat;background-image:url('');"
+				onclick="dlgOnUpOneLevel()">
+				&nbsp;
+			</button>
+			<button id="btnCreateFolder" class="dlgButton" title="Create new folder"
+				style="position:relative;width:22px;height:22px;padding:1px;margin-left:2px;border:2px solid buttonshadow;border-top:2px solid buttonhighlight;border-left:2px solid buttonhighlight;background-position:center;background-repeat:no-repeat;background-image:url('../images/foldernew.gif');"
+				onclick="dlgOnNewFolder()">
+				&nbsp;
+			</button>
+			<button id="btnNewDrive" class="dlgButton" title="Select new drive"
+				style="position:relative;width:22px;height:22px;padding:1px;margin-left:2px;border:2px solid buttonshadow;border-top:2px solid buttonhighlight;border-left:2px solid buttonhighlight;background-position:center;background-repeat:no-repeat;background-image:url('../images/ico_drive.gif');"
+				onclick="dlgOnNewDrive()" 
+				onkeydown="dlgDriveKeyDown()"> 
+				&nbsp;
+			</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<label id="lblAvailableFolders" class="dlgLabel" style="position:relative;text-align:left;">Available Folders</label><br/>
+			<div id="folderdiv"
+				style="background-color:white;border-style:inset;border-width:2px;border-color:grey;height:220px;width:98%;overflow:auto;">&nbsp;
+			</div>
+		</td>
+	</tr>
+	</table>
+	<table width="95%" cellspacing="4" style="margin-left:8px;">
+	<tr>
+		<td align="right">
+			<input id="btnOK" type="button" class="dlgButton" onclick="dlgOK()" style="position:relative;" value="OK"></input>
+			<input id="btnCancel" type="button" class="dlgButton" onclick="window.close()" style="position:relative;" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+<!-- drive popup menu container -->
+<div id="oDrivePopup" style="display:none"></div>
+
+</body>
+</html>

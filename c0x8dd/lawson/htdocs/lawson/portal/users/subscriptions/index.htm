@@ -1,0 +1,52 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/subscriptions/index.htm,v 1.19.2.3.4.2.14.1.2.2 2012/08/08 12:37:28 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Subscriptions</title>
+<script language="javascript" src="../../servenv.js"></script>
+<script language="javascript" src="../../layout.js"></script>
+<script language="javascript" src="../../admin/admincommon.js"></script>
+<script language="javascript" src="../../objects/FeedBack.js"></script>
+<script language="javascript" src="subscriptions.js"></script>
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="subscriptions.css" type="text/css" />
+</head>
+
+<body tabIndex="-1" scroll="no" style="margin:0px;" 
+		onload="initSubscriptions()" onUnload="unloadFunc()" onkeydown="subKeyDown(event)" onresize="sizeFind()">
+	<div id="lblSubHeader" class="xTTreeTitle" style="position:absolute;top:0px;left:10px;width:260px;height:25px;">Subscriptions</div>
+	<div id="lblLayoutHeader" class="xTTreeTitle" style="position:absolute;top:0px;left:290px;height:25px;width:200px;">Layout</div>
+	<div id="divBookmarks" style="position:absolute;width:260px;top:25px;left:10px;height:400px;overflow:auto;visibility:hidden;" class="node" onclick="divBookmarksClick"></div>
+	<div id="divFind" class="xTTreeFind" style="position:absolute;width:270px;top:-1000px;left:-1000px;height:25px;text-align:right;">
+		<input type="text" id="txtSearch" class="xTTextBox" style="position:relative;margin-bottom:2px;width:100px;"
+			onfocus="portalWnd.cmnOnTextboxFocus(event,this)" onblur="portalWnd.cmnOnTextboxBlur(event,this)">
+		</input>
+		<button id="spansearch" class="xTToolBarButton" onclick="doSearch();" style="margin-left:4px;">Find</button>
+	</div>
+	<div id="lyrLayout" style="position:absolute;top:25px;left:265px;overflow:auto;visibility:hidden;">
+	</div>
+	<div id="lyrDrag" style="position:absolute;visibility:hidden;" class="xTDragHighlight" style="position:absolute;top:-1000px;left:-1000px;"><img src="../../images/spacer.gif" height="1" width="1" border="0"></div>
+	<span id="lyrHelp" style="position:absolute;visibility:hidden;"></div>
+</body>
+</html>

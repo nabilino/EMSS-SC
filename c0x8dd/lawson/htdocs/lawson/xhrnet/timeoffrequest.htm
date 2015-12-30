@@ -1,0 +1,1847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Time Off Request</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeoffrequest.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script>
+function initTimeOff()
+{
+	authenticate("frameNm='jsreturn'|funcNm='loadPage()'|desiredEdit='EM'");
+}
+
+function loadPage()
+{
+	stylePage();
+	var taskNm = getSeaPhrase("TIME_OFF_REQUEST","SEA");
+	setWinTitle(taskNm);
+	setTaskHeader("header",taskNm,"TimeEntry");
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), checkAppVersion);
+}
+
+function getData()
+{
+	empData.empNbr = Number(authUser.employee);
+	getEmployeeData();
+}
+
+function displayEmployeeData()
+{
+	empData.dirty = null;
+	empData.allRequests = empData.timeOffRequests.concat(empData.leaveOfAbsenceRequests);	
+	displayPage();
+}
+
+function displayPage()
+{
+	var strBuffer = [];
+	var strHtml = '';
+	var len = empData.balances.length;
+	strBuffer[0] = '<div id="balancesSection"><table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_79","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("LEAVE_BALANCES","ESS")+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","ESS")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("AVAILABLE_BALANCE","SEA")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PENDING_REQUESTS","SEA")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PROJECTED_BALANCE","SEA")+'</th></tr>';	
+	if (len > 0)
+	{
+		for (var k=0; k<len; k++)
+		{
+			strBuffer[strBuffer.length] = '<tr><td class="plaintablecellborder" nowrap>'
+			+ ((empData.balances[k].desc)?empData.balances[k].desc:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborderright" nowrap>'+AppObject.truncateNbr(empData.balances[k].available_balance,2)+'</td>'
+			+ '<td class="plaintablecellborderright" nowrap>'+AppObject.truncateNbr(empData.balances[k].pending_requests,2)+'</td>'
+			+ '<td class="plaintablecellborderright" nowrap>'+AppObject.truncateNbr(empData.balances[k].projected_balance,2)+'</td></tr>';
+		}
+	}
+	else
+		strBuffer[strBuffer.length] = '<tr><td class="plaintablecell" colspan="4">'+getSeaPhrase("NO_BALANCES","SEA")+'</td></tr>';
+	strBuffer[strBuffer.length] = '</table></div>';
+	strHtml += uiTable(self.main, getSeaPhrase("BALANCES","ESS"), strBuffer.join(""));
+	strHtml += '<div id="requestsSection"></div><div id="addRequestSection">';
+	strHtml += uiButton(getSeaPhrase("ADD_REQUEST","SEA"),"parent.displayAddRequestDialog();return false",null,null,'aria-haspopup="true"');
+	strHtml += '</div>';
+	self.main.document.getElementById("paneBody").innerHTML = strHtml;
+	fitToScreen();
+	// if data is being refreshed, retain the prior sort order
+	empData.sortField = empData.reqSortField;
+	empData.sortDir = (!empData.reqSortDir || empData.reqSortDir == "descending") ? "ascending" : "descending";
+	displayRequests(empData.sortField);
+	document.getElementById("main").style.visibility = "visible";
+}
+
+function sortRequests(sort)
+{
+	showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), function(){displayRequests(sort);});
+}
+
+function displayRequests(sort)
+{
+	// if sorting the same field more than once, alternate the direction
+	if (sort && empData.sortField && sort == empData.sortField)
+		empData.sortDir = (!empData.sortDir || empData.sortDir == "descending") ? "ascending" : "descending";
+	else	
+		empData.sortDir = "ascending";
+	empData.sortField = sort || "desc";
+	empData.reqSortField = empData.sortField;
+	empData.reqSortDir = empData.sortDir;
+	var sortFunc = (empData.sortDir == "descending") ? sortByDescField : sortByAscField;
+	switch (empData.sortField)
+	{
+		case "desc":
+		case "status_xlt":
+		case "leave_date":
+		case "return_date":
+		case "hours":	
+			empData.allRequests.sort(sortFunc);
+			break;
+		default: break;
+	}
+	var strBuffer = [];
+	var len = empData.allRequests.length;
+	var allowCancel = (empData.timeOffRequests.length > 0) ? true : false;
+	var toolTip = getSeaPhrase("SORT_BY_TYPE","ESS");
+	strBuffer[0] = '<table id="allRequestsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_80","SEA")+'">';
+	strBuffer[0] += '<caption class="offscreen">'+getSeaPhrase("TIME_OFF_REQUESTS","SEA")+'</caption>';
+	strBuffer[0] += '<tr>';
+	if (allowCancel)
+		strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("CANCEL","ESS")+'</th>';	
+	strBuffer[0] +=  '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'desc\');return false;" title="'+toolTip+'">'+getSeaPhrase("TYPE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_STATUS","ESS");
+	strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'status_xlt\');return false;" title="'+toolTip+'">'+getSeaPhrase("STATUS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_DATE","SEA");
+	strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'leave_date\');return false;" title="'+toolTip+'">'+getSeaPhrase("DATE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("RETURN_DATE","SEA")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'return_date\');return false;" title="'+toolTip+'">'+getSeaPhrase("RETURN_DATE","SEA")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("HOURS","ESS")+' - '+getSeaPhrase("SORT_BY_X","SEA");
+	strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortRequests(\'hours\');return false;" title="'+toolTip+'">'+getSeaPhrase("HOURS","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	strBuffer[0] += '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("COMMENTS","ESS")+'</th></tr>';
+	var nbrCols = (allowCancel) ? 7 : 6;
+	if (len > 0)
+	{
+		for (var k=0; k<len; k++)
+		{
+			var commentsToolTip = getSeaPhrase("OPEN_CMT_REQUEST","SEA",[empData.allRequests[k].desc,empData.allRequests[k].leave_date,AppObject.truncateNbr(empData.allRequests[k].hours,2)]);
+			var cancelToolTip = getSeaPhrase("CANCEL_PTO_REQUEST","SEA",[empData.allRequests[k].desc,empData.allRequests[k].leave_date,AppObject.truncateNbr(empData.allRequests[k].hours,2)]);
+			var updateToolTip = getSeaPhrase("UPDATE_PTO_REQUEST","SEA",[empData.allRequests[k].desc,empData.allRequests[k].leave_date,AppObject.truncateNbr(empData.allRequests[k].hours,2)]);
+			var cmtsUrl = (NonSpace(empData.allRequests[k].comments) > 0) ? commentsExistUrl : commentsUrl;			
+			strBuffer[strBuffer.length] = '<tr>';
+			if (allowCancel)
+			{	
+				strBuffer[strBuffer.length-1] += '<td class="plaintablecellborder" style="text-align:center" nowrap>';
+				if (empData.allRequests[k].rec_type == "PTO")
+				{	
+					strBuffer[strBuffer.length-1] += '<a href="javascript:;" onclick="parent.cancelTimeOffLeaveRequest('+k+');return false;" title="'+cancelToolTip+'" aria-label="'+cancelToolTip+'" aria-haspopup="true">'
+					+ '<img styler="deleteicon" src="'+deleteUrl+'" border="0" width="18" height="18" default_icon="'+deleteUrl+'" active_icon="'+deleteUrl+'" '
+					+ 'name="delete" id="delete'+k+'" alt="'+cancelToolTip+'" title="'+cancelToolTip+'"></a>';	
+				}
+				else
+					strBuffer[strBuffer.length-1] += '&nbsp;';
+				strBuffer[strBuffer.length-1] += '</td>';
+			}
+			strBuffer[strBuffer.length-1] += '<td class="plaintablecellborder" nowrap>';
+			if (empData.allRequests[k].rec_type == "PTO" && empData.allRequests[k].status == 1)
+				strBuffer[strBuffer.length-1] += '<a href="javascript:;" onclick="parent.displayUpdateRequestDialog('+k+');return false;" title="'+updateToolTip+'" aria-haspopup="true">'+((empData.allRequests[k].desc)?empData.allRequests[k].desc:'&nbsp;')+'<span class="offscreen"> - '+updateToolTip+'</span></a>';
+			else
+				strBuffer[strBuffer.length-1] += ((empData.allRequests[k].desc)?empData.allRequests[k].desc:'&nbsp;');
+			strBuffer[strBuffer.length-1] += '</td><td class="plaintablecellborder" nowrap>'
+			+ ((empData.allRequests[k].status_xlt)?empData.allRequests[k].status_xlt:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+			+ ((empData.allRequests[k].leave_date)?empData.allRequests[k].leave_date:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+			+ ((empData.allRequests[k].return_date)?empData.allRequests[k].return_date:'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborderright" nowrap>'+AppObject.truncateNbr(empData.allRequests[k].hours,2)+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+			+ '<a href="javascript:;" onclick="parent.displayRequestComments('+k+');return false;" onmouseover="parent.commentIconHover(true,'+k+');return true;" onfocus="parent.commentIconHover(true,'+k+');return true;" '
+			+ 'onmouseout="parent.commentIconHover(false,'+k+');return true;" onblur="parent.commentIconHover(false,'+k+');return true;" title="'+commentsToolTip+'" aria-label="'+commentsToolTip+'" aria-haspopup="true">'
+			+ '<img styler="documenticon" src="'+cmtsUrl+'" border="0" width="32" height="32" default_icon="'+commentsUrl+'" active_icon="'+commentsExistUrl+'" name="comment'+k+'" id="comment'+k+'" alt="'+commentsToolTip+'" title="'+commentsToolTip+'"></a></td></tr>';
+		}
+	}
+	else
+		strBuffer[strBuffer.length] = '<tr><td class="plaintablecell" colspan="'+nbrCols+'">'+getSeaPhrase("NO_TIME_OFF_REQUESTS","SEA")+'</td></tr>';
+	strBuffer[strBuffer.length] = '</table>';	
+	var strHtml = uiTable(self.main, getSeaPhrase("TIME_OFF_REQUESTS","SEA"), strBuffer.join(""));	
+	self.main.document.getElementById("requestsSection").innerHTML = strHtml;
+	self.main.stylePage();
+	self.main.styleSortArrow("allRequestsTbl", empData.sortField, empData.sortDir);
+	fitToScreen();	
+	if (!sort && len > 0)
+	{
+		var commentIcon = self.main.document.getElementById("comment0");
+		if (commentIcon)
+		{
+			commentsUrl = commentIcon.getAttribute("default_icon");
+			commentsExistUrl = commentIcon.getAttribute("active_icon");
+		}
+	}
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.main.getWinTitle()]));
+	// workspace IE8 hack: a vertical scrollbar may not display until the window has focus and its contents have changed
+	try 
+	{ 
+		self.main.focus();
+		var tmpNode = self.main.document.createElement("div");
+		self.main.document.body.appendChild(tmpNode);
+		self.main.document.body.removeChild(tmpNode);
+	} 
+	catch(e) {}	
+}
+
+function cancelTimeOffLeaveRequest(recIndex)
+{
+	var request = empData.allRequests[recIndex];
+	var cancelRequest = function()
+	{
+		// cancel time off request
+		var checkHS19Response = function()
+		{
+			var msgNbr = tranObj.getMsgNbr();
+			var msg = tranObj.getMessage();
+			if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+			{
+				var refreshData = function()
+				{						
+					empData.dirty = {"balances":true,"timeOffRequests":true};
+					showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+				};
+				var submitComplete = function()
+				{
+					removeWaitAlert();
+					var alertResponse = seaPageMessage(getSeaPhrase("TIME_OFF_REQUEST_CANCELLED","SEA"), "", null, "info", refreshData, true, getSeaPhrase("UPDATE_COMPLETE","ESS"), true);
+					if (typeof(alertResponse) == "undefined" || alertResponse == null)
+					{	
+						if (seaPageMessage == window.alert)
+							refreshData();
+						return;
+					}				
+				};			
+				if (sysRules.notification_required == 2 && emssObjInstance.emssObj.processFlowsEnabled)
+				{
+					// trigger processflow to email manager that this request has been cancelled
+					showWaitAlert(getSeaPhrase("SENDING_EMAIL","ESS"));
+					var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+					pfObj.setEncoding(authUser.encoding);
+					pfObj.showErrors = false;					
+					var flowObj = pfObj.setFlow("EMSSTimeOffChg", Workflow.SERVICE_EVENT_TYPE, Workflow.ERP_SYSTEM, authUser.prodline, authUser.webuser, null, "");
+					flowObj.addVariable("company", String(Number(authUser.company)));
+					flowObj.addVariable("employee", String(Number(authUser.employee)));
+					flowObj.addVariable("emailFormat", String(emssObjInstance.emssObj.emailFormat)+","+String(emssObjInstance.emssObj.emailAddressType));
+					flowObj.addVariable("role", "employee");
+					flowObj.addVariable("action", "cancel"); // cancel
+					flowObj.addVariable("seqNbrs1", String(Number(request.seq_nbr)));
+					pfObj.triggerFlow();
+					setTimeout(submitComplete, 2000);					
+				}
+				else
+					submitComplete();
+			}	
+			else
+			{
+				setTimeout(removeWaitAlert, 10);
+				if (msg)
+					seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+			}				
+		};		
+		var callHS19 = function()
+		{	
+			tranObj = new TransactionObject(window, techVersion, httpRequest, checkHS19Response);
+			tranObj.setEncoding(authUser.encoding);
+			tranObj.setParameter("_PDL", authUser.prodline);
+			tranObj.setParameter("_TKN", "HS19.2");
+			tranObj.setParameter("_LFN", "ALL");
+			tranObj.setParameter("_EVT", "CHG");
+			tranObj.setParameter("_RTN", "DATA");
+			tranObj.setParameter("_TDS", "Ignore");
+			if (techVersion == TransactionObject.TECHNOLOGY_900)
+				tranObj.setParameter("_DTLROWS", "FALSE");
+			tranObj.setParameter("FC", "C");
+			tranObj.setParameter("COMPANY", String(Number(authUser.company)));
+			tranObj.setParameter("EMPLOYEE", String(Number(authUser.employee)));	
+			tranObj.setParameter("TEM-PLAN", request.plan);
+			tranObj.setParameter("TEM-EMPLOYEE-GROUP", request.employee_group);
+			tranObj.setParameter("TEM-POSITION", request.position);
+			tranObj.setParameter("WEB-UPDATE", "Y");
+			tranObj.setParameter("LPQ-EMP-USER-ID", "W" + authUser.employee);
+			//seq nbr, hours, leave date, status, and memo all need to be passed on a change
+			tranObj.setParameter("LINE-FCr0", "C");
+			tranObj.setParameter("LPQ-SEQ-NUMBERr0", String(Number(request.seq_nbr)));
+			tranObj.setParameter("LPQ-HOURSr0", String(Number(request.hours)));			
+			tranObj.setParameter("LPQ-LEAVE-DATEr0", formjsDate(formatDME(request.leave_date)));
+			tranObj.setParameter("LPQ-STATUSr0", "3");
+			if (request.comments)
+				tranObj.setParameter("LPQ-MEMOr0", String(request.comments));
+			else
+				tranObj.setParameter("LPQ-MEMOr0", "");
+			tranObj.callTransaction();
+		};
+		showWaitAlert(getSeaPhrase("CANCELLING_REQUEST","SEA"), callHS19);		
+	};
+	var confirmCancelRequest = function(confirmWin)
+	{
+	    if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+	    	cancelRequest();
+	};
+	createDialog("cancelDialog");
+	cancelDialog.translationAry = new Array();
+	cancelDialog.translationAry["btnYes"] = "OK";
+	//cancelDialog.translationAry["btnNo"] = "CANCEL";
+	cancelDialog.translationAry["btnCancel"] = "CANCEL";
+	cancelDialog.initDialog = function(wnd)
+	{
+		wnd = wnd || window;
+		if (typeof(wnd["styler"]) == "undefined" || wnd.styler == null)
+			wnd.stylerWnd = findStyler(true);
+		if (!wnd.stylerWnd)
+			return;
+		if (this.styler == null)
+		{
+			this.styler = new wnd.stylerWnd.StylerBase();
+			this.styler.showLDS = styler.showLDS;
+			this.styler.showInfor = styler.showInfor;
+			this.styler.showInfor3 = styler.showInfor3;
+			if (this.pinned && typeof(parent.parent["SSORequest"]) != "undefined")
+				this.styler.httpRequest = parent.parent.SSORequest;
+			else if (typeof(wnd["SSORequest"]) != "undefined")
+				this.styler.httpRequest = wnd.SSORequest;
+		}
+		wnd.styler = this.styler;
+		if (!wnd.styler || (!wnd.styler.showInfor3 && !wnd.styler.showInfor && !wnd.styler.showLDS))
+		{
+			wnd.styler.loadEnableCssFile(wnd, "/lawson/xhrnet/ui/ui.css");
+			var msgTable = wnd.document.getElementById("msgTable");
+			msgTable.style.marginLeft = "auto";
+			msgTable.style.marginRight = "auto";
+		}
+		if (this.styler != null && this.styler.showInfor3)
+		{
+			this.setButtons([
+			     {id: "ok", name: "ok", text: this.getPhrase("OK"), click: null},
+			     {id: "cancel", name: "cancel", text: this.getPhrase("CANCEL"), click: null}
+			]);
+		}
+		else
+			wnd.accessKeyToBtn = new Array();
+	};	
+	var reqData = [request.desc,request.leave_date,AppObject.truncateNbr(request.hours,2)];
+	var strHtml = '<div style="padding:5px;text-align:center"><div class="fieldlabelbolddialog">'+getSeaPhrase("CONFIRM_CANCEL_TIME_OFF_REQUEST","SEA")+'</div>'
+	+ '<p><table border="0" cellspacing="0" cellpadding="0" style="margin-left:0px;width:auto" summary="'+getSeaPhrase("TSUM_81","SEA",reqData)+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_60","SEA",reqData)+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'
+	+ '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("PLAN","ESS")+'</th><td class="plaintablecelldisplay">'+((request.desc)?request.desc:'&nbsp;')+'</td></tr>';
+	if (request.rec_type == "LOA")
+	{
+		strHtml += '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("DATE","ESS")+'</th><td class="plaintablecelldisplay">'+((request.leave_date)?request.leave_date:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("RETURN_DATE","SEA")+'</th><td class="plaintablecelldisplay">'+((request.return_date)?request.return_date:'&nbsp;')+'</td></tr>';			
+	}	
+	else	
+	{	
+		strHtml += '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("DATE","ESS")+'</th><td class="plaintablecelldisplay">'+((request.leave_date)?request.leave_date:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("HOURS","ESS")+'</th><td class="plaintablecelldisplay">'+AppObject.truncateNbr(request.hours,2)+'</td></tr>';
+	}
+	if (typeof(mgrData) == "undefined")
+	{
+		strHtml += '<tr><th scope="row" class="fieldlabelbold" nowrap="">'+getSeaPhrase("APPROVER","SEA")+'</th>'
+		+ '<td class="plaintablecelldisplay">'+((empData.approverName)?empData.approverName:'&nbsp;')+'</td></tr>';
+	}
+	strHtml += '</table></p></div>';
+	var actionReturn = cancelDialog.messageBox(strHtml, "okcancel", "question", window, false, "", confirmCancelRequest, null, false, getSeaPhrase("CANCEL_REQUEST","SEA"));
+	if (typeof(actionReturn) != "undefined" && typeof(actionReturn) != null)
+		confirmCancelRequest(actionReturn);
+}
+
+function getLeaveOfAbsenceReasons(wnd, selElm)
+{
+	var storeLeaveOfAbsenceReasons = function()
+	{
+		empData.reasons = [];
+		var nbrRecs = dataObj.getNbrRecs();
+		for (var j=0; j<nbrRecs; j++)
+		{	
+			var record = dataObj.getRecord(j);	
+			empData.reasons[empData.reasons.length] = {
+				"code" : record.getFieldValue("code"),
+				"description" : record.getFieldValue("description")
+			}
+		}
+		if (dataObj.getNextCall())
+		{
+			dataObj.callNext();
+			return;
+		}
+		removeWaitAlert();
+		addRequestTypeSelected(wnd, selElm);
+	};
+	dataObj = new DataObject(window, techVersion, httpRequest, storeLeaveOfAbsenceReasons);
+	dataObj.setEncoding(authUser.encoding); 
+	dataObj.setParameter("PROD", authUser.prodline);
+	dataObj.setParameter("FILE", "pcodes");
+	dataObj.setParameter("INDEX", "pcoset1");
+	dataObj.setParameter("FIELD", "code;description");
+	dataObj.setParameter("KEY", "LR");
+	dataObj.setParameter("COND", "active");
+	dataObj.setParameter("SELECT", "web-available>1");
+	dataObj.setParameter("MAX", "500");
+	dataObj.callData();	
+}
+
+function getRequestTypeHTML(requestType)
+{
+	requestType = (typeof(requestType) != "undefined") ? requestType : null;
+	var strHtml = '<tr><th class="fieldlabelbold" style="width:15%"><label for="requestType">'+getSeaPhrase("TYPE","ESS")+'</label></th><td id="requestTypeCell" class="plaintablecell">'
+	+ '<select class="inputbox" id="requestType" name="requestType" onchange="var wnd=(typeof(window[\'addRequestTypeSelected\'])!=\'undefined\')?window:parent;wnd.addRequestTypeSelected(window,this);" styler="combobox">'+drawRequestTypeSelect(requestType)+'</select>'+uiRequiredIcon()+'</td></tr>';
+	return strHtml;
+}
+
+function addRequestActionTaken(msgWin)
+{
+	var rtnStatus = true;
+	switch (msgWin.returnValue)
+	{
+		case "submit": //submit
+		case "yes":
+		case "ok":
+			rtnStatus = submitAddRequest(msgWin, msgWin.document.forms["addRequest"]);
+			break;
+		case "cancel": //cancel
+		case "no":
+		case "close":
+			break;	
+	}
+	return rtnStatus;
+}
+
+function updateRequestActionTaken(msgWin, request)
+{
+	var rtnStatus = true;
+	switch (msgWin.returnValue)
+	{
+		case "update": //update
+		case "yes":
+		case "ok":		
+			rtnStatus = updateRequest(msgWin, msgWin.document.forms["updRequest"], request);
+			break;
+		case "cancel": //cancel
+		case "no":
+		case "close":
+			break;	
+	}
+	return rtnStatus;
+}
+
+function displayAddRequestDialog()
+{
+	var reqTypeHtml = getRequestTypeHTML();
+	if (empData.requestTypes != null && empData.requestTypes.length == 0)
+	{
+		seaAlert(getSeaPhrase("NO_REQUEST_TYPES","SEA"), getSeaPhrase("CONTACT_HR","ESS"));
+		return;
+	}	
+	DialogObject.prototype.hideCover = function(wnd)
+	{
+		wnd = wnd || window;
+		if (this.showOpaqueCover && this.opaqueCover != null)
+		{
+			// if this is a secondary dialog and the request dialog is still open, do not hide the opaque cover
+			if (typeof("requestDialog") != "undefined" && requestDialog.pinned && requestDialog.oFrame && this.oFrameID != requestDialog.oFrameID)
+			{
+				var dlgFrame = requestDialog.oFrame;
+				if (dlgFrame && dlgFrame.style.visibility != "hidden")
+					return;
+			}	
+			this.opaqueCover.hideCover();
+		}	
+	};	
+	createDialog("requestDialog");
+	requestDialog.translationAry = new Array();
+	requestDialog.translationAry["btnYes"] = "SUBMIT";
+	requestDialog.translationAry["btnCancel"] = "CANCEL";
+	requestDialog.initDialog = function(wnd)
+	{
+		wnd = wnd || window;
+		if (typeof(wnd["styler"]) == "undefined" || wnd.styler == null)
+			wnd.stylerWnd = findStyler(true);
+		if (!wnd.stylerWnd)
+			return;
+		if (this.styler == null)
+		{
+			this.styler = new wnd.stylerWnd.StylerBase();
+			this.styler.showLDS = styler.showLDS;
+			this.styler.showInfor = styler.showInfor;
+			this.styler.showInfor3 = styler.showInfor3;
+			if (this.pinned && typeof(parent.parent["SSORequest"]) != "undefined")
+				this.styler.httpRequest = parent.parent.SSORequest;
+			else if (typeof(wnd["SSORequest"]) != "undefined")
+				this.styler.httpRequest = wnd.SSORequest;	
+		}
+		wnd.styler = this.styler;
+		wnd.StylerBase = wnd.stylerWnd.StylerBase;
+		wnd.StylerEMSS = wnd.stylerWnd.StylerEMSS;
+		wnd.StylerBase.webappjsURL = "/lawson/webappjs";		
+		if (!wnd.styler || (!wnd.styler.showInfor3 && !wnd.styler.showInfor && !wnd.styler.showLDS))
+		{	
+			wnd.styler.loadJsFile(wnd, "Sizer", wnd.StylerBase.webappjsURL + "/javascript/objects/Sizer.js");
+			wnd.styler.loadJsFile(wnd, "Calendar", wnd.StylerBase.webappjsURL + "/javascript/objects/Calendar.js");
+		    if (typeof(wnd.calObj) == "undefined" || wnd.calObj == null)
+		    {
+		    	wnd.userWnd = wnd.stylerWnd.userWnd;
+		    	wnd.StylerEMSS.initCalendarControl(wnd);
+		        wnd.calObj.styler = wnd.styler;
+		        wnd.calObj.openDirection = wnd.CalendarObject.OPEN_LEFT_DOWN;
+		    }			
+			wnd.styler.loadEnableCssFile(wnd, "/lawson/xhrnet/ui/ui.css");
+			wnd.styler.preProcessDom(wnd);
+			var msgTable = wnd.document.getElementById("msgTable"); 
+			msgTable.style.marginLeft = "auto";
+			msgTable.style.marginRight = "auto";
+		}		
+		if (this.styler != null && this.styler.showInfor3)
+		{			
+			this.setButtons([
+			     {id: "submit", name: "submit", text: this.getPhrase("SUBMIT"), click: null},
+			     {id: "cancel", name: "cancel", text: this.getPhrase("CANCEL"), click: null}
+			]);					
+		}
+		else
+			wnd.accessKeyToBtn = new Array();	
+	};
+	requestDialog.oFrameID = "requestiframe";
+	requestDialog.allowPopups = false;
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	requestDialog.minWidth = winWidth - 150;
+	if (requestDialog.minWidth > 600)
+		requestDialog.minWidth = 600;
+	requestDialog.minHeight = winHeight - 150;
+	if (requestDialog.minHeight > 245)
+		requestDialog.minHeight = 245;	
+	var strBuffer = [];
+	strBuffer[0] = '<div class="dataDiv" style="width:'+requestDialog.minWidth+'px;height:'+requestDialog.minHeight+'px;overflow:auto" tabindex="0">'
+	+ uiRequiredFooter()+'<form name="addRequest" onsubmit="return false;"><input type="text" id="dummy" name="dummy" value="" style="display:none">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" summary="'+getSeaPhrase("TSUM_100","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_78","SEA")+'</caption>'
+	+ '<tr><th scope="col" colspan="3"></th></tr>'
+	+ reqTypeHtml+'</table></form></div>';	
+	var actionReturn = requestDialog.messageBox(strBuffer.join(""), "okcancel", "none", window, false, "", addRequestActionTaken, null, false, getSeaPhrase("NEW_REQUEST","SEA"));
+	if (typeof(actionReturn) != "undefined" && actionReturn != null)
+		addRequestActionTaken(actionReturn);
+}
+
+function getUpdateRequestHTML(request, wnd)
+{
+	wnd = wnd || window;
+	var appWnd = typeof(wnd["AppObject"]) != "undefined" ? 'window' : 'parent';
+	var nbrHours = AppObject.truncateNbr(request.hours,2);
+	var fullDay = (Number(nbrHours) == Number(AppObject.truncateNbr(sysRules.full_day_hours,2))) ? true : false;
+	var halfDay = (Number(nbrHours) == Number(AppObject.truncateNbr(sysRules.full_day_hours/2,2))) ? true : false;
+	var hoursEntry = (!fullDay && !halfDay) ? true : false;
+	var reqData = [request.desc,request.leave_date,nbrHours];
+	var strHtml = uiRequiredFooter()+'<form name="updRequest" onsubmit="return false;"><input type="text" id="dummy" name="dummy" value="" style="display:none">'
+	+ '<input class="inputbox" type="hidden" name="requestDate" size="10" maxlength="10" value="'+request.leave_date+'">'
+	+ '<input class="inputbox" type="hidden" name="startDate" size="10" maxlength="10" value="">'
+	+ '<input class="inputbox" type="hidden" name="endDate" size="10" maxlength="10" value="">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" summary="'+getSeaPhrase("TSUM_81","SEA",reqData)+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_60","SEA",reqData)+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'	
+	// Plan
+	+ '<tr><th class="fieldlabelbold" style="width:15%" nowrap="">'+getSeaPhrase("PLAN","ESS")+'</th><td class="plaintablecelldisplay">'+((request.desc)?request.desc:'&nbsp;')+'</td></tr>'
+	// Date
+	+ '<tr><th class="fieldlabelbold" style="width:15%" nowrap>'+getSeaPhrase("DATE","ESS")+'</th><td class="plaintablecelldisplay" nowrap>'+((request.leave_date)?request.leave_date:'&nbsp;')+'</td></tr>'
+	// Hours
+	+ '<tr><th class="fieldlabelbold" style="width:15%;vertical-align:top">'+uiRequiredIcon()+getSeaPhrase("HOURS","ESS")+'</th>'
+	+ '<td class="plaintablecell">'
+	+ '<div role="radiogroup" aria-labelledby="hoursLbl">'
+	+ '<span id="hoursLbl" class="offscreen">'+getSeaPhrase("HOURS","ESS")+'</span>'	
+	+ '<input type="radio" id="allDay" name="duration" value="0" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio"';
+	if (fullDay)
+		strHtml += ' checked="checked"';
+	strHtml += ' role="radio"><label for="allDay">'+getSeaPhrase("ALL_DAY","SEA")+'</label><br/>'
+	+ '<input type="radio" id="halfDay" name="duration" value="1" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio"';
+	if (halfDay)
+		strHtml += ' checked="checked"';	
+	strHtml += ' role="radio"><label for="halfDay">'+getSeaPhrase("HALF_DAY","SEA")+'</label><br/>'
+	+ '<input type="radio" id="hoursEntry" name="duration" value="2" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio"';
+	if (hoursEntry)
+		strHtml += ' checked="checked"';	
+	strHtml += ' role="radio"><label></label><label class="offscreen" for="hoursEntry">'+getSeaPhrase("ENTER_HOURS","SEA")+'</label><label class="offscreen" for="hours">'+getSeaPhrase("ENTER_HOURS","SEA")+'</label>&nbsp;<input class="inputbox" type="text" id="hours" name="hours" size="5" maxlength="5" onchange="'+appWnd+'.validatePTORequestField(window,this);" onfocus="this.select()" value="'+((hoursEntry)?nbrHours:'')+'" styler="textbox">&nbsp;<label>'+getSeaPhrase("HOURS","ESS")+'</label>'
+	+ '</div></td></tr>';
+	// Selected Description
+	if (NonSpace(request.leave_date) > 0)
+	{
+		var selDesc = getSeaPhrase("YOU_HAVE_SELECTED","SEA",[request.leave_date]);
+		var hoursDesc = '';
+		if (hoursEntry)
+			hoursDesc = getSeaPhrase("NUMBER_OF_HOURS_PER_DAY","SEA",['1',''+nbrHours]);
+		else if (fullDay)
+			hoursDesc = getSeaPhrase("NUMBER_OF_FULL_DAYS","SEA",['1']);
+		else if (halfDay)
+			hoursDesc = getSeaPhrase("NUMBER_OF_HALF_DAYS","SEA",['1']);
+		selDesc += ' '+hoursDesc;
+		strHtml += '<tr><th id="selectedReqDesc" class="plaintablecelldisplay" colspan="2">'+selDesc+'</th></tr>';
+	}	
+	else
+		strHtml += '<tr style="display:none"><th id="selectedReqDesc" class="plaintablecelldisplay" colspan="2"></th></tr>';
+	// Comments
+	strHtml += '<tr><th class="fieldlabelbold" nowrap><label for="leaveComments">'+getSeaPhrase("COMMENTS","ESS")+'</label></th>'
+	+ '<td class="plaintablecell" style="padding-top:5px" nowrap><input type="text" class="inputbox" style="width:auto;max-width:325px" id="leaveComments" name="leaveComments" size="60" maxlength="60" value="'+request.comments+'" styler="textbox">'
+	+ '</td></tr>'
+	// Approver
+	+ '<tr><th class="fieldlabelbold" nowrap>'+getSeaPhrase("APPROVER","SEA")+'</th>'
+	+ '<td class="plaintablecelldisplay">'+((empData.approverName)?empData.approverName:'&nbsp;')+'</td></tr>'	
+	+ '</table></form>';
+	return strHtml;
+}
+
+function displayUpdateRequestDialog(recIndex)
+{
+	var request = empData.allRequests[recIndex];	
+	DialogObject.prototype.hideCover = function(wnd)
+	{
+		wnd = wnd || window;
+		if (this.showOpaqueCover && this.opaqueCover != null)
+		{
+			// if this is a secondary dialog and the request dialog is still open, do not hide the opaque cover
+			if (typeof("requestDialog") != "undefined" && requestDialog.pinned && requestDialog.oFrame && this.oFrameID != requestDialog.oFrameID)
+			{
+				var dlgFrame = requestDialog.oFrame;
+				if (dlgFrame && dlgFrame.style.visibility != "hidden")
+					return;
+			}	
+			this.opaqueCover.hideCover();
+		}	
+	};	
+	createDialog("requestDialog");
+	requestDialog.translationAry = new Array();
+	requestDialog.translationAry["btnYes"] = "UPDATE";
+	requestDialog.translationAry["btnCancel"] = "CANCEL";
+	requestDialog.initDialog = function(wnd)
+	{
+		wnd = wnd || window;
+		var appWnd = typeof(wnd["AppObject"]) != "undefined" ? 'window' : 'parent';
+		if (wnd.document.getElementById("updRequestSection"))
+			wnd.document.getElementById("updRequestSection").innerHTML = getUpdateRequestHTML(request, wnd);		
+		if (typeof(wnd["styler"]) == "undefined" || wnd.styler == null)
+			wnd.stylerWnd = findStyler(true);
+		if (!wnd.stylerWnd)
+			return;
+		if (this.styler == null)
+		{
+			this.styler = new wnd.stylerWnd.StylerBase();
+			this.styler.showLDS = styler.showLDS;
+			this.styler.showInfor = styler.showInfor;
+			this.styler.showInfor3 = styler.showInfor3;
+			if (this.pinned && typeof(parent.parent["SSORequest"]) != "undefined")
+				this.styler.httpRequest = parent.parent.SSORequest;
+			else if (typeof(wnd["SSORequest"]) != "undefined")
+				this.styler.httpRequest = wnd.SSORequest;	
+		}
+		wnd.styler = this.styler;
+		wnd.StylerBase = wnd.stylerWnd.StylerBase;
+		wnd.StylerEMSS = wnd.stylerWnd.StylerEMSS;
+		wnd.StylerBase.webappjsURL = "/lawson/webappjs";		
+		if (!wnd.styler || (!wnd.styler.showInfor3 && !wnd.styler.showInfor && !wnd.styler.showLDS))
+		{			
+			wnd.styler.loadEnableCssFile(wnd, "/lawson/xhrnet/ui/ui.css");
+			wnd.styler.preProcessDom(wnd);
+			var msgTable = wnd.document.getElementById("msgTable"); 
+			msgTable.style.marginLeft = "auto";
+			msgTable.style.marginRight = "auto";
+		}		
+		if (this.styler != null && this.styler.showInfor3)
+		{			
+			this.setButtons([
+			     {id: "update", name: "update", text: this.getPhrase("UPDATE"), click: null},
+			     {id: "cancel", name: "cancel", text: this.getPhrase("CANCEL"), click: null}
+			]);					
+		}
+		else
+		{
+			wnd.accessKeyToBtn = new Array();
+		}		
+	};
+	requestDialog.oFrameID = "requestiframe";
+	requestDialog.allowPopups = false;
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	requestDialog.minWidth = winWidth - 150;
+	if (requestDialog.minWidth > 600)
+		requestDialog.minWidth = 600;
+	requestDialog.minHeight = winHeight - 150;
+	if (requestDialog.minHeight > 245)
+		requestDialog.minHeight = 245;	
+	var strHtml = '<div id="updRequestSection" class="dataDiv" style="width:'+requestDialog.minWidth+'px;height:'+requestDialog.minHeight+'px;overflow:auto" tabindex="0">'+getUpdateRequestHTML(request, window)+'</div>';
+	var actionTaken = function(msgWin)
+	{
+		return updateRequestActionTaken(msgWin, request);	
+	};
+	var actionReturn = requestDialog.messageBox(strHtml, "okcancel", "none", window, false, "", actionTaken, null, false, getSeaPhrase("UPDATE_REQUEST","SEA"));
+	if (typeof(actionReturn) != "undefined" && actionReturn != null)
+		actionTaken(actionReturn);
+}
+
+function sendPTOEmployeeRequestEmail(action, newRequests, callback)
+{
+	if (emssObjInstance.emssObj.processFlowsEnabled)
+	{	
+		// trigger processflow to email manager that new requests have been submitted
+		var nextFunc = function()
+		{
+			var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+			pfObj.setEncoding(authUser.encoding);
+			pfObj.showErrors = false;	
+			var nbrRecs = (newRequests) ? newRequests.length : 0;
+			var seqNbrs = [];
+			var k = 0;
+			seqNbrs[k] = "";
+			for (var j=0; j<nbrRecs; j++)
+			{
+				var sNbr = String(Number(newRequests[j].seq_nbr));
+				var newLen = seqNbrs[k].length + sNbr.length;
+				if (seqNbrs[k] != "")
+					newLen = newLen + 1;
+				if (newLen <= 45)
+				{
+					if (seqNbrs[k] != "")
+						seqNbrs[k] += ";";
+					seqNbrs[k] += sNbr;
+				}
+				else
+				{
+					k++;
+					seqNbrs[k] = sNbr;
+				}
+			}
+			var nbrFlows = Math.ceil(seqNbrs.length / 10);
+			var seqNbrsIndex = 0;
+			for (var l=0; l<nbrFlows; l++)
+			{
+				var flowObj = pfObj.setFlow("EMSSTimeOffChg", Workflow.SERVICE_EVENT_TYPE, Workflow.ERP_SYSTEM, authUser.prodline, authUser.webuser, null, "");
+				flowObj.addVariable("company", String(Number(authUser.company)));
+				flowObj.addVariable("employee", String(Number(authUser.employee)));			
+				flowObj.addVariable("emailFormat", String(emssObjInstance.emssObj.emailFormat)+","+String(emssObjInstance.emssObj.emailAddressType));
+				flowObj.addVariable("role", "employee");
+				flowObj.addVariable("action", String(action));
+				//send up to 10 seqNbrs variables per flow
+				var m = seqNbrsIndex;
+				var n = 1;
+				while (m < (seqNbrsIndex + 10))
+				{
+					if (m < seqNbrs.length)
+						flowObj.addVariable("seqNbrs"+n, seqNbrs[m]);
+					else
+						flowObj.addVariable("seqNbrs"+n, "");
+					m++;
+					n++;
+				}
+				seqNbrsIndex += 10;
+				pfObj.triggerFlow();
+			}
+		};
+		showWaitAlert(getSeaPhrase("SENDING_EMAIL","ESS"), nextFunc);
+		if (callback)
+			callback();
+		else
+			removeWaitAlert();		
+	}
+	else
+	{	
+		if (callback)
+			callback();
+		else
+			removeWaitAlert();
+	}
+}
+
+function submitAddRequest(wnd, formElm)
+{
+	var typeElm = formElm.elements["requestType"];
+	clearRequiredField(wnd.document.getElementById("requestTypeCell"));
+	if (typeElm.selectedIndex > 0)
+	{
+		var requestType = typeElm.options[typeElm.selectedIndex].value;
+		if (requestType == "LOA")
+		{
+			var reasonCode = "";
+			clearRequiredField(formElm.elements["leaveDate"]);
+			clearRequiredField(formElm.elements["returnDate"]);
+			if (emssObjInstance.emssObj.filterSelect)
+				clearRequiredField(formElm.elements["leaveReason"]);
+			else
+				clearRequiredField(wnd.document.getElementById("leaveReasonCell"));
+			if (NonSpace(formElm.elements["leaveDate"].value) == 0)
+			{
+				setRequiredField(formElm.elements["leaveDate"], getSeaPhrase("LEAVE_DATE_REQUIRED","SEA"));
+				return false;
+			}	
+			if (NonSpace(formElm.elements["leaveDate"].value) > 0 && ValidDate(formElm.elements["leaveDate"]) == false)
+				return false;	
+			if (NonSpace(formElm.elements["returnDate"].value) > 0 && ValidDate(formElm.elements["returnDate"]) == false)
+				return false;
+			if (NonSpace(formElm.elements["returnDate"].value) > 0 && formjsDate(formatDME(formElm.elements["returnDate"].value)) < formjsDate(formatDME(formElm.elements["leaveDate"].value)))
+			{
+				setRequiredField(formElm.elements["returnDate"], getSeaPhrase("INVALID_RETURN_DATE","SEA"));
+				return false;
+			}			
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				if (NonSpace(formElm.elements["leaveReason"].value) == 0)
+				{
+					setRequiredField(formElm.elements["leaveReason"], getSeaPhrase("LEAVE_REASON_REQUIRED","SEA"));
+					return false;
+				}	
+				reasonCode = formElm.elements["leaveReason"].value;
+			}
+			else
+			{
+				if (formElm.elements["leaveReason"].selectedIndex < 1)
+				{
+					setRequiredField(wnd.document.getElementById("leaveReasonCell"), getSeaPhrase("LEAVE_REASON_REQUIRED","SEA"), formElm.elements["leaveReason"]);
+					return false;					
+				}	
+				reasonCode = formElm.elements["leaveReason"].options[formElm.elements["leaveReason"].selectedIndex].value;
+			}	
+			// submit leave of absence request
+			var checkLP51Response = function()
+			{
+				var msgNbr = tranObj.getMsgNbr();
+				var msg = tranObj.getMessage();	
+				if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+				{		
+					var refreshData = function()
+					{
+						empData.dirty = {"balances":true,"leaveOfAbsenceRequests":true};
+						showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+					};
+					removeWaitAlert();
+					var alertResponse = seaPageMessage(getSeaPhrase("TIME_OFF_REQUEST_SUBMITTED","SEA"), "", null, "info", refreshData, true, getSeaPhrase("UPDATE_COMPLETE","ESS"), true);
+					if (typeof(alertResponse) == "undefined" || alertResponse == null)
+					{	
+						if (seaPageMessage == window.alert)
+							refreshData();
+						return;
+					}	
+				}	
+				else
+				{
+					setTimeout(removeWaitAlert, 10);
+					if (msg)
+						seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+				}
+			};			
+			var callLP51 = function()
+			{
+				tranObj = new TransactionObject(window, techVersion, httpRequest, checkLP51Response);
+				tranObj.setEncoding(authUser.encoding);
+				tranObj.setParameter("_PDL", authUser.prodline);
+				tranObj.setParameter("_TKN", "LP51.1");
+				tranObj.setParameter("_LFN", "ALL");
+				tranObj.setParameter("_EVT", "ADD");
+				tranObj.setParameter("_RTN", "DATA");
+				tranObj.setParameter("_TDS", "Ignore");
+				if (techVersion == TransactionObject.TECHNOLOGY_900)
+					tranObj.setParameter("_DTLROWS", "FALSE");
+				tranObj.setParameter("LEL-COMPANY", String(Number(authUser.company)));
+				tranObj.setParameter("LEL-EMPLOYEE", String(Number(authUser.employee)));
+				tranObj.setParameter("FC", "A");
+				tranObj.setParameter("LEL-REQUEST-DATE", String(authUser.date));
+				tranObj.setParameter("LEL-BEGIN-DATE", formjsDate(formatDME(formElm.elements["leaveDate"].value)));
+				if (NonSpace(formElm.elements["returnDate"].value) > 0)
+					tranObj.setParameter("LEL-EXPECT-RETURN", formjsDate(formatDME(formElm.elements["returnDate"].value)));
+				tranObj.setParameter("LEL-LEAVE-REASON", reasonCode);
+				tranObj.setParameter("LEL-STATUS", sysRules.leave_status_code);
+				tranObj.setParameter("LEL-ACTION-CODE", sysRules.leave_action_code);
+				var cmtText = formElm.elements["leaveComments"].value;
+				if (NonSpace(cmtText) > 0)
+					tranObj.setParameter("LEL-MEMO", String(cmtText));
+				tranObj.setParameter("LEL-USER-ID", "W" + authUser.employee);
+				tranObj.callTransaction();				
+			};
+			showWaitAlert(getSeaPhrase("SUBMITTING_REQUEST","SEA"), callLP51);			
+		}	
+		else
+		{
+			clearRequiredField(formElm.elements["requestDate"]);
+			clearRequiredField(formElm.elements["startDate"]);
+			clearRequiredField(formElm.elements["endDate"]);
+			clearRequiredField(formElm.elements["duration"][0]);
+			clearRequiredField(formElm.elements["hours"]);
+			if (NonSpace(formElm.elements["requestDate"].value) == 0 && NonSpace(formElm.elements["startDate"].value) == 0 && NonSpace(formElm.elements["endDate"].value) == 0)
+			{
+				setRequiredField(formElm.elements["requestDate"], getSeaPhrase("DATE_OR_RANGE_REQUIRED","SEA"));
+				return false;
+			}
+			if (NonSpace(formElm.elements["requestDate"].value) > 0 && (NonSpace(formElm.elements["startDate"].value) > 0 || NonSpace(formElm.elements["endDate"].value) > 0))
+			{
+				setRequiredField(formElm.elements["requestDate"], getSeaPhrase("ENTER_DATE_OR_RANGE","SEA"));
+				return false;
+			}			
+			if (NonSpace(formElm.elements["requestDate"].value) > 0 && ValidDate(formElm.elements["requestDate"]) == false)
+				return false;
+			if (NonSpace(formElm.elements["startDate"].value) > 0 && ValidDate(formElm.elements["startDate"]) == false)
+				return false;	
+			if (NonSpace(formElm.elements["endDate"].value) > 0 && ValidDate(formElm.elements["endDate"]) == false)
+				return false;
+			if (NonSpace(formElm.elements["startDate"].value) > 0 && NonSpace(formElm.elements["endDate"].value) == 0)
+			{
+				setRequiredField(formElm.elements["endDate"], getSeaPhrase("END_DATE_REQUIRED","SEA"));
+				return false;				
+			}
+			if (NonSpace(formElm.elements["endDate"].value) > 0 && NonSpace(formElm.elements["startDate"].value) == 0)
+			{
+		    	setRequiredField(formElm.elements["startDate"], getSeaPhrase("START_DATE_REQUIRED","SEA"));
+				return false;				
+			}			
+			if (NonSpace(formElm.elements["startDate"].value) > 0 && NonSpace(formElm.elements["endDate"].value) > 0 && formjsDate(formatDME(formElm.elements["endDate"].value)) < formjsDate(formatDME(formElm.elements["startDate"].value)))
+			{
+				setRequiredField(formElm.elements["endDate"], getSeaPhrase("INVALID_END_DATE","SEA"));
+				return false;
+			}
+			if (formElm.elements["duration"][0].checked == false && formElm.elements["duration"][1].checked == false && formElm.elements["duration"][2].checked == false)
+			{
+				setRequiredField(formElm.elements["duration"][0], getSeaPhrase("HOURS_REQUIRED","SEA"));
+		       	return false;					
+			}
+			if (formElm.elements["duration"][2].checked == true)
+			{
+				if (NonSpace(formElm.elements["hours"].value) == 0)
+				{	
+					setRequiredField(formElm.elements["hours"], getSeaPhrase("HOURS_REQUIRED","SEA"));
+					return false;
+				}	
+				else if (ValidNumber(formElm.elements["hours"],5,2) == false)
+				{
+					setRequiredField(formElm.elements["hours"], getSeaPhrase("INVALID_NO","ESS"));
+					return false;
+				}
+				else if (Number(formElm.elements["hours"].value) < 0)
+				{
+					setRequiredField(formElm.elements["hours"], getSeaPhrase("POSITIVE_VALUE","SEA"));
+					return false;
+				}
+			}
+			var nbrHours = 0;
+			if (formElm.elements["duration"][2].checked == true)
+				nbrHours = Number(AppObject.truncateNbr(formElm.elements["hours"].value,2));
+			else if (formElm.elements["duration"][0].checked == true)
+				nbrHours = Number(AppObject.truncateNbr(sysRules.full_day_hours,2));
+			else if (formElm.elements["duration"][1].checked == true)
+				nbrHours = Number(AppObject.truncateNbr(sysRules.full_day_hours/2,2));
+			var nbrRecs = 0;
+			var singleDay;
+			var beginDate;
+			var endDate;				
+			// single day request
+			if (NonSpace(formElm.elements["requestDate"].value) > 0)
+			{
+				singleDay = true;
+				beginDate = formElm.elements["requestDate"].value;
+				endDate = formElm.elements["requestDate"].value;
+			}
+			else // date range request
+			{
+				singleDay = false;
+				beginDate = formElm.elements["startDate"].value;
+				endDate = formElm.elements["endDate"].value;					
+			}
+			var errorObj = empData.checkTimeOffRequestHoursLimit(nbrHours, beginDate, endDate);
+			if (errorObj[0])
+			{
+				var msg = getSeaPhrase("TIME_OFF_MAX_HOURS","SEA",[''+sysRules.max_hours_per_day]);
+				if (errorObj[1])
+					msg += ' '+getSeaPhrase("TIME_OFF_MAX_HOURS_DATE","SEA",[''+errorObj[1]]);
+				setRequiredField(formElm.elements["hours"], msg);
+				return false;
+			}		
+			// make sure the employee is eligible for the plan for the requested date(s)
+			var balanceRec = empData.balances[Number(requestType)];
+			var masterEndDate = (balanceRec && balanceRec.master_end_date) ? formjsDate(formatDME(balanceRec.master_end_date)) : null;
+			var requestEndDate = (endDate) ? formjsDate(formatDME(endDate)) : null;
+			if (masterEndDate && requestEndDate && masterEndDate <= requestEndDate)
+			{
+				setRequiredField(leaveDateElm, getSeaPhrase("CANNOT_REQUEST_TIME_OFF","SEA"));
+				return false;	
+			}
+			var startPTOAddRequest = function()
+			{
+				// submit time off request
+				var rngDate = null;
+				var rngEndDate = null;
+				if (!singleDay)
+				{
+					rngDate = Number(formjsDate(formatDME(formElm.elements["startDate"].value)));
+					rngEndDate = Number(formjsDate(formatDME(endDate)));				
+				}
+				var submitComplete = function()
+				{
+					var refreshData = function()
+					{						
+						empData.dirty = {"balances":true,"timeOffRequests":true};
+						showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+					};
+					removeWaitAlert();
+					var alertResponse = seaPageMessage(getSeaPhrase("TIME_OFF_REQUEST_SUBMITTED","SEA"), "", null, "info", refreshData, true, getSeaPhrase("UPDATE_COMPLETE","ESS"), true);
+					if (typeof(alertResponse) == "undefined" || alertResponse == null)
+					{	
+						if (seaPageMessage == window.alert)
+							refreshData();
+						return;
+					}					
+				};
+				var checkHS19Response = function()
+				{
+					var msgNbr = tranObj.getMsgNbr();
+					var msg = tranObj.getMessage();
+					if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+					{
+						requestDialog.closeDialog();
+						var continueUpdate = function()
+						{
+							if (!singleDay && rngDate <= rngEndDate)
+								callHS19();
+							else
+								submitComplete();
+						};						
+						// send email
+						if (sysRules.notification_required == 2)
+						{
+							var newRequests = [];
+							var i = 0;
+							var seqNbr = tranObj.getValue("LPQ-SEQ-NUMBERr" + i);
+							while (i < nbrRecs && seqNbr != null && !isNaN(Number(seqNbr)) && Number(seqNbr) != 0)
+							{
+								newRequests[newRequests.length] = {
+									"rec_type" : "PTO",
+									"seq_nbr" : Number(seqNbr)
+								};
+								i++;
+								seqNbr = tranObj.getValue("LPQ-SEQ-NUMBERr" + i);
+							}
+							if (newRequests.length > 0)
+							{
+								sendPTOEmployeeRequestEmail("add", newRequests, continueUpdate);
+								return;
+							}	
+						}
+						continueUpdate();
+					}	
+					else
+					{
+						setTimeout(removeWaitAlert, 10);
+						if (Number(msgNbr) == 108)
+						{
+							var fldNbr = tranObj.getValue("FldNbr");
+							if (fldNbr)
+							{
+								var reIdx = fldNbr.search(/r[\d]+/);
+								if (reIdx != -1)
+								{
+									var rowNbr = fldNbr.substring(reIdx+1, fldNbr.length);
+									var errDate = tranObj.getValue("LPQ-LEAVE-DATEr" + rowNbr);
+									if (errDate)
+										msg = getSeaPhrase("DUPLICATE_TIME_OFF_REQUEST","SEA",[FormatDte4(AppObject.dateInCompareFormat(errDate))]);
+								}
+							}
+						}
+						if (msg)
+							seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+					}				
+				};
+				var callHS19 = function()
+				{
+					tranObj = new TransactionObject(window, techVersion, httpRequest, checkHS19Response);
+					tranObj.setEncoding(authUser.encoding);
+					tranObj.setParameter("_PDL", authUser.prodline);
+					tranObj.setParameter("_TKN", "HS19.2");
+					tranObj.setParameter("_LFN", "ALL");
+					tranObj.setParameter("_EVT", "ADD");
+					tranObj.setParameter("_RTN", "DATA");
+					tranObj.setParameter("_TDS", "Ignore");
+					if (techVersion == TransactionObject.TECHNOLOGY_900)
+						tranObj.setParameter("_DTLROWS", "FALSE");
+					tranObj.setParameter("FC", "A");
+					tranObj.setParameter("COMPANY", String(Number(authUser.company)));
+					tranObj.setParameter("EMPLOYEE", String(Number(authUser.employee)));
+					if (balanceRec)
+					{	
+						tranObj.setParameter("TEM-PLAN", balanceRec.plan);
+						tranObj.setParameter("TEM-EMPLOYEE-GROUP", balanceRec.employee_group);
+						tranObj.setParameter("TEM-POSITION", balanceRec.position);
+					}
+					tranObj.setParameter("WEB-UPDATE", "Y");
+					tranObj.setParameter("LPQ-EMP-USER-ID", "W" + authUser.employee);
+					var cmtText = formElm.elements["leaveComments"].value;
+					// single day request
+					if (singleDay)
+					{
+						tranObj.setParameter("LINE-FCr0", "A");
+						// leave seq nbr blank so HS19.2 will automatically generate a new number
+						tranObj.setParameter("LPQ-SEQ-NUMBERr0", "");					
+						tranObj.setParameter("LPQ-HOURSr0", String(nbrHours));
+						tranObj.setParameter("LPQ-LEAVE-DATEr0", formjsDate(formatDME(formElm.elements["requestDate"].value)));
+						tranObj.setParameter("LPQ-STATUSr0", "1");
+						if (NonSpace(cmtText) > 0)
+							tranObj.setParameter("LPQ-MEMOr0", String(cmtText));
+						else
+							tranObj.setParameter("LPQ-MEMOr0", "");
+						nbrRecs = 1;	
+					}
+					else // date range request
+					{
+						var j = 0;
+						while (rngDate <= rngEndDate)
+						{
+							tranObj.setParameter("LINE-FCr"+j, "A");
+							// leave seq nbr blank so HS19.2 will automatically generate a new number
+							tranObj.setParameter("LPQ-SEQ-NUMBERr"+j, "");
+							tranObj.setParameter("LPQ-HOURSr"+j, String(nbrHours));
+							tranObj.setParameter("LPQ-LEAVE-DATEr"+j, rngDate);
+							tranObj.setParameter("LPQ-STATUSr"+j, "1");
+							if (NonSpace(cmtText) > 0)
+								tranObj.setParameter("LPQ-MEMOr"+j, String(cmtText));
+							else
+								tranObj.setParameter("LPQ-MEMOr"+j, "");
+							rngDate = Number(NextDate(rngDate));
+							j++;
+							if (j >= 40)
+								break;
+						}
+						nbrRecs = j;
+					}
+					tranObj.callTransaction();				
+				};
+				showWaitAlert(getSeaPhrase("SUBMITTING_REQUEST","SEA"), callHS19);
+			};
+			// will the employee's projected balance become negative with this request?
+			if (balanceRec && (balanceRec.negative_balance == 1 || balanceRec.negative_balance == 2))
+			{
+				var nbrDays = getDteDifference(formjsDate(formatDME(beginDate)),formjsDate(formatDME(endDate))) + 1;
+				var totalHours = nbrHours * nbrDays;					
+				if ((balanceRec.projected_balance - totalHours) < 0)
+				{					
+					if (balanceRec.negative_balance == 1)
+					{
+						var confirmNegativeBalance = function(confirmWin)
+						{
+							if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+								startPTOAddRequest();
+						};						
+						if (seaConfirm(getSeaPhrase("NEG_BAL_WARNING","SEA"), "", confirmNegativeBalance))
+							startPTOAddRequest();
+						else
+							return false;
+					}
+					else if (balanceRec.negative_balance == 2)
+					{
+						removeWaitAlert();
+						seaAlert(getSeaPhrase("NEG_BAL_ERROR","SEA"), "", null, "error");
+						return false;					
+					}	
+				}
+			}
+			startPTOAddRequest();
+			return false;
+		}	
+	}
+	else
+	{
+		setRequiredField(wnd.document.getElementById("requestTypeCell"), getSeaPhrase("SELECT_REQUEST_TYPE","SEA"), typeElm);
+		return false;
+	}	
+}
+
+function updateRequest(wnd, formElm, request)
+{
+	clearRequiredField(formElm.elements["duration"][0]);
+	clearRequiredField(formElm.elements["hours"]);
+	if (formElm.elements["duration"][0].checked == false && formElm.elements["duration"][1].checked == false && formElm.elements["duration"][2].checked == false)
+	{
+		setRequiredField(formElm.elements["duration"][0], getSeaPhrase("HOURS_REQUIRED","SEA"));
+		return false;					
+	}
+	if (formElm.elements["duration"][2].checked == true)
+	{
+		if (NonSpace(formElm.elements["hours"].value) == 0)
+		{	
+			setRequiredField(formElm.elements["hours"], getSeaPhrase("HOURS_REQUIRED","SEA"));
+			return false;
+		}	
+		else if (ValidNumber(formElm.elements["hours"],5,2) == false)
+		{
+			setRequiredField(formElm.elements["hours"], getSeaPhrase("INVALID_NO","ESS"));
+			return false;
+		}
+		else if (Number(formElm.elements["hours"].value) < 0)
+		{
+			setRequiredField(formElm.elements["hours"], getSeaPhrase("POSITIVE_VALUE","SEA"));
+			return false;
+		}
+	}
+	var nbrHours = 0;
+	if (formElm.elements["duration"][2].checked == true)
+		nbrHours = Number(AppObject.truncateNbr(formElm.elements["hours"].value,2));
+	else if (formElm.elements["duration"][0].checked == true)
+		nbrHours = Number(AppObject.truncateNbr(sysRules.full_day_hours,2));
+	else if (formElm.elements["duration"][1].checked == true)
+		nbrHours = Number(AppObject.truncateNbr(sysRules.full_day_hours/2,2));
+	var nbrRecs = 0;
+	var errorObj = empData.checkTimeOffRequestHoursLimit(nbrHours, request.leave_date, request.leave_date);
+	if (errorObj[0])
+	{
+		var msg = getSeaPhrase("TIME_OFF_MAX_HOURS","SEA",[sysRules.max_hours_per_day]);
+		if (errorObj[1])
+			msg += ' '+getSeaPhrase("TIME_OFF_MAX_HOURS_DATE","SEA",[''+errorObj[1]]);
+		setRequiredField(formElm.elements["hours"], msg);
+		return false;
+	}
+	var startPTOUpdateRequest = function()
+	{
+		var updatedRequests = [];
+		// submit time off request
+		var updateComplete = function()
+		{
+			var refreshData = function()
+			{						
+				empData.dirty = {"balances":true,"timeOffRequests":true};
+				showWaitAlert(getSeaPhrase("REFRESHING_DATA","SEA"), getEmployeeData);
+			};
+			removeWaitAlert();
+			var alertResponse = seaPageMessage(getSeaPhrase("TIME_OFF_REQUEST_SUBMITTED","SEA"), "", null, "info", refreshData, true, getSeaPhrase("UPDATE_COMPLETE","ESS"), true);
+			if (typeof(alertResponse) == "undefined" || alertResponse == null)
+			{	
+				if (seaPageMessage == window.alert)
+					refreshData();
+				return;
+			}			
+		};
+		var checkHS19Response = function()
+		{
+			var msgNbr = tranObj.getMsgNbr();
+			var msg = tranObj.getMessage();
+			if (msgNbr == TransactionObject.SUCCESS_MSGNBR)
+			{
+				requestDialog.closeDialog();						
+				// send email
+				if (sysRules.notification_required == 2)
+				{
+					if (updatedRequests.length > 0)
+					{
+						sendPTOEmployeeRequestEmail("update", updatedRequests, updateComplete);
+						return;
+					}	
+				}
+				updateComplete();
+			}	
+			else
+			{
+				setTimeout(removeWaitAlert, 10);
+				if (msg)
+					seaAlert(msg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+			}				
+		};
+		var callHS19 = function()
+		{
+			tranObj = new TransactionObject(window, techVersion, httpRequest, checkHS19Response);
+			tranObj.setEncoding(authUser.encoding);
+			tranObj.setParameter("_PDL", authUser.prodline);
+			tranObj.setParameter("_TKN", "HS19.2");
+			tranObj.setParameter("_LFN", "ALL");
+			tranObj.setParameter("_EVT", "ADD");
+			tranObj.setParameter("_RTN", "DATA");
+			tranObj.setParameter("_TDS", "Ignore");
+			if (techVersion == TransactionObject.TECHNOLOGY_900)
+				tranObj.setParameter("_DTLROWS", "FALSE");
+			tranObj.setParameter("FC", "C");
+			tranObj.setParameter("COMPANY", String(Number(authUser.company)));
+			tranObj.setParameter("EMPLOYEE", String(Number(authUser.employee)));
+			if (balanceRec)
+			{	
+				tranObj.setParameter("TEM-PLAN", balanceRec.plan);
+				tranObj.setParameter("TEM-EMPLOYEE-GROUP", balanceRec.employee_group);
+				tranObj.setParameter("TEM-POSITION", balanceRec.position);
+			}
+			tranObj.setParameter("WEB-UPDATE", "Y");
+			tranObj.setParameter("LPQ-EMP-USER-ID", "W" + authUser.employee);
+			var cmtText = formElm.elements["leaveComments"].value;
+			updatedRequests[0] = {
+				"rec_type" : "PTO",
+				"seq_nbr" : Number(request.seq_nbr)
+			};						
+			tranObj.setParameter("LINE-FCr0", "C");
+			tranObj.setParameter("LPQ-SEQ-NUMBERr0", String(Number(request.seq_nbr)));					
+			tranObj.setParameter("LPQ-HOURSr0", String(nbrHours));
+			tranObj.setParameter("LPQ-LEAVE-DATEr0", formjsDate(formatDME(request.leave_date)));
+			tranObj.setParameter("LPQ-STATUSr0", String(Number(request.status)));
+			if (NonSpace(cmtText) > 0)
+				tranObj.setParameter("LPQ-MEMOr0", String(cmtText));
+			else
+				tranObj.setParameter("LPQ-MEMOr0", "");
+			tranObj.callTransaction();
+		};
+		showWaitAlert(getSeaPhrase("SUBMITTING_REQUEST","SEA"), callHS19);
+	};	
+	var balanceRec = empData.getPlanBalance(request);
+	// will the employee's projected balance become negative with this request?
+	if (balanceRec && (balanceRec.negative_balance == 1 || balanceRec.negative_balance == 2))
+	{					
+		if ((balanceRec.projected_balance - nbrHours) < 0)
+		{					
+			if (balanceRec.negative_balance == 1)
+			{
+				var confirmNegativeBalance = function(confirmWin)
+				{
+					if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+						startPTOUpdateRequest();
+				};						
+				if (seaConfirm(getSeaPhrase("NEG_BAL_WARNING","SEA"), "", confirmNegativeBalance))
+					startPTOUpdateRequest();
+				else
+					return false;
+			}
+			else if (balanceRec.negative_balance == 2)
+			{
+				removeWaitAlert();
+				seaAlert(getSeaPhrase("NEG_BAL_ERROR","SEA"), "", null, "error");
+				return false;					
+			}	
+		}
+	}
+	startPTOUpdateRequest();
+	return false;	
+}
+
+function addRequestTypeSelected(wnd, selElm)
+{
+	var appWnd = typeof(wnd["AppObject"]) != "undefined" ? 'window' : 'parent';
+	requestDialog.allowPopups = false;
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	requestDialog.minWidth = winWidth - 150;
+	if (requestDialog.minWidth > 600)
+		requestDialog.minWidth = 600;
+	requestDialog.minHeight = winHeight - 150;
+	if (requestDialog.minHeight > 245)
+		requestDialog.minHeight = 245;
+	var toolTip;
+	var typeNotSelected = false;
+	var requestType = selElm.options[selElm.selectedIndex].value;
+	var strBuffer = [];
+	strBuffer[0] = '<div class="dataDiv" style="width:'+requestDialog.minWidth+'px;height:'+requestDialog.minHeight+'px;overflow:auto" tabindex="0">'
+	+uiRequiredFooter()+'<form name="addRequest" onsubmit="return false;"><input type="text" id="dummy" name="dummy" value="" style="display:none">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" summary="'+getSeaPhrase("TSUM_100","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_78","SEA")+'</caption>'
+	+ '<tr><th scope="col" colspan="3"></th></tr>'
+	+ getRequestTypeHTML(requestType);
+	if (selElm.selectedIndex <= 0)
+	{
+		typeNotSelected = true;
+	}	
+	else if (selElm.options[selElm.selectedIndex].value == "LOA")
+	{
+		if (!emssObjInstance.emssObj.filterSelect && empData.reasons == null)
+		{
+			showWaitAlert(getSeaPhrase("WAIT","ESS"), function(){getLeaveOfAbsenceReasons(wnd, selElm);});
+			return;
+		}	
+		// Leave Date
+		toolTip = uiDateToolTip(getSeaPhrase("LEAVE_BEGIN_DATE","SEA"));
+		strBuffer[strBuffer.length] = '<tr><th scope="row" class="fieldlabelbold" nowrap><label id="leaveDateLbl" for="leaveDate">'+getSeaPhrase("LEAVE_BEGIN_DATE","SEA")+'</label></th>'
+		+ '<td class="plaintablecell" colspan="2"><input class="inputbox" type="text" id="leaveDate" name="leaveDate" size="10" maxlength="10" onfocus="this.select()" onchange="'+appWnd+'.AppObject.validDate(this);" value="" styler="calendar" aria-labelledby="leaveDateLbl leaveDateFmt">'
+		+ '<a href="javascript:'+appWnd+'.DateSelect(\'leaveDate\')" title="'+toolTip+'" aria-label="'+toolTip+'" styler="hidden">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("leaveDateFmt")+uiRequiredIcon()+'</td><td>&nbsp;</td></tr>'
+		// Return Date
+		toolTip = uiDateToolTip(getSeaPhrase("LEAVE_ESTIMATED_RETURN","SEA"));
+		strBuffer[strBuffer.length-1] += '<tr><th scope="row" class="fieldlabelbold" nowrap><label id="returnDateLbl" for="returnDate">'+getSeaPhrase("LEAVE_ESTIMATED_RETURN","SEA")+'</label></th>'
+		+ '<td class="plaintablecell" colspan="2"><input class="inputbox" type="text" id="returnDate" name="returnDate" size="10" maxlength="10" onfocus="this.select()" onchange="'+appWnd+'.AppObject.validDate(this);" value="" styler="calendar" aria-labelledby="returnDateLbl returnDateFmt">'
+		+ '<a href="javascript:'+appWnd+'.DateSelect(\'returnDate\')" title="'+toolTip+'" aria-label="'+toolTip+'" styler="hidden">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("returnDateFmt")+'</td><td>&nbsp;</td></tr>'		
+		// Leave Reason
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap><label for="leaveReason">'+getSeaPhrase("LEAVE_REASON","SEA")+'</label></th>'
+		+ '<td id="leaveReasonCell" class="plaintablecell">';
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("leave_reason");
+			strBuffer[strBuffer.length-1] += '<input type="text" id="leaveReason" name="leaveReason" fieldnm="leave_reason" class="inputbox" size="10" maxlength="10" '
+			+ 'value="" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'leave_reason\');" styler="select" styler_click="StylerEMSS.selectControlOnClick"/>'
+			+ '<a href="javascript:;" onclick="'+appWnd+'.openDmeFieldFilter(\'leave_reason\');return false" styler="hidden" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+toolTip+'" title="'+toolTip+'">'
+			+ '</a><span class="plaintablecelldisplay" style="width:200px" id="xlt_leave_reason">&nbsp;</span>'+uiRequiredIcon()+'</td></tr>';
+		}
+		else
+			strBuffer[strBuffer.length-1] += '<select class="inputbox" id="leaveReason" name="leaveReason" styler="combobox">'+drawLeaveOfAbsenceReasonSelect()+'</select>'+uiRequiredIcon()+'</td></tr>';
+		// Comments
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap><label for="leaveComments">'+getSeaPhrase("COMMENTS","ESS")+'</label></th>'
+		+ '<td class="plaintablecell" nowrap><input type="text" class="inputbox" id="leaveComments" name="leaveComments" style="width:auto;max-width:325px" size="60" maxlength="60" onfocus="this.select()" value="" styler="textbox"></td></tr>'
+		// Approver
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap>'+getSeaPhrase("APPROVER","SEA")+'</th>'
+		+ '<td class="plaintablecelldisplay">'+((empData.approverName)?empData.approverName:'&nbsp;')+'</td></tr>';
+	}
+	else // "PTO"
+	{
+		// Date
+		var dateRangeLbl = getSeaPhrase("DATE_RANGE","SEA");
+		toolTip = uiDateToolTip(getSeaPhrase("SINGLE_DAY","SEA"));
+		strBuffer[strBuffer.length] = '<tr><th scope="row" class="fieldlabelbold" style="width:15%;vertical-align:top" nowrap>'+getSeaPhrase("DATE","ESS")+'</th>'
+		+ '<td nowrap>'
+		+ '<table border="0" cellspacing="0" cellpadding="0" role="presentation">'
+		+ '<tr><td class="fieldlabelboldleft" style="vertical-align:top"><label id="requestDateLbl" for="requestDate">'+getSeaPhrase("SINGLE_DAY","SEA")+'</label><br/>'
+		+ '<span><input class="inputbox" type="text" id="requestDate" name="requestDate" size="10" maxlength="10" onfocus="this.select()" onchange="'+appWnd+'.validatePTORequestField(window,this);" value="" styler="calendar" aria-labelledby="requestDateLbl requestDateFmt">'
+		+ '<a href="javascript:'+appWnd+'.DateSelect(\'requestDate\')" title="'+toolTip+'" aria-label="'+toolTip+'" styler="hidden">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("requestDateFmt")+uiRequiredIcon()+'</span></td>'
+		+ '<td class="fieldlabelboldleft" style="padding-left:25px">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" role="presentation">'
+		+ '<tr><td class="fieldlabelboldleft" colspan="2">'+dateRangeLbl+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("START","ESS"));
+		strBuffer[strBuffer.length-1] += '<tr><td class="fieldlabelbold"><label id="startDateLbl" for="startDate"><span class="offscreen">'+dateRangeLbl+'&nbsp;</span>'+getSeaPhrase("START","ESS")+'</label></td><td class="plaintablecell"><input class="inputbox" type="text" id="startDate" name="startDate" size="10" maxlength="10" onfocus="this.select()" onchange="'+appWnd+'.validatePTORequestField(window,this);" value="" styler="calendar" aria-labelledby="startDateLbl startDateFmt">'
+		+ '<a href="javascript:'+appWnd+'.DateSelect(\'startDate\')" title="'+toolTip+'" aria-label="'+toolTip+'" styler="hidden">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("startDateFmt")+uiRequiredIcon()+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("END","ESS"));
+		strBuffer[strBuffer.length-1] += '<tr><td class="fieldlabelbold"><label id="endDateLbl" for="endDate"><span class="offscreen">'+dateRangeLbl+'&nbsp;</span>'+getSeaPhrase("END","ESS")+'</label></td><td class="plaintablecell"><input class="inputbox" type="text" id="endDate" name="endDate" size="10" maxlength="10" onfocus="this.select()" onchange="'+appWnd+'.validatePTORequestField(window,this);" value="" styler="calendar" aria-labelledby="endDateLbl endDateFmt">'
+		+ '<a href="javascript:'+appWnd+'.DateSelect(\'endDate\')" title="'+toolTip+'" aria-label="'+toolTip+'" styler="hidden">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("endDateFmt")+uiRequiredIcon()+'</td></tr>'		
+		+ '</table></td></tr></table></td></tr>'
+		// Hours
+		+ '<tr><th scope="row" colspan="2">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%" role="presentation">'
+		+ '<tr><td class="fieldlabelbold" style="width:15%;vertical-align:top">'+uiRequiredIcon()+getSeaPhrase("HOURS","ESS")+'</td>'
+		+ '<td class="plaintablecell">'
+		+ '<div role="radiogroup" aria-labelledby="hoursLbl">'
+		+ '<span id="hoursLbl" class="offscreen">'+getSeaPhrase("HOURS","ESS")+'</span>'		
+		+ '<input type="radio" id="allDay" name="duration" value="0" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio" role="radio"><label for="allDay">'+getSeaPhrase("ALL_DAY","SEA")+'</label><br/>'
+		+ '<input type="radio" id="halfDay" name="duration" value="1" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio" role="radio"><label for="halfDay">'+getSeaPhrase("HALF_DAY","SEA")+'</label><br/>'
+		+ '<input type="radio" id="hoursEntry" name="duration" value="2" onclick="'+appWnd+'.validatePTORequestField(window,this);" styler="radio" role="radio"><label></label><label class="offscreen" for="hoursEntry">'+getSeaPhrase("ENTER_HOURS","SEA")+'</label><label class="offscreen" for="hours">'+getSeaPhrase("ENTER_HOURS","SEA")+'</label>'
+		+ '&nbsp;<input class="inputbox" type="text" id="hours" name="hours" size="5" maxlength="5" onchange="'+appWnd+'.validatePTORequestField(window,this);" onfocus="this.select()" value="" styler="textbox">&nbsp;<label>'+getSeaPhrase("HOURS","ESS")+'</label>'
+		+ '</div></td></tr></table></th></tr>'
+		// Selected Description
+		+ '<tr style="display:none"><th scope="row" id="selectedReqDesc" class="plaintablecelldisplay" colspan="2"></th></tr>'
+		// Comments
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap><label for="leaveComments">'+getSeaPhrase("COMMENTS","ESS")+'</label></th>'
+		+ '<td class="plaintablecell" style="padding-top:5px" nowrap><input type="text" class="inputbox" style="width:auto;max-width:325px" id="leaveComments" name="leaveComments" size="60" maxlength="60" value="" styler="textbox"></td></tr>'
+		// Approver
+		+ '<tr><th scope="row" class="fieldlabelbold" nowrap>'+getSeaPhrase("APPROVER","SEA")+'</th>'
+		+ '<td class="plaintablecelldisplay">'+((empData.approverName)?empData.approverName:'&nbsp;')+'</td></tr>';
+	}
+	strBuffer[strBuffer.length] = '</table></form></div>';
+	var actionReturn = requestDialog.messageBox(strBuffer.join(""), "okcancel", "none", window, false, "", addRequestActionTaken, null, false, getSeaPhrase("COMMENTS","ESS"));
+	if (typeof(actionReturn) != "undefined" && actionReturn != null)
+		addRequestActionTaken(actionReturn);
+}
+
+function validatePTORequestField(wnd, reqElm)
+{
+	// do some field validation as the user selects values; user must enter a single day or date range
+	var formElm = reqElm.form;
+	var descElm = wnd.document.getElementById("selectedReqDesc");
+	var validDates = true;
+	if (NonSpace(formElm.elements["requestDate"].value) > 0 && AppObject.validDate(formElm.elements["requestDate"]) == false)
+		validDates = false;
+	else if (NonSpace(formElm.elements["startDate"].value) > 0 && AppObject.validDate(formElm.elements["startDate"]) == false)
+		validDates = false;
+	else if (NonSpace(formElm.elements["endDate"].value) > 0 && AppObject.validDate(formElm.elements["endDate"]) == false)
+		validDates = false;	
+	else if (NonSpace(formElm.elements["requestDate"].value) > 0 && (NonSpace(formElm.elements["startDate"].value) > 0 || NonSpace(formElm.elements["endDate"].value) > 0))	
+		validDates = false;	
+	else if (NonSpace(formElm.elements["startDate"].value) > 0 && NonSpace(formElm.elements["endDate"].value) > 0 && formjsDate(formatDME(formElm.elements["endDate"].value)) < formjsDate(formatDME(formElm.elements["startDate"].value)))	
+		validDates = false;	
+	switch (reqElm.name)
+	{
+		case "duration":
+			var hoursElm = formElm.elements["hours"];
+			if (reqElm == formElm.elements["duration"][2])
+			{
+				hoursElm.removeAttribute("disabled");
+				hoursElm.removeAttribute("readonly");
+				hoursElm.disabled = false;
+				hoursElm.readOnly = false;
+			}
+			else
+			{
+				clearRequiredField(hoursElm);
+				hoursElm.setAttribute("disabled", "disabled");
+				hoursElm.setAttribute("readonly", "readonly");
+				hoursElm.disabled = true;	
+				hoursElm.readOnly = true;
+			}	
+			self.main.styleElement(hoursElm);			
+			break;
+		case "hours":
+			if (ValidateNumber(reqElm,5,2))
+			{
+				// If the user enters an hours amount and has not selected an hours radio button, select it
+				if (NonSpace(reqElm.value) > 0 && formElm.elements["duration"][0].checked == false && formElm.elements["duration"][1].checked == false && formElm.elements["duration"][2].checked == false)
+					formElm.elements["duration"][2].click();
+			}
+			break;
+		default: break;	
+	}
+	if (!validDates)
+	{
+		descElm.innerHTML = "";
+		descElm.parentNode.style.display = "none";
+		return;
+	}
+	// display user's date selections on the screen
+	var selDesc = '';
+	var nbrDays = 0;
+	// single day request
+	if (NonSpace(formElm.elements["requestDate"].value) > 0)
+	{
+		selDesc = getSeaPhrase("YOU_HAVE_SELECTED","SEA",[formElm.elements["requestDate"].value]);
+		nbrDays = 1;
+	}
+	else // date range request
+	{
+		var beginDate = formElm.elements["startDate"].value;
+		var endDate = formElm.elements["endDate"].value;
+		if (NonSpace(beginDate) > 0 || NonSpace(endDate) > 0)
+		{
+			selDesc = getSeaPhrase("YOU_HAVE_SELECTED","SEA",[beginDate+' - '+endDate]);
+			if (NonSpace(beginDate) > 0 && NonSpace(endDate) > 0)
+				nbrDays = getDteDifference(formjsDate(formatDME(beginDate)),formjsDate(formatDME(endDate))) + 1;
+		}	
+	}
+	// display the duration only when valid date(s) are selected
+	if (selDesc != '')
+	{	
+		var hoursDesc = '';
+		if (formElm.elements["duration"][2].checked == true)
+		{	
+			if (NonSpace(formElm.elements["hours"].value) > 0 && ValidNumber(formElm.elements["hours"],5,2) == true && Number(formElm.elements["hours"].value) >= 0)
+			{	
+				var nbrHours = AppObject.truncateNbr(formElm.elements["hours"].value,2);
+				hoursDesc = getSeaPhrase("NUMBER_OF_HOURS_PER_DAY","SEA",[''+nbrDays,''+nbrHours]);
+			}
+		}	
+		else if (formElm.elements["duration"][0].checked == true)
+			hoursDesc = getSeaPhrase("NUMBER_OF_FULL_DAYS","SEA",[''+nbrDays]);
+		else if (formElm.elements["duration"][1].checked == true)
+			hoursDesc = getSeaPhrase("NUMBER_OF_HALF_DAYS","SEA",[''+nbrDays]);
+		selDesc += ' '+hoursDesc;
+	}
+	if (selDesc != '')
+	{ 
+		descElm.innerHTML = selDesc;
+		descElm.parentNode.style.display = "";
+	}
+	else
+	{
+		descElm.innerHTML = "";
+		descElm.parentNode.style.display = "none";
+	}	
+}
+
+function drawLeaveOfAbsenceReasonSelect(selectedValue)
+{
+	var strBuffer = [];
+	strBuffer[0] = '<option value=""></option>';
+	var len = empData.reasons.length;
+	for (var i=0; i<len; i++)
+	{
+		strBuffer[i+1] = '<option value="'+empData.reasons[i].code+'"';
+		if (selectedValue && selectedValue == empData.reasons[i].code)
+			strBuffer[i+1] += ' selected="selected"';
+		strBuffer[i+1] += '>'+empData.reasons[i].description+'</option>';
+	}
+	return strBuffer.join("");	
+}
+
+function drawRequestTypeSelect(selectedValue)
+{
+	var strBuffer = [];
+	empData.requestTypes = [];
+	strBuffer[0] = '<option value=""></option>';
+	if (sysRules.request_type == 2 || sysRules.request_type == 3)
+	{
+		empData.requestTypes[0] = {"value":"LOA","desc":getSeaPhrase("LEAVE_OF_ABSENCE","SEA")};
+		strBuffer[0] += '<option value="LOA"';
+		if (selectedValue && selectedValue == "LOA")
+			strBuffer[0] += ' selected="selected"';
+		strBuffer[0] += '>'+getSeaPhrase("LEAVE_OF_ABSENCE","SEA")+'</option>';
+	}	
+	var len = empData.balances.length;
+	for (var i=0; i<len; i++)
+	{
+		var balanceRec = empData.balances[i];
+		strBuffer[i+1] = '<option value="'+i+'"';
+		if (selectedValue && selectedValue == i)
+			strBuffer[i+1] += ' selected="selected"';
+		strBuffer[i+1] += '>'+balanceRec.desc+' - '+AppObject.truncateNbr(balanceRec.available_balance,2)+'</option>';
+		empData.requestTypes[i+1] = {"value":String(i),"desc":balanceRec.desc+' - '+AppObject.truncateNbr(balanceRec.available_balance,2)};
+	}
+	return strBuffer.join("");
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "leave_reason": // leave of absence reasons
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("LEAVE_REASON","SEA"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes", 
+				"pcoset1", 
+				"code;description", 
+				"LR", 
+				"active", 
+				"web-available>1", 
+				dmeFilter.getNbrRecords(), 
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "leave_reason": // leave of absence reasons
+		var selStr = dmeFilter.getSelectStr();
+		if (selStr)
+			selStr += "&web-available>1";
+		else
+			selStr = "web-available>1";		
+		filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes", 
+				"pcoset1", 
+				"code;description", 
+				"LR", 
+				"active", 
+				selStr, 
+				dmeFilter.getNbrRecords(), 
+				null);
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selForm = null;
+	if (typeof("requestDialog") != "undefined" && requestDialog.pinned && requestDialog.oFrame)
+		selForm = window.frames[requestDialog.oFrameID].document.forms["addRequest"];
+	else
+		selForm = window.document.forms["addRequest"];
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = null;
+	if (!selForm)
+		return;
+	switch (fieldNm.toLowerCase())
+	{
+		case "leave_reason": // leave of absence reasons
+			formElm = selForm.elements["leaveReason"]; 
+			formElm.value = selRec.code;
+			try { self.main.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description; } catch(e) {}
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	fld = [null, null, null];
+	try
+	{
+		var selWnd = null;
+		var selForm = null;
+		if (typeof("requestDialog") != "undefined" && requestDialog.pinned && requestDialog.oFrame)
+		{
+			selWnd = window.frames[requestDialog.oFrameID];
+			selForm = selWnd.document.forms["addRequest"];
+		}
+		else
+		{
+			selWnd = window;
+			selForm = selWnd.document.forms["addRequest"];		
+		}
+		if (selForm)
+		{
+			var formElm = null;
+			var elmDesc = null;			
+			switch (fieldNm.toLowerCase())
+			{
+				case "leave_reason": // leave of absence reasons
+					formElm = selForm.elements["leaveReason"];
+					elmDesc = getSeaPhrase("LEAVE_REASON","SEA");
+					break;
+				default: break;
+			}
+			fld = [selWnd, formElm, elmDesc];
+		}
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	var selForm = null;
+	if (typeof("requestDialog") != "undefined" && requestDialog.pinned && requestDialog.oFrame)
+		selForm = window.frames[requestDialog.oFrameID].document.forms["addRequest"];
+	else
+		selForm = window.document.forms["addRequest"];
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = null;
+	if (!selForm)
+		return;
+	switch (fieldNm.toLowerCase())
+	{
+		case "leave_reason": // leave of absence reasons
+			formElm = selForm.elements["leaveReason"]; 
+			formElm.value = "";
+			try { self.main.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = ""; } catch(e) {}
+			break;
+		default: break;
+	}	
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm.toLowerCase())
+	{
+		case "leave_reason": // leave of absence reasons
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("LEAVE_REASON","SEA")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 40;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 50;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 40;
+		contentHeightBorder = contentHeight;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.main.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="initTimeOff()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;position:absolute;height:464px;left:0px;top:32px;width:400px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/timeoffrequest.htm,v 1.1.2.59 2014/02/25 22:49:12 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,1251 @@
+<html>
+<head>
+<title>Contract Assignment Balances</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StringBuffer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var contractData;
+var contractAssignments;
+var allContractRecords;
+var baseContractRecords;
+var suppContractRecords;
+var contractBalances;
+var sortProperty;
+var sortDirection = "<";
+var appObj;
+
+function startContractBalances()
+{
+	authenticate("frameNm='jsreturn'|funcNm='initContractBalances()'|desiredEdit='EM'");
+}
+
+function initContractBalances()
+{
+    stylePage();
+	setTaskHeader("header", getSeaPhrase("CONTRACT_ASSIGNMENT_BALANCES","ESS"), "Employment");
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	checkLawsonApplicationVersion();
+}
+
+function checkLawsonApplicationVersion()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       		setTimeout("checkLawsonApplicationVersion()", 10);
+       		return;
+	}
+
+	if (!appObj || appObj.getLongAppVersion() == null || appObj.getLongAppVersion().toString() < "9.0.1.1")
+	{
+		removeWaitAlert();
+		seaAlert("HR Application version error", "You must be running Lawson HR application version 9.0.1 MSP#1 or newer to use the Contract Balances task.");
+		return;
+	}
+
+	loadContractBalances();
+}
+
+function loadContractBalances()
+{
+	contractData = new Array();
+
+	var dmeObj = new DMEObject(authUser.prodline, "cwcontract");
+       	dmeObj.out = "JAVASCRIPT";
+      	dmeObj.index = "cctset1";
+      	dmeObj.field = "contract-year;position;work-sched;work-schedule.description;effect-date;end-date;"
+      		+ "cont-status,xlt;cont-close-dt;cont-payout,xlt;pay-cycles;full-amt;full-units;prorated-amt;"
+      		+ "prorated-units;pay-per-amt;pay-rate;schedule;pay-grade;pay-step;fte;right;contract-right.description;"
+      		+ "group;contract-group.description;unit-type,xlt";
+      	dmeObj.key = authUser.company + "=" + authUser.employee;
+	  	dmeObj.max = "600";
+	  	dmeObj.otmmax = "1";
+	  	dmeObj.func = "populateYears()";
+		dmeObj.debug = false;
+	DME(dmeObj,"jsreturn");
+}
+
+function populateYears()
+{
+	contractData = contractData.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next)
+	{
+		self.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	var sb = new StringBuffer();
+	var len = contractData.length;
+
+	if (len == 0)
+	{
+		sb.append('<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">');
+		sb.append(getSeaPhrase("NO_CONTRACT_INFO","ESS"));
+		sb.append('</div>');
+	}
+	else
+	{
+		sb.append('<div style="padding-top:3px">');
+    	sb.append('<table border="0" cellspacing="0" cellpadding="0" width="100%">');
+		sb.append('<tr>');
+		sb.append('<td class="fieldlabelbold" style="width:50%">');
+		sb.append(getSeaPhrase("SELECT_A_YEAR","ESS"));
+		sb.append('</td>');
+		sb.append('<td class="plaintablecell" style="width:50%" nowrap>');
+		sb.append('<select class="inputbox" id="contractYear" name="contractYear" ');
+		sb.append('onmouseover="window.status=\''+getSeaPhrase("VIEW_CONTRACTS","ESS").replace(/\'/g,"\\'")+'\';return true" ');
+		sb.append('onmouseout="window.status=\'\';return true" ');
+		sb.append('onchange="contractYearSelected(this)">');
+		sb.append('<option value="">');
+
+		for (var i=0; i<len; i++)
+		{
+			if (i > 0 && Number(contractData[i].contract_year) == Number(contractData[i-1].contract_year))
+			{
+				continue;
+			}
+			sb.append('<option value="' + contractData[i].contract_year + '">');
+			sb.append(contractData[i].contract_year);
+		}
+
+		sb.append('</select>');
+		sb.append('</td>');
+		sb.append('</table>');
+		sb.append('</div>');
+	}
+
+	try
+	{
+		document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTRACT_YEARS","ESS");
+		document.getElementById("paneBody").innerHTML = sb.toString();
+		styleElement(document.getElementById("contractYear"));
+	}
+	catch(e) {}
+
+	fitToScreen();
+	document.getElementById("year").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function contractYearSelected(yearSelect)
+{
+	var selectedYear = yearSelect.options[yearSelect.selectedIndex].value;
+
+	clearContractAssignments();
+
+	if (selectedYear != "")
+	{
+		getContractAssignments(selectedYear);
+	}
+}
+
+function getContractAssignments(selectedYear)
+{
+	showWaitAlert(getSeaPhrase("RETRIEVING_RECORDS","ESS"));
+
+	self.lawheader.init(true);
+
+	var agsObj = new AGSObject(authUser.prodline,"CW65.1");
+	agsObj.event = "ADD";
+	agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=I"
+		+ "&CCT-COMPANY=" + Number(authUser.company)
+		+ "&CCT-CONTRACT-YEAR=" + Number(selectedYear)
+		+ "&CCT-EMPLOYEE=" + Number(authUser.employee);
+    agsObj.out = "JAVASCRIPT";
+    agsObj.func = "parent.storeContractAssignments()";
+    AGS(agsObj,"jsreturn");
+}
+
+function storeContractAssignments()
+{
+	self.lawheader.mergeContractRecords();
+	allContractRecords = new Array();
+	baseContractRecords = new Array();
+	suppContractRecords = new Array();
+	contractAssignments = new Array();
+
+	allContractRecords = allContractRecords.concat(self.lawheader.allContractRecords);
+	contractAssignments = contractAssignments.concat(self.lawheader.allContractRecords);
+
+	var len = allContractRecords.length;
+	var i = 0;
+	var j = len;
+	var done = false;
+
+	while (i < len && j == len)
+	{
+		if (allContractRecords[i].assignmentType != "B")
+		{
+			j = i;
+		}
+		else
+		{
+			i++;
+		}
+	}
+
+	baseContractRecords = allContractRecords.slice(0, j);
+	suppContractRecords = allContractRecords.slice(j, len);
+
+	displayContractAssignments();
+}
+
+function displayContractAssignments(onsort, property)
+{
+	var sb = new StringBuffer();
+	var len = contractAssignments.length;
+
+	if (len == 0)
+	{
+		sb.append('<div class="fieldlabelbold" style="text-align:left">'+getSeaPhrase("NO_CONTRACT_ASSIGNMENTS","ESS")+'</div>');
+	}
+	else
+	{
+		sb.append('<div id="dataDiv">');
+		sb.append('<form name="contractassignmentsform">');
+		sb.append('<table id="contractAssignmentsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">');
+		sb.append('<tr>');
+		sb.append('<th class="plaintableheaderborder" style="text-align:center;width:10%">'+getSeaPhrase("CALC_YTD","ESS")+'</th>');
+		sb.append('<th class="plaintableheaderborder" style="text-align:center;width:40%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:void(0);" onclick="parent.sortContractAssignments(\'position\')"');
+		sb.append(' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_POSITION","ESS").replace(/\'/g,"\\'")+'\';return true"');
+		sb.append(' onmouseout="window.status=\' \';return true">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</a></th>');
+		sb.append('<th class="plaintableheaderborder" style="text-align:center;width:50%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:void(0);" onclick=parent.sortContractAssignments(\'positionDescription\')');
+		sb.append(' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_1","ESS").replace(/\'/g,"\\'")+'\';return true"');
+		sb.append(' onmouseout="window.status=\' \';return true">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</a></th>');
+		sb.append('</tr>');
+
+		var contractRec;
+
+		for (var i=0; i<len; i++)
+		{
+			contractRec = contractAssignments[i];
+
+			sb.append('<tr>');
+			sb.append('<td class="plaintablecellborder" style="text-align:center" nowrap>');
+			sb.append('<input class="inputbox" type="checkbox" name="cbox" contractPosition="'+contractRec.position+'" contractType="'+contractRec.assignmentType+'"');
+			sb.append(' onmouseover="window.status=\''+getSeaPhrase("CALC_BALANCES_FOR_ASSIGNMENT","ESS").replace(/\'/g,"\\'")+'\';return true"');
+			sb.append(' onmouseout="window.status=\'\';return true">');
+			sb.append('</td>');
+			sb.append('<td class="plaintablecellborder" nowrap>');
+			sb.append('<a href="javascript:parent.getAssignmentDetails('+i+')"');
+			sb.append(' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"');
+			sb.append(' onmouseout="window.status=\'\';return true">' + ((contractRec.position)?contractRec.position:'&nbsp;')+'</a></td>');
+			sb.append('<td class="plaintablecellborder"  nowrap>');
+			if (contractRec.positionDescription)
+			{
+				sb.append('<a href="javascript:parent.getAssignmentDetails('+i+')"');
+				sb.append(' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"');
+				sb.append(' onmouseout="window.status=\'\';return true">'+contractRec.positionDescription+'</a>');
+			}
+			else
+			{
+				sb.append('&nbsp;');
+			}
+			sb.append('</td></tr>');
+		}
+
+		sb.append('</table>');
+
+		if (len > 0)
+		{
+			sb.append('<table border="0" cellspacing="0" cellpadding="0" width="100%">');
+			sb.append('<tr><td style="padding-top:5px;padding-bottom:5px">');
+			sb.append(uiButton(getSeaPhrase("CALC_YTD_BALANCES","ESS"),"parent.calcYTDBalances();return false","margin-left:5px","calc"));
+			sb.append('</td></tr>');
+			sb.append('</table>');
+		}
+
+		sb.append('</form>');
+		sb.append('</div>');
+	}
+
+	self.main.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTRACT_ASSIGNMENTS","ESS");
+	self.main.document.getElementById("paneBody").innerHTML = sb.toString();
+	self.main.stylePage();
+
+	if (onsort)
+	{
+		self.main.styleSortArrow("contractAssignmentsTbl", property, (sortDirection == "<") ? "ascending" : "descending");
+	}
+	else
+	{
+		self.main.setLayerSizes();
+	}
+
+	fitToScreen();
+	document.getElementById("main").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function refreshAssignmentBalances(contractBalances, baseContractSelected)
+{
+	var detailDoc = self.detail.document;
+
+	detailDoc.getElementById("ytdPaidWages").innerHTML = (contractBalances.ytdPaidWages != null && contractBalances.ytdPaidWages != "") ? contractBalances.ytdPaidWages : "&nbsp;";
+	if (baseContractSelected)
+	{
+		detailDoc.getElementById("ytdPaidUnits").innerHTML = (contractBalances.ytdPaidUnits != null && contractBalances.ytdPaidUnits != "") ? contractBalances.ytdPaidUnits : "&nbsp;";
+		detailDoc.getElementById("ytdDockedWages").innerHTML = (contractBalances.ytdDockedWages != null && contractBalances.ytdDockedWages != "") ? contractBalances.ytdDockedWages : "&nbsp;";
+		detailDoc.getElementById("ytdDockedUnits").innerHTML = (contractBalances.ytdDockedUnits != null && contractBalances.ytdDockedUnits != "") ? contractBalances.ytdDockedUnits : "&nbsp;";
+	}
+	detailDoc.getElementById("remainingWageBalance").innerHTML = (contractBalances.remainingWageBalance != null && contractBalances.remainingWageBalance != "") ? contractBalances.remainingWageBalance : "&nbsp;";
+	if (baseContractSelected)
+	{
+		detailDoc.getElementById("remainingUnitBalance").innerHTML = (contractBalances.remainingUnitBalance != null && contractBalances.remainingUnitBalance != "") ? contractBalances.remainingUnitBalance : "&nbsp;";
+		detailDoc.getElementById("reserveWageBalance").innerHTML = (contractBalances.reserveWageBalance != null && contractBalances.reserveWageBalance != "") ? contractBalances.reserveWageBalance : "&nbsp;";
+		detailDoc.getElementById("reserveUnitBalance").innerHTML = (contractBalances.reserveUnitBalance != null && contractBalances.reserveUnitBalance != "") ? contractBalances.reserveUnitBalance : "&nbsp;";
+		detailDoc.getElementById("unitsWorked").innerHTML = (contractBalances.unitsWorked != null && contractBalances.unitsWorked != "") ? contractBalances.unitsWorked : "&nbsp;";
+		detailDoc.getElementById("unitsRemain").innerHTML = (contractBalances.unitsRemain != null && contractBalances.unitsRemain != "") ? contractBalances.unitsRemain : "&nbsp;";
+	}
+}
+
+function displayAssignmentBalances(baseContractSelected)
+{
+	contractBalances = self.lawheader.contractBalances;
+
+	if (!self.detail.document.getElementById("ytdPaidWages")
+	|| (baseContractSelected && !self.detail.document.getElementById("ytdPaidUnits"))
+	|| (!baseContractSelected && self.detail.document.getElementById("ytdPaidUnits")))
+	{
+		var sb = new StringBuffer();
+		var paneTitle = getSeaPhrase("TOTAL_ASSIGNMENT_BALANCES","ESS");
+
+		sb.append('<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+paneTitle+'">');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("YTD_PAID_WAGES","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="ytdPaidWages">');
+		sb.append((contractBalances.ytdPaidWages != null && contractBalances.ytdPaidWages != "")?formatNumber(contractBalances.ytdPaidWages,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		if (baseContractSelected)
+		{
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("YTD_PAID_UNITS","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="ytdPaidUnits">');
+			sb.append((contractBalances.ytdPaidUnits != null && contractBalances.ytdPaidUnits != "")?formatNumber(contractBalances.ytdPaidUnits,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("YTD_DOCKED_WAGES","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="ytdDockedWages">');
+			sb.append((contractBalances.ytdDockedWages != null && contractBalances.ytdDockedWages != "")?formatNumber(contractBalances.ytdDockedWages,4):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("YTD_DOCKED_UNITS","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="ytdDockedUnits">');
+			sb.append((contractBalances.ytdDockedUnits != null && contractBalances.ytdDockedUnits != "")?formatNumber(contractBalances.ytdDockedUnits,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+		}
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("REMAINING_WAGE_BALANCE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="remainingWageBalance">');
+		sb.append((contractBalances.remainingWageBalance != null && contractBalances.remainingWageBalance != "")?formatNumber(contractBalances.remainingWageBalance,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		if (baseContractSelected)
+		{
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("REMAINING_UNIT_BALANCE","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="remainingUnitBalance">');
+			sb.append((contractBalances.remainingUnitBalance != null && contractBalances.remainingUnitBalance != "")?formatNumber(contractBalances.remainingUnitBalance,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("RESERVE_WAGE_BALANCE","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="reserveWageBalance">');
+			sb.append((contractBalances.reserveWageBalance != null && contractBalances.reserveWageBalance != "")?formatNumber(contractBalances.reserveWageBalance,4):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("RESERVE_UNIT_BALANCE","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="reserveUnitBalance">');
+			sb.append((contractBalances.reserveUnitBalance != null && contractBalances.reserveUnitBalance != "")?formatNumber(contractBalances.reserveUnitBalance,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("UNITS_WORKED","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="unitsWorked">');
+			sb.append((contractBalances.unitsWorked != null && contractBalances.unitsWorked != "")?formatNumber(contractBalances.unitsWorked,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("UNITS_REMAIN","ESS"));
+			sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="unitsRemain">');
+			sb.append((contractBalances.unitsRemain != null && contractBalances.unitsRemain != "")?formatNumber(contractBalances.unitsRemain,6):'&nbsp;');
+			sb.append('</span></td></tr>');
+			sb.append('</table>');
+		}
+		sb.append('<table border="0" cellspacing="0" cellpadding="0" width="100%">');
+		sb.append('<tr><td style="padding-top:5px;padding-bottom:5px;width:40%">&nbsp;</td>');
+		sb.append('<td style="padding-top:5px;padding-bottom:5px;width:60%">');
+		sb.append(uiButton(getSeaPhrase("CANCEL","ESS"),"parent.cancelAssignmentDetails();return false","margin-left:5px","calc"));
+		sb.append('</td></tr>');
+		sb.append('</table>');
+
+		try
+		{
+			self.detail.document.getElementById("paneHeader").innerHTML = paneTitle;
+			self.detail.document.getElementById("paneBody").innerHTML = sb.toString();
+		}
+		catch(e) {}
+
+		self.detail.stylePage();
+		self.detail.setLayerSizes();
+	}
+	else
+	{
+		refreshAssignmentBalances(contractBalances, baseContractSelected);
+	}
+
+	fitToScreen();
+	document.getElementById("detail").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function calcYTDBalances()
+{
+	var mainForm = self.main.document.forms["contractassignmentsform"];
+	var calcButtons = mainForm.elements["cbox"];
+	var selectedBasePositions = new Array();
+	var selectedSuppPositions = new Array();
+
+	if (calcButtons.length)
+	{
+		var len1 = calcButtons.length;
+		for (var i=0; i<len1; i++)
+		{
+			if (calcButtons[i].checked)
+			{
+				if (calcButtons[i].getAttribute("contractType") == "B")
+				{
+					selectedBasePositions[selectedBasePositions.length] = calcButtons[i].getAttribute("contractPosition");
+				}
+				else if (calcButtons[i].getAttribute("contractType") == "S")
+				{
+					selectedSuppPositions[selectedSuppPositions.length] = calcButtons[i].getAttribute("contractPosition");
+				}
+			}
+		}
+	}
+	else if (calcButtons.checked)
+	{
+		if (calcButtons.getAttribute("contractType") == "B")
+		{
+			selectedBasePositions[selectedBasePositions.length] = calcButtons.getAttribute("contractPosition");
+		}	
+		else if (calcButtons.getAttribute("contractType") == "S")
+		{
+			selectedSuppPositions[selectedSuppPositions.length] = calcButtons.getAttribute("contractPosition");
+		}
+	}
+
+	var len2 = selectedBasePositions.length;
+	var len3 = selectedSuppPositions.length;
+
+	if (len2 == 0 && len3 == 0)
+	{
+		seaAlert(getSeaPhrase("SELECT_AN_ASSIGNMENT","ESS"));
+	}
+	else
+	{
+		showWaitAlert(getSeaPhrase("IN_CALCULATING","ESS"));
+		deactivateTableRows("contractAssignmentsTbl", self.main, false, true);
+
+		var len4 = baseContractRecords.length;
+		var len5 = suppContractRecords.length;
+		var selectedYear = contractAssignments[0].contractYear;
+		var colNbr, rowNbr;
+		var baseContractSelected = false;
+
+		self.lawheader.init();
+
+		var agsObj = new AGSObject(authUser.prodline,"CW65.1");
+		agsObj.event = "CHG";
+		agsObj.rtn = "DATA";
+		agsObj.longNames = true;
+		agsObj.lfn = "ALL";
+		agsObj.tds = false;
+		agsObj.field = "FC=X"
+			+ "&CCT-COMPANY=" + Number(authUser.company)
+			+ "&CCT-CONTRACT-YEAR=" + Number(selectedYear)
+			+ "&CCT-EMPLOYEE=" + Number(authUser.employee);
+
+		for (var i=0; i<len4; i++)
+		{
+			for (var j=0; j<len2; j++)
+			{
+				if (selectedBasePositions[j] == baseContractRecords[i].position)
+				{
+					baseContractSelected = true;
+					colNbr = (((i+1) % 2) == 0) ? 2 : 1;
+					rowNbr = Math.ceil((i+1) / 2);
+					agsObj.field += "&BASE-SELECTION" + colNbr + rowNbr + "=X";
+				}
+			}
+		}
+
+		for (var i=0; i<len5; i++)
+		{
+			for (var j=0; j<len3; j++)
+			{
+				if (selectedSuppPositions[j] == suppContractRecords[i].position)
+				{
+					colNbr = (((i+1) % 2) == 0) ? 2 : 1;
+					rowNbr = Math.ceil((i+1) / 2);
+					agsObj.field += "&CWA-SELECTION"  + colNbr + rowNbr + "=X";
+				}
+			}
+		}
+
+		agsObj.dtlField = "BASE-SELECTION1;BASE-SELECTION2;CWA-SELECTION1;CWA-SELECTION2";
+    	agsObj.out = "JAVASCRIPT";
+    	agsObj.func = "parent.displayAssignmentBalances(" + baseContractSelected + ")";
+    	AGS(agsObj,"jsreturn");
+	}
+}
+
+function getContractRecord(recIndex)
+{
+	var contractAssignmentRec = contractAssignments[recIndex];
+
+	if (contractAssignmentRec.assignmentType == "B")
+	{
+		var dmeObj = new DMEObject(authUser.prodline, "cwcontract");
+    	   	dmeObj.out = "JAVASCRIPT";
+    	  	dmeObj.index = "cctset1";
+    	  	dmeObj.field = "contract-year;position;work-schedule.description;effect-date;end-date;"
+    	  		+ "cont-status,xlt;cont-close-dt;cont-payout,xlt;pay-cycles;full-amt;full-units;prorated-amt;"
+    	  		+ "prorated-units;pay-per-amt;pay-rate;schedule;pay-grade;pay-step;fte;right;contract-right.description;"
+    	  		+ "group;contract-group.description;unit-type,xlt";
+    	  	dmeObj.key = authUser.company + "=" + authUser.employee
+    	  		+ "=" + escape(contractAssignmentRec.contractYear,2)
+    	  		+ "=" + escape(contractAssignmentRec.position,2);
+		  	dmeObj.max = "1";
+		  	dmeObj.otmmax = "1";
+		  	dmeObj.func = "storeContractRecord("+recIndex+")";
+			dmeObj.debug = false;
+		DME(dmeObj,"jsreturn");
+	}
+	else if (contractAssignmentRec.assignmentType == "S")
+	{
+		var dmeObj = new DMEObject(authUser.prodline, "cwassign");
+    	   	dmeObj.out = "JAVASCRIPT";
+    	  	dmeObj.index = "cwaset1";
+    	  	dmeObj.field = "position;work-schedule.description;asg-effect-dte;asg-end-date;pay-cycles;asg-calc-type,xlt;amt-pct";
+    	  	dmeObj.key = authUser.company + "=" + authUser.employee
+    	  		+ "=" + escape(contractAssignmentRec.contractYear,2)
+    	  		+ "=" + escape(contractAssignmentRec.position,2);
+		  	dmeObj.max = "1";
+		  	dmeObj.otmmax = "1";
+		  	dmeObj.func = "storeContractRecord("+recIndex+")";
+			dmeObj.debug = false;
+		DME(dmeObj,"jsreturn");
+	}
+	else
+	{
+		displayContractRetrievalError(contractAssignmentRec);
+	}
+}
+
+function displayContractRetrievalError(contractAssignmentRec)
+{
+	seaAlert("Error retrieving contract record " + contractAssignmentRec.position + " for contract year " + contractAssignmentRec.contractYear + ".");
+}
+
+function storeContractRecord(recIndex)
+{
+	var contractAssignmentRec = contractAssignments[recIndex];
+	var contractDataRec = (self.jsreturn.record.length > 0) ? self.jsreturn.record[0] : null;
+
+	if (contractDataRec == null)
+	{
+		displayContractRetrievalError(contractAssignmentRec);
+	}
+	else
+	{
+		renderAssignmentDetails(contractAssignmentRec, contractDataRec);
+	}
+}
+
+function getAssignmentDetails(recIndex)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	activateTableRow("contractAssignmentsTbl", recIndex, self.main);
+
+	var contractAssignmentRec = contractAssignments[recIndex];
+
+	if (contractAssignmentRec.assignmentType == "B")
+	{
+		var contractDataRec = null;
+		var len = contractData.length;
+
+		for (var i=0; i<len; i++)
+		{
+			if (contractData[i].contract_year == contractAssignmentRec.contractYear
+			&& contractData[i].position == contractAssignmentRec.position)
+			{
+				contractDataRec = contractData[i];
+				break;
+			}
+		}
+
+		// We did not find the contract record in the stored array; look it up.
+		if (contractDataRec == null)
+		{
+			getContractRecord(recIndex);
+		}
+		else
+		{
+			renderAssignmentDetails(contractAssignmentRec, contractDataRec);
+		}
+	}
+	else if (contractAssignmentRec.assignmentType == "S")
+	{
+		getContractRecord(recIndex);
+	}
+}
+
+function cancelAssignmentDetails()
+{
+	document.getElementById("detail").style.visibility = "hidden";
+}
+
+function renderAssignmentDetails(contractAssignmentRec, contractDataRec)
+{
+	var sb = new StringBuffer();
+	var paneTitle = "Details";
+
+	sb.append('<form name="contractassignmentsdetailform" onsubmit="return false">');
+
+	if (contractAssignmentRec.assignmentType == "B")
+	{
+		paneTitle = getSeaPhrase("CONTRACT_BASE_ASSIGNMENT_DETAILS","ESS");
+		sb.append('<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+paneTitle+'">');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("JOB_PROFILE_8","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="position">');
+		if (contractAssignmentRec.positionDescription)
+		{
+			sb.append(contractAssignmentRec.positionDescription);
+		}
+		else if (contractDataRec.position)
+		{
+			sb.append(contractDataRec.position);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("WORK_SCHEDULE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="workSchedule">');
+		if (contractDataRec.work_schedule_description)
+		{
+			sb.append(contractDataRec.work_schedule_description);
+		}
+		else if (contractAssignmentRec.workSchedule)
+		{
+			sb.append(contractAssignmentRec.workSchedule);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("HOME_ADDR_1","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap>');
+		sb.append('<input type="text" name="effectdate" value="'+contractDataRec.effect_date+'" size="10" maxlength="10" onfocus="this.select()" onkeydown="return false">');
+		sb.append('<a href="javascript:parent.openDmeFieldFilter(\'effectdate\')" style="margin-left:5px">');
+		sb.append('<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>');
+		sb.append('</td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("STOP_DATE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="stopDate">');
+		sb.append((contractDataRec.end_date != "")?contractDataRec.end_date:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("CONTRACT_STATUS","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="contractStatus">');
+		sb.append((contractDataRec.cont_status_xlt != "")?contractDataRec.cont_status_xlt:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("CLOSED_DATE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="closedDate">');
+		sb.append((contractDataRec.cont_close_dt != "")?contractDataRec.cont_close_dt:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("CONTRACT_PAY_OUT","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="contractPayOut">');
+		sb.append((contractDataRec.cont_payout_xlt != "")?contractDataRec.cont_payout_xlt:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("PAY_CYCLES","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="payCycles">');
+		sb.append((contractDataRec.pay_cycles != "")?contractDataRec.pay_cycles:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("FULL_AMOUNT","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="fullAmount">');
+		sb.append((contractDataRec.full_amt != "")?formatNumber(contractDataRec.full_amt,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("FULL_UNITS","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="fullUnits">');
+		sb.append((contractDataRec.full_units != "")?formatNumber(contractDataRec.full_units,2)+'&nbsp;'+contractDataRec.unit_type_xlt:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("SEGMENT_AMOUNT","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="segmentAmount">');
+		sb.append((contractDataRec.prorated_amt != "")?formatNumber(contractDataRec.prorated_amt,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("SEGMENT_UNITS","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="segmentUnits">');
+		sb.append((contractDataRec.prorated_units != "")?formatNumber(contractDataRec.prorated_units,2)+'&nbsp;'+contractDataRec.unit_type_xlt:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("SEGMENT_PAY_PERIOD_AMOUNT","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="segmentPayPeriodAmount">');
+		sb.append((contractDataRec.pay_per_amt != "")?formatNumber(contractDataRec.pay_per_amt,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("RATE_OF_PAY","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="rateOfPay">');
+		sb.append((contractDataRec.pay_rate != "")?formatNumber(contractDataRec.pay_rate,4):'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("SCHEDULE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="schedule">');
+		sb.append((contractDataRec.schedule != "")?contractDataRec.schedule:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("GRADE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="grade">');
+		sb.append((contractDataRec.pay_grade != "")?contractDataRec.pay_grade:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("STEP","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="step">');
+		sb.append((contractDataRec.pay_step != "" && Number(contractDataRec.pay_step) != 0)?contractDataRec.pay_step:'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="fte">');
+		sb.append((contractDataRec.fte != "")?formatNumber(contractDataRec.fte,6):'&nbsp;');
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("CONTRACT_RIGHT","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="contractRight">');
+		if (contractDataRec.contract_right_description)
+		{
+			sb.append(contractDataRec.contract_right_description);
+		}
+		else if (contractDataRec.right)
+		{
+			sb.append(contractDataRec.right);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</span></td></tr>');
+		sb.append('<tr><td class="plaintablerowheaderborder" style="text-align:right;width:40%">'+getSeaPhrase("CONTRACT_GROUP","ESS"));
+		sb.append('</td><td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="contractGroup">');
+		if (contractDataRec.contract_group_description)
+		{
+			sb.append(contractDataRec.contract_group_description);
+		}
+		else if (contractDataRec.group)
+		{
+			sb.append(contractDataRec.group);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</span></td></tr>');
+		sb.append('</table>');
+		sb.append('<table border="0" cellspacing="0" cellpadding="0" width="100%">');
+		sb.append('<tr><td style="padding-top:5px;padding-bottom:5px;width:40%">&nbsp;</td>');
+		sb.append('<td style="padding-top:5px;padding-bottom:5px;width:60%">');
+		sb.append(uiButton(getSeaPhrase("CANCEL","ESS"),"parent.cancelAssignmentDetails();return false","margin-left:5px","calc"));
+		sb.append('</td></tr>');
+		sb.append('</table>');
+	}
+	else if (contractAssignmentRec.assignmentType == "S")
+	{
+		paneTitle = getSeaPhrase("CONTRACT_SUPP_ASSIGNMENT_DETAILS","ESS");
+		sb.append('<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+paneTitle+'" styler="list">');
+		sb.append('<tr><th class="plaintableheaderborder" style="width:50%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</th>');
+		sb.append('<th class="plaintableheaderborder" style="width:50%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</th>');
+		sb.append('</tr>');
+		sb.append('<tr><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		if (contractAssignmentRec.positionDescription)
+		{
+			sb.append(contractAssignmentRec.positionDescription);
+		}
+		else if (contractDataRec.position)
+		{
+			sb.append(contractDataRec.position);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</td><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		if (contractDataRec.work_schedule_description)
+		{
+			sb.append(contractDataRec.work_schedule_description);
+		}
+		else if (contractAssignmentRec.workSchedule)
+		{
+			sb.append(contractAssignmentRec.workSchedule);
+		}
+		else
+		{
+			sb.append('&nbsp;');
+		}
+		sb.append('</tr>');
+		sb.append('</table>');
+		sb.append('<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+paneTitle+'" styler="list">');
+		sb.append('<tr><th class="plaintableheaderborder" style="width:34%">'+getSeaPhrase("BEGIN_DATE","ESS")+'</th>');
+		sb.append('<th class="plaintableheaderborder" style="width:33%">'+getSeaPhrase("END_DATE","ESS")+'</th>');
+		sb.append('<th class="plaintableheaderborder" style="width:33%">'+getSeaPhrase("PAY_CYCLES","ESS")+'</th>');
+		sb.append('</tr>');
+		sb.append('<tr><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		sb.append((contractDataRec.asg_effect_dte != "")?contractDataRec.asg_effect_dte:'&nbsp;');
+		sb.append('</td><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		sb.append((contractDataRec.asg_end_date != "")?contractDataRec.asg_end_date:'&nbsp;');
+		sb.append('</td><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		sb.append((contractDataRec.pay_cycles != "")?contractDataRec.pay_cycles:'&nbsp;');
+		sb.append('</td></tr>');
+		sb.append('</table>');
+		sb.append('<table class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" summary="'+paneTitle+'" styler="list">');
+		sb.append('<tr><th class="plaintableheaderborder" style="width:50%">'+getSeaPhrase("CALC_TYPE","ESS")+'</th>');
+		sb.append('<th class="plaintableheaderborder" style="width:50%">'+getSeaPhrase("AMOUNT","ESS")+'</th>');
+		sb.append('</tr>');
+		sb.append('<tr><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		sb.append((contractDataRec.asg_calc_type_xlt != "")?contractDataRec.asg_calc_type_xlt:'&nbsp;');
+		sb.append('</td><td class="plaintablecellborder" style="text-align:center" nowrap>');
+		sb.append((contractDataRec.amt_pct != "")?formatNumber(contractDataRec.amt_pct,4):'&nbsp;');
+		sb.append('</tr>');
+		sb.append('</table>');
+		sb.append('<table border="0" cellspacing="0" cellpadding="0" width="100%">');
+		sb.append('<tr><td style="padding-top:5px;padding-bottom:5px">');
+		sb.append(uiButton(getSeaPhrase("CANCEL","ESS"),"parent.cancelAssignmentDetails();return false","margin-left:5px","calc"));
+		sb.append('</td></tr>');
+		sb.append('</table>');
+	}
+
+	sb.append('<input type="hidden" name="contractyear" value="'+contractAssignmentRec.contractYear+'">');
+	sb.append('<input type="hidden" name="position" value="'+contractDataRec.position+'">');
+	sb.append('</form>');
+
+	if (contractAssignmentRec.positionDescription)
+	{
+		paneTitle += " - " + contractAssignmentRec.positionDescription;
+	}
+
+	try
+	{
+		self.detail.document.getElementById("paneHeader").innerHTML = paneTitle;
+		self.detail.document.getElementById("paneBody").innerHTML = sb.toString();
+	}
+	catch(e) {}
+
+	self.detail.stylePage();
+	self.detail.setLayerSizes();
+	fitToScreen();
+	document.getElementById("detail").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+
+	if (sortDirection == "<") // ascending sort
+	{
+		if (name1 < name2)
+			return -1;
+		else if (name1 > name2)
+			return 1;
+		else
+			return 0;
+	}
+	else // descending sort
+	{
+		if (name1 > name2)
+			return -1;
+		else if (name1 < name2)
+			return 1;
+		else
+			return 0;
+	}
+}
+
+function sortContractAssignments(property)
+{
+	if (sortProperty != property)
+	{
+		sortDirection = "<";
+	}
+	else
+	{
+		sortDirection = (sortDirection == "<") ? ">" : "<";
+	}
+
+	sortProperty = property;
+	contractAssignments.sort(sortByProperty);
+	displayContractAssignments(true, property);
+}
+
+function clearContractAssignments()
+{
+	document.getElementById("main").style.visibility = "hidden";
+	document.getElementById("detail").style.visibility = "hidden";
+}
+
+function refreshBaseAssignmentDetails(contractDataRec)
+{
+	var detailDoc = self.detail.document;
+
+	detailDoc.getElementById("workSchedule").innerHTML = (contractDataRec.work_schedule_description != "")
+		? contractDataRec.work_schedule_description
+		: ((contractDataRec.work_sched) ? contractDataRec.work_sched : "&nbsp;");
+	detailDoc.getElementById("stopDate").innerHTML = (contractDataRec.end_date != "") ? contractDataRec.end_date : "&nbsp;";
+	detailDoc.getElementById("contractStatus").innerHTML = (contractDataRec.cont_status_xlt != "") ? contractDataRec.cont_status_xlt : "&nbsp;";
+	detailDoc.getElementById("closedDate").innerHTML = (contractDataRec.cont_close_dt != "") ? contractDataRec.cont_close_dt : "&nbsp;";
+	detailDoc.getElementById("contractPayOut").innerHTML = (contractDataRec.cont_payout_xlt != "") ? contractDataRec.cont_payout_xlt : "&nbsp;";
+	detailDoc.getElementById("payCycles").innerHTML = (contractDataRec.pay_cycles != "") ? contractDataRec.pay_cycles : "&nbsp;";
+	detailDoc.getElementById("fullAmount").innerHTML = (contractDataRec.full_amt != "") ? formatNumber(contractDataRec.full_amt,4) : "&nbsp;";
+	detailDoc.getElementById("fullUnits").innerHTML = (contractDataRec.full_units != "") ? formatNumber(contractDataRec.full_units,2)+"&nbsp;"+contractDataRec.unit_type_xlt : "&nbsp;";
+	detailDoc.getElementById("segmentAmount").innerHTML = (contractDataRec.prorated_amt != "") ? formatNumber(contractDataRec.prorated_amt,4) : "&nbsp;";
+	detailDoc.getElementById("segmentUnits").innerHTML = (contractDataRec.prorated_units != "") ? formatNumber(contractDataRec.prorated_units,2)+"&nbsp;"+contractDataRec.unit_type_xlt : "&nbsp;";
+	detailDoc.getElementById("segmentPayPeriodAmount").innerHTML = (contractDataRec.pay_per_amt != "") ? formatNumber(contractDataRec.pay_per_amt,4) : "&nbsp;";
+	detailDoc.getElementById("rateOfPay").innerHTML = (contractDataRec.pay_rate != "") ? formatNumber(contractDataRec.pay_rate,4) : "&nbsp;";
+	detailDoc.getElementById("schedule").innerHTML = (contractDataRec.schedule != "") ? contractDataRec.schedule : "&nbsp;";
+	detailDoc.getElementById("grade").innerHTML = (contractDataRec.pay_grade != "") ? contractDataRec.pay_grade : "&nbsp;";
+	detailDoc.getElementById("step").innerHTML = (contractDataRec.pay_step != "" && Number(contractDataRec.pay_step) != 0) ? contractDataRec.pay_step : "&nbsp;";
+	detailDoc.getElementById("fte").innerHTML = (contractDataRec.fte != "") ? formatNumber(contractDataRec.fte,6) : "&nbsp;";
+	detailDoc.getElementById("contractRight").innerHTML = (contractDataRec.contract_right_description != "")
+		? contractDataRec.contract_right_description
+		: ((contractDataRec.right) ? contractDataRec.right : "&nbsp;");
+	detailDoc.getElementById("contractGroup").innerHTML = (contractDataRec.contract_group_description != "")
+		? contractDataRec.contract_group_description
+		: ((contractDataRec.group) ? contractDataRec.group : "&nbsp;");
+}
+
+function formatNumber(nbr, truncateToDecimalPlace)
+{
+	if (!nbr)
+		return null;
+
+	var strNbr = nbr.toString().replace(/^\s+|\s+$/g, "");
+	var sign = strNbr.charAt(strNbr.length - 1);
+
+	if (sign == "+" || sign == "-")
+		strNbr = (sign == "-") ? "-" + strNbr.substring(0, strNbr.length - 1) : strNbr.substring(0, strNbr.length - 1);
+
+	if (truncateToDecimalPlace && !isNaN(parseInt(truncateToDecimalPlace, 10)) && strNbr.indexOf(".") != -1)
+	{
+		strNbr = strNbr.substring(0, strNbr.indexOf(".") + parseInt(truncateToDecimalPlace, 10) + 1);
+	}
+
+	return strNbr;
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "effectdate":
+			var contractForm = self.detail.document.forms["contractassignmentsdetailform"];
+			var contractYear = contractForm.elements["contractyear"].value;
+			var contractPosition = contractForm.elements["position"].value;
+
+			dmeFilter.addFilterField("position", 12, getSeaPhrase("JOB_PROFILE_8","ESS"), false);
+			dmeFilter.addFilterField("work-sched", 10, getSeaPhrase("WORK_SCHEDULE","ESS"), true);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cwcontract",
+				"cctset2",
+				"contract-year;position;work-schedule.description;effect-date;end-date;"
+    	  			+ "cont-status,xlt;cont-close-dt;cont-payout,xlt;pay-cycles;full-amt;full-units;prorated-amt;"
+    	  			+ "prorated-units;pay-per-amt;pay-rate;schedule;pay-grade;pay-step;fte;right;contract-right.description;"
+    	  			+ "group;contract-group.description;unit-type,xlt",
+				authUser.company + "=" + authUser.employee + "=" + contractYear + "=" + contractPosition,
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+			break;
+		default:
+			break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "effectdate":
+			var contractForm = self.detail.document.forms["contractassignmentsdetailform"];
+			var contractYear = contractForm.elements["contractyear"].value;
+			var contractPosition = contractForm.elements["position"].value;
+
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cwcontract",
+				"cctset2",
+				"contract-year;position;work-schedule.description;effect-date;end-date;"
+    	  			+ "cont-status,xlt;cont-close-dt;cont-payout,xlt;pay-cycles;full-amt;full-units;prorated-amt;"
+    	  			+ "prorated-units;pay-per-amt;pay-rate;schedule;pay-grade;pay-step;fte;right;contract-right.description;"
+    	  			+ "group;contract-group.description;unit-type,xlt",
+				authUser.company + "=" + authUser.employee + "=" + contractYear + "=" + contractPosition,
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+			break;
+		default:
+			break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var contractForm = self.detail.document.forms["contractassignmentsdetailform"];
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "effectdate":
+			contractForm.elements["effectdate"].value = selRec.effect_date;
+			refreshBaseAssignmentDetails(selRec);
+			break;
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	}
+	catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var contractForm = self.detail.document.forms["contractassignmentsdetailform"];
+	var fld = [null, null];
+	switch(fieldNm.toLowerCase())
+	{
+		case "effectdate":
+			fld = [self.detail, contractForm.elements["effectdate"]];
+			break;
+		default:
+			break;
+	}
+	return fld;
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+
+	switch(fieldNm)
+	{
+		case "effectdate":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list">'
+			selectHtml[0] += '<tr><th style="width:20%">'+getSeaPhrase("CONTRACT_YEAR","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:20%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:20%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:20%">'+getSeaPhrase("HOME_ADDR_1","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:20%">'+getSeaPhrase("STOP_DATE","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.contract_year) ? tmpObj.contract_year : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.position) ? tmpObj.position : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.work_sched) ? tmpObj.work_sched : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.effect_date) ? tmpObj.effect_date : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.end_date) ? tmpObj.end_date : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="5" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		if (typeof(parent.removeWaitAlert) != "undefined")
+		{
+			parent.removeWaitAlert();
+		}
+		removeWaitAlert();
+	} catch(e) {}
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var yearDiv = document.getElementById("year");
+	var mainFrame = document.getElementById("main");
+	var detailFrame = document.getElementById("detail");
+	var winHeight = 464;
+	var winWidth = 400;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentLeftBorderWidth = parseInt(winWidth*.49,10) - 10;
+	var contentLeftWidth = (window.styler && window.styler.showLDS) ? contentLeftBorderWidth - 10 : contentLeftBorderWidth;
+	var contentRightBorderWidth = parseInt(winWidth*.51,10) - 10;
+	var contentRightWidth = (window.styler && window.styler.showLDS) ? contentRightBorderWidth - 10 : contentRightBorderWidth;
+
+	yearDiv.style.width = parseInt(winWidth*.49,10) + "px";
+	try
+	{
+		if (!window.styler || !window.styler.showLDS || navigator.appName.indexOf("Microsoft") == -1)
+			document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		document.getElementById("paneBody").style.width = "100%";
+		document.getElementById("paneBorder").style.height = "55px";
+		document.getElementById("paneBodyBorder").style.height = "55px";
+		document.getElementById("paneBody").style.height = "55px";
+	}
+	catch(e)
+	{}
+
+	mainFrame.style.width = parseInt(winWidth*.49,10) + "px";
+	if (winHeight - 85 > 0)
+	{
+		mainFrame.style.height = (winHeight - 85) + "px";
+	}
+	try
+	{
+		if (!window.styler || !window.styler.showLDS || navigator.appName.indexOf("Microsoft") == -1)
+			self.main.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		if (winHeight - 95 > 0)
+		{
+			self.main.document.getElementById("paneBorder").style.height = (winHeight - 95) + "px";
+			self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 95) + "px";
+		}
+		if (winHeight - 120 > 0)
+		{
+			self.main.document.getElementById("paneBody").style.height = (winHeight - 120) + "px";
+		}
+		self.main.document.getElementById("paneBody").style.width = "100%";
+		self.main.document.getElementById("paneBody").style.overflow = "auto";
+		self.main.document.getElementById("depTbl").style.width = "100%";
+		self.main.document.getElementById("dataDiv").style.width = contentLeftWidth + "px";
+	}
+	catch(e)
+	{}
+
+	detailFrame.style.left = parseInt(winWidth*.49,10) + "px";
+	detailFrame.style.width = parseInt(winWidth*.51,10) + "px";
+	if (winHeight - 32 > 0)
+	{
+		detailFrame.style.height = (winHeight - 32) + "px";
+	}
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	//if (self.detail.onresize && self.detail.onresize.toString().indexOf("setLayerSizes") >= 0)
+	//{
+	//	self.detail.onresize = null;
+	//}
+	try
+	{
+		if (!window.styler || !window.styler.showLDS || navigator.appName.indexOf("Microsoft") == -1)
+			self.detail.document.getElementById("paneBorder").style.width = contentRightBorderWidth + "px";
+		self.detail.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		if (winHeight - 37 > 0)
+		{
+			self.detail.document.getElementById("paneBorder").style.height = (winHeight - 37) + "px";
+			self.detail.document.getElementById("paneBodyBorder").style.height = (winHeight - 37) + "px";
+		}
+		if (winHeight - 62 > 0)
+		{
+			self.detail.document.getElementById("paneBody").style.height = (winHeight - 62) + "px";
+		}
+		self.detail.document.getElementById("paneBody").style.width = "100%";
+		self.detail.document.getElementById("paneBody").style.overflow = "auto";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="startContractBalances()" onresize="fitToScreen()">
+	<div id="year" style="visibility:hidden;position:absolute;left:0px;width:49%;top:32px;height:55px">
+		<div id="paneBorder" class="paneborder">
+			<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+			<tr><td style="height:16px;vertical-align:top">
+				<div id="paneHeader" class="paneheader">
+				&nbsp;
+				</div>
+			</td></tr>
+			<tr><td style="vertical-align:top">
+				<div id="paneBodyBorder" class="panebodyborder" styler="groupbox">
+					<div id="paneBody" class="panebody">
+					</div>
+				</div>
+			</td></tr>
+			</table>
+		</div>
+	</div>
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:92px;height:431px;left:0px;width:49%" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="detail" name="detail" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:49%;width:51%;top:32px;height:491px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/contractslawheader.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/contractbalances.htm,v 1.1.2.10 2011/07/01 21:27:03 brentd Exp $ -->

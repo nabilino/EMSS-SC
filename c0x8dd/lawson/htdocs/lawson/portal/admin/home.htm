@@ -1,0 +1,230 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/Attic/home.htm,v 1.1.2.10.4.4.14.1.2.3 2012/08/08 12:37:31 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Portal Administration Home</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="stylesheet" href="../portal.css" type="text/css" />
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="home.js"></script>
+</head>
+
+<body style="visibility:hidden;overflow:auto;"  tabIndex="-1"
+		onload="onLoadHome()" onunload="onUnloadHome()" onkeydown="homOnKeyDown(event)">
+
+	<!-- portal brand image -->
+	<img id="ico_portal_logo" alt="Portal Logo" style="margin-left:20px;" src="../images/ico_portal_logo.gif"></img>
+
+	<!-- floating help text div -->
+	<div id="divHelpText" class="ptHomeHelpBox" style="position:absolute;top:80px;left:260px;width:240px;">
+		<div id="lblHelpText" class="ptHomeHelpText">&nbsp;</div>
+	</div>
+
+	<!-- common tasks header/table -->
+	<div id="divCommonTasks" class="ptHomeHeader" style="position:absolute;left:20px;top:50px;width:500px;">
+		<NOBR><div id="lblCommonTasks" class="ptHomeHeaderText" style="width:150px;">Common Tasks</div></NOBR>
+	</div>
+	<div id="taskDiv" style="position:absolute;left:20px;top:74px;width:260px;">
+		<table border="0" cellspacing="0" cellpadding="2" style="width:260px;margin-top:10px;margin-bottom:10px;">
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td width="170px" valign="top">
+				<button id="btnManageRoles" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('0')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Manage Roles
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnManageBookmarks" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('1')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Manage Bookmarks
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnRebuildIndex" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('2')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Rebuild Forms Index
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnSetFormPDL" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('3')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Set Custom Form PDL
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnFormDel" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('4')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Delete Custom Form
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnClearIOSCache" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('5')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Clear IOS Cache
+				</button>
+			</td>
+		</tr>
+		<tr id="knowledgeRow">
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnViewKnowledge" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('6')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Search KnowledgeBase
+				</button>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<!-- useful information header/table -->
+	<div id="divUsefulInfo" class="ptHomeInfo" style="position:absolute;left:560px;top:50px;width:200px;">
+		<div id="lblUsefulInfo" class="ptHomeInfoHeader" style="margin-top:8px;margin-left:8px;width:200px;">
+			Useful Information
+		</div>
+		<table border="0" cellspacing="0" cellpadding="2" style="width:200px;margin-left:10px;margin-top:6px;margin-bottom:20px;">
+		<tr id="adminHelpRow">
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td width="170px" valign="top">
+				<button id="btnAdminHelp" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="portalWnd.portalShowAdminHelp()" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Administration Help
+				</button>
+			</td>
+		</tr>
+		<tr id="userHelpRow">
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnUserHelp" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="portalWnd.portalShowUserHelp()" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Portal User Help
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnViewHotkeys" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="portalWnd.portalShowHotkeyHelp()" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Hotkeys Help
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnPortalConfig" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('7')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Portal Configuration
+				</button>
+			</td>
+		</tr>
+		<tr>
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnIOSConfig" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('8')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					System Environment
+				</button>
+			</td>
+		</tr>
+		<tr id="ssoRow">
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnSSOConfig" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('9')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					SSO Configuration
+				</button>
+			</td>
+		</tr>
+		<tr id="debugRow">
+			<td width="12px;" valign="top" align="left">
+				<img id="calright" src="../images/calright.gif" />
+			</td>
+			<td valign="top">
+				<button id="btnViewDebug" class="anchorActive" style="position:relative;text-align:left;"
+					onclick="homOnButtonClick('10')" onfocus="homOnButtonFocus(this)" onblur="homOnButtonBlur(this)"
+					onmouseover="homOnButtonMouseOver(this)" onmouseout="homOnButtonMouseOut(this)">
+					Debug Information
+				</button>
+			</td>
+		</tr>
+		</table>
+	</div>
+</body>
+</html>

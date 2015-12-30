@@ -1,0 +1,58 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/dialogs/msgdlg.htm,v 1.2.20.1.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Lawson Portal Message</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="msgdlg.js"></script>
+<link id="LinkStyle" type="text/css" rel="stylesheet" href="dlg.css"></link>
+</head>
+
+<body onload="initMsgDlg()" onkeydown="msgOnKeyDown()" style="visibility:hidden;background-color:threedface;">
+		
+	<table id="msgTable" border="0" style="margin-top:10px;">
+	<tr>
+	<td width="60px" align="center" valign="top">
+		<img id="imgGraphic" src=""></img>
+	</td>
+	<td align="left" valign="center">
+		<label id="lblPrompt" class="dlgLabel" style="text-align:left;overflow:visible;"></label>
+	</td>
+	</tr>
+	</table>
+	<div style="position:absolute;left:0;top:expression(document.body.clientHeight-30);">
+		<table id="btnTable" border="0">
+		<tr>
+		<td valign="top" align="center">
+			<input type="button" id="btnYes" class="dlgButton" onclick="onClick(this)" value="Yes" style="width:75px;"></input>
+			<input type="button" id="btnNo" class="dlgButton" onclick="onClick(this)" value="No" style="width:75px;"></input>
+			<input type="button" id="btnCancel" class="dlgButton" onclick="onClick(this)" value="Cancel" style="width:75px;"></input>
+			<input type="button" id="btnPrint" class="dlgButton" onclick="onClick(this)" value="Print" style="width:75px;display:none;"></input>
+		</td>
+		</tr>
+		</table>
+	</div>
+
+</body>
+</html>

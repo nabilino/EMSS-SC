@@ -1,0 +1,350 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xbnnet/besscommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var preaftflag=parent.parent.SelectedPlan[26]
+var pctamtflag=parent.parent.SelectedPlan[24]
+var payperiod=parent.parent.BenefitRules[6]
+REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+var head=""
+var bod=""
+var flexflag=0
+var empflag=0
+var compflag=0
+var payDesc=""
+var paydivisor=1
+
+if(payperiod=="P")
+{
+	payDesc=getSeaPhrase("PAY_PERIOD","BEN").toLowerCase()
+	paydivisor=parent.parent.SelectedPlan[37]
+}
+else if(payperiod=="M")
+{
+	payDesc=getSeaPhrase("MONTHLY","BEN").toLowerCase()
+	paydivisor=12
+}
+else if(payperiod=="S")
+{
+	payDesc=getSeaPhrase("SEMI_MONTHLY","BEN").toLowerCase()
+	paydivisor=24
+}
+else if(payperiod=="A")
+	payDesc=getSeaPhrase("ANNUAL","BEN").toLowerCase()
+
+function startProgram()
+{
+	var html = "";
+
+	html += '<div class="plaintablecell" style="padding:10px">'
+	html += parent.header()
+
+	if(parent.parent.SelectedPlan[24]=="A" || parent.parent.SelectedPlan[24]=="B")
+	{
+        html += '<BR><BR>'+getSeaPhrase("ELECTBEN_29","BEN")+' '+payDesc+' '+getSeaPhrase("ELECTBEN_30","BEN")
+		html += '<FORM name=contr1 onSubmit="return false"><TABLE>'
+		if(parent.parent.SelectedPlan[26]=="P" || parent.parent.SelectedPlan[26]=="B")
+			html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("PRE_TAX","BEN")+': <TD><input class="inputbox" id=pre type=text name=pre size=8>'
+		if(parent.parent.SelectedPlan[26]=="A" || parent.parent.SelectedPlan[26]=="B")
+			html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("AFTER_TAX","BEN")+': <TD><input class="inputbox" id=aft type=text name=aft size=8>'
+		html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("ELECTBEN_32","BEN")+':<TD class="plaintablecell">'+parent.parent.formatCont(parseFloat(parent.parent.SelectedPlan[12])/parseFloat(paydivisor))
+		html += '</TABLE></FORM>'
+	}
+	if(parent.parent.SelectedPlan[24]=="B")
+	{
+		html += '<BR>'+getSeaPhrase("OR","BEN")+'<BR>'
+	}
+	if(parent.parent.SelectedPlan[24]=="P" || parent.parent.SelectedPlan[24]=="B")
+	{
+		html += getSeaPhrase("ELECTBEN_35","BEN")
+		html += '<FORM name=contr onSubmit="return false"><TABLE>'
+		if(parent.parent.SelectedPlan[26]=="P" || parent.parent.SelectedPlan[26]=="B")
+			html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("PRE_TAX","BEN")+':<TD><input class="inputbox" id=pre type=text name=pre size=8>'
+		if(parent.parent.SelectedPlan[26]=="A" || parent.parent.SelectedPlan[26]=="B")
+			html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("AFTER_TAX","BEN")+':<TD><input class="inputbox" id=aft type=text name=aft size=8>'
+		html += '<TR><TD class="plaintablecellbold">'+getSeaPhrase("ELECTBEN_32","BEN")+':<TD class="plaintablecell">'+parent.parent.formatCont(parent.parent.SelectedPlan[10])+getSeaPhrase("PER","BEN")
+		html += '</TABLE></form>'
+	}
+	html += '</div>'
+	html += footer(parent.parent.SelectedPlan[26],parent.parent.SelectedPlan[28])
+
+	parent.parent.removeWaitAlert();
+	if (typeof(parent.parent.parent.removeWaitAlert) != "undefined") {
+		parent.parent.parent.removeWaitAlert();
+	}
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8]+'</span>';
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+
+function footer(precont,defaul)
+{
+	var html = "";
+	html += '<p>'
+//	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"limitCheck(this.form);return false","margin-top:10px")
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"limitCheck();return false","margin-top:10px")
+	if(parent.parent.LastDoc[parent.parent.currentdoc]!=null)
+	{
+		html += uiButton(getSeaPhrase("PREVIOUS","BEN"),"parent.parent.document.getElementById('main').src='"+parent.parent.LastDoc[parent.parent.currentdoc]+"';parent.parent.currentdoc--;return false","margin-top:10px")
+	}
+	html += uiButton(getSeaPhrase("QUIT","BEN"),"parent.parent.quitEnroll(parent.location);return false","margin-top:10px")
+	html += '</p>'
+	return html;
+}
+
+function limitCheck()
+{
+	var preamount=0
+	var aftamount=0
+	var totamount=0
+	var prepercent=0
+	var aftpercent=0
+	var totpercent=0
+	var msg=""
+	if(pctamtflag=="A" || pctamtflag=="B")
+	{
+		if((preaftflag=="P" || preaftflag=="B") && !isNaN(parseFloat(parent.parent.roundToPennies(self.document.contr1.pre.value))))
+			preamount=parseFloat(parent.parent.roundToPennies(self.document.contr1.pre.value))
+		if((preaftflag=="A" || preaftflag=="B") && !isNaN(parseFloat(parent.parent.roundToPennies(self.document.contr1.aft.value))))
+			aftamount=parseFloat(parent.parent.roundToPennies(self.document.contr1.aft.value))
+		if(isNaN(preamount) && isNaN(aftamount) && pctamtflag=="A" && preaftflag=="B")
+			msg=getSeaPhrase("ERROR_69","BEN")
+	}
+	if(pctamtflag=="P" || pctamtflag=="B")
+	{
+		if((preaftflag=="P" || preaftflag=="B") && !isNaN(parseFloat(parent.parent.roundToPennies(self.document.contr.pre.value))))
+			prepercent=parseFloat(parent.parent.roundToPennies(self.document.contr.pre.value))
+		if((preaftflag=="A" || preaftflag=="B") && !isNaN(parseFloat(parent.parent.roundToPennies(self.document.contr.aft.value))))
+			aftpercent=parseFloat(parent.parent.roundToPennies(self.document.contr.aft.value))
+		if(isNaN(prepercent) && isNaN(aftpercent) && pctamtflag=="P" && preaftflag=="B")
+			msg=getSeaPhrase("ERROR_70","BEN")
+	}
+	if(pctamtflag=="B")
+	{
+		if(((!isNaN(preamount) && preamount!=0) || (!isNaN(aftamount) && aftamount!=0))
+		&& ((!isNaN(prepercent) && prepercent!=0) || (!isNaN(aftpercent) && aftpercent!=0)))
+			msg=getSeaPhrase("ERROR_72","BEN")
+
+		if(isNaN(preamount) && isNaN(aftamount) && isNaN(prepercent) && isNaN(aftpercent))
+			msg=getSeaPhrase("ERROR_71","BEN")
+	}
+	if(isNaN(prepercent)) prepercent=0
+	if(isNaN(aftpercent)) aftpercent=0
+	if(isNaN(preamount)) preamount=0
+	if(isNaN(aftamount)) aftamount=0
+	var amounttotmax=parseFloat(parent.parent.SelectedPlan[12])/parseFloat(paydivisor)
+	var percenttotmax=parseFloat(parent.parent.SelectedPlan[10])
+	if(prepercent+aftpercent>percenttotmax)
+		msg=getSeaPhrase("ERROR_84","BEN")+" "+parent.parent.roundToPennies(percenttotmax)
+	if(preamount+aftamount>amounttotmax)
+		msg=getSeaPhrase("TOTAL","BEN")+" "+payDesc+" "+getSeaPhrase("ERROR_90","BEN")+" "+parent.parent.roundToPennies(amounttotmax)
+	if(preamount<0 || aftamount<0 || prepercent<0 || aftpercent<0)
+		msg = getSeaPhrase("ELECTBEN_36","BEN")
+	if(msg=="")
+	{
+		var increment=parseFloat(parent.parent.SelectedPlan[51])
+		parent.parent.SelectedPlan[23]=""
+		parent.parent.SelectedPlan[36]=""
+		if(preaftflag=="B")
+		{
+			if(pctamtflag=="A")
+			{
+				parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(preamount)
+				parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftamount)
+			}
+			if(pctamtflag=="P")
+			{
+				if(!isNaN(prepercent) && prepercent!=0)
+				{
+					//PT 145495
+					if(!dividesEvenly(prepercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_88","BEN")+" "+increment)
+						return
+					}
+				}
+				if(!isNaN(aftpercent) && aftpercent!=0)
+				{
+					if(!dividesEvenly(aftpercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_89","BEN")+" "+increment)
+						return
+					}
+				}
+				parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(prepercent)+getSeaPhrase("PER","BEN")
+				parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftpercent)+getSeaPhrase("PER","BEN")
+			}
+			if(pctamtflag=="B")
+			{
+				if(!isNaN(preamount) && preamount!=0)
+				{
+					parent.parent.SelectedPlan[24]="A"
+					parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(preamount)
+				}
+				if(!isNaN(aftamount) && aftamount!=0)
+				{
+					parent.parent.SelectedPlan[24]="A"
+					parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftamount)
+				}
+				if(!isNaN(prepercent) && prepercent!=0)
+				{
+					parent.parent.SelectedPlan[24]="P"
+					//PT 145495
+					if(!dividesEvenly(prepercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_88","BEN")+" "+increment)
+						return
+					}
+					parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(prepercent)+getSeaPhrase("PER","BEN")
+				}
+				if(!isNaN(aftpercent) && aftpercent!=0)
+				{
+					parent.parent.SelectedPlan[24]="P"
+					if(!dividesEvenly(aftpercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_89","BEN")+" "+increment)
+						return
+					}
+					parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftpercent)+getSeaPhrase("PER","BEN")
+				}
+			}
+			if( ((isNaN(aftpercent) || aftpercent==0) && (isNaN(prepercent) || prepercent==0)) &&
+				((!isNaN(aftamount) && aftamount!=0) || (!isNaN(preamount) && preamount!=0)) )
+			{
+				parent.parent.SelectedPlan[24]="A"
+				parent.parent.SelectedPlan[42]="A"
+			}
+			if( ((!isNaN(aftpercent) && aftpercent!=0) || (!isNaN(prepercent) && prepercent!=0))
+				&& ((isNaN(aftamount) || aftamount==0) && (isNaN(preamount) || preamount==0)) )
+			{
+				parent.parent.SelectedPlan[24]="P"
+				parent.parent.SelectedPlan[42]="P"
+			}
+			preaftflag=parent.parent.SelectedPlan[26]
+			pctamtflag=parent.parent.SelectedPlan[24]
+		}
+		if(preaftflag=="P")
+		{
+			if(pctamtflag=="A")
+				parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(preamount)
+			if(pctamtflag=="P")
+			{
+				//PT 145495
+				if(!dividesEvenly(prepercent, increment))
+				{
+					parent.parent.seaAlert(getSeaPhrase("ERROR_88","BEN")+" "+increment)
+					return
+				}
+				parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(prepercent)+getSeaPhrase("PER","BEN")
+			}
+			if(pctamtflag=="B")
+			{
+				if(!isNaN(preamount) && preamount!=0)
+				{
+					parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(preamount)
+					parent.parent.SelectedPlan[24]="A"
+					parent.parent.SelectedPlan[42]="A"
+				}
+				if(!isNaN(prepercent) && prepercent!=0)
+				{
+					//PT 145495
+					if(!dividesEvenly(prepercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_88","BEN")+" "+increment)
+						return
+					}
+					parent.parent.SelectedPlan[23]=parent.parent.roundToPennies(prepercent)+getSeaPhrase("PER","BEN")
+					parent.parent.SelectedPlan[24]="P"
+					parent.parent.SelectedPlan[42]="P"
+				}
+			}
+		}
+		if(preaftflag=="A")
+		{
+			if(pctamtflag=="A")
+				parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftamount)
+			if(pctamtflag=="P")
+			{
+				if(!dividesEvenly(aftpercent, increment))
+				{
+					parent.parent.seaAlert(getSeaPhrase("ERROR_89","BEN")+" "+increment)
+					return
+				}
+				parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftpercent)+getSeaPhrase("PER","BEN")
+			}
+			if(pctamtflag=="B")
+			{
+				if(!isNaN(aftamount) && aftamount!=0)
+				{
+					parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(preamount)
+					parent.parent.SelectedPlan[24]="A"
+					parent.parent.SelectedPlan[42]="A"
+				}
+				if(!isNaN(aftpercent) && aftpercent!=0)
+				{
+					if(!dividesEvenly(aftpercent, increment))
+					{
+						parent.parent.seaAlert(getSeaPhrase("ERROR_89","BEN")+" "+increment)
+						return
+					}
+					parent.parent.SelectedPlan[36]=parent.parent.roundToPennies(aftpercent)+getSeaPhrase("PER","BEN")
+					parent.parent.SelectedPlan[24]="P"
+					parent.parent.SelectedPlan[42]="P"
+				}
+			}
+		}
+		parent.parent.SelectedPlan[18]=""
+		parent.parent.SelectedPlan[16]=""
+		parent.parent.SelectedPlan[22]=""
+		parent.parent.SelectedPlan[42]=parent.parent.SelectedPlan[24]
+		parent.parent.SelectedPlan[41]=0
+		if((!isNaN(preamount) && preamount!=0) || (!isNaN(aftamount) && aftamount!=0))
+		{
+			if(!isNaN(preamount) && preamount!=0)
+				parent.parent.SelectedPlan[41]+=parseFloat(parent.parent.SelectedPlan[23])*parseFloat(paydivisor)
+			if(!isNaN(aftamount) && aftamount!=0)
+				parent.parent.SelectedPlan[41]+=parseFloat(parent.parent.SelectedPlan[36])*parseFloat(paydivisor)
+		}
+		else if((!isNaN(aftpercent) && aftpercent!=0) || (!isNaN(prepercent) && prepercent!=0))
+		{
+			if(!isNaN(aftpercent) && aftpercent!=0)
+				parent.parent.SelectedPlan[41]+=parseFloat(parent.parent.SelectedPlan[36])
+			if(!isNaN(prepercent) && prepercent!=0)
+				parent.parent.SelectedPlan[41]+=parseFloat(parent.parent.SelectedPlan[23])
+		}
+		if(parent.parent.SelectedPlan[41]==0)
+			parent.parent.SelectedPlan[41]=""
+		else parent.parent.SelectedPlan[41]=parent.parent.roundToPennies(parent.parent.SelectedPlan[41])
+
+		parent.setBenefit(preaftflag)
+	}
+	else
+		parent.parent.seaAlert(msg)
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_09.htm,v 1.13.2.13 2009/07/01 07:59:03 israelf Exp $ -->

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Load Enwisen Page</title>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<!--script src="/sso/sso.js"></script-->
+<script>
+//-----------------------------------------------------------------------------
+// Need to get the employee's company value from the Profile servlet.
+function lawson_init()
+{
+	authenticate("frameNm='jsreturn'|funcNm='enwisen_init()'|desiredEdit='EM'");
+}
+
+//-----------------------------------------------------------------------------
+function enwisen_init()
+{
+	var pageParams = self.location.search;
+	var enabled = isEnwisenEnabled();
+	if (pageParams && pageParams.length > 1 && enabled)
+	{		
+		var enwisenUrl = emssObj.enwisenHostUrl + pageParams;
+		//URL parameters override the config file
+		if (emssObj.enwisenHeader)
+		{
+			var header = getVarFromString("header", pageParams);
+			if (!header)
+				enwisenUrl += "&header=on";
+		}
+		var failUrl = getVarFromString("failurl", pageParams);
+		if (!failUrl)
+		{	
+			failUrl = self.location.protocol + "//" + self.location.host + "/lawson/xhrnet/xml/enwisen/enwisenPost.htm";	
+			enwisenUrl += "&failurl=" + escape(failUrl);
+		}
+		if (emssObj.debugEnwisen)
+		{
+			var alertStr = "ENWISEN.HTM PAGE URL\n\n"		
+			alertStr += "URL = " + enwisenUrl + "\n";			
+			alert(alertStr);
+		}
+		self.location.replace(enwisenUrl);
+	}
+	else
+	{
+		if (!enabled)
+			alert("Error: Access to Enwisen has not been enabled in emss_config.xml.");
+		else
+			alert("Error: Invalid Enwisen URL. No page subscription parameter found. A code, name, or alias must be defined.");
+		return;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function getVarFromString(varName, str)
+{
+	var url = unescape(str);
+	var ptr = url.toLowerCase().indexOf(varName.toLowerCase() + "=");
+	var ptr2;
+	var val1 = "";
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1, url.length);
+		var ptr2;
+		if ((ptr2 = val1.indexOf("&")) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0, ptr2);
+		}
+	}
+	return val1;
+}
+</script>
+<style>
+body 
+{
+	margin: 0px;
+	padding: 0px;
+	font-family: Helvetica,Arial,sans-serif;
+	font-size: 12px;
+	color: #666666;
+	background-color: #ffffff;
+}
+</style>
+</head>
+<body onload="lawson_init()">
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/enwisen.htm,v 1.1.2.20 2014/02/17 23:01:52 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

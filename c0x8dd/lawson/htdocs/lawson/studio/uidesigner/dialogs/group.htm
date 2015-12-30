@@ -1,0 +1,91 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/group.htm,v 1.3.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="keyhandlers.js"></SCRIPT>
+<SCRIPT language="javascript" src="group.js"></SCRIPT>
+<TITLE>Tab Properties</TITLE>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+		<phrase id="msgIdAlreadyAssigned">This tab id is already assigned.</phrase>
+		<phrase id="msgDifferentIdReq">Please provide a different id.</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="grpInit()" onkeypress="grpOnKeyPress()" style="background-color:buttonface;margin:10px;visibility:hidden">
+
+	<table border="0" width="100%" cellspacing="4">
+	<tr>
+		<td width="30%" height="20px;" align="right">
+			<label id="lblTabId" for="txtTabId" class="dsLabel">Tab Id:</label>
+	    </td>
+	   	<td>
+			<input id="txtTabId" type="textbox" class="dsTextBox"
+			style="position:relative;width:160px;border-style:inset;border-width:2px;border-color:white;">
+		</td>
+	</tr>
+	<tr>
+		<td height="20px;" align="right">
+			<label id="lblPhraseId" for="txtPhraseId" class="dsLabel">Text:</label>
+	    </td>
+	   <td>
+			<input id="txtPhrase" class="dsTextBox" 
+				style="position:relative;width:160px;border-style:inset;border-width:2px;border-color:white;">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td height="20px;" align="right">
+			<label id="lblDataSrc" for="txtDataSrc" class="dsLabel">Data Source:</label>
+	    </td>
+	   <td>
+			<input id="txtDataSrc" class="dsTextBox" disabled
+				style="position:relative;width:160px;border-style:inset;border-width:2px;border-color:white;">
+			</input>
+			<input type="button" class="dsDlgButton" id="btnDataSrc" onclick="onClickDataSrc()"
+				style="height:18px;width:18px;background-position:center;background-repeat:no-repeat;background-image:url('../../images/3dots.gif');">
+			</input>
+		</td>
+	</tr>
+	<tr><td colspan="2"><HR></td></tr>
+	</table>
+
+	<table border="0" width="100%" cellspacing="4">
+	<tr>
+		<td  width="50%" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="grpOnOK()" value="OK"></input>
+		</td>
+		<td  width="50%" align="left">
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

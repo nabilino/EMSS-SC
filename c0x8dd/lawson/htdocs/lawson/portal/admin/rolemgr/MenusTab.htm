@@ -1,0 +1,144 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/MenusTab.htm,v 1.4.2.1.4.3.14.1.2.3 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the menus tab HTML -->
+<table border="0" width="95%" cellpadding="0" cellspacing="0" style="margin:15px;">
+	<tr>
+		<td colspan="2">
+			<label id="lblPrefsList" for="selPrefsList" class="xTLabel" 
+					style="position:relative;text-align:left;">Preferences menu list:
+			</label>
+	    </td>
+	</tr>
+	<tr>
+	   <td width="300px;">
+			<select id="selPrefsList" class="xTListText" size="8" onchange="window.tabMgr.tabs['tabMenus'].onPrefsSelectionChange()"
+				style="width:280px;height:expression(this.size*17);" >
+			</select>
+		</td>
+		<td valign="top" align="left">
+			<input id="btnPrefsNew" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doNewPrefs()" value="New">
+			</input><br>
+			<input id="btnPrefsRename" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doRenamePrefs()" value="Rename">
+			</input><br>
+			<input id="btnPrefsDelete" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doDelete(event,this)" value="Delete">
+			</input><br>
+			<input id="btnPrefsUp" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].movePrefsUpDown('up')" value="Up">
+			</input><br>
+			<input id="btnPrefsDown" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+				onclick="window.tabMgr.tabs['tabMenus'].movePrefsUpDown('down')" value="Down">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<label id="lblPrefsSelected" for="txtPreferences" class="xTLabel" 
+					style="position:relative;">Preferences menu item:
+			</label>
+		</td>
+		<td>
+			<label id="lblPrefsAction" for="selPrefsAction" class="xTLabel" 
+					style="position:relative;">Action:
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="text" id="txtPreferences" class="xTTextBox" style="position:relative;width:280;"
+				onfocus="window.tabMgr.tabs['tabMenus'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabMenus'].onTextBlur(event,this)" value="">
+			</input>
+		</td>
+		<td valign="top" align="left">
+			<select id="selPrefsAction" class="xTTextBox" onchange="window.tabMgr.tabs['tabMenus'].onSelChange(event,this)">
+				<option value="navigate">Navigate
+				<option value="function">Function
+			</select>
+		</td>
+	</tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr><td colspan="2"><HR style="height:1px;color:#6699CC"></td></tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblHelpList" for="selHelpList" class="xTLabel" 
+					style="position:relative;text-align:left;">Help menu list:
+			</label>
+	    </td>
+	</tr>
+	<tr>
+	   <td width="300px;">
+			<select id="selHelpList" class="xTListText" size="8" onchange="window.tabMgr.tabs['tabMenus'].onHelpSelectionChange()"
+				style="width:280px;height:expression(this.size*17);" >
+			</select>
+		</td>
+		<td valign="top" align="left">
+			<input id="btnHelpNew" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doNewHelp()" value="New">
+			</input><br>
+			<input id="btnHelpRename" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doRenameHelp()" value="Rename">
+			</input><br>
+			<input id="btnHelpDelete" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].doDelete(event,this)" value="Delete">
+			</input><br>
+			<input id="btnHelpUp" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabMenus'].moveHelpUpDown('up')" value="Up">
+			</input><br>
+			<input id="btnHelpDown" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+				onclick="window.tabMgr.tabs['tabMenus'].moveHelpUpDown('down')" value="Down">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<label id="lblHelpSelected" for="txtHelp" class="xTLabel" 
+					style="position:relative;">Help menu item:
+			</label>
+		</td>
+		<td>
+			<label id="lblHelpAction" for="selHelpAction" class="xTLabel" 
+					style="position:relative;">Action:
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<input type="text" id="txtHelp" class="xTTextBox" style="position:relative;width:280;"
+				onfocus="window.tabMgr.tabs['tabMenus'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabMenus'].onTextBlur(event,this)" value="">
+			</input>
+		</td>
+		<td valign="top" align="left">
+			<select id="selHelpAction" class="xTTextBox" onchange="window.tabMgr.tabs['tabMenus'].onSelChange(event,this)">
+				<option value="navigate">Navigate
+				<option value="function">Function
+			</select>
+		</td>
+	</tr>
+</table>

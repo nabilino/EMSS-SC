@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/de-de/Attic/drsearch.xml,v 1.1.2.2.16.2 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="dede">
+		<phrase id="lblAdvSearch">Erweitert</phrase>
+		<phrase id="lblAnd">Und</phrase>
+		<phrase id="lblCancel">Abbrechen</phrase>
+		<phrase id="lblFilter">Filter</phrase>
+		<phrase id="lblFind">Suchen</phrase>
+		<phrase id="lblFindField">Feld suchen</phrase>
+		<phrase id="lblFindValue">Wert suchen</phrase>
+		<phrase id="lblGenSearch">Suchen</phrase>
+		<phrase id="lblLike">wie</phrase>
+		<phrase id="lblNotEqual">nicht =</phrase>
+		<phrase id="lblNotLike">nicht wie</phrase>
+		<phrase id="lblOr">Oder</phrase>
+		<phrase id="lblPerform">Durchführen</phrase>
+		<phrase id="msgQueryTooLong">Suchkriterium ist zu lang.</phrase>
+		<phrase id="msgPleaseEnterValue">Geben Sie einen Wert ein.</phrase>
+		<phrase id="msgSelectFindFilter1">Klicken Sie auf 'Suchen', um die erste Fundstelle für das Suchkriterium anzuzeigen, oder</phrase>
+		<phrase id="msgSelectFindFilter2">auf 'Filter', um alle Fundstellen für das Suchkriterium anzuzeigen.</phrase>
+	</Translate>
+</LAWXML>

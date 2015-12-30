@@ -1,0 +1,77 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/Attic/listoutput.htm,v 1.1.4.1.22.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Listbox Phrase Field</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></SCRIPT>
+<script language="javascript" src="listoutput.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgNoInputFields">No input fields defined for current view.</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="lstInit()" onkeydown="lstOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+
+	<div id="divGeneral" class="dsTabPaneActive" style="border:0px;top:10px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr>
+			<td>
+				<label id="lblOutputField" class="dsLabel" style="position:relative;text-align:left;">Phrase display field:</label>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selFields" class="dsListText" size="9"
+						style="width:240px;height:expression(this.size*24);"></select>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-60);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr><td colspan="2"><hr style="color:black;height:1px;"></td></tr>
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="lstUpdate()" 
+				style="position:relative;width:60px;" value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="lstReturn()" 
+				style="position:relative;width:60px;" value="Cancel">
+			</input>
+			<input id="btnClear" type="button" class="dsDlgButton" disabled onclick="lstClear()" 
+				style="position:relative;width:60px;" value="Clear">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

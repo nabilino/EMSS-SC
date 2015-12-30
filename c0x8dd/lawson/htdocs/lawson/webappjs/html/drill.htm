@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!-- $Header: /cvs/cvs_archive/applications/webtier/webappjs/html/drill.htm,v 1.8.2.7.2.7 2014/02/18 16:42:34 brentd Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+<html lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+	<meta charset="utf-8">
+	<title>Lawson Drill</title>
+	<link href="../css/drill.css" rel="stylesheet" type="text/css"/>
+	<script src="../common.js"></script>
+	<script src="../javascript/drill.js"></script>
+	<script src="../javascript/events.js"></script>
+	<script src="../javascript/strings.js"></script>
+	<script src="../javascript/objects/Drill.js"></script>
+	<script src="../javascript/objects/OpaqueCover.js"></script>
+	<script src="../javascript/objects/Sizer.js"></script>
+	<script src="../javascript/objects/TableBuilder.js"></script>
+	<script src="../../webappjs/javascript/objects/StylerBase.js?rss"></script>
+	<script src="../../webappjs/javascript/objects/rss/StylerRSS.js"></script>
+	<script src="/sso/sso.js"></script>	
+</head>
+
+<body onload="drill_init();" onresize="drill_resize(event);" onkeydown="drill_keydown(event);" onunload="drill_unload();" style="visibility:hidden;">
+	<!-- bar with buttons -->
+	<div id="buttonBarDiv" class="buttonBar" style="overflow:auto; width:100%;">
+		<table id="buttonBarTable" border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tr>
+			<td align="left" nowrap="true" id="bbutton">
+				<table border="0" cellpadding="0" cellspacing="2">
+				<tr>
+					<td><button styler="pushbutton" id="backBtn" class="button" onclick="goBack()" disabled="true"><!-- Back --></button></td>
+				</tr>
+				</table>
+			</td>
+
+			<td align="middle" nowrap="true" id="alpahbetTD" style="display:none">
+				<table border="0" cellpadding="0" cellspacing="0">
+				<tr>
+					<td nowrap="true">
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('0')">0</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('1')">1</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('2')">2</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('3')">3</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('4')">4</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('5')">5</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('6')">6</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('7')">7</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('8')">8</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('9')">9</button>
+					</td>
+					<td>&nbsp;&nbsp;</td>
+					<td nowrap="true">
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('A')">A</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('B')">B</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('C')">C</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('D')">D</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('E')">E</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('F')">F</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('G')">G</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('H')">H</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('I')">I</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('J')">J</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('K')">K</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('L')">L</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('M')">M</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('N')">N</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('O')">O</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('P')">P</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('Q')">Q</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('R')">R</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('S')">S</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('T')">T</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('U')">U</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('V')">V</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('W')">W</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('X')">X</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('Y')">Y</button>
+						<button class="alphabetBtn" onclick="goAlphabetVendorSearch('Z')">Z</button>
+					</td>
+				</tr>
+				</table>
+			</td>
+
+			<td align="right" nowrap="true"><!-- width="85%" -->
+				<table border="0" cellpadding="0" cellspacing="2">
+				<tr>
+					<td nowrap="true"><button styler="pushbutton" id="prevBtn" class="button" onclick="goPrev()" disabled="true"><!-- Previous --></button></td>
+					<td nowrap="true"><button styler="pushbutton" id="nextBtn" class="button" onclick="goNext()" disabled="true"><!-- Next --></button></td>
+					<td nowrap="true"><button styler="pushbutton" id="findNextBtn" class="button" onclick="goFindNext()" disabled="true"><!-- Find Next --></button></td>
+				</tr>
+				</table>
+			</td>
+		</tr>
+		</table>
+	</div>
+
+	<!-- div for table with line information/links -->
+	<div id="itemBodyDiv" class="itemBodyDrill" styler="groupbox" style="overflow:auto">
+		<table id="searchTable" style="display:none" cellpadding="0" cellspacing="0" border="0" width="100%">
+			<tr>
+				<td align="center">
+					<table>
+						<tr>
+							<td><label id="srchFieldLbl" class="fieldlabel2" for="srchField"></label></td>
+							<td>&nbsp;</td>
+							<td id="srchFieldTD"><!-- Field Name to search through --></td>
+							<td>&nbsp;</td>
+							<td>&nbsp;</td>
+							<td><label id="srchTypeLbl" class="fieldlabel2" for="srchType"></label></td>
+							<td>&nbsp;</td>
+							<td id="srchTypeTD"><!-- Type of search i.e equal to, begins with ...--></td>
+							<td>&nbsp;</td>
+							<td>&nbsp;</td>
+							<td><label id="srchValueLbl" class="fieldlabel2" for="srchValue"></label></td>
+							<td>&nbsp;</td>
+							<td id="srchValueTD"><!-- Value to search for --></td>
+							<td>&nbsp;</td>
+							<td>&nbsp;</td>
+							<td>
+								<button styler="pushbutton" id="searchBtn" class="button" onclick="goSearch()"><!-- Search --></button>
+							</td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr><td>&nbsp;</td></tr>
+		</table>
+		<div class="inforFieldSet">
+			<span id="titleSpan" class="fieldlabelbig inforFieldSetLabel"></span>
+			<p/>
+			<table id="drillTable" cellpadding="0" cellspacing="0" border="0" summary="Selection List">
+				<thead>
+					<tr id="pRow"></tr>
+				</thead>
+			</table>
+			<p/>
+		</div>
+	</div>
+</body>
+</html>

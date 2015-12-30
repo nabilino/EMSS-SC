@@ -1,0 +1,101 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/datamap.htm,v 1.3.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Data Map</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="datamap.js"></script>
+</head>
+<body onload="dmInit()" onkeydown="dmOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<div id="one" style="left:0;top:0;width:100%;height:90%;position:absolute;">
+	<table border="0" width="100%" height="100%" >
+		<colgroup><col width="45%"/><col width="10%"/><col width="45%"/></colgroup>
+		<tr height="25px">
+			<td valign="top" align="center">
+				<span id="lblObjects" class="dsLabel" style="position:relative;">Objects</span>
+				<select id="selObjects" class="dsTextBox" style="position:relative;width:100px;" onchange="dmOnSelChangeHandler(this)"></select>
+			</td>
+			<td></td>
+			<td valign="top" align="center">
+				<span id="lblElement" class="dsLabel" style="position:relative;">Element</span>
+				<input id="txtElement" type="text" class="dsTextBox" style="position:relative;width:90px;"></input>
+				<input id="btnElement" type="button" class="dsDlgButton" style="position:relative;width:30;" value="Add" onclick="dmAddElement()"></input>
+			</td>
+		</tr>
+		<tr height="150px">
+			<td valign="center" align="center">
+				<select id="lstTranFlds" class="dsListText" size="8" style="height:expression(this.size*17);width:180px;" ondblclick="dmAddToDataSrc()"></select>
+			</td>
+			<td valign="center" align="center">
+				<input id="btnLeft" type="button" class="dsDlgButton" style="width:60px;" onclick="dmAddToDataSrc()" value=">"></input>
+				<input id="btnMap" type="button" class="dsDlgButton" style="width:60px;" onclick="dmMap()" value="Map"></input>
+				<input id="btnRight" type="button" class="dsDlgButton" style="width:60px;" onclick="dmRemoveFromDataSrc()" value="<"></input>
+			</td>
+			<td valign="center" align="center">
+				<select id="lstDataSrc" class="dsListText" size="8" style="height:expression(this.size*17);width:180px;" ondblclick="dmRemoveFromDataSrc()" onchange="dmInitDefValue()"></select>
+			</td>
+		</tr>
+		<tr height="25px">
+			<td colspan="3" valign="center" align="right">
+				<span id="lblDefault" class="dsLabel" style="position:relative;">Default Value</span>
+				<input id="txtDefault" type="text" class="dsTextBox" style="position:relative;width:100px;" onblur="dmOnBlurDefault(this)"></input>
+				<input type="button" class="dsButton" id="btnDefault" onclick="dmDefaultDlg()"
+				style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="3" valign="top" align="center">
+				<div id="divMap" style="width:90%;height:100%;overflow:auto;">
+					<table id="tDmap" style="width:100%;table-layout:fixed;">
+					<colgroup><col width="10%"/><col width="90%"/></colgroup>
+						<tr>
+							<td align="center"><input id="btnDelete" type="button" class="dsDlgButton" style="position:relative;width:60px;" onclick="dmDelete()" value="Delete"></input></td>
+							<td align="center"><span id="lblMapElem" class="dsLabel" style="position:relative;">Mapped elements</span></td>
+						</tr>
+					</table>
+				</div>
+			</td>
+		</tr>
+	</table>
+	</div>
+	<div id="two" style="left:0;top:90%;width:100%;height:10%;position:absolute;border-top:1px solid black">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="dmOK()"
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" disabled onclick="dmApply()"
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+</body>
+</html>

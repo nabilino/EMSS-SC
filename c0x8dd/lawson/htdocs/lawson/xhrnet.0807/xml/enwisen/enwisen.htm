@@ -1,0 +1,150 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<!--script src="/sso/sso.js"></script-->
+<script>
+//-----------------------------------------------------------------------------
+// Need to get the employee's company value from the Profile servlet.
+function lawson_init()
+{
+	authenticate("frameNm='jsreturn'|funcNm='enwisen_init()'|desiredEdit='EM'");
+}
+
+//-----------------------------------------------------------------------------
+function enwisen_init()
+{
+	var code = "";
+	var name = "";
+	var alias = "";
+	var pageParams = unescape(self.location.search);
+		
+	if (pageParams)
+	{
+		code = getVarFromString("code", pageParams);
+		name = getVarFromString("name", pageParams);
+		alias = getVarFromString("alias", pageParams);
+	}
+
+	var enabled = isEnwisenEnabled();
+
+	if ((code != "" || name != "" || alias != "") && enabled)
+	{
+		var enwisenUrl = emssObj.enwisenHostUrl + "?";
+
+		// if an alias is defined, use that; otherwise use name or code, in that order
+		if (alias != "")
+		{
+			// handle the case where the name has not been encoded
+			alias = unescape(alias);
+			enwisenUrl += "alias=" + escape(alias,1);
+		}
+		else if (name != "")
+		{
+			// handle the case where the name has not been encoded
+			name = unescape(name);
+			enwisenUrl += "name=" + escape(name,1);
+		}
+		else if (code != "")
+		{
+			enwisenUrl += "code=" + code;
+		}
+
+		if (emssObj.enwisenHeader)
+		{
+			enwisenUrl += "&header=on";
+		}	
+
+		enwisenUrl += "&failurl=";
+
+		var failUrl = self.location.protocol + "//" + self.location.host + "/lawson/xhrnet/xml/enwisen/enwisenPost.htm";
+
+		if (emssObj.debugEnwisen)
+		{
+			var alertStr = "ENWISEN.HTM PAGE URL\n\n"
+			if (name != "")
+				alertStr += "name = " + name + "\n";
+			else if (code != "")
+				alertStr += "code = " + code + "\n";
+			else if (alias != "")
+				alertStr += "alias = " + alias + "\n";
+			if (emssObj.enwisenHeader)
+				alertStr += "header = on\n";
+			else
+				alertStr += "header = off\n";		
+			alertStr += "URL = " + enwisenUrl + failUrl + "\n";
+			alert(alertStr);
+		}
+
+		self.location.replace(enwisenUrl + escape(failUrl));
+	}
+	else
+	{
+		if (!enabled)
+		{
+			alert("ERROR: Access to Enwisen has not been enabled in emss_config.xml.");
+		}
+		else
+		{
+			alert("ERROR: Invalid Enwisen URL. Invalid page subscription values. A code, name, or alias must be defined.\n\n"
+				+ "code: " + code + "\n"
+				+ "name: " + name + "\n"
+				+ "alias: " + alias + "\n");
+		}
+		return;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function getVarFromString(varName, str)
+{
+	var url = unescape(str);
+	var ptr = url.indexOf(varName + "=");
+	var ptr2;
+	var val1 = "";
+
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1, url.length);
+		var ptr2;
+
+		if ((ptr2 = val1.indexOf("&")) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0, ptr2);
+		}
+	}
+	return val1;
+}
+</script>
+</head>
+<body onload="lawson_init()">
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/enwisen.htm,v 1.1.2.11 2012/06/29 17:12:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

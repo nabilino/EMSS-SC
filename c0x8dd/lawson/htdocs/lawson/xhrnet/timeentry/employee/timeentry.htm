@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Time Entry</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/timeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Calendar.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StringBuffer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script language="JavaScript">
+var prm = "";
+var EmpIndex = 0;
+var Reports, ReportsSaved;
+var NoSummaryFlag = false;
+var QuickPaint = false;
+var ExceptionFlag = false;
+if (window.location.search)
+{
+	prm = getVarFromString("type", window.location.search).toLowerCase();
+	EmpIndex = parseInt(getVarFromString("index", window.location.search).toLowerCase(), 10);
+	var SummaryParam = getVarFromString("summary", window.location.search).toLowerCase();
+	NoSummaryFlag = (SummaryParam == "no") ? true : false;
+}
+if (!prm)
+	prm = "period";
+if (isNaN(EmpIndex))
+	EmpIndex = 0;
+
+function OpenProgram()
+{
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+		return;
+	authenticate("frameNm='jsreturn'|funcNm='InitTimeEntry()'|sysenv=true|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+//
+// This function will get called once when the program starts. hs36 is initialized and executed
+//
+var ReportsDetail;
+function InitTimeEntry()
+{
+	stylePage();
+	self.printFm.stylePage();
+	var title = (prm == "daily") ? getSeaPhrase("DAILY_ENTRY","TE") : getSeaPhrase("PERIOD_ENTRY","TE");
+	setWinTitle(title);
+	setTaskHeader("header", title, "TimeEntry");
+	setHelpRollover();
+    document.getElementById("paneBorder").style.visibility = "visible";	
+	startProcessing(getSeaPhrase("LOADING_TE","TE"), StartTimeEntry);
+}
+
+function StartTimeEntry()
+{
+	var ReportsObj = null;
+	try
+	{
+		if ((opener && opener.Reports) || (parent && parent.Reports))
+			ReportsObj = (opener && opener.Reports) ? opener.Reports : parent.Reports;
+	}
+	catch(e) 
+	{
+		ReportsObj = null;
+	}
+	if (ReportsObj)
+	{
+		ReportsDetail = new Array();
+		for (var i=0; i<ReportsObj.Detail.length; i++)
+		{
+			ReportsDetail[i] = new ReportsDetailObject(ReportsObj.Detail[i].Employee)
+			ReportsDetail[i].Employee = ReportsObj.Detail[i].Employee
+			ReportsDetail[i].TimecardType = ReportsObj.Detail[i].TimecardType
+			ReportsDetail[i].TimecardTypeDesc = ReportsObj.Detail[i].TimecardTypeDesc;
+			ReportsDetail[i].PlanCode = ReportsObj.Detail[i].PlanCode
+			ReportsDetail[i].CommentsExist = ReportsObj.Detail[i].CommentsExist
+			ReportsDetail[i].FullName = ReportsObj.Detail[i].FullName
+			ReportsDetail[i].TotalHours = ReportsObj.Detail[i].TotalHours
+			ReportsDetail[i].Status = ReportsObj.Detail[i].Status
+			ReportsDetail[i].Email = ReportsObj.Detail[i].Email
+			ReportsDetail[i].EmailPersonal = ReportsObj.Detail[i].EmailPersonal
+			ReportsDetail[i].DatesExist = ReportsObj.Detail[i].DatesExist
+			ReportsDetail[i].PeriodStartsAt = ReportsObj.Detail[i].PeriodStartsAt;
+			ReportsDetail[i].PeriodStopsAt = ReportsObj.Detail[i].PeriodStopsAt;
+		}
+		if (ReportsObj.PeriodEnd)
+			hs36 = new HS36Object(ReportsObj.PeriodStart, ReportsObj.PeriodEnd, ReportsObj.Detail[EmpIndex].Employee, true);
+		else
+		{
+			if (prm == "period")
+				hs36 = new HS36Object(ReportsObj.PeriodStart, "", ReportsObj.Detail[EmpIndex].Employee, true);
+			else
+				hs36 = new HS36Object(ReportsObj.PeriodStart, ReportsObj.PeriodStart, ReportsObj.Detail[EmpIndex].Employee, true);
+		}
+	}
+	else if (prm == "daily")
+		hs36 = new HS36Object(authUser.date, authUser.date, authUser.employee, false);
+	else
+		hs36 = new HS36Object("", "", authUser.employee, false);
+	hs36.normal();
+	fitToScreen();
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+//
+// This function will only get called if an email needs to be sent as a result of information
+// changed on the current time card. The reject and managerchanged emails are only sent if
+// this program is being run in Manager Mode.
+//
+function SendEmail(type)
+{
+	var mailText = "";
+	var SendingTo = "";
+	var Sender = "";
+	var alertMsg = getSeaPhrase("SENDING_EMAIL","TE");
+	var TimeCardStart = TimeCard.StartDate;
+	var TimeCardStop = TimeCard.EndDate;
+	var action = "";
+	switch (type)
+	{
+		case "reject":
+			action = "reject";
+			alertMsg = getSeaPhrase("SENDING_EMPLOYEE_NOTICE","TE");
+			mailText = Reports.EmployeeName+getSeaPhrase("TIME_CARD_RETURNED_PERIOD","TE")+FormatDte3(TimeCardStart)+getSeaPhrase("TO","TE")+FormatDte3(TimeCardStop)+getSeaPhrase("DOT","TE");
+			SendingTo = Employee.Email;
+			Sender = Employee.SupervisorEmail;
+			break;
+		case "approve":
+			action = "approve";
+			alertMsg = getSeaPhrase("SENDING_EMPLOYEE_NOTICE","TE");
+			mailText = Reports.EmployeeName+getSeaPhrase("TIME_CARD_APPROVED_PERIOD","TE")+FormatDte3(TimeCardStart)+getSeaPhrase("TO","TE")+FormatDte3(TimeCardStop)+getSeaPhrase("DOT","TE");
+			SendingTo = Employee.Email;
+			Sender = Employee.SupervisorEmail;
+			break;
+		case "managerchanged":
+			action = "change";
+			alertMsg = getSeaPhrase("SENDING_EMPLOYEE_NOTICE","TE");
+			mailText = Reports.EmployeeName+getSeaPhrase("TIME_CARD_CHANGED_PERIOD","TE")+FormatDte3(TimeCardStart)+getSeaPhrase("TO","TE")+FormatDte3(TimeCardStop)+getSeaPhrase("DOT","TE");
+			SendingTo = Employee.Email;
+			Sender = Employee.SupervisorEmail;
+			break;
+		case "employeesubmitted":
+			action = "submit";
+			alertMsg = getSeaPhrase("SENDING_SUPERVISOR_APPROVAL","TE");
+			mailText = Employee.EmployeeName+getSeaPhrase("TIME_CARD_SUBMITTED_PERIOD","TE")+FormatDte3(TimeCardStart)+getSeaPhrase("TO","TE")+FormatDte3(TimeCardStop)+getSeaPhrase("DOT","TE");
+			SendingTo = Employee.SupervisorEmail;
+			Sender = Employee.Email;
+			break;
+	}
+	if (Employee.EmailPersonal == null && Employee.SupervisorEmailPersonal == null)
+		emssObjInstance.emssObj.emailAddressType = "work";
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+	{
+		if (!appObj)
+			appObj = new AppVersionObject(authUser.prodline, "HR");
+		// if you call getAppVersion() right away and the IOS object isn't set up yet,
+		// then the code will be trying to load the sso.js file, and your call for
+		// the appversion will complete before the ios version is set
+		if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+		{
+			setTimeout(function(){SendEmail.apply(this, arguments);}, 10);
+			return;
+		}		
+		if (!appObj || appObj.getAppVersion() == null || appObj.getAppVersion().toString() < "10.00.00")
+			emssObjInstance.emssObj.emailAddressType = "work";
+		else
+		{
+			switch (type)
+			{
+				case "reject":
+				case "approve":
+				case "managerchanged":
+					SendingTo = Employee.EmailPersonal;
+					Sender = Employee.SupervisorEmailPersonal;					
+					break;
+				case "employeesubmitted":
+					SendingTo = Employee.SupervisorEmailPersonal;
+					Sender = Employee.EmailPersonal;
+					break;
+			}			
+		}
+	}
+	if (typeof(Sender) == "undefined" || Sender == null || !Sender)
+		Sender = SendingTo;
+	var Subject = getSeaPhrase("TIME_ENTRY","TE");
+	if (SendingTo)
+	{
+		var nextFunc = function()
+		{
+			if (emssObjInstance.emssObj.processFlowsEnabled)
+			{
+				var techVersion = (iosHandler && iosHandler.getIOSVersionNumber() >= "09.00.00") ? ProcessFlowObject.TECHNOLOGY_900 : ProcessFlowObject.TECHNOLOGY_803;
+				var httpRequest = (typeof(SSORequest) == "function") ? SSORequest : SEARequest;
+				var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+				pfObj.setEncoding(authUser.encoding);
+				pfObj.showErrors = false;
+				var flowObj = pfObj.setFlow("EMSSTimeEntChg", Workflow.SERVICE_EVENT_TYPE, Workflow.ERP_SYSTEM,
+							authUser.prodline, authUser.webuser, null, "");
+				flowObj.addVariable("company", String(authUser.company));
+				flowObj.addVariable("employee", String(Employee.EmployeeNbr));
+				flowObj.addVariable("role", (type == "employeesubmitted") ? "employee" : "manager");
+				flowObj.addVariable("action", action);
+				flowObj.addVariable("fromDate", String(TimeCard.StartDate));
+				flowObj.addVariable("toDate", String(TimeCard.EndDate));
+				flowObj.addVariable("dailyFlag", (TimeCard.DailyFlag && TimeCard.DailyFlag != "N") ? "Y" : "N");
+				flowObj.addVariable("printFlag", (TimeCard.PrintFlag && TimeCard.PrintFlag != "N") ? "Y" : "N");
+				flowObj.addVariable("exceptionFlag", (TimeCard.ExceptionFlag && TimeCard.ExceptionFlag != "N") ? "Y" : "N");
+				flowObj.addVariable("emailFormat", String(emssObjInstance.emssObj.emailFormat)+","+String(emssObjInstance.emssObj.emailAddressType));
+				pfObj.triggerFlow();
+				EmailType = "Status";
+				EmailTimer = setTimeout("cgiEmailDone()", 5);
+				return;
+			}
+			EmailType = "Status";
+			var obj = new EMAILObject(SendingTo,Sender);
+			obj.subject = Subject;
+			obj.message = mailText;
+			EmailTimer = setTimeout("cgiEmailDone()", 10000);
+			EMAIL(obj,"jsreturn");
+		}
+		startProcessing(alertMsg, nextFunc);
+	}
+	else
+	{
+		stopProcessing();
+		var alertResponse = seaAlert(getSeaPhrase("EMPLOYEE_EMAIL_NOT_AVAILABLE","TE"), "", null, "error", RefreshTimeCard);
+		if (typeof(alertResponse) == "undefined" || alertResponse == null)
+		{
+			if (seaAlert == window.alert)
+				RefreshTimeCard();
+			return;
+		}
+		RefreshTimeCard();
+	}
+}
+
+function RefreshTimeCard()
+{
+	var nextFunc = function()
+	{
+		if (boolSaveChanges || bSelectChanged)
+		{
+			if (!SaveChangesDone())
+			{
+				QuickPaint = true;
+				hs36.normal();		
+			}
+			else
+			{
+				TimeCard.RecordUpdate = "";
+				stopProcessing();
+			}
+		}
+		else
+		{
+			QuickPaint = true;
+			hs36.normal();
+		}
+	};
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Function that is called when the email has successfully been delivered.
+//
+function cgiEmailDone()
+{
+	try { clearTimeout(EmailTimer); } catch(e) {}
+	if (EmailType == "Employee")
+	{
+		stopProcessing();
+		seaPageMessage(getSeaPhrase("EMAIL_SENT","TE"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);		
+	}
+	else
+		RefreshTimeCard();
+}
+
+function Unload()
+{
+	CloseChildPopupWindows();
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var headerHeight = 40;
+	var outerPane = self.TABLE.document.getElementById("outerPane");
+	var paneBody1 = self.TABLE.document.getElementById("paneBody1");
+	var paneBody2 = self.TABLE.document.getElementById("paneBody2");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var tblFrame = document.getElementById("TABLE");
+	tblFrame.style.height = (winHeight - headerHeight) + "px";
+	tblFrame.style.width = (winWidth - 20) + "px";
+	var paneBorder = document.getElementById("paneBorder");
+	paneBorder.style.height = (winHeight - headerHeight) + "px";
+	paneBorder.style.width = (winWidth - 10) + "px";
+	if (window.styler && window.styler.showInfor3)
+		paneBorder.style.top = headerHeight + "px";
+	if (outerPane)
+	{
+		if (window.styler && window.styler.showInfor3)
+		{
+			outerPane.removeAttribute("styler");
+			outerPane.style.paddingTop = "10px";
+		}	
+		else
+			outerPane.setAttribute("styler", "groupbox");
+		outerPane.style.marginTop = "1px";
+		outerPane.style.width = "100%";
+	}
+	if (paneBody1 && paneBody2)
+	{
+		paneBody2.setAttribute("tabindex", "0");
+		paneBody2.style.overflow = "auto";
+		paneBody2.style.width = "100%";
+		if (winHeight > (paneBody1.offsetHeight + headerHeight + 32))
+			paneBody2.style.height = (winHeight - paneBody1.offsetHeight - headerHeight - 32) + "px";
+	}
+}
+</script>
+</head>
+<body class="panecontents" style="overflow:hidden" onload="fitToScreen();OpenProgram()" onresize="fitToScreen()" onunload="Unload()">
+<iframe id="header" name="header" title="Header" level="1" tabindex="0" src="/lawson/xhrnet/ui/header.htm" style="visibility:visible;position:absolute;height:34px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+<div id="paneBorder" class="panebordertimeentry" style="position:absolute;top:34px;left:0px;visibility:hidden;height:560px;overflow:hidden">
+	<table id="paneTable" border="0" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr style="height:16px" styler="hidden">
+	<td>
+		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%" role="presentation">
+		<tr>
+		<td>
+			<img id="paneHelpIcon" border="0" class="helpicon" onclick="OpenHelpDialog()" alt="Help" title="Help" src="/lawson/xhrnet/ui/images/ico_help_6699cc.gif" onmouseover="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-over.gif'" onfocus="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-over.gif'" onmousedown="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-down.gif'" onkeydown="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-down.gif'" onmouseout="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc.gif'" onblur="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc.gif'">
+			<div id="paneHeader" class="paneheadertimeentry" width="100%" height="100%" role="heading" aria-level="1">&nbsp;</div>
+		</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="TABLE" id="TABLE" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/plain.htm" style="visibility:visible;position:relative;width:100%;height:520px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td>
+		<iframe name="printFm" title="Empty" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="lawheader" title="Empty" src="/lawson/xhrnet/timeentry/employee/timeentrylaw.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/employee/timeentry.htm,v 1.16.2.79 2014/02/25 22:49:18 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

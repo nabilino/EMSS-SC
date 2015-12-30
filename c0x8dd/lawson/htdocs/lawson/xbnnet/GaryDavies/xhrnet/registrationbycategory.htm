@@ -1,0 +1,1024 @@
+<html>
+<head><title>Registration by Category</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var categoryArray = new Array();
+var courseArray = new Array();
+var sessionArray = new Array();
+var Courses = new Array();
+var Sessions = new Array();
+var Prereqs = new Array();
+var WaitingFlag = new Array();
+var DateTypeFlds;
+var sortProperty;
+var sessionIndex;
+var sessionFc;
+
+function OpenProgram()
+{
+	authenticate("frameNm='jsreturn'|funcNm='GetWaitingList()'|desiredEdit='EM'");
+}
+
+function GetWaitingList()
+{
+	stylePage();
+	document.title = getSeaPhrase("REGISTRATION_BY_CATEGORY","ESS");
+	setTaskHeader("header",getSeaPhrase("REGISTRATION_BY_CATEGORY","ESS"),"Training");
+	StoreDateRoutines();
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	DMECallForWaitingFlag();
+}
+
+function DMECallForWaitingFlag()
+{
+	WaitingFlag = new Array();
+
+	var DMEObj = new DMEObject(authUser.prodline, "pamodopt");
+	DMEObj.out = "javascript";
+	DMEObj.field = "waitlist-flag";
+	DMEObj.key = "1";
+	DMEObj.max = "1";
+	DMEObj.func = "getWaitingFlag()";
+	DME(DMEObj, "jsreturn");
+}
+
+function getWaitingFlag()
+{
+	WaitingFlag = self.jsreturn.record;
+
+	if (WaitingFlag.length == 0) {
+		seaAlert(getSeaPhrase("TRAINING_SETUP_INCOMPLETE","ESS")+"\n"+getSeaPhrase("SETUP_TR00","ESS"));
+		return;
+	}
+	else if (WaitingFlag[0].waitlist_flag != "Y") {
+		// treat spaces as equivalent to "No"
+		WaitingFlag[0].waitlist_flag = "N";
+	}
+
+	getPcodes();
+}
+
+function getPcodes()
+{
+	if (CalledPcodesInfo == false)
+	{
+		categoryArray = new Array();
+		GetPcodesSelect(authUser.prodline,"CC","storeCategories()","Active");
+	}
+	else
+	{
+		DrawCategoryList();
+	}
+}
+
+function storeCategories()
+{
+	categoryArray = PcodesInfo;
+	categoryArray.sort(sortByDescription);
+	DrawCategoryList();
+}
+
+function sortByDescription(obj1, obj2)
+{
+	var name1 = obj1.description;
+	var name2 = obj2.description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function sortByCrsDescription(obj1, obj2)
+{
+	var name1 = obj1.short_crs_desc;
+	var name2 = obj2.short_crs_desc;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function sortCategories(field)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	categoryArray.sort(sortByDescription);
+	DrawCategoryList(true,field);
+}
+
+function DrawCategoryList(onsort,property)
+{
+	var htmlStr = '<table id="categoriesTbl" class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" styler="list">';
+	htmlStr += '<tr>';
+	htmlStr += '<th class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlStr += '<a class="columnsort" href="" onclick="parent.sortCategories(\'description\');return false"';
+	htmlStr += ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_1","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlStr += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</a></th>';
+	htmlStr += '</tr>';
+
+	for(var i=0; i<categoryArray.length; i++)
+	{
+		htmlStr += '<tr>';
+		htmlStr += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+		htmlStr += '<a href="javascript:parent.FillDetail('+i+')"';
+		htmlStr += ' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"';
+		htmlStr += ' onmouseout="window.status=\' \';return true">';
+		htmlStr += ((categoryArray[i].description)?categoryArray[i].description:'&nbsp;')+'</a></td>';
+		htmlStr += '</tr>';
+	}
+
+	htmlStr += '</table>';
+
+	try {
+		self.CATEGORIES.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CATEGORIES","ESS");
+
+		if (categoryArray.length > 0) {
+			self.CATEGORIES.document.getElementById("paneBody").innerHTML = htmlStr;
+		}
+		else {
+			self.CATEGORIES.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_TRAINING_COURSES","ESS")
+			+ '</div>';
+		}
+	}
+	catch(e) {}
+
+	self.CATEGORIES.stylePage();
+	self.CATEGORIES.setLayerSizes();
+	if (onsort) {
+			self.CATEGORIES.styleSortArrow("categoriesTbl", property);
+	}
+	document.getElementById("CATEGORIES").style.visibility = "visible";
+
+
+	// Course List Frame
+	var htmlDtl = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">';
+	htmlDtl += '<tr>\n'
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("COURSE","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("LENGTH","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FREQUENCY","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TYPE","ESS")+'</th>';
+	htmlDtl += '</tr>';
+	htmlDtl += '</table>';
+
+	try {
+		self.COURSES.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COURSES","ESS");
+		self.COURSES.document.getElementById("paneBody").innerHTML = htmlDtl;
+	}
+	catch(e) {}
+
+	self.COURSES.stylePage();
+	self.COURSES.setLayerSizes();
+	document.getElementById("COURSES").style.visibility = "visible";
+
+	// Session Detail Frame
+	var htmlSess = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">';
+	htmlSess += '<tr>\n'
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("SESSION","ESS")+'</th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","ESS")+'</th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FACILITY","ESS")+'</th>';
+//	htmlSess += '<td class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("SITE","ESS")+'</td>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STATUS","ESS")+'</th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_TIME","ESS")+'</th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("END_TIME","ESS")+'</th>';
+	htmlSess += '</tr>';
+	htmlSess += '</table>';
+
+	try {
+		self.SESSIONS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REGISTER_FOR_SESSION","ESS");
+		self.SESSIONS.document.getElementById("paneBody").innerHTML = htmlSess;
+	}
+	catch(e) {}
+
+	self.SESSIONS.stylePage();
+	self.SESSIONS.setLayerSizes();
+	document.getElementById("SESSIONS").style.visibility = "visible";
+
+	// Prerequisites Detail Frame
+	var htmlPrereq = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">'
+	htmlPrereq += '<tr>\n'
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PREREQUISITE","ESS")+'</th>';
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TYPE","ESS")+'</th>';
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("REQUIRED","ESS")+'</th>';
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FROM_DATE","ESS")+'</th>';
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("LENGTH","ESS")+'</th>';
+	htmlPrereq += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("WHEN_ELIGIBLE","ESS")+'</th>';
+	htmlPrereq += '</tr>';
+	htmlPrereq += '</table>';
+
+	try {
+		self.PREREQS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PREREQUISITES","ESS");
+		self.PREREQS.document.getElementById("paneBody").innerHTML = htmlPrereq;
+	}
+	catch(e) {}
+
+	self.PREREQS.stylePage();
+	self.PREREQS.setLayerSizes();
+	document.getElementById("PREREQS").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function FillDetail(n)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	activateTableRow("categoriesTbl",n,self.CATEGORIES);
+
+	// Clear any old session/prereq detail
+	ClearSessionDetail();
+	ClearPrereqDetail();
+
+	// Course Detail
+	GetCourses(n);
+
+	removeWaitAlert();
+}
+
+function GetCourses(n)
+{
+	if (!Courses[categoryArray[n].code]) {
+		courseArray = new Array();
+		Courses[categoryArray[n].code] = new Array();
+
+		var dmeObj = new DMEObject(authUser.prodline, "pacourse");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.field = "course;effective-date;short-crs-desc;"
+		          + "end-date;freq,xlt;duration-units;duration-meas,xlt;"
+		          + "course-cat.description;course-type.description";
+//		dmeObj.select = "course-cat="+escape(categoryArray[n].code,1); 		// PT 179379 - 901 LSF env encode/decode issue
+		dmeObj.select = "course-cat="+categoryArray[n].code;
+		dmeObj.cond = "current";
+		dmeObj.max = "600";
+		dmeObj.func = "GetCoursesArray("+n+")";
+		DME(dmeObj, "jsreturn");
+	}
+	else {
+		courseArray = Courses[categoryArray[n].code];
+		drawCourseList();
+	}
+}
+
+function GetCoursesArray(n)
+{
+	courseArray = courseArray.concat(self.jsreturn.record);
+
+	if(self.jsreturn.Next!="") {
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	}
+	else {
+		courseArray.sort(sortByCrsDescription);
+		Courses[categoryArray[n].code] = Courses[categoryArray[n].code].concat(courseArray);
+		drawCourseList();
+	}
+}
+
+function drawCourseList(onsort,property)
+{
+	var noCurrent = true;
+	var crsObj;
+	var lengthExists = false;
+	var effDate = "";
+	var counter = -1;
+
+	var htmlDtl = '<table id="coursesTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">';
+	htmlDtl += '<tr>\n'
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlDtl += '<a class="columnsort" href="" onclick="parent.sortPacourse(\'course\');return false"';
+	htmlDtl += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_COURSE","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlDtl += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("COURSE","ESS")+'</a></th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlDtl += '<a class="columnsort" href="" onclick="parent.sortPacourse(\'short_crs_desc\');return false"';
+	htmlDtl += ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_1","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlDtl += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</a></th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("LENGTH","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FREQUENCY","ESS")+'</th>';
+	htmlDtl += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TYPE","ESS")+'</th>';
+	htmlDtl += '</tr>';
+
+	for (var i=0; i<courseArray.length; i++)
+	{
+		crsObj = courseArray[i];
+		lengthExists = (NonSpace(crsObj.duration_units) > 0 || NonSpace(crsObj.duration_meas_xlt) > 0)?true:false;
+		effDate = crsObj.effective_date;
+
+		//if (typeof(effDate)=="undefined" || effDate==null || effDate=="" ||
+		//IsCurrent(formjsDate(formatDME(effDate)),formjsDate(formatDME(crsObj.end_date)))) {
+
+			noCurrent = false;
+			counter++;
+			htmlDtl += '<tr>';
+			htmlDtl += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlDtl += '<a href="javascript:parent.FillCourseDetail('+i+','+counter+')"';
+			htmlDtl += ' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"';
+			htmlDtl += ' onmouseout="window.status=\'\';return true">';
+			htmlDtl += ((crsObj.course)?crsObj.course:'&nbsp;')+'</a></td>';
+			htmlDtl += '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((crsObj.short_crs_desc)?crsObj.short_crs_desc:'&nbsp;')+'</td>';
+			htmlDtl += '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((lengthExists)?crsObj.duration_units+' '+crsObj.duration_meas_xlt:'&nbsp;')+'</td>';
+			htmlDtl += '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((crsObj.freq_xlt)?crsObj.freq_xlt:'&nbsp;')+'</td>';
+			htmlDtl += '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((crsObj.course_type_description)?crsObj.course_type_description:'&nbsp;')+'</td>';
+			htmlDtl += '</tr>';
+		//}
+	}
+
+	htmlDtl += '</table>';
+
+	try {
+		if (courseArray.length > 0) {
+			if (noCurrent) {
+				self.COURSES.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+				+ getSeaPhrase("NO_CURRENT_TRAINING_COURSES","ESS")
+				+ '</div>';
+			}
+			else {
+				self.COURSES.document.getElementById("paneBody").innerHTML = htmlDtl;
+			}
+		}
+		else {
+			self.COURSES.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_TRAINING_COURSE_ASSIGNED","ESS")
+			+ '</div>';
+		}
+	}
+	catch(e) {}
+
+	self.COURSES.stylePage();
+	self.SESSIONS.stylePage();
+	self.PREREQS.stylePage();
+	self.COURSES.setLayerSizes();
+
+	if (onsort) {
+		self.COURSES.styleSortArrow("coursesTbl", property);
+	}
+	document.getElementById("COURSES").style.visibility = "visible";
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (sortProperty == "start_date" || sortProperty == "end_date")
+	{
+		name1 = formjsDate(formatDME(name1));
+		name2 = formjsDate(formatDME(name2));
+	}
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function sortPacourse(property)
+{
+	sortProperty = property;
+	courseArray.sort(sortByProperty);
+	drawCourseList(true,property);
+}
+
+function sortPasession(property)
+{
+	sortProperty = property;
+	sessionArray.sort(sortByProperty);
+	drawSessions(true,property);
+}
+
+function FillCourseDetail(n,rowNbr)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	activateTableRow("coursesTbl",rowNbr,self.COURSES);
+
+	// Session Detail
+	GetSessions(n);
+
+	// Prerequisite Detail
+	GetPrereqs(n);
+
+	removeWaitAlert();
+}
+
+function GetSessions(course)
+{
+	if (!Sessions[courseArray[course].course]) {
+		sessionArray = new Array();
+		Sessions[courseArray[course].course] = new Array();
+
+		var DMEObj = new DMEObject(authUser.prodline, "pasession");
+		DMEObj.out = "javascript";
+		DMEObj.field = "course;course.short-crs-desc;session;start-date;end-date;"
+			+ "facility.description;site;session-status;session-status,xlt;start-time;"
+			+ "end-time;course-type";
+		DMEObj.key = escape(courseArray[course].course);
+		DMEObj.cond = "future-start;open-fill;register-yes";
+		DMEObj.max = "600";
+		DMEObj.func = "getSessions(" + course + ")";
+		DME(DMEObj, "jsreturn");
+	}
+	else {
+		sessionArray = Sessions[courseArray[course].course];
+		drawSessions();
+	}
+}
+
+function getSessions(course)
+{
+	sessionArray = sessionArray.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next != "") {
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	}
+	else {
+		Sessions[courseArray[course].course] = Sessions[courseArray[course].course].concat(sessionArray);
+		drawSessions();
+	}
+}
+
+function drawSessions(onsort,property)
+{
+	var htmlSess = '<table id="sessionsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">';
+	htmlSess += '<tr>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'session\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_SESSION","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("SESSION","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'start_date\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_START","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("START_DATE","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'end_date\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_END","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("END_DATE","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'facility_description\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_FACILITY","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("FACILITY","ESS")+'</a></th>';
+//	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+//	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'site\');return false"';
+//	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_SITE","ESS").replace(/\'/g,"\\'")+'\';return true"';
+//	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("SITE","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'session_status_xlt\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_STATUS","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("STATUS","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'start_time\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_START","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("START_TIME","ESS")+'</a></th>';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">';
+	htmlSess += '<a class="columnsort" href="" onclick="parent.sortPasession(\'end_time\');return false"';
+	htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_END","ESS").replace(/\'/g,"\\'")+'\';return true"';
+	htmlSess += ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("END_TIME","ESS")+'</a></th>';
+	htmlSess += '</tr>';
+
+	var openSessionExists = false;
+	var canRegister = false;
+	var counter = -1;
+	var sessObj;
+
+	for(var i=0; i<sessionArray.length; i++)
+	{
+		sessObj = sessionArray[i];
+
+		//if (IsCurrentSession(formjsDate(formatDME(sessObj.end_date))) == true) {
+
+			openSessionExists = true;
+
+			counter++;
+			htmlSess += '<tr>';
+
+			canRegister = false;
+
+			if (WaitingFlag[0].waitlist_flag == "N") {
+				if(sessionArray[i].session_status == "OP") {
+					canRegister = true;
+				}
+			} else if (sessionArray[i].session_status != "CN") {
+				canRegister = true;
+				if (sessionArray[i].session_status == "FL") {
+					sessionArray[i].session_status = "FA";
+					sessionArray[i].session_status_xlt = getSeaPhrase("FILLED_ACTIVE_WAIT_LIST","ESS");
+				}
+			}
+
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+
+			if (canRegister) {
+				htmlSess += '<a href="javascript:parent.CheckRegistration('+i+','+counter+')"';
+				htmlSess += ' onmouseover="window.status=\''+getSeaPhrase("REGISTER_SESSION","ESS").replace(/\'/g,"\\'")+'\';return true"';
+				htmlSess += ' onmouseout="window.status=\'\';return true">';
+				htmlSess += ((sessObj.session)?sessObj.session:'&nbsp;')+'</a></td>';
+			}
+			else {
+				htmlSess += ((sessObj.session)?sessObj.session:'&nbsp;')+'</td>';
+			}
+
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlSess += ((formatDME(sessObj.start_date))?formatDME(sessObj.start_date):'&nbsp;')+'</td>';
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlSess += ((formatDME(sessObj.end_date))?formatDME(sessObj.end_date):'&nbsp;')+'</td>';
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlSess += ((sessObj.facility_description)?sessObj.facility_description:'&nbsp;')+'</td>';
+		//	htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+		//	htmlSess += ((sessObj.site)?sessObj.site:'&nbsp;')+'</td>';
+			htmlSess += '<td class="plaintablecellborder" style="text-align:center" nowrap>';
+			htmlSess += ((sessObj.session_status_xlt)?sessObj.session_status_xlt:'&nbsp;')+'</td>';
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlSess += ((sessObj.start_time)?sessObj.start_time:'&nbsp;')+'</td>';
+			htmlSess += '<td class="plaintablecellborder" style="text-align:left" nowrap>';
+			htmlSess += ((sessObj.end_time)?sessObj.end_time:'&nbsp;')+'</td>';
+			htmlSess += '</tr>';
+		//}
+	}
+
+	htmlSess += '</table>';
+
+	try {
+		self.SESSIONS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REGISTER_FOR_SESSION","ESS");
+		if (sessionArray.length == 0) {
+			self.SESSIONS.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_TRAINING_COURSE_SESSION","ESS")
+			+ '</div>';
+		}
+		else if (!openSessionExists) {
+			self.SESSIONS.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_CURRENT_SESSIONS_FOR","ESS")
+			+ '</div>';
+		}
+		else {
+			self.SESSIONS.document.getElementById("paneBody").innerHTML = htmlSess;
+		}
+	}
+	catch(e) {}
+
+	self.SESSIONS.stylePage();
+	self.SESSIONS.setLayerSizes();
+
+	if (onsort) {
+			self.SESSIONS.styleSortArrow("sessionsTbl", property);
+	}
+	document.getElementById("SESSIONS").style.visibility = "visible";
+}
+
+function GetPrereqs(n)
+{
+	if (!Prereqs[courseArray[n].course])
+	{
+		Prereqs[courseArray[n].course] = new Array();
+
+		var dmeObj 		= new DMEObject(authUser.prodline,"paprereq");
+		dmeObj.out 		= "JAVASCRIPT";
+		dmeObj.index 	= "rqsset1";
+		dmeObj.field 	= "course;prereq-type;prereq-type,xlt;required-flag,xlt;"
+			+ "prerequisite;date-type;date-type,xlt;date-measure;unit-type;"
+			+ "end-date;unit-type,xlt"
+		dmeObj.key   	= courseArray[n].course+"=";
+		dmeObj.max 		= "600";
+		dmeObj.debug 	= false;
+		dmeObj.func  	= "StorePrereqs("+n+")";
+		DME(dmeObj, "jsreturn2");
+	}
+	else {
+		FillPrereqDetail(n);
+	}
+}
+
+function StorePrereqs(n)
+{
+	Prereqs[courseArray[n].course] = Prereqs[courseArray[n].course].concat(self.jsreturn2.record);
+
+	if (self.jsreturn2.Next)
+	{
+		self.jsreturn2.replace(self.jsreturn2.Next);
+	}
+	else
+	{
+		if (Prereqs[courseArray[n].course].length > 0)
+		{
+			GetDateTypeFlds(n);
+		}
+		else {
+			FillPrereqDetail(n);
+		}
+	}
+}
+
+function GetDateTypeFlds(n)
+{
+	if (!DateTypeFlds)
+	{
+		DateTypeFlds = new Array();
+
+		var dmeObj 		= new DMEObject(authUser.prodline, "employee");
+		dmeObj.out 		= "JAVASCRIPT";
+		dmeObj.index	= "empset1";
+		dmeObj.debug 	= false;
+		dmeObj.key		= parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10);
+		dmeObj.field	= "date-hired;adj-hire-date;annivers-date;paemployee.senior-date";
+		dmeObj.func		= "StoreDateTypeFlds("+n+")";
+		dmeObj.max		= "1";
+		DME(dmeObj, "jsreturn2");
+	}
+	else
+	{
+		FillPrereqDetail(n);
+	}
+}
+
+function StoreDateTypeFlds(n)
+{
+	DateTypeFlds = self.jsreturn2.record;
+	FillPrereqDetail(n);
+}
+
+function ClearSessionDetail()
+{
+	var htmlSess = '<body>\n';
+	htmlSess += '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">\n';
+	htmlSess += '<tr>\n'
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("SESSION","ESS")+'</th>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","ESS")+'</th>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FACILITY","ESS")+'</th>\n';
+//	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("SITE","ESS")+'</th>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STATUS","ESS")+'</th>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_TIME","ESS")+'</td>\n';
+	htmlSess += '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("END_TIME","ESS")+'</th>\n';
+	htmlSess += '</tr>\n';
+	htmlSess += '</table>\n';
+	htmlSess += '</body>';
+
+	try {
+		self.SESSIONS.document.getElementById("paneBody").innerHTML = htmlSess;
+	}
+	catch(e) {}
+}
+
+function ClearPrereqDetail()
+{
+	var prereqsHtml = '<body>\n'
+	+ '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PREREQUISITE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TYPE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("REQUIRED","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FROM_DATE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("LENGTH","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("WHEN_ELIGIBLE","ESS")+'</th>\n'
+	+ '</tr>\n'
+	+ '</table>\n'
+	+ '</body>'
+
+	try {
+		self.PREREQS.document.getElementById("paneBody").innerHTML = prereqsHtml;
+	}
+	catch(e) {}
+}
+
+function FillPrereqDetail(n)
+{
+	var lengthExists = false;
+	var whenEligible = "";
+	var tmpObj;
+
+	var prereqsHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%"  styler="list">'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PREREQUISITE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TYPE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("REQUIRED","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("FROM_DATE","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("LENGTH","ESS")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("WHEN_ELIGIBLE","ESS")+'</th>\n'
+	+ '</tr>\n'
+
+	var prArray = Prereqs[courseArray[n].course];
+
+	for (var i=0; i<prArray.length; i++)
+	{
+		var tmpObj = prArray[i];
+		lengthExists = (NonSpace(tmpObj.date_measure) > 0 || NonSpace(tmpObj.unit_type_xlt) > 0)?true:false;
+		whenEligible = calcEligibleDate(tmpObj);
+
+		prereqsHtml += '<tr>\n'
+		+ '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((tmpObj.prerequisite)?tmpObj.prerequisite:'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((tmpObj.prereq_type_xlt)?tmpObj.prereq_type_xlt:'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((tmpObj.required_flag_xlt)?tmpObj.required_flag_xlt:'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((tmpObj.date_type_xlt)?tmpObj.date_type_xlt:'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:left" nowrap>'+((lengthExists)?tmpObj.date_measure+' '+tmpObj.unit_type_xlt:'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((whenEligible)?whenEligible:'&nbsp;')+'</td>\n'
+		+ '</tr>\n'
+	}
+
+	prereqsHtml += '</table>\n'
+
+	try {
+		self.PREREQS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PREREQUISITES","ESS");
+		if (prArray.length > 0) {
+			self.PREREQS.document.getElementById("paneBody").innerHTML = prereqsHtml;
+		}
+		else {
+			self.PREREQS.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_PREREQS","ESS")
+			+ '</div>'
+		}
+		self.PREREQS.stylePage();
+		self.PREREQS.setLayerSizes();
+		document.getElementById("PREREQS").style.visibility = "visible";
+	}
+	catch(e) {}
+
+	removeWaitAlert();
+}
+
+function calcEligibleDate(tmpObj)
+{
+	var fromDate = "";
+	year = "";
+	month = "";
+	day = "";
+
+	if (tmpObj.date_type == "HI")
+		fromDate = DateTypeFlds[0].date_hired;
+	else if (tmpObj.date_type == "AJ")
+		fromDate = DateTypeFlds[0].adj_hire_date;
+	else if(tmpObj.date_type == "AN")
+		fromDate = DateTypeFlds[0].annivers_date;
+	else if(tmpObj.date_type == "SN")
+		fromDate = DateTypeFlds[0].paemployee_senior_date;
+	else
+		fromDate = 0;
+
+	if (fromDate == 0) {
+		return(getSeaPhrase("NA_SHORT","ESS"));
+	}
+	else {
+		fromDate = formjsDate(formatDME(fromDate));
+		year = parseInt(fromDate.substring(0,4),10);
+		month = parseInt(fromDate.substring(4,6),10);
+		day = parseInt(fromDate.substring(6,8),10);
+
+		if (tmpObj.unit_type == "Y")
+		{
+			year = year + parseInt(tmpObj.date_measure,10);
+			addMonthDay();
+		}
+		else if (tmpObj.unit_type == "M")
+		{
+			day = day + (parseInt(tmpObj.date_measure,10)*30);
+			addMonthDay();
+		}
+		else if (tmpObj.unit_type == "D")
+		{
+			day = day + parseInt(tmpObj.date_measure,10);
+			addMonthDay();
+		}
+		else if (!tmpObj.unit_type)
+		{
+			return(getSeaPhrase("NA_SHORT","ESS"));
+		}
+
+		year = year + "";
+		month = month + "";
+		day = day + "";
+
+		if (month.length < 2) month = "0" + month;
+		if (day.length < 2) day = "0" + day;
+
+		fromDate = year + month + day;
+		fromDate = checkCurrentDate(fromDate);
+		return(fromDate);
+	}
+}
+
+function addMonthDay()
+{
+	found = false;
+
+	while (!found)
+	{
+		if (month == 1 || month == 3 || month == 5 || month == 7
+		|| month == 8 || month == 10 || month == 12) {
+
+			if (month == 12 && day > 31) {
+				day = day-31;
+				year++;
+				month = 1;
+			}
+			else if (day > 31) {
+				day = day-31;
+				month++;
+			}
+			else {
+				found=true;
+			}
+		}
+		if (month == 4 || month == 6 || month == 9 || month == 11) {
+
+			if(day > 30) {
+				day = day-30;
+				month++;
+			}
+			else {
+				found = true;
+			}
+		}
+		if (month == 2) {
+
+			if(((year%4 == 0) && (year%100 != 0)) || (year%400 == 0)) {
+
+				if(day > 29) {
+					day = day-29;
+					month++;
+				}
+				else {
+					found = true;
+				}
+			}
+			else
+			{
+				if (day > 28) {
+					day = day-28;
+					month++;
+				}
+				else {
+					found = true;
+				}
+			}
+		}
+	}
+}
+
+function checkCurrentDate(dte)
+{
+	if (fmttoday >= dte)
+		dte = getSeaPhrase("CURRENT","ESS");
+	else
+		dte = FormatDte4(dte);
+
+	return(dte);
+}
+
+function IsCurrentSession(end)
+{
+	var ymdstop;
+	end = String(end);
+
+	if (end.length == 0) {
+		ymdstop = "";
+	}
+	else {
+		ymdstop = end.substring(0,4) + end.substring(4,6)
+			+ end.substring(6,8);
+	}
+
+	if (ymdstop != "" && ymdstop < ymdtoday) {
+		return false;
+	}
+	else {
+		return true;
+	}
+}
+
+function CheckRegistration(n,rowNbr)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+    activateTableRow("sessionsTbl",rowNbr,self.SESSIONS);
+
+    var sessObj = sessionArray[n];
+
+  	var dmeObj = new DMEObject(authUser.prodline, "paregister");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "regset2";
+	dmeObj.field = "course;session;start-date;reg-status";
+	dmeObj.key = parseInt(authUser.company,10)+"="+parseInt(authUser.employee,10)+"="+escape(sessObj.course)+"="+escape(parseInt(sessObj.session,10))+"="+formatDME(sessObj.start_date);
+	dmeObj.max = "1";
+	dmeObj.func = "CheckRegistrationReturned("+n+")";
+	DME(dmeObj, "jsreturn");
+}
+
+function confirmWaitList(confirmWin)
+{
+    if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+    {
+    	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+        Register(sessionIndex,sessionFc,"W");
+    }
+    else
+    {
+    	removeWaitAlert();
+    }
+}
+
+function CheckRegistrationReturned(n)
+{
+	var sessionRecs = self.jsreturn.record;
+	var cancelledSession = (sessionRecs.length > 0 && sessionRecs[0].reg_status == "X") ? true : false;
+	var fc = (cancelledSession) ? "C" : "A";
+	
+	var status = "C";
+	var sessObj = sessionArray[n];
+
+	sessionIndex = n;
+	sessionFc = fc;
+	if (sessObj.session_status=="FA" || sessObj.session_status=="FL") {
+		var willWait = seaConfirm(getSeaPhrase("PUT_ON_WAITING_LIST","ESS"), "", confirmWaitList);
+		if (!willWait)
+		{
+			removeWaitAlert();
+			return;
+		}	
+		status = "W";
+	} else {
+		status = "C";
+	}
+	Register(n,fc,status);
+}
+
+function Register(n,fc,status)
+{
+	var sessObj = sessionArray[n];
+
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+
+	var AGSObj = new AGSObject(authUser.prodline, "TR20.2");
+	AGSObj.event = (fc=="A") ? "ADD" : "CHG";
+	AGSObj.rtn = "DATA";
+	AGSObj.longNames = true;
+	AGSObj.lfn = "ALL";
+	AGSObj.callmethod = "post";
+	AGSObj.tds = false;
+	AGSObj.func = "parent.afterRegister()";
+	AGSObj.debug = false;
+	AGSObj.field = "FC=" + fc
+		+ "&LINE-FC1=" + fc
+		+ "&DTL-COURSE1=" + escape(sessObj.course)
+		+ "&DTL-SESSION1=" + escape(parseInt(sessObj.session,10))
+		+ "&DTL-START-DATE1=" + formjsDate(formatDME(sessObj.start_date))
+		+ "&DTL-COMPANY1=" + parseInt(authUser.company,10)
+		+ "&DTL-EMPLOYEE1=" + parseInt(authUser.employee,10) 
+		+ "&REG-COURSE1=" + escape(sessObj.course)
+		+ "&REG-SESSION1=" + escape(parseInt(sessObj.session,10))
+		+ "&REG-START-DATE1=" + formjsDate(formatDME(sessObj.start_date))
+		+ "&REG-COMPANY1=" + parseInt(authUser.company,10)
+		+ "&REG-EMPLOYEE1=" + parseInt(authUser.employee,10)
+		+ "&REG-REG-STATUS1=" + status;
+
+	if (fc == "C")
+	{
+		AGSObj.field += "&PT-REG-COURSE=" + escape(sessObj.course)
+		+ "&PT-REG-SESSION=" + escape(parseInt(sessObj.session,10))
+		+ "&PT-REG-START-DATE=" + formjsDate(formatDME(sessObj.start_date))
+		+ "&PT-REG-COMPANY=" + parseInt(authUser.company,10)
+		+ "&PT-REG-EMPLOYEE=" + parseInt(authUser.employee,10);
+	}
+	
+	AGS(AGSObj, "jsreturn");
+}
+
+function afterRegister()
+{
+	removeWaitAlert();
+
+   	if (self.lawheader.gmsgnbr == "000") {
+		seaAlert(getSeaPhrase("SUCCESSFULLY_REGISTERED","ESS"));
+	}
+	else {
+		seaAlert(self.lawheader.gmsg);
+	}
+}
+</script>
+<body onload="OpenProgram()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="CATEGORIES" name="CATEGORIES" style="visibility:hidden;position:absolute;height:464px;width:250px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="COURSES" name="COURSES" style="visibility:hidden;position:absolute;height:157px;width:553px;left:250px;top:32px" src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="SESSIONS" name="SESSIONS" style="visibility:hidden;position:absolute;height:157px;width:553px;left:250px;top:189px" src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="PREREQS" name="PREREQS" style="visibility:hidden;position:absolute;height:150px;width:553px;left:250px;top:346px" src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn2" name="jsreturn2" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/registrationbycategory.htm,v 1.8.2.24 2011/05/04 21:10:11 brentd Exp $ -->

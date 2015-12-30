@@ -1,0 +1,67 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/drill/drsearch.htm,v 1.2.2.4.18.2.2.2 2012/08/08 12:37:23 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="drill.css"></link>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="drsearch.js"></script>
+<script language="javascript" src="../objects/FeedBack.js"></script>
+<title>Search</title>
+</head>
+
+<body tabIndex="-1" onload="init()" onkeydown="srchKeyDown(event)">
+	<div id="choiceDiv" style="background-color:#D4DFF0;">
+		<span style="text-align:left;left:5%;width:90%;margin-left:15px;">
+			<label id="lblPerform" class="xTLabelForm" style="margin-top:3px;">Perform:</label>
+			<input type="radio" id="rbFind" name="radio" onclick="window.oSearch.onClickRadio(this)"></input>
+			<label id="lblFind" for="rbFind" class="xTLabel" style="margin-top:3px;">Find</label>
+			&nbsp;
+			<input type="radio" id="rbFilter" name="radio" onclick="window.oSearch.onClickRadio(this)"></input>
+			<label id="lblFilter" for="rbFilter" class="xTLabel" style="margin-top:3px;">Filter</label>
+		</span>
+
+	</div>
+	<div id="bannerDiv" style="height:40px;background-color:#DDDDDD;border:solid white 2px;">
+		<span style="width:90%;margin-top:5px;">
+			<label id="txt1" class="xTLabel" style="margin-left:13px;">
+				Select Find to display the first occurrence of the search criteria or
+			</label><br>
+			<label id="txt2" class="xTLabel" style="margin-left:13px;">
+				Filter to display all occurrences of the search criteria.
+			</label>
+		</span>
+	</div>
+
+	<div style="height:155px;width:100%;">
+		<!-- display tabs -->
+		<iframe id="frmDisplayTabs" frameborder="no" scrolling="no" src="../blank.htm" style="display:none;width:100%;height:100%;">
+		</iframe>
+	</div>
+	<div id="btnDiv" style="width:100%;margin-left:auto;margin-right:auto;text-align:center;">
+		<button id="btnFind" class="xTToolBarButton" onclick="window.oSearch.doOK()" style="width:60px">Find</button>
+		<button id="btnCancel" class="xTToolBarButton" onclick="window.close()" style="width:60px">Cancel</button>
+	</div>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/wizards/erp_new.htm,v 1.3.2.1.26.2 2012/08/08 12:48:54 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>New User Interface Wizard</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<script language="javascript" src="../../servenv.js"></script>
+<script language="javascript" src="../../SortArray.js"></script>
+<script language="javascript" src="erp_new.js"></script>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgDiscoverError">The web tier Data service reported an error:</phrase>
+		<phrase id="msgInvalidServerResponse">The web server returned an invalid response.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="dlgInit()" onkeydown="dlgOnKeyDown()" style="background-color:buttonface;visibility:hidden;">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;padding-left:5px;">
+		<span id="tabPDL" class="dsLabel" tabind="0" style="top:10;left:10;width:90%;display:block;text-align:left;font-weight:bold;">Data Area Selection</span>
+		<span id="tabSYS" class="dsLabel" tabind="1" style="top:10;left:10;width:90%;display:none;text-align:left;font-weight:bold;">System Code Selection</span>
+		<span id="tabTKN" class="dsLabel" tabind="2" style="top:10;left:10;width:90%;display:none;text-align:left;font-weight:bold;">Form Selection</span>
+		<span id="tabFinish" class="dsLabel" tabind="3" style="top:10;left:10;width:90%;display:none;text-align:left;font-weight:bold;">Confirm Selections</span>
+	</div>
+
+	<!-- PDL tab pane -->
+	<div id="divPDL" class="dsTabPaneActive" style="top:30px;display:block;height:75%;width:100%;">
+	<table width="100%">
+		<tr>
+			<td colspan="2">
+				<span class="dsLabel" style="position:relative;">Select the data area of the new user interface.</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+		   	<td colspan="2">
+				<select id="selPDL" class="dsListText" size="10" style="width:300px;height:expression(this.size*17);" 
+						ondblclick="dlgOnClickNext()">
+				</select>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- SYS tab pane -->
+	<div id="divSYS" class="dsTabPaneActive" style="top:30px;display:none;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr>
+			<td colspan="2">
+				<span class="dsLabel" style="position:relative;">Choose a system code from the selected data area.</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+		   	<td colspan="2">
+				<select id="selSYS" class="dsListText" size="10" style="width:300px;height:expression(this.size*17);" 
+						ondblclick="dlgOnClickNext()">
+				</select>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- TKN tab pane -->
+	<div id="divTKN" class="dsTabPaneActive" style="top:30px;display:none;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr>
+			<td colspan="2">
+				<span class="dsLabel" style="position:relative;">Select the form id of the new user interface.</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+		   	<td colspan="2">
+				<select id="selTKN" class="dsListText" size="10" style="width:300px;height:expression(this.size*17);" 
+						ondblclick="dlgOnClickNext()">
+				</select>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- Finish tab pane -->
+	<div id="divFinish" class="dsTabPaneActive" style="top:30px;display:none;height:75%;width:100%;">
+	<table border="0" width="100%">
+		<tr>
+			<td colspan="2">
+				<span class="dsLabel" style="position:relative;">Please confirm your selections.</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td width="30%" align="right"><label class="dsLabel" style="position:relative;">Data Area:&nbsp;</label></td>
+			<td align="left"><label id="txtDataArea" class="dsLabel" style="position:relative;"></label></td>
+		</tr>
+		<tr>
+			<td width="30%" align="right"><label class="dsLabel" style="position:relative;">System Code:&nbsp;</label></td>
+			<td align="left"><label id="txtSystemCode" class="dsLabel" style="position:relative;"></label></td>
+		</tr>
+		<tr>
+			<td width="30%" align="right"><label class="dsLabel" style="position:relative;">Form Id:&nbsp;</label></td>
+			<td align="left"><label id="txtToken" class="dsLabel" style="position:relative;"></label></td>
+		</tr>
+		<tr>
+			<td colspan="2">&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<span class="dsLabel" style="position:relative;">Select initial state of the interface:</span>
+			</td>
+		</tr>
+		<tr>
+			<td width="30%" align="right" valign="top">
+				<label for="QuickPaint" class="dsLabel" style="position:relative;">QuickPaint</label>
+			</td>
+			<td align="left" valign="bottom">
+				<input id="QuickPaint" type="radio" name="radio" checked></input>
+			</td>
+		</tr>
+		<tr>
+			<td width="30%" align="right" valign="top">
+				<label for="BlankPalette" class="dsLabel" style="position:relative;">Blank Palette</label>
+			</td>
+			<td align="left" valign="bottom">
+				<input id="BlankPalette" type="radio" name="radio"></input>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnBack" type="button" class="dsDlgButton" onclick="dlgOnClickBack()" 
+				style="position:relative;width:70px;" disabled value="< Back">
+			</input>
+			<input id="btnNext" type="button" class="dsDlgButton" onclick="dlgOnClickNext()" 
+				style="position:relative;width:70px;" value="Next >">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

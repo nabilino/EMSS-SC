@@ -1,0 +1,481 @@
+<HTML><HEAD>
+<link id="StyleLink" type="text/css" href="/lawson/smnet/smstyle.css" rel="stylesheet">
+<link id="StyleLink" type="text/css" href="/lawson/smnet/button.css" rel="stylesheet">
+<TITLE>Reset User Password</TITLE></HEAD><BODY>
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+<SPAN class=smWelcome>SYSTEM ADMINISTRATION</SPAN>
+<hr size="2" width="90%" align="left">
+<!--SCRIPT LANGUAGE="JavaScript" SRC="/lawson/smnet/CalendarPopup.js"></SCRIPT -->
+
+<script language="javascript">
+
+   function selectAll(formObj, isInverse) {
+
+     if(document.getElementById("application").checked) {
+       document.getElementById("application").checked = false;
+     }
+     else {
+       document.getElementById("application").checked = true;
+     }
+     if(document.getElementById("authentication").checked) {
+       document.getElementById("authentication").checked = false;
+     }
+     else {
+       document.getElementById("authentication").checked = true;
+     }
+
+   }
+
+  // Function to select all checkboxes or reverse all checkboxes
+   function selectAllDeprecated(formObj, isInverse) {
+     for (var i=0;i < formObj.length;i++) {
+       fldObj = formObj.elements[i];
+       if (fldObj.type == 'checkbox' && !fldObj.disabled) {
+         fldObj.checked = (fldObj.checked) ? false : true;
+       }
+    }
+   }
+
+  function checksys(form)
+
+  {
+        if(document.getElementById("loadusers").checked) {
+          var selectedAuthentication = false;
+          var csv = document.getElementById("LoadCsv").value;
+          // read radio button array
+          var authentication = document.getElementsByName("authentication");
+          if(csv) {
+            for(var i=0; i<authentication.length; i++) {
+              if(authentication[i].checked) {
+                selectedAuthentication = true;
+              }
+            }
+            if(selectedAuthentication) {
+              return true;
+            }
+            else {
+              alert("Please select an authentication method");
+              return false;
+            }
+          }
+          else {
+            alert("csv file required");
+            return false;
+          }
+        }
+
+        if(document.getElementById("disableusers").checked) {
+          var selectedAuthentication = false;
+          var csv = document.getElementById("DisableCsv").value;
+          if(csv) {
+            var msg = "The RM IsDisabled attribute must be installed in your environment to support disabling ids\n";
+            msg += "An attempt will be made to determine if the attribute is installed \n";
+            msg += "Do you wish to continue ?";
+            if(confirm(msg)) {
+              return true;
+            }
+            return false;
+          }
+          else {
+            alert("csv file required");
+            return false;
+          }
+        }
+ 
+        if(document.getElementById("deleteusers").checked) {
+          var selectedAuthentication = false;
+          var csv = document.getElementById("DeleteCsv").value;
+          if(csv) {
+            return true;
+          }
+          else {
+            alert("csv file required");
+            return false;
+          }
+        }
+ 
+  	for (var i=0;i < form.length;i++) {
+   	
+   	   fldObj = form.elements[i];
+   	   if (fldObj.type == 'checkbox')
+   	   {
+   	      if(fldObj.checked)
+   	      {
+   	      	return true
+   	      }
+   	   }
+   	}
+   	alert("You must select a type of User to Add.")
+   	return false
+
+
+}
+
+function displayDiv(div) {
+
+  var message = "Is it going to work?";
+
+  // read div tags DOM getElementById
+//var LoadUsers = document.getElementById("LoadUsers");
+
+switch(div) {
+
+case "LoadUsers": {
+
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("disableusers").checked = false;
+document.getElementById("deleteusers").checked = false;
+
+if(LoadUsers.style.display == "none") {
+// display div
+LoadUsers.style.display = "block";
+// use innerHTML property to stream html
+//LoadUsers.innerHTML = message;
+// hide single and disable divs 
+SingleIds.style.display = "none";
+DisableUsers.style.display = "none";
+DeleteUsers.style.display = "none";
+}
+else {
+// hide div
+LoadUsers.style.display = "none";
+// restore single user form buttons
+SingleIds.style.display = "block";
+}
+
+break;
+}
+case "DisableUsers": {
+
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("loadusers").checked = false;
+document.getElementById("deleteusers").checked = false;
+
+if(DisableUsers.style.display == "none") {
+// display div
+DisableUsers.style.display = "block";
+//LoadUsers.innerHTML = message;
+// hide single and mass load divs
+SingleIds.style.display = "none";
+LoadUsers.style.display = "none";
+DeleteUsers.style.display = "none";
+}
+else {
+// hide div
+DisableUsers.style.display = "none";
+// restore single users form buttons
+SingleIds.style.display = "block";
+}
+
+
+break;
+}
+
+case "DeleteUsers": {
+
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("loadusers").checked = false;
+document.getElementById("disableusers").checked = false;
+
+if(DeleteUsers.style.display == "none") {
+// display div
+DeleteUsers.style.display = "block";
+// hide single and mass load divs
+SingleIds.style.display = "none";
+LoadUsers.style.display = "none";
+DisableUsers.style.display = "none";
+}
+else {
+// hide div
+DeleteUsers.style.display = "none";
+// restore single users form buttons
+SingleIds.style.display = "block";
+}
+break;
+}
+
+}
+
+}
+
+function validOption() {
+
+if(document.getElementById("loadusers").checked) {
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("disableusers").checked = false;
+document.getElementById("deleteusers").checked = false;
+}
+
+if(document.getElementById("disableusers").checked) {
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("loadusers").checked = false;
+document.getElementById("deleteusers").checked = false;
+}
+if(document.getElementById("deleteusers").checked) {
+document.getElementById("application").checked = false;
+document.getElementById("authentication").checked = false;
+document.getElementById("loadusers").checked = false;
+document.getElementById("disableusers").checked = false;
+}
+}
+
+
+function resetPage() {
+
+// hide div
+LoadUsers.style.display = "none";
+DisableUsers.style.display = "none";
+DeleteUsers.style.display = "none";
+// restore single users form buttons
+SingleIds.style.display = "block";
+
+return true;
+
+}
+
+
+// Create PopupWindow objects
+
+//var loginpopup = new PopupWindow("DIVloginhelp");
+//loginpopup.offsetY=20;
+
+//var formpopup = new PopupWindow("DIVformhelp");
+//formpopup.offsetY=20;
+//formpopup.setSize(100,100);
+</script>
+<table WIDTH="100%" BORDER="0">
+<tbody>
+<br>
+<p><DIV class=smSubSectionHead>Add User</DIV></p> 
+<p>Select the type of user you want to add.</p> 
+<form action="/cgi-lawson/veladduser.cgi" method="POST">
+<tr>
+<td title="Creates a Velocity UID that provides system,ftp and LAUA connectivity and a Velocity Authentication ID">
+<input type="checkbox" name="application" id="application" value="Application Server" onclick="validOption()";>&nbsp;Single Core ID</td>
+</tr>
+<tr>
+<td title="Creates a Velocity Authentication ID">
+<input type="checkbox" name="authentication" id="authentication" value="Authentication LDAP" onclick="validOption()";>&nbsp;Single RMID/SSOP Portal ID</font></td>
+</tr>
+
+<tr>
+<td>
+
+<div id="SingleIds" style="display: block;" align=left>
+<table>
+<tr>
+<td>
+<input type="button" class="button" name="selectall" VALUE="Select All" onclick="selectAll(this.form,0)">
+</td>
+<td><input type="submit" class="button" name="Continue" value="Continue" onClick="return checksys(this.form)">
+</td>
+</tr>
+</table>
+</div>
+
+</td>
+</tr>
+
+</form>
+
+<form action="/aspx/fileUpload.aspxcgi" id="LoadUsersForm" name="LoadusersForm" method="POST" ENCTYPE="multipart/form-data">
+<tr>
+<td title="Create IDs using loaduser">
+<input type="checkbox" name="loadusers" id="loadusers" value="validateLoadUsers" onclick="displayDiv('LoadUsers');">&nbsp;Mass Load IDs</font>
+</td>
+</tr>
+
+<tr>
+<td>
+<div id="LoadUsers" style="display: none;" align=left>
+<hr size=1>
+<center>
+<a title="CSV Requirements" href="#" onclick="window.open('loadusers_schema.htm#massadd', '_blank', 'scrollbars=1','width=600,height=700')";>
+<b>Mass Load IDs</b>
+</a>
+</center>
+<br>
+Use this form to initiate the Lawson loadusers utility to create Portal and/or Self Service IDs
+<br>
+You are required to select an authenticaton method and provide the loaduser CSV.
+<br>
+<br>
+<table align=center border=0>
+
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="ad">
+Our Active Directory authenticates IDs.
+</td>
+</tr>
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="vts">
+Velocity authenticates IDs.
+</td>
+</tr>
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="idk">
+Not sure.
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td>
+Required CSV&nbsp;<input type="file" name="LoadCsv" id="LoadCsv">
+</td>
+</tr>
+<tr>
+<td align=center>
+
+<table>
+<tr>
+<td><input type="reset" class="button" name="reset" VALUE="Reset" onClick="return resetPage();"></td>
+<td><input type="submit" class="button" name="Continue" value="Continue" onClick="return checksys(this.form)"></td>
+</tr>
+</table>
+
+</td>
+
+</table>
+<hr size=1>
+</div>
+</form>
+
+</td>
+</tr>
+
+<form action="/aspx/fileUpload.aspxcgi" id="DisableUsersForm" name="DisableUsersForm" method="POST" ENCTYPE="multipart/form-data">
+<tr>
+<td title="Disable IDs using loaduser">
+<input type="checkbox" name="disableusers" id="disableusers" value="validateDisableUsers" onclick="displayDiv('DisableUsers');">&nbsp;Mass Disable IDs</font>
+</td>
+</tr>
+
+<tr>
+<td>
+<div id="DisableUsers" style="display: none;" align=left>
+<hr size=1>
+<center>
+<a title="CSV Requirements" href="#" onclick="window.open('loadusers_schema.htm#massdisable', '_blank', 'scrollbars=1','width=600,height=100')";>
+<b>Mass Disable IDs</b></a>
+</center>
+<br>
+Use this form to initiate the Lawson loadusers utility to disable Portal and/or Self Service IDs
+<br>
+<br>
+<table align=center>
+
+<tr>
+<td>
+Required CSV&nbsp;<input type="file" name="DisableCsv" id="DisableCsv">
+</td>
+</tr>
+<tr>
+<td align=center>
+
+<table>
+<tr>
+<td><input type="reset" class="button" name="reset" VALUE="Reset" onclick="return resetPage();";></td>
+<td><input type="submit" class="button" name="Continue" value="Continue" onClick="return checksys(this.form)"></td>
+</tr>
+</table>
+
+</td>
+
+</table>
+
+<hr size=1>
+
+</div>
+<input type="hidden" name="authentication" id="authentication" value="idk">
+</form>
+
+</td>
+</td>
+
+<form action="/aspx/fileUpload.aspxcgi" id="DeleteUsersForm" name="DeleteUsersForm" method="POST" ENCTYPE="multipart/form-data">
+<tr>
+<td title="Delete IDs using loaduser">
+<input type="checkbox" name="deleteusers" id="deleteusers" value="validateDeleteUsers" onclick="displayDiv('DeleteUsers');">&nbsp;Mass Delete IDs</font>
+</td>
+</tr>
+
+<tr>
+<td>
+<div id="DeleteUsers" style="display: none;" align=left>
+<hr size=1>
+<center>
+<a href="loadusers_schema.htm#massdelete" title="CSV Requirements">
+<a title="CSV Requirements" href="#" onclick="window.open('loadusers_schema.htm#massdelete', '_blank', 'scrollbars=1','width=600,height=100')";>
+<b>Mass Delete IDs</b></a>
+</center>
+<br>
+Use this form to initiate the Lawson loadusers utility to delete Portal and/or Self Service IDs
+<br>
+<br>
+
+<table align=center border=0>
+
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="ad">
+Our Active Directory authenticates IDs.
+</td>
+</tr>
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="vts">
+Velocity authenticates IDs.
+</td>
+</tr>
+<tr>
+<td><input type="radio" name="authentication" id="authentication" value="idk">
+Not sure.
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td>
+Required CSV&nbsp;<input type="file" name="DeleteCsv" id="DeleteCsv">
+</td>
+</tr>
+<tr>
+<td align=center>
+
+<table>
+<tr>
+<td><input type="submit" class="button" name="Continue" value="Continue" onClick="return checksys(this.form)"></td>
+</tr>
+</table>
+
+<hr size=1>
+
+</div>
+</form>
+
+</td>
+</td>
+
+
+</tbody>
+</table>
+
+</form>
+
+
+<!-- The following DIVs contain the help text behind each info button -->
+
+<DIV ID="DIVformhelp" STYLE="position:absolute;visibility:hidden;background-color:#cccccc">
+&nbsp;Displays every Lawson Portal&nbsp;<BR>&nbsp;Productline/Form accessed&nbsp;<BR>&nbsp;with Date/Time/Userid.<BR>
+&nbsp;<A HREF="#" onClick="formpopup.hidePopup();return false;">Hide</A>
+</DIV>
+<DIV ID="DIVloginhelp" STYLE="position:absolute;visibility:hidden;background-color:#cccccc">
+&nbsp;Displays every login&nbsp;<BR>&nbsp;to Lawson Portal&nbsp;<BR>&nbsp;with Date/Time/Userid.<BR>
+&nbsp;<A HREF="#" onClick="loginpopup.hidePopup();return false;">Hide</A>
+</DIV>
+
+
+
+</html>

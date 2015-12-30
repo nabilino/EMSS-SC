@@ -1,0 +1,1332 @@
+<html>
+<head>
+<title>Leave Balances</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var authUser;
+var sysRuleRecords;
+var taMastrRecords;
+var pgemployeeRecords;
+var taTransRecords;
+var tranTypeDescs;
+var taTransId;
+var taTransWidths = new Array();
+
+var tabHeadingsHTML = new Array();
+var tabPlanHolder = new Array();
+var tabBodysHTML = new Array();
+var positionIndices = new Array();
+
+var hoursinADayDivisor;
+var defaultDivisor;
+var tabBodyBalanceTotals = new Array();
+var tabBodyBalanceDetails = new Array();
+
+var total_aval_hrs_flag;
+var total_accr_hours_flag;
+var total_allot_hrs_flag;
+var total_reserve_hrs_flag;
+var total_aval_earn_flag;
+var total_accr_earn_flag;
+var total_allot_earn_flag;
+var total_reserve_earn_flag;
+var total_carry_hrs_flag;
+var total_carry_earn_flag;
+
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var emdseqnbr = 0;
+var CurrentDep = new Object();
+var prm = 3;
+var taskNm = " ";
+var geffectd = "";
+var userAction = "";
+var freeES10DepNbr = 1;
+var currentDepIndex = -1;
+var leaveTabs;
+var familyStatusExists = false;
+var onLoad = true;
+var openMsg = "Open";
+var closeMsg = "Close";
+var openImg = "/lawson/xhrnet/ui/images/ico_reveal_open.gif";
+var closeImg = "/lawson/xhrnet/ui/images/ico_reveal_close.gif";
+var openImgOver = openImg;
+var openImgActive = openImg;
+var closeImgOver = closeImg;
+var closeImgActive = closeImg;
+function CallBack()
+{
+	self.MAIN.document.body.onresize = null;
+	authUser = null;
+	try
+	{
+		if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+		{
+			authUser = opener.authUser;
+		}	
+	}
+	catch(e)
+	{
+		authUser = null;
+	}
+	if (authUser)
+	{
+		stylePage();
+		showWaitAlert(getSeaPhrase("WAIT","ESS"));
+		document.title = getSeaPhrase("LEAVE_BALANCES","ESS");
+		setTaskHeader("header", getSeaPhrase("TIME_ENTRY","TE"), "TimeEntry");
+		try
+		{
+			if (typeof(opener.Employee) != "undefined")
+			{
+				EmployeeName = opener.Employee.EmployeeName;
+				Employee = opener.Employee.EmployeeNbr;
+			}
+			else
+			{
+				Employee = authUser.employee;
+			}
+		}
+		catch(e)
+		{
+			Employee = authUser.employee;
+		}
+		getSysRules(true);
+	}
+	else 
+	{
+		authenticate("frameNm='jsreturn'|funcNm='user=authUser;setEmployee()'|desiredEdit='EM'")
+	}
+}
+function setEmployee() 
+{
+	stylePage();
+	self.printframe.stylePage();
+	setLayerSizes();
+	Employee = authUser.employee;
+	getSysRules(true);
+}
+function getSysRules(setHeader) 
+{
+	if (setHeader) 
+	{
+		showWaitAlert(getSeaPhrase("WAIT","ESS"));
+		document.title = getSeaPhrase("LEAVE_BALANCES","ESS");
+		setTaskHeader("header",getSeaPhrase("LEAVE_BALANCES","ESS"),"TimeEntry");
+	}
+	//call for sysrules, leavebalance system
+	var obj = new DMEObject(authUser.prodline, "sysrules");
+	obj.out = "JAVASCRIPT";
+	obj.index = "syrset1";
+	obj.field = "key1;key2;key3;key4;alphadata1;alphadata2;alphadata3;numeric1;desc;task";
+	obj.key = "LEAVEBALANCE;LEAVEHOURS=LP";
+	obj.debug = false;
+	obj.max	= "600"; //set to 600 to get around dme pt134805 occurs error
+	DME(obj,"jsreturn")
+}
+function getPgemployee() 
+{
+	sysRuleRecords = self.jsreturn.record;
+	var obj = new DMEObject(authUser.prodline, "pgemployee");
+	obj.out = "JAVASCRIPT";
+	obj.field = "group-name";
+	obj.index = "pgeset2";
+	obj.key = authUser.company+"="+Employee;
+	obj.debug = false;
+	obj.max	= "600";
+  	DME(obj,"jsreturn")
+}
+function DspPgemployee() 
+{
+	getTaeemaster();
+}
+function DspSysrules() 
+{
+	getPgemployee();
+}
+function getTaeemaster() 
+{
+	pgemployeeRecords = self.jsreturn.record;
+	var obj = new DMEObject(authUser.prodline, "taeemaster");
+	obj.out = "JAVASCRIPT";
+	obj.index = "temset1";
+	obj.field = "company;employee;plan;plan.balance-type;plan.description;employee-group;employee-group.description;position;position.description;avail-hrs-bal;tastructur.accrual-option;avail-ern-bal;accr-hrs-bal;allot-hrs-bal;resrv-hrs-bal;carry-hrs-bal;accr-ern-bal;allot-ern-bal;resrv-ern-bal;carry-ern-bal;carryover-end;employee.label-name-1";
+	obj.key = authUser.company+"="+Employee;
+	obj.debug = false;
+	obj.otmmax = "1";
+	obj.select = "mstr-end=00000000&mastr-entry<="+authUser.date+"&plan.web-available=2";
+	obj.max	= "600";
+	DME(obj,"jsreturn")
+}
+function DspTaeemaster() 
+{
+	taMastrRecords = self.jsreturn.record;
+	//check if records exist or not
+	if (taMastrRecords.length <= 0)
+	{
+		self.MAIN.document.body.innerHTML = '<br/><div class="fieldlabelboldleft" style="vertical-align:top">'
+		+ getSeaPhrase("NO_LEAVE_BALANCE","ESS") + '</div>'
+		removeWaitAlert();
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		document.getElementById("MAIN").style.visibility = "visible";
+	}
+	else 
+	{
+		determineDivisor();
+		makePage();
+	}
+}
+function determineDivisor() 
+{
+	for (var j=0; j<sysRuleRecords.length; j++) 
+	{
+		if (sysRuleRecords[j].task == "LEAVEHOURS" && sysRuleRecords[j].key1 == "ES023" && parseInt(sysRuleRecords[j].key2,10) == parseInt(authUser.company,10)) 
+		{
+			if (sysRuleRecords[j].key3) 
+			{
+				for (var g=0; g<pgemployeeRecords.length; g++) 
+				{
+					if (pgemployeeRecords[g].group_name == sysRuleRecords[j].key3) 
+					{
+						hoursinADayDivisor = sysRuleRecords[j].numeric1;
+						break;
+					}
+				}
+			}
+			else 
+			{
+				if (!defaultDivisor) 
+				{
+					defaultDivisor = sysRuleRecords[j].numeric1
+				}
+			}
+			if (hoursinADayDivisor) 
+			{
+				break;
+			}
+		}
+	}
+}
+function DrawLeaveTabs(action,depIndex,frameStr)
+{
+	if (typeof(leaveTabs) == "undefined") 
+	{
+		leaveTabs = new leaveBalancesUiTabSet("leaveTabs", tabHeadingsHTML);
+	}
+	leaveTabs.draw = true;
+	leaveTabs.frame = eval(frameStr);
+	leaveTabs.tabHtml = new Array();
+	for (var k=0; k<tabBodysHTML.length; k++) 
+	{
+		leaveTabs.tabHtml[k] = tabBodysHTML[k];
+	}
+	if (onLoad && (prm == 1 || prm == 2)) 
+	{
+		leaveTabs.isDetail = false;
+	}
+	else 
+	{
+		leaveTabs.isDetail = true;
+	}
+	leaveTabs.create();
+	displaySwitchSetup(positionIndices, eval(frameStr));
+	var tmpObj = String(frameStr).split(".");
+	var tmpId = tmpObj[tmpObj.length-1];
+	document.getElementById(tmpId).style.visibility = "visible";
+	onLoad = false;
+}
+function collapsibleListHtml(id)
+{
+	positionIndices[positionIndices.length] = id;
+	var strHtml = '<ul style="margin:0px" id="collapsibleList'+id+'">';
+	return strHtml;
+}
+function collapsibleListItemHtml(id, desc, classNm, expandable)
+{
+	positionIndices[positionIndices.length] = id;
+	var strHtml = '<li'
+	strHtml += ((classNm) ? ' class="'+classNm+'"' : '')	
+	if (expandable)
+	{
+		strHtml += ' onclick="displaySwitchClick(\''+id+'\',\''+openMsg+'\',\''+closeMsg+'\',\''+openImg+'\',\''+openImgOver+'\',\''+openImgActive+'\',\''+closeImg+'\',\''+closeImgOver+'\',\''+closeImgActive+'\');return false;"'
+		+ ' style="cursor:pointer"><img id="Position'+id+'Image" src="'+closeImg+'" alt="'+openMsg+'" title="'+openMsg+'" style="vertical-align:middle" '
+		+ 'onmouseover="this.src=\''+closeImgOver+'\'" onmousedown="this.src=\''+closeImgActive+'\'" onmouseout="this.src=\''+closeImg+'\'">'
+	}
+	else
+	{
+		strHtml += '>'
+	}		
+	strHtml += ' '+desc+'</li>'
+	strHtml += '<ul id="Position'+id+'List" style="padding-left:15px">';	
+	return strHtml;
+}
+function getBalances(sysIndex, taeIndex, tabheadIndex) 
+{
+	var expandable = (Number(sysRuleRecords[sysIndex].alphadata3) != 1);
+	var balDesc = ''
+	if (sysRuleRecords[sysIndex].alphadata2 == 1) 
+	{
+		//display avail_hrs_bal
+		if (hoursinADayDivisor || defaultDivisor) 
+		{
+			//hoursinADayDivisor exists so display days--by all time headings--(always, even 0 days) and display possible carryover (if check) with balances
+			if (hoursinADayDivisor) 
+			{
+				balDesc += getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal)/EvaluateBCD(hoursinADayDivisor))+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			else 
+			{
+				balDesc += getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal)/EvaluateBCD(defaultDivisor))+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			balDesc += '</span>'			
+		}
+		else 
+		{
+			//hoursinADayDivisor does not exist so don't display days, just display possible carryover with balances
+			balDesc += getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+			balDesc += '</span>'
+		}
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.0',balDesc,null,expandable)+'</ul>'		
+		//display carry_hrs_bal
+		if (sysRuleRecords[sysIndex].alphadata1_3 == 2) 
+		{
+			var balDesc2 = truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].carry_hrs_bal))
+			if (taMastrRecords[taeIndex].carryover_end != "")
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_HOURS_USED_BY","ESS")+' '+taMastrRecords[taeIndex].carryover_end
+			else
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_HOURS_INCLUDED","ESS")		
+			tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.8',balDesc2,'carryover',expandable)+'</ul>'
+			total_carry_hrs_flag = true;
+			Total_Carryover_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].carry_hrs_bal));
+		}		
+		total_aval_hrs_flag = true;
+		Total_Available_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal));
+	}
+	else if (sysRuleRecords[sysIndex].alphadata2 == 2) 
+	{
+		//display avail_ern_bal		
+		balDesc += getSeaPhrase("AVAILABLE_EARNINGS","ESS")+': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_ern_bal))
+		balDesc += '</span>'
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.1',balDesc,null,expandable)+'</ul>'
+		//display carry_ern_bal
+		if (sysRuleRecords[sysIndex].alphadata1_7 == 2) 
+		{
+			var balDesc2 = truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].carry_ern_bal))
+			if (taMastrRecords[taeIndex].carryover_end != "")
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_AMOUNT_USED_BY","ESS")+' '+taMastrRecords[taeIndex].carryover_end
+			else
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_AMOUNT_INCLUDED","ESS")
+			tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.9',balDesc2,'carryover',expandable)+'</ul>'
+			total_carry_earn_flag = true;
+			Total_Carryover_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].carry_ern_bal));
+		}		
+		total_aval_earn_flag = true;
+		Total_Available_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].avail_ern_bal));
+	}
+	else if (sysRuleRecords[sysIndex].alphadata2 == 3) 
+	{
+		//display avail_hrs_balance
+		if (hoursinADayDivisor || defaultDivisor) 
+		{
+			//hoursinADayDivisor exists so display days--by all time headings--(always, even 0 days) and display possible carryover (if check) with balances
+			if (hoursinADayDivisor) 
+			{
+				balDesc += getSeaPhrase("AVAILABLE_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			else 
+			{
+				balDesc += getSeaPhrase("AVAILABLE_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal)/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			balDesc += '</span>'
+		}
+		else 
+		{
+			//hoursinADayDivisor does not exist so don't display days, just display possible carryover with balances
+			balDesc += getSeaPhrase("AVAILABLE_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+			balDesc += '</span>'
+		}
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.0',balDesc,null,expandable)+'</ul>'
+		//display carry_hrs_bal
+		if (sysRuleRecords[sysIndex].alphadata1_3 == 2) 
+		{
+			var balDesc2 = truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].carry_hrs_bal))
+			if (taMastrRecords[taeIndex].carryover_end != "")
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_HOURS_USED_BY","ESS")+' '+taMastrRecords[taeIndex].carryover_end
+			else
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_HOURS_INCLUDED","ESS")
+			tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.8',balDesc2,'carryover',expandable)+'</ul>'	
+			total_carry_hrs_flag = true;
+			Total_Carryover_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].carry_hrs_bal));
+		}		
+		total_aval_hrs_flag = true;
+		Total_Available_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].avail_hrs_bal));
+		//display avail_ern_bal
+		balDesc = getSeaPhrase("AVAILABLE_EARNINGS","ESS")+': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].avail_ern_bal))
+		balDesc += '</span>'
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.1',balDesc,null,expandable)+'</ul>'
+		//display carry_ern_bal
+		if (sysRuleRecords[sysIndex].alphadata1_7 == 2) 
+		{
+			var balDesc2 = truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].carry_ern_bal))
+			if (taMastrRecords[taeIndex].carryover_end != "")
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_AMOUNT_USED_BY","ESS")+' '+taMastrRecords[taeIndex].carryover_end
+			else
+				balDesc2 += ' '+getSeaPhrase("CARRYOVER_AMOUNT_INCLUDED","ESS")
+			tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.9',balDesc2,'carryover',expandable)+'</ul>'	
+			total_carry_earn_flag = true;
+			Total_Carryover_Earnings += parseFloat(taMastrRecords[taeIndex].carry_ern_bal);
+		}		
+		total_aval_earn_flag = true;
+		Total_Available_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].avail_ern_bal));
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_1 == 2) 
+	{
+		balDesc = ''
+		//display accr_hrs_bal
+		if (hoursinADayDivisor || defaultDivisor) 
+		{
+			if (hoursinADayDivisor) 
+			{
+				balDesc += getSeaPhrase("ACCRUED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			else 
+			{
+				balDesc += getSeaPhrase("ACCRUED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal)/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			balDesc += '</span>'
+		}
+		else 
+		{
+			balDesc += getSeaPhrase("ACCRUED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+			balDesc += '</span>'
+		}
+		total_accr_hours_flag = true;
+		Total_Accrual_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].accr_hrs_bal));
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.2',balDesc,null,expandable)+'</ul>'		
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_2 == 2) 
+	{
+		balDesc = ''
+		//display allot_hrs_bal
+		if (hoursinADayDivisor || defaultDivisor) 
+		{
+			if (hoursinADayDivisor) 
+			{
+				balDesc += getSeaPhrase("ALLOTTED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			else 
+			{
+				balDesc += getSeaPhrase("ALLOTTED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal)/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			balDesc += '</span>'
+		}
+		else 
+		{
+			balDesc += getSeaPhrase("ALLOTTED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+			balDesc += '</span>'
+		}
+		total_allot_hrs_flag = true;
+		Total_Allotment_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].allot_hrs_bal));
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.3',balDesc,null,expandable)+'</ul>'		
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_4 == 2) 
+	{
+		balDesc = ''
+		//display resrv_hrs_bal
+		if (hoursinADayDivisor || defaultDivisor) 
+		{
+			if (hoursinADayDivisor) 
+			{
+				balDesc += getSeaPhrase("RESERVED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+			else 
+			{
+				balDesc += getSeaPhrase("RESERVED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal)/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+			}
+		}
+		else 
+		{
+			balDesc += getSeaPhrase("RESERVED_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+		}
+		total_reserve_hrs_flag = true;
+		Total_Reserve_Hours += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].resrv_hrs_bal));
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.4',balDesc,null,expandable)+'</ul>'		
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_5 == 2) 
+	{
+		//display accr_ern_bal
+		balDesc = getSeaPhrase("ACCRUED_EARNINGS","ESS")+': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].accr_ern_bal))+'</span>'
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.5',balDesc,null,expandable)+'</ul>'
+		total_accr_earn_flag = true;
+		Total_Accrual_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].accr_ern_bal));
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_6 == 2) 
+	{
+		//display allot_ern_bal
+		balDesc = getSeaPhrase("ALLOTTED_EARNINGS","ESS")+': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].allot_ern_bal))+'</span>'
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.6',balDesc,null,expandable)+'</ul>'
+		total_allot_earn_flag = true;
+		Total_Allotment_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].allot_ern_bal));
+	}
+	if (sysRuleRecords[sysIndex].alphadata1_8 == 2) 
+	{
+		//display resrv_ern_bal
+		balDesc = getSeaPhrase("RESERVED_EARNINGS","ESS")+': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[taeIndex].resrv_ern_bal))+'</span>'
+		tabBodyBalanceDetails[tabheadIndex] += collapsibleListItemHtml(tabheadIndex+'.'+taeIndex+'.7',balDesc,null,expandable)+'</ul>'
+		total_reserve_earn_flag = true;
+		Total_Reserve_Earnings += parseFloat(EvaluateBCD(taMastrRecords[taeIndex].resrv_ern_bal));
+	}
+}
+function makePage(onsort) 
+{
+	positionIndices = new Array();
+	openMsg = getSeaPhrase("DISPLAY_ITEMS","ESS");
+	closeMsg = getSeaPhrase("RETRACT_ITEMS","ESS");
+	var lastSetPlan;
+	var lastSetPlan2;
+	var g = 0;
+	//store tab names
+	for (var i=0; i<taMastrRecords.length; i++) 
+	{
+		if (taMastrRecords[i].plan == lastSetPlan) 
+		{
+			//do nothing
+		}
+		else 
+		{
+			lastSetPlan = taMastrRecords[i].plan;
+			tabHeadingsHTML[g] = taMastrRecords[i].plan_description;
+			tabPlanHolder[g] = taMastrRecords[i].plan;
+			g++;
+		}
+	}
+	//create and store tab bodies
+	for (var b=0; b<tabPlanHolder.length; b++) 
+	{
+		var tempGroup = null;
+		//if you want the totals display to only display balances dynamically, in sync with balance details, set flags
+		total_aval_hrs_flag = false;
+		total_aval_hrs_flag = false;
+		total_accr_hours_flag = false;
+		total_allot_hrs_flag = false;
+		total_reserve_hrs_flag = false;
+		total_aval_earn_flag = false;
+		total_accr_earn_flag = false;
+		total_allot_earn_flag = false;
+		total_reserve_earn_flag = false;
+		total_carry_hrs_flag = false;
+		total_carry_earn_flag = false;
+
+		//initialize totals
+		Total_Available_Hours = 0.00;
+		Total_Accrual_Hours = 0.00;
+		Total_Allotment_Hours = 0.00;
+		Total_Reserve_Hours = 0.00;
+		Total_Carryover_Hours = 0.00;
+		Total_Available_Earnings = 0.00;
+		Total_Accrual_Earnings = 0.00;
+		Total_Allotment_Earnings = 0.00;
+		Total_Carryover_Earnings = 0.00;
+		Total_Reserve_Earnings = 0.00;
+
+		tabBodysHTML[b] = '<table border="0" cellspacing="0" cellpadding="0" width="100%">\n'		
+				
+		tabBodysHTML[b] += '<tr><td style="width:40%"><div class="fieldlabelboldwhiteblue" style="height:22px">'+getSeaPhrase("BALANCE_TOTALS","ESS")+'</div></td>'
+		+ '<td style="width:60%">'
+		
+		if (window.print && taMastrRecords.length > 0)
+		{
+			tabBodysHTML[b] += '<div class="buttonBar">' + uiButton(getSeaPhrase("PRINT","BEN"),"parent.printForm("+b+");return false",false,"printbtn") + '</div>';
+		}	
+		
+		tabBodysHTML[b] += '<div class="fieldlabelboldwhitegreen" style="height:22px">'+getSeaPhrase("BALANCE_DETAILS","ESS")+'</div>'
+		tabBodysHTML[b] += '</td></tr>'
+		
+		//balance totals setup
+		tabBodyBalanceTotals[b] = '<tr><td valign="top" id="balancetotals_'+ b +'" class="balancetotals" style="width:40%">'
+		+ '<div class="balanceinnertotals">'
+		+ '<ul>'
+
+		//make the balance details body
+		tabBodyBalanceDetails[b] = '<td valign="top" id="balancedetails_'+ b +'" class="balancedetails" style="width:60%">'
+
+		//define groups and positions
+		for (var i=0; i<taMastrRecords.length; i++) 
+		{
+			//check to see if we are within the same plan
+			if (tabPlanHolder[b] == taMastrRecords[i].plan) 
+			{
+				//if tempGroup == taMastrRecords[i-1].employee_group we are within the same group, so just go display positions
+				if (i == 0 || tempGroup != taMastrRecords[i].employee_group) 
+				{
+					tabBodyBalanceDetails[b] += '<h1>'+taMastrRecords[i].employee_group_description+'</h1>'
+					+ '<div class="balanceinnerdetails" id="balanceinnerdetails">'
+					tempGroup = taMastrRecords[i].employee_group;
+				}
+				//check for positions
+				if (taMastrRecords[i].position_description) 
+				{
+					tabBodyBalanceDetails[b] += collapsibleListHtml(b+'.'+i)
+					+ collapsibleListItemHtml(b+'.'+i,taMastrRecords[i].position_description,null,true)
+	  			}
+	  			else 
+	  			{
+		  			tabBodyBalanceDetails[b] += '<ul id="StaticList" style="list-style:none">';
+	  			}
+	  			
+	  			//check system rules in sysrules file
+		  		var sysRuleFound = false;
+		  		var firstSysRule = -1;
+		  		var secondSysRule = -1;
+		  		var thirdSysRule = -1;
+		  		for (var j=0; j<sysRuleRecords.length; j++) 
+		  		{
+					var compkey = sysRuleRecords[j].key2
+					var company = taMastrRecords[i].company;
+					if (sysRuleRecords[j].key1 == "ES022" && parseInt(compkey,10) == parseInt(company,10) && sysRuleRecords[j].key3 == taMastrRecords[i].plan && sysRuleRecords[j].key4 == taMastrRecords[i].employee_group) 
+					{
+						if (firstSysRule == -1) 
+							firstSysRule = j;
+					}
+					else 
+					{
+						if (sysRuleRecords[j].key1 == "ES022" && parseInt(compkey,10) == parseInt(company,10) && sysRuleRecords[j].key3 == taMastrRecords[i].plan && sysRuleRecords[j].key4 == "") 
+						{
+							if (secondSysRule == -1) 
+								secondSysRule = j;
+						}
+						else 
+						{
+							if (sysRuleRecords[j].key1 == "ES022" && parseInt(compkey,10) == parseInt(company,10) && sysRuleRecords[j].key3 == "" && sysRuleRecords[j].key4 == "") 
+							{
+								if (thirdSysRule == -1) 
+									thirdSysRule = j;
+							}
+						}
+					}
+				}
+				//if we found a sysrule record, set plan description = sysrules desc and determine which balances to display
+				if (firstSysRule != -1) 
+				{
+					if (sysRuleRecords[firstSysRule].desc != "")  
+						tabHeadingsHTML[b] = sysRuleRecords[firstSysRule].desc;
+					getBalances(firstSysRule,i,b);
+					sysRuleFound = true;
+				}
+				else 
+				{
+					if (secondSysRule != -1) 
+					{
+						if (sysRuleRecords[secondSysRule].desc != "") 
+							tabHeadingsHTML[b] = sysRuleRecords[secondSysRule].desc;
+						getBalances(secondSysRule,i,b);
+						sysRuleFound = true;
+					}
+					else 
+					{
+						if (thirdSysRule != -1) 
+						{
+							if (sysRuleRecords[thirdSysRule].desc != "") 
+								tabHeadingsHTML[b] = sysRuleRecords[thirdSysRule].desc;
+							getBalances(thirdSysRule,i,b);
+							sysRuleFound = true;
+						}
+					}
+				}
+				if (sysRuleFound == false) 
+				{	
+					var balDesc = ''
+					//sysrule record not found
+					if (taMastrRecords[i].tastructur_accrual_option == "1") 
+					{
+						//set plan description = TAP-DESCRIPTION and display only available_hours
+						if (hoursinADayDivisor) 
+						{
+							//hoursinADayDivisor exists so display days--by all time headings--(always, even 0 days) and display possible carryover (if check) with balances
+							balDesc += getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+							balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+							balDesc += '</span>'
+						}
+						else 
+						{
+							//hoursinADayDivisor does not exist so don't display days, just display possible carryover with balances
+							balDesc += getSeaPhrase("AVAILABLE_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+							balDesc += '</span>'
+						}
+						tabBodyBalanceDetails[b] += collapsibleListItemHtml(b+'.'+i+'.0',balDesc,null,true)+'</ul>'	
+						Total_Available_Hours += parseFloat(EvaluateBCD(taMastrRecords[i].avail_hrs_bal));
+						total_aval_hrs_flag = true;
+					}
+					else 
+					{
+						if (taMastrRecords[i].tastructur_accrual_option == "2") 
+						{
+							//set plan description = TAP-DESCRIPTION and display only available_earnings
+							balDesc += getSeaPhrase("AVAILABLE_EARNINGS","ESS") + ': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_ern_bal))
+							balDesc += '</span>'
+							tabBodyBalanceDetails[b] += collapsibleListItemHtml(b+'.'+i+'.1',balDesc,null,true)+'</ul>'
+							Total_Available_Earnings += parseFloat(EvaluateBCD(taMastrRecords[i].avail_ern_bal));
+							total_aval_earn_flag = true;
+						}
+						else 
+						{
+							if (taMastrRecords[i].tastructur_accrual_option == "3") 
+							{
+								var balDesc2 = ''
+								//set plan description = TAP-DESCRIPTION for taeemaster record[i] and display only available_earnings and available_hours
+								if (hoursinADayDivisor) 
+								{
+									//hoursinADayDivisor exists so display days--by all time headings--(always, even 0 days) and display possible carryover (if check) with balances
+									balDesc += getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+									balDesc += ' ('+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal)/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+									balDesc += '</span>'
+								}
+								else 
+								{
+									//hoursinADayDivisor does not exist so don't display days, just display possible carryover with balances
+									balDesc += getSeaPhrase("AVAILABLE_TIME","ESS")+': <span>'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_hrs_bal))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+									balDesc += '</span>'
+								}
+								tabBodyBalanceDetails[b] += collapsibleListItemHtml(b+'.'+i+'.0',balDesc,null,true)+'</ul>'	
+								//now display earnings
+								balDesc2 += getSeaPhrase("AVAILABLE_EARNINGS","ESS") + ': <span>'+' $'+truncateTwoDecimals(EvaluateBCD(taMastrRecords[i].avail_ern_bal))
+								balDesc2 += '</span>'
+								tabBodyBalanceDetails[b] += collapsibleListItemHtml(b+'.'+i+'.1',balDesc2,null,true)+'</ul>'
+								total_aval_hrs_flag = true;
+								total_aval_earn_flag = true;
+								Total_Available_Hours += parseFloat(EvaluateBCD(taMastrRecords[i].avail_hrs_bal));
+								Total_Available_Earnings += parseFloat(EvaluateBCD(taMastrRecords[i].avail_ern_bal));
+							}
+							else 
+							{
+								alert("ERROR: Could not match SYSRULES records or TAP-BALANCE-TYPEs");
+								exit;
+							}
+						}
+					}
+				}
+		  		if (taMastrRecords[i].position_description) 
+		  			tabBodyBalanceDetails[b] += '</ul></ul>'
+  				else 
+	  				 tabBodyBalanceDetails[b] += '</ul>'
+  				//check if group is completely populated
+  				if (i+1 == taMastrRecords.length || tempGroup !=  taMastrRecords[i+1].employee_group) 
+	  				tabBodyBalanceDetails[b] += '</div>'
+			}
+		}
+
+		//balance totals display
+		if (hoursinADayDivisor == null && defaultDivisor == null) 
+		{
+			//hoursinADayDivisor does not exist so don't display days, just display possible carryover with balances
+			if (total_aval_hrs_flag) 
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(EvaluateBCD(Total_Available_Hours))+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+				tabBodyBalanceTotals[b] += '</span></li>'
+				if (total_carry_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Hours)
+					if (taMastrRecords[b].carryover_end != "")
+						tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+					else
+						tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_INCLUDED","ESS")
+					tabBodyBalanceTotals[b] += '</li>'
+				}				
+			}
+			if (total_accr_hours_flag) 
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ACCRUED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Accrual_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")+'</span></li>'
+			}
+			if (total_allot_hrs_flag) 
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Allotment_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")+'</span></li>'
+			}
+			if (total_reserve_hrs_flag) 
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Reserve_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")+'</span></li>'
+			}
+			if ((total_aval_hrs_flag ||  total_accr_hours_flag ||  total_allot_hrs_flag ||  total_reserve_hrs_flag) && (total_aval_earn_flag || total_accr_earn_flag || total_allot_earn_flag || total_reserve_earn_flag || total_carry_earn_flag)) 
+			{
+				tabBodyBalanceTotals[b] += '<hr/>'
+			}
+			if (total_aval_earn_flag) 
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Available_Earnings)
+				tabBodyBalanceTotals[b] += '</span></li>'
+				if (total_carry_earn_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Earnings)
+					if (taMastrRecords[b].carryover_end != "")
+						tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+					else
+						tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_INCLUDED","ESS")
+					tabBodyBalanceTotals[b] += '</li>'
+				}				
+			}
+			if (total_accr_earn_flag)
+			{
+				tabBodyBalanceTotals[b] += '</li><li>'+ getSeaPhrase("ACCRUED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Accrual_Earnings)+'</span></li>'
+			}
+			if (total_allot_earn_flag)
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Allotment_Earnings)+'</span></li>'
+			}
+			if (total_reserve_earn_flag)
+			{
+				tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Reserve_Earnings)+'</span></li>'
+			}
+			tabBodyBalanceTotals[b] += '</ul></div>'+'</td>'
+		}
+		else 
+		{
+			//hoursinADayDivisor exists so display days--by all time headings--(always, even 0 days) and display possible carryover (if check) with balances
+			if (hoursinADayDivisor) 
+			{
+				if (total_aval_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Available_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")+' '
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Available_Hours/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+					tabBodyBalanceTotals[b] += '</span></li>'
+					if (total_carry_hrs_flag != 0) 
+					{
+						tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Hours)
+						if (taMastrRecords[b].carryover_end != "")
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+						else
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_INCLUDED","ESS")
+						tabBodyBalanceTotals[b] += '</li>'
+					}					
+				}
+				if (total_accr_hours_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ACCRUED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Accrual_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Accrual_Hours/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if (total_allot_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Allotment_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Allotment_Hours/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if (total_reserve_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Reserve_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Reserve_Hours/hoursinADayDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if ((total_aval_hrs_flag ||  total_accr_hours_flag ||  total_allot_hrs_flag ||  total_reserve_hrs_flag) && (total_aval_earn_flag || total_accr_earn_flag || total_allot_earn_flag || total_reserve_earn_flag || total_carry_earn_flag)) 
+				{
+					tabBodyBalanceTotals[b] += '<hr/>'
+				}
+				if (total_aval_earn_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Available_Earnings)
+					tabBodyBalanceTotals[b] += '</span></li>'
+					if (total_carry_earn_flag) 
+					{
+						tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Earnings)
+						if (taMastrRecords[b].carryover_end != "")
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+						else
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_INCLUDED","ESS")
+						tabBodyBalanceTotals[b] += '</li>'
+					}					
+				}
+				if (total_accr_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '</li><li>'+ getSeaPhrase("ACCRUED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Accrual_Earnings)+'</span></li>'
+				}
+				if (total_allot_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Allotment_Earnings)+'</span></li>'
+				}
+				if (total_reserve_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Reserve_Earnings)+'</span></li>'
+				}
+				tabBodyBalanceTotals[b] += '</ul></div>'+'</td>'
+			}
+			else 
+			{
+				//use default divisor
+				if (total_aval_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Available_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Available_Hours/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'
+					tabBodyBalanceTotals[b] += '</span></li>'
+					if (total_carry_hrs_flag != 0) 
+					{
+						tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Hours)
+						if (taMastrRecords[b].carryover_end != "")
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+						else
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_HOURS_INCLUDED","ESS")
+						tabBodyBalanceTotals[b] += '</li>'
+					}					
+				}
+				if (total_accr_hours_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ACCRUED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Accrual_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Accrual_Hours/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if (total_allot_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Allotment_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Allotment_Hours/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if (total_reserve_hrs_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_TIME","ESS") + ': <span>'+truncateTwoDecimals(Total_Reserve_Hours)+' '+getSeaPhrase("HOURS_LOWER","ESS")
+					tabBodyBalanceTotals[b] += ' ('+truncateTwoDecimals(Total_Reserve_Hours/defaultDivisor)+' '+getSeaPhrase("DAYS_LOWER","ESS")+')'+'</span></li>'
+				}
+				if ((total_aval_hrs_flag ||  total_accr_hours_flag ||  total_allot_hrs_flag ||  total_reserve_hrs_flag) && (total_aval_earn_flag || total_accr_earn_flag || total_allot_earn_flag || total_reserve_earn_flag || total_carry_earn_flag)) 
+				{
+					tabBodyBalanceTotals[b] += '<hr/>'
+				}
+				if (total_aval_earn_flag) 
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("AVAILABLE_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Available_Earnings)
+					tabBodyBalanceTotals[b] += '</span></li>'
+					if (total_carry_earn_flag) 
+					{
+						tabBodyBalanceTotals[b] += '<li class="carryover">'+truncateTwoDecimals(Total_Carryover_Earnings)
+						if (taMastrRecords[b].carryover_end != "")
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_USED_BY","ESS")+' '+taMastrRecords[b].carryover_end
+						else
+							tabBodyBalanceTotals[b] += ' '+getSeaPhrase("CARRYOVER_AMOUNT_INCLUDED","ESS")
+						tabBodyBalanceTotals[b] += '</li>'
+					}					
+				}
+				if (total_accr_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '</li><li>'+ getSeaPhrase("ACCRUED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Accrual_Earnings)+'</span></li>'
+				}
+				if (total_allot_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("ALLOTTED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Allotment_Earnings)+'</span></li>'
+				}
+				if (total_reserve_earn_flag)
+				{
+					tabBodyBalanceTotals[b] += '<li>'+ getSeaPhrase("RESERVED_EARNINGS","ESS") + ': <span>'+'$'+truncateTwoDecimals(Total_Reserve_Earnings)+'</span></li>'
+				}
+				tabBodyBalanceTotals[b] += '</ul></div>'+'</td>'
+			}
+		}
+		
+		tabBodyBalanceDetails[b] += '</td>'+'</tr>'
+		//concat total and detail bodies
+		tabBodysHTML[b] += tabBodyBalanceTotals[b] + tabBodyBalanceDetails[b];
+		tabBodysHTML[b] += '</table>\n'
+	}
+	try 
+	{
+		DrawLeaveTabs("Add",-1,"self.MAIN");
+	}
+	catch(e) {}
+	if (!onsort) 
+	{
+		fitToScreen();
+		document.getElementById("MAIN").style.visibility = "visible";
+	}
+	removeWaitAlert();
+}
+function switchClicked(id)
+{
+	id = id.toString();
+	var listObj = self.MAIN.document.getElementById('Position'+id+'List');
+	if (!listObj || listObj.style.display == "none")
+		return;
+	var idIndices = id.split('.');
+	if (idIndices.length > 2)
+	{
+		showWaitAlert(getSeaPhrase("WAIT","ESS"));
+		var tabIndex = parseInt(idIndices[0],10);
+		var taeIndex = parseInt(idIndices[1],10);
+		var balType = parseInt(idIndices[2],10);
+		getMoreBalanceDetails(taeIndex,balType,'Position'+id+'List');
+	}
+}
+function getMoreBalanceDetails(taeIndex, balType, listID)
+{
+	if (typeof(tranTypeDescs) == "undefined" || !tranTypeDescs)
+		setTranTypeDescs();	
+	var taeRec = taMastrRecords[taeIndex];
+	var condStr = "closed";
+	var selectStr = "";
+	var amountFld = "";
+	switch (balType)
+	{
+		case 0: condStr += ";available;hours"; amountFld = "ta-hours"; break; //available time
+		case 1: condStr += ";available;earnings"; amountFld = "ta-earnings"; break; //available earnings
+		case 2: condStr += ";accrual;hours"; amountFld = "ta-hours"; break; //accrued time
+		case 3: condStr += ";allotment;hours"; amountFld = "ta-hours"; break; //allotted time
+		case 4: condStr += ";hours"; selectStr += "balance-type=4"; amountFld = "ta-hours"; break; //reserved time
+		case 5: condStr += ";accrual;earnings"; amountFld = "ta-earnings"; break; //accrued earnings
+		case 6: condStr += ";allotment;earnings"; amountFld = "ta-earnings"; break; //allotted earnings
+		case 7: condStr += ";earnings"; selectStr += "balance-type=4"; amountFld = "ta-earnings"; break; //reserved earnings
+		case 8: condStr += ";carryover;hours"; amountFld = "ta-hours"; break; //carryover time
+		case 9: condStr += ";carryover;earnings"; amountFld = "ta-earnings"; break; //carryover earnings
+		default: break;
+	}
+	var obj = new DMEObject(authUser.prodline, "taemptrans");
+	obj.out = "JAVASCRIPT";
+	obj.index = "ttrset7";
+	obj.field = "date;tran-type;" + amountFld;
+	obj.key = authUser.company + "=" + Employee + "=" + escapeEx(taeRec.plan,1) + "=" + escapeEx(taeRec.employee_group,1) + "=" + escapeEx(taeRec.position,1);
+	obj.debug = false;
+	obj.otmmax = "1";
+	obj.cond = condStr;
+	if (selectStr)
+		obj.select = selectStr; 
+	obj.max	= "10";
+	obj.func = "DspTaemptrans('"+listID+"')";
+	DME(obj,"jsreturn");	
+}
+function DspTaemptrans(listID)
+{
+	var listObj = self.MAIN.document.getElementById(listID);
+	listObj.style.listStyle = "none";
+	taTransRecords = self.jsreturn.record;
+	var hasPreviousOrNext = (self.jsreturn.Prev || self.jsreturn.Next)?true:false;
+	var sb = new Array();
+	sb[sb.length] = '<div style="height:auto;width:100%;overflow:auto;padding-bottom:3px">';
+	sb[sb.length] = '<table id="'+listID+'Trans" border="0" cellspacing="0" cellpadding="0" class="plaintableborder" style="width:100%" styler="list">';
+	sb[sb.length] = '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center;width:25%;white-space:nowrap">'+getSeaPhrase("DATE","ESS")+'</th>';
+	sb[sb.length] = '<th scope="col" class="plaintableheaderborderlite" style="text-align:center;width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th>';
+	sb[sb.length] = '<th scope="col" class="plaintableheaderborderlite" style="text-align:center;width:25%;white-space:nowrap">'+getSeaPhrase("AMOUNT","ESS")+'</th></tr>';
+	if (taTransRecords.length > 0)
+	{
+		for (var j=0; j<taTransRecords.length; j++)
+		{
+			var tranRec = taTransRecords[j];
+			sb[sb.length] = '<tr><td class="plaintablecellborder" style="text-align:center">'+((tranRec.date)?tranRec.date:'&nbsp;')+'</td>';
+			sb[sb.length] = '<td class="plaintablecellborder">'+((tranRec.tran_type)?getTranTypeDesc(tranRec.tran_type):'&nbsp;')+'</td>';
+			if (typeof(tranRec.ta_hours) != "undefined")
+				sb[sb.length] = '<td class="plaintablecellborderright">'+truncateTwoDecimals(EvaluateBCD(tranRec.ta_hours))+'</td></tr>';
+			else
+				sb[sb.length] = '<td class="plaintablecellborderright">'+truncateTwoDecimals(EvaluateBCD(tranRec.ta_earnings))+'</td></tr>';	
+		}
+	}	
+	else
+	{
+		sb[sb.length] = '<tr><td colspan="3" class="plaintablecellborder">'+getSeaPhrase("NO_BALANCE_DETAILS","SEA")+'</td></tr>';
+	}
+	sb[sb.length] = '</table></div>';	
+	if (hasPreviousOrNext)
+	{
+		sb[sb.length] = '<div style="height:auto;width:100%;overflow:none"><table id="'+listID+'Nav" border="0" cellspacing="0" cellpadding="0" style="width:100%">';
+		sb[sb.length] = '<tr><td>'+((self.jsreturn.Prev)?'<a href="javascript:void(0);" onclick="parent.getPrevDtl(\''+self.jsreturn.Prev+'\');return false;">'+getSeaPhrase("PREVIOUS","ESS")+'</a>':'&nbsp;')+'</td>';
+		sb[sb.length] = '<td class="textAlignRight">'+((self.jsreturn.Next)?'<a href="javascript:void(0);" onclick="parent.getNextDtl(\''+self.jsreturn.Next+'\');return false;">'+getSeaPhrase("NEXT","ESS")+'</a>':'&nbsp;')+'</td>';
+		sb[sb.length] = '</tr></table></div>';
+	}
+	listObj.innerHTML = sb.join("");
+	var transTbl = self.MAIN.document.getElementById(listID+"Trans");
+	self.MAIN.styleElement(transTbl);
+	transTbl.setAttribute("hasPreviousOrNext", String(hasPreviousOrNext));
+	fitToScreen();
+	removeWaitAlert();
+}
+function setTranTypeDescs()
+{
+	tranTypeDescs = new Array();
+	var tranTypes = new Array(1,2,3,4,5,11,12,21,22,31,32,33,34,35,42,43,44,45,
+		46,47,48,51,52,61,63,71,72,73,74,75,81,82,83,84,85,91,92,93,94,95);	
+	for (var i=0; i<tranTypes.length; i++)	
+		tranTypeDescs[tranTypes[i]] = getSeaPhrase("TRAN_TYPE_"+tranTypes[i],"SEA");
+}
+function getTranTypeDesc(tranType)
+{
+	var ttDesc = null;
+	try 
+	{
+		ttDesc = tranTypeDescs[parseInt(tranType,10)];
+	}
+	catch(e) {}
+	if (!ttDesc)
+		return tranType;
+	else
+		return ttDesc;
+}
+function getPrevDtl(url)
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	self.jsreturn.location.replace(url);
+}
+function getNextDtl(url)
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	self.jsreturn.location.replace(url);
+}
+function truncateTwoDecimals(balance) 
+{
+	balance = Number(balance); 
+	var result = balance.toFixed(3) + ""; 
+	return result.substring(0, result.length - 1); 
+}
+function leaveTabs_OnClick(tab)
+{
+	var tabProps = tab.id.split("_");
+	var tabId = tabProps[0];
+	var tabType = tabProps[1];
+	var tabNbr = tabProps[2];
+	if (Number(tabNbr) != leaveTabs.getActiveTab())
+	{
+		taTransWidths[Number(tabNbr)] = null;
+	}
+	return true;
+}
+function escapeEx(arg)
+{
+	arg = escape(arg,1);
+	return arg.replace(/\+/g, "%2B");
+}
+function resizeDetailTable(listID, tableWidth)
+{
+	var transTbl = self.MAIN.document.getElementById(listID+"Trans");
+	var tabNbr = leaveTabs.getActiveTab();
+	var scrollBar = false;
+	var dtlWidth;
+
+	if(tableWidth && !isNaN(Number(tableWidth)) && Number(tableWidth) >= 0)
+		dtlWidth = tableWidth;
+	else if (typeof(taTransWidths[tabNbr]) != "undefined" && taTransWidths[tabNbr] != null && !isNaN(taTransWidths[tabNbr]))
+		dtlWidth = Number(taTransWidths[tabNbr]);
+	else
+	{
+		dtlWidth = transTbl.offsetWidth;
+		taTransWidths[tabNbr] = dtlWidth;
+	}	
+	if (transTbl.offsetHeight > 140)
+	{
+		scrollBar = true;
+		transTbl.parentNode.style.height = "140px";
+	}
+	else
+	{	
+		dtlWidth -= 15;
+		try
+		{
+			if (navigator.appName.indexOf("Microsoft") >= 0 && styler.showLDS)
+				dtlWidth -= 5;
+		}
+		catch(e) {}
+	}
+	transTbl.parentNode.style.width = dtlWidth + "px";
+
+	var hasPreviousOrNext = transTbl.getAttribute("hasPreviousOrNext");
+	if (hasPreviousOrNext != null && hasPreviousOrNext == "true")
+	{
+		var navTbl = self.MAIN.document.getElementById(listID+"Nav");
+		navTbl.parentNode.style.width = (scrollBar) ? (dtlWidth - 15) : dtlWidth + "px";
+	}
+}
+function printForm(nTab)
+{
+	var printHTML = "";
+	var empName = (taMastrRecords && taMastrRecords.length > 0) ? taMastrRecords[0].employee_label_name_1 : authUser.name;
+	var headerHtml = '<table>'	
+		+ '<tr>'
+		+ '<td class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">' + getSeaPhrase("EMPLOYEE_NAME","ESS") + ':</span></td>'
+		+ '<td class="plaintablecell">' + empName + '</td>'
+		+ '</tr>'	
+		+ '<tr>'
+		+ '<td class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">' + getSeaPhrase("EMPLOYEE_NUMBER","ESS") + ':</span></td>'
+		+ '<td class="plaintablecell">' + authUser.employee + '</td>'
+		+ '</tr>'					
+		+ '</table><div style="height:20px">&nbsp;</div>';
+	
+	self.printframe.document.title = getSeaPhrase("LEAVE_BALANCES","ESS") + " - " + leaveTabs.tabs[nTab];
+
+    printHTML = '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+    printHTML += '<tr><td>' + getSeaPhrase("BALANCE_TOTALS","ESS") + '</td></tr>'
+	printHTML += '<tr><td class="balancetotals" style="border:0px" nowrap="nowrap">'
+    printHTML += self.MAIN.document.getElementById("balancetotals_"+ nTab).innerHTML
+    printHTML += '</td></tr></table><br/><br/>'
+  	printHTML += '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+    printHTML += '<tr><td>' + getSeaPhrase("BALANCE_DETAILS","ESS") + '</td></tr>'
+    printHTML += '<tr><td class="balancedetails" style="border:0px">'
+    printHTML += self.MAIN.document.getElementById("balancedetails_"+ nTab).innerHTML
+    printHTML += '</td></tr></table>'
+    
+	self.printframe.document.body.innerHTML = headerHtml + printHTML;
+	self.printframe.stylePage();
+
+	var tableList = self.printframe.document.getElementsByTagName("table");
+	
+	for(var i=0; i<tableList.length; i++)
+	{
+		if(tableList[i].getAttribute("id") != null)
+		{
+			if(tableList[i].getAttribute("id").indexOf("Trans") != -1)
+			{
+				tableList[i].parentNode.style.overflow = "visible";			
+				tableList[i].parentNode.style.width = "100%";
+				tableList[i].parentNode.style.height = "100%";
+				tableList[i].style.width = "100%";
+			}
+
+			if(tableList[i].getAttribute("id").indexOf("Nav") != -1)
+			{
+				tableList[i].parentNode.style.width = "0px";
+				tableList[i].style.visibility = "hidden";
+				tableList[i].style.position = "absolute";
+			}
+		}
+	}
+	
+	self.printframe.focus();
+	self.printframe.print();
+}
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+	
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 464;
+	var winWidth = 778;
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+	
+	var fullContentWidth;
+
+	if (window.styler && window.styler.showInfor)
+	{
+		fullContentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth + 10 : winWidth - 6;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		fullContentWidth = winWidth - 17;	
+	}
+	else
+	{
+		fullContentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? (winWidth - 12) : (winWidth - 7);
+	}
+
+	mainFrame.style.width = (winWidth - 10) + "px";
+	mainFrame.style.height = (winHeight - 30) + "px";
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.MAIN.onresize = null;
+	}
+
+	try
+	{
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = fullContentWidth + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}	
+
+	try
+	{
+		setTabContentSizes("leaveTabs", leaveTabs.frame, fullContentWidth, winHeight - 35);
+	}
+	catch(e)
+	{}	
+	
+	var tableList = self.MAIN.document.getElementsByTagName("table");
+
+	for(var i=0; i<tableList.length; i++)
+	{
+		if(tableList[i].getAttribute("id") != null)
+		{
+			var tableID = tableList[i].getAttribute("id");
+			var listID = "";
+
+			if(tableID.indexOf("Trans") != -1)
+			{
+				listID = tableID.substring(0, tableID.indexOf("Trans"));
+
+				try
+				{
+					resizeDetailTable(listID, parseInt(fullContentWidth * 0.60,10));
+				}
+				catch(e)
+				{}
+			}
+		}
+	}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="CallBack()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:5px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/outertabpanehelplite.htm" style="visibility:hidden;position:absolute;width:803px;height:550px;left:5px;top:32px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="7" marginheight="7" scrolling="no"></iframe>
+	<iframe id="printframe" name="printframe" src="/lawson/xhrnet/ui/pane.htm" style="visibility:visible;height:1px;width:800px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/leavebalance.htm,v 1.1.2.58 2012/06/29 17:12:06 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

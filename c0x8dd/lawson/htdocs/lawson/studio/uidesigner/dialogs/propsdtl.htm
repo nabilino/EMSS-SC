@@ -1,0 +1,249 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/propsdtl.htm,v 1.2.6.1.22.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Detail Area Properties</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></SCRIPT>
+<script language="javascript" src="propsdtl.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgPleaseEnterReq">Please enter required value.</phrase>
+		<phrase id="msgColsNotConsistent">Column positions not consistent - must be ascending values.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="dtlInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="dtlOnKeyDown()">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabHeader" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="dtlSwitchTab(this)">Header</span>
+		<span id="tabBody" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="dtlSwitchTab(this)">Body</span>
+		<span id="tabData" class="dsTabButtonInactive" style="top:10;left:140;width:70px;" tabind="2" onclick="dtlSwitchTab(this)">Data</span>
+	</div>
+
+	<!-- Header tab pane -->
+	<div id="divHeader" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" style="height:20px;">
+				<label id="lblDetailId" for="txtDetailId" class="dsLabel" style="position:relative;">
+					Detail Id:&nbsp;
+				</label>
+				<label id="txtDetailId" class="dsLabel" style="position:relative;text-align:left;">
+				</label>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td colspan="3"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2" style="height:20px;">
+				<label id="lblHeaderSize" for="txtHeaderSize" class="dsLabel" style="position:relative;">
+					Header Size:&nbsp;
+				</label>
+				<input type="text" id="txtHeaderSize" class="dsTextBox" maxlength="1" onkeypress="khdlNbrKeyPress()" 
+						onchange="ppgEnableApply()" style="position:relative;width:20px;">
+				</input>
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td><label id="lblAvailable" class="dsLabel">Available fields:</label></td>
+			<td>&nbsp;</td>
+			<td><label id="lblAssigned" class="dsLabel">Assigned fields:</label></td>
+		</tr>
+		<tr>
+			<td>
+				<select id="selHdrAvailable" class="dsListText" size="12" 
+						style="width:185px;height:expression(this.size*17);">
+				</select>
+			</td>
+			<td style="width:80px;" align="center" valign="center">
+				<input id="btnAddHdrSel" type="button" class="dsDlgButton" onclick="dtlAddSel()" 
+						style="position:relative;width:30px" title="Add available selection to assigned" value=">">
+				</input>
+				<input id="btnRemHdrSel" type="button" class="dsDlgButton" onclick="dtlRemSel()" 
+						style="position:relative;width:30px;margin-top:4px;" title="Remove assigned selection" value="<">
+				</input>
+			</td>
+			<td>
+				<select id="selHdrAssigned" class="dsListText" size="12" 
+						style="width:185px;height:expression(this.size*17);">
+				</select>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- Body tab pane -->
+	<div id="divBody" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table id="tblBody" border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" style="height:20px;">
+				<label id="lblDetailId2" for="txtDetailId2" class="dsLabel" style="position:relative;">
+					Detail Id:&nbsp;
+				</label>
+				<label id="txtDetailId2" class="dsLabel" style="position:relative;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td align="right" style="width:28%;height:20px;">
+				<label id="lblRows" for="txtRows" class="dsLabel" style="position:relative;">
+					Rows:&nbsp;
+				</label>
+				<input type="text" id="txtRows" class="dsTextBox" disabled maxlength="2" onkeypress="khdlNbrKeyPress()" 
+						onchange="ppgEnableApply()" style="position:relative;width:20px;">
+				</input>
+			</td>
+			<td align="left" style="height:20px;">
+				<label id="lblRowSpan" for="txtRowSpan" class="dsLabel" style="position:relative;">
+					&nbsp;&nbsp;&nbsp;Row Span:&nbsp;
+				</label>
+				<input type="text" id="txtRowSpan" class="dsTextBox" maxlength="1" onkeypress="khdlNbrKeyPress()" 
+						onchange="ppgEnableApply()" style="position:relative;width:20px;">
+				</input>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" style="width:28%;height:20px;">
+				<label id="lblDtlCols" for="txtDtlCols" class="dsLabel" style="position:relative;">
+					Columns:&nbsp;
+				</label>
+				<input type="text" id="txtDtlCols" class="dsTextBox" maxlength="1" onkeypress="khdlNbrKeyPress()" 
+						onchange="dtlOnColsChange()" style="position:relative;width:20px;">
+				</input>
+			</td>
+			<td id="dtlColsCell" align="left" style="height:20px;">&nbsp;</td>
+		</tr>
+	</table>
+	<table id="tblBody2" border="0" width="100%">
+		<tr>
+			<td><label id="lblAvailableFlds" class="dsLabel">Available form elements:</label></td>
+			<td>&nbsp;</td>
+			<td><label id="lblAssignedFlds" class="dsLabel">Assigned form elements:</label></td>
+		</tr>
+		<tr>
+			<td>
+				<select id="selFldsAvailable" class="dsListText" size="10" 
+						style="width:185px;height:expression(this.size*17);">
+				</select>
+			</td>
+			<td style="width:40px;" align="center" valign="center">
+				<input id="btnAddSelFld" type="button" class="dsDlgButton" onclick="dtlAddSelFld()" 
+						style="position:relative;width:30px" title="Add available selection to assigned" value=">">
+				</input>
+				<input id="btnRemSelFld" type="button" class="dsDlgButton" onclick="dtlRemSelFld()" 
+						style="position:relative;width:30px;margin-top:4px;" title="Remove assigned selection" value="<">
+				</input>
+			</td>
+			<td>
+				<select id="selFldsAssigned" class="dsListText" size="10" 
+						style="width:185px;height:expression(this.size*17);">
+				</select>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- Data tab pane -->
+	<div id="divData" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table id="tblData" border="0" style="width:100%;table-layout:fixed;">
+		<colgroup><col width="200px;"/><col width="*"/></colgroup>
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" align="left" style="height:20px;">
+				<label id="lblDetailId3" for="txtDetailId2" class="dsLabel" style="position:relative;">
+					Detail Id:&nbsp;
+				</label>
+				<label id="txtDetailId3" class="dsLabel" style="position:relative;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<label id="lblMultiSelect" class="dsLabel">Select one or more data elements and click
+				'Quick Paint' to have the elements added to the Detail Area.</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td><label id="lblAvailableData" class="dsLabel">Available data elements:</label></td>
+			<td>&nbsp;</td>
+		</tr>
+		<tr>
+			<td width="200px">
+				<select id="selDataAvailable" class="dsListText" size="9" multiple 
+						style="width:185px;height:expression(this.size*17);">
+				</select>
+			</td>
+			<td align="left" valign="top">
+				<input id="btnPaint" type="button" class="dsDlgButton" onclick="dtlQuickPaint()" 
+					style="position:relative;width:70px;" value="Quick Paint">
+				</input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><label id="lblFldsHidden" class="dsLabel">* Fields are declared hidden
+				on base form definition.</label>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="dtlOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="dtlUpdate()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="dtlReturn()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

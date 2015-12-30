@@ -1,0 +1,229 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/Attic/OptionsTab.htm,v 1.1.2.4.4.4.14.1.2.3 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the options tab HTML -->
+<table id="optionsTbl" border="0" width="700px" cellpadding="0" cellspacing="6" style="margin:15px;">
+	<tr>
+		<td width="40%">&nbsp;</td>
+		<td width="20%" align="left">
+			<label id="lblRequiredValue" class="xTLabel" style="position:relative;">Required value</label>
+		</td>
+		<td width="8%" align="left">
+			<label id="lblDisabled" class="xTLabel" style="position:relative;">Disabled?</label>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblLocale" class="xTLabel" style="position:relative;margin-right:6px;">Locale</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selLocaleRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxLocaleDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblProductLine" class="xTLabel" style="position:relative;margin-right:6px;">Productline</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selPDLRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxPDLDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblValueSeparator" class="xTLabel" style="position:relative;margin-right:6px;">Value Separator</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selSeparatorRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxSeparatorDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblToolbarDisplay" class="xTLabel" style="position:relative;margin-right:6px;">Toolbar Button Display</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selToolbarDisplayRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxToolbarDisplayDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblDefRptType" class="xTLabel" style="position:relative;margin-right:6px;">Default Report Type</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selReportFormatRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxReportFormatDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblDefPrinter" class="xTLabel" style="position:relative;margin-right:6px;">Default Printer</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selPrinterRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxPrinterDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblAutoSelect" class="xTLabel" style="position:relative;margin-right:6px;">Auto Select Required Fields</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selAutoselectRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxAutoselectDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblUseLists" class="xTLabel" style="position:relative;margin-right:6px;">Use List Style Presentation</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selUselistRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxUselistDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblExplorerRecords" class="xTLabel" style="position:relative;margin-right:6px;">Explorer Record Count</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selExplorerRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxExplorerDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td width="42%">&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblSelectRecords" class="xTLabel" style="position:relative;margin-right:6px;">Select Record Count</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selSelectRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxSelectDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblListRecords" class="xTLabel" style="position:relative;margin-right:6px;">List Record Count</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selListRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxListDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+	<tr>
+		<td width="40%" align="right" valign="center">
+			<label id="lblOtheroptions" class="xTLabel" style="position:relative;margin-right:6px;">Default Search Option</label>
+		</td>
+		<td width="20%" align="left">
+			<select id="selOtheroptionsRequired" class="xTTextBox" style="margin-left:0px;position:relative;width:100;"
+				onchange="window.tabMgr.tabs['tabOptions'].onSelectionChange(this)">
+			</select>
+		</td>
+		<td width="8%" align="left" valign="center">
+			<input type="checkbox"  id="cbxOtheroptionsDisabled" 
+				onclick="window.tabMgr.tabs['tabOptions'].onClickCbx(event,this)">
+			</input>
+		</td>
+		<td>&nbsp;</td>
+	</tr>
+</table>

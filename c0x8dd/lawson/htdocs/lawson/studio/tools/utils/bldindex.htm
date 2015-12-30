@@ -1,0 +1,102 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/tools/utils/bldindex.htm,v 1.2.2.1.26.2 2012/08/08 12:48:54 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<TITLE>Rebuild Forms Index</TITLE>
+
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="bldindex.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="lblCustomFormsFolder">Custom Forms Folder:</phrase>
+	</Translate>
+</XML>
+
+</HEAD>
+
+<BODY onload="bldInit()" style="background-color:buttonface;visibility:hidden;" onkeydown="bldOnKeyDown()">
+
+	<!-- trick for showing wait cursor -->
+	<div id="waitDiv" style="width:100%;height:100%;cursor:wait;display:none;">
+		<span style="position:absolute;top:30%;left:20%;width:80%;">
+			<label id="lblPleaseWait" class="dsLabel" style="position:absolute;top:10;left:40;">Please Wait...rebuild in progress.</label>
+			<img src="../../images/icobusy.gif">
+		</span>
+	</div>
+
+	<table border="0" width="100%" cellspacing="8" style="margin:6px;">
+	<tr>
+		<td colspan="2">
+			<label class="dsLabel" id="lblCustomFormsFolder" style="position:relative;text-align:left;">
+				Custom Forms Folder:
+			</label>
+			<BR>
+			<input type="text" class="dsTextBox" id="txtFolder" disabled="true" style="position:relative;width:85%;"></input>
+			<input type="button" id="btnBrowse" class="dsDlgButton" onclick="bldOnClickBrowse()"
+				style="position:relative;height:20px;width:20px;background-image: url('../../images/3dots.gif');background-position:center;background-repeat:no-repeat;">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<button id="btnRebuild" class="dsDlgButton" style="width:70px;" onclick="bldOnRebuild()">
+				Rebuild
+			</button>
+			&nbsp;
+			<input type="checkbox" id="cbxSubFolders" checked></input>
+			<label class="dsLabel" id="lblSubFolders" for="cbxSubFolders" style="text-align:left;">
+				Iterate Sub-folders
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<button id="btnAnalysis" class="dsDlgButton" style="width:70px;" onclick="bldOnAnalysis()">
+				Analysis...
+			</button>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="left">
+			<HR width="90%">
+			<label class="dsLabel" id="lblComment" style="text-align:left;">
+				Click 'Rebuild' to rebuild index for selected folder.<br>
+				Click 'Analysis' to display inconsistencies of selected folder.
+			</label>
+			<HR width="90%">
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="window.close()" 
+				style="position:relative;width:60px" value="OK">
+			</input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

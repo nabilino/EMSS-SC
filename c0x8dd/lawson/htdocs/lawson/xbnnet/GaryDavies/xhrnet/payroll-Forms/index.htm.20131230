@@ -1,0 +1,75 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Forms List</title>
+</head>
+<style>
+<!--
+h1.ezmain {
+	color: #6699CC;
+     text-align: center;
+}
+p.ezdisclaimer {
+	font-size: 10.0pt;
+	font-family: "Times New Roman";
+}
+td.ezheading {
+	color: white;
+	background-color: #6699CC;
+	font-weight: bold;
+}
+.ezbase {
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	/* Arial */
+}
+td#table1 {
+	font-size:12.0pt;
+	font-family:"Times New Roman";      
+}
+
+-->
+</style>
+<body bgcolor="#FFFFFF">
+<h1 class="ezmain">Forms</h1>
+<table border="1" cellspacing="2" cellpadding="5" width="100%" id="table1">
+	<tr>
+		<td class="ezheading" style="width:150px">Form</td>
+    <td class="ezheading">Description</td>
+	</tr>
+	<tr>
+		<td>
+      <p><a href="Online-Paystubs-Employee-Guide.pdf" target="_new">Online Paystubs Guide</p>
+    </td>
+		<td>For instructions on how to use Online Paystubs, please view this guide.</td>
+	</tr>
+	<tr>
+		<td>
+      <p>Direct Deposit</p>
+      <A HREF="DirectDeposit.pdf" TARGET="_new">Direct Deposit Form</A>
+    </td>
+		<td>Add a direct deposit account or change your current direct deposit election.  Please fill form out, attach voided check, and if in Magic Valley, send to HR, if not in Magic Valley, send to Payroll department.</td>
+	</tr>
+	<tr>
+		<td><A HREF="W-4.pdf" TARGET="_new">W-4</A></td>
+		<td>Change your W-4 by filling out this form and sending it to the Payroll department.</td>
+	</tr>
+	<tr>
+		<td><A HREF="TimeCardBlank.pdf" TARGET="_new">Blank Time Card</A></td>
+		<td>(Boise Only) Print out a blank time card if you are looking to replace a lost copy.</td>
+	</tr>
+	<tr>
+		<td>
+      <p>Payroll Calendar</p>
+      <A HREF="PayrollCalendar2012.pdf" TARGET="_new">Payroll 2012</A><br/>
+      <a href="PayrollCalendar2013.pdf" TARGET="_new">Payroll 2013</a><br/>
+          </td>
+		<td>Use the payroll calendar to tell when pay periods start and end, and to know when you will get paid.</td>
+	</tr>  
+	</table>
+
+</body>
+
+</html>

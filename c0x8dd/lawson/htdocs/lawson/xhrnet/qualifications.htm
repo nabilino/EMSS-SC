@@ -1,0 +1,1885 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Employee Qualifications</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/statesuscan.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/qualifications.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+// Pass in a code identifying this task (Competencies = "CMP",
+// Certifications = "CRT", Education = "EDU").
+var QualTask = "";
+if (window.location.search && window.location.search.toLowerCase().indexOf("type=") >= 0)
+	QualTask = getVarFromString("type", window.location.search).toUpperCase();
+var QualIndex = 0;
+var Competency = new Array();
+var Certifications = new Array();
+var Source = new Array();
+var Proficiency = new Array();
+var FilteredProficiency = new Array();
+var Subject = new Array();
+var Degree = new Array();
+var Institution = new Array();
+var Currency = new Array();
+var EmpCodes = new Array();
+if (!QualTask) QualTask = "CMP"; // Default task is Competencies.
+var TitleDesc;
+var stateProvFilter = "state";
+
+function OpenCompetencies()
+{
+  	clearTimeout(timer);
+ 	setLayerSizes();
+ 	authenticate("frameNm='jsreturn'|funcNm='InitCompetencies()'|desiredEdit='EM'");
+}
+
+function InitCompetencies()
+{
+	stylePage();
+	switch (QualTask)
+	{
+		case "CMP": TitleDesc = getSeaPhrase("INIT_APP_24","ESS"); break;
+		case "CRT": TitleDesc = getSeaPhrase("INIT_APP_23","ESS"); break;
+		case "EDU": TitleDesc = getSeaPhrase("INIT_APP_25","ESS"); break;
+		default: TitleDesc = getSeaPhrase("QUALIFICATIONS","ESS"); break;
+	}
+	setWinTitle(TitleDesc);
+	setTaskHeader("header",TitleDesc,"Personal");
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), LoadCompetencies);	
+}
+
+function LoadCompetencies()
+{
+	if (emssObjInstance.emssObj.filterSelect) 
+	{
+		if (QualTask == "CMP")
+			GetProficiencies();
+		else
+			GetQualifications();
+	} 
+	else
+		GrabStates("GetPcodes()");
+}
+
+function GetProficiencies()
+{
+	// Get the active record lists for Source and Proficiency (not setup as web-available).
+	GetPcodesSelect(authUser.prodline,"PF","StoreProficiencies()","Active")
+}
+
+function StoreProficiencies()
+{
+	Proficiency = PcodesInfo;
+	CalledPcodesInfo = false;
+	PcodesInfo = new Array();
+	GetQualifications();
+}
+
+function GetPcodes()
+{
+	var FieldStr;
+	switch (QualTask)
+	{
+		case "CMP": FieldStr = "PF;SS"; break;
+		case "CRT": FieldStr = "SS"; break;
+		case "EDU": FieldStr = "EI;ES"; break;
+		default: FieldStr = "PF;SS;EI;ES"; break;
+	}
+	// Get the active record lists for Source and Proficiency (not setup as web-available).
+	GetPcodesSelect(authUser.prodline,FieldStr,"GetMorePcodes()","Active")
+}
+
+function GetMorePcodes()
+{
+	var PcodesObj = new Object();
+	var FieldStr = "ED;CE;AB;KN;OA;SK";
+	if (QualTask == "CMP")
+	{
+		for (var i=0; i<PcodesInfo.length; i++)
+		{
+			PcodesObj = PcodesInfo[i];
+			if (PcodesObj.type == "PF")
+				Proficiency[Proficiency.length] = PcodesObj;
+			else if (PcodesObj.type == "SS")
+				Source[Source.length] = PcodesObj;
+		}
+		FieldStr = "AB;KN;OA;SK";
+	}
+	else if (QualTask == "CRT")
+	{
+		Source = PcodesInfo;
+		FieldStr = "CE";
+	}
+	else if (QualTask == "EDU")
+	{
+		for (var i=0; i<PcodesInfo.length; i++)
+		{
+			PcodesObj = PcodesInfo[i];
+			if (PcodesObj.type == "EI")
+				Institution[Institution.length] = PcodesObj;
+			else if (PcodesObj.type == "ES")
+				Subject[Subject.length] = PcodesObj;
+		}
+		FieldStr = "ED";
+	}
+	CalledPcodesInfo = false;
+	PcodesInfo = new Array();
+	// Get the active record qualification lists (look for web-available).
+	GetPcodesSelect(authUser.prodline,FieldStr,"GetQualifications()","Active","web-available=3");
+}
+
+function GetQualifications()
+{
+	var sortType;
+	switch (QualTask)
+	{
+		case "CMP":
+			if (!emssObjInstance.emssObj.filterSelect)
+				Competency = PcodesInfo;
+			sortType = 1;
+			break;
+		case "CRT":
+			if (!emssObjInstance.emssObj.filterSelect)
+				Certifications = PcodesInfo;
+			sortType = 2;
+			break;
+		case "EDU":
+			if (!emssObjInstance.emssObj.filterSelect)
+				Degree = PcodesInfo;
+			sortType = 3;
+			break;
+		default:
+			sortType = 1;
+			break;
+	}
+	Do_HS50_Call(2,null,"Y",null,"HS50.1","QUAL",authUser.employee,sortType);
+}
+
+function Do_HS50_1_Call_QUAL_Finished()
+{
+	if ((QualTask == "CRT") && !emssObjInstance.emssObj.filterSelect)
+		GetCurrencyInfo();
+	else
+		DrawQualificationListScreen();
+}
+
+function GetCurrencyInfo()
+{
+	var dmeObj = new DMEObject(authUser.prodline, "CUCODES");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.field = "currency-code;description";
+	dmeObj.max = "600";
+	dmeObj.debug = false;
+	dmeObj.func = "GetCurrencyCodes_Finished()";
+	DME(dmeObj,"jsreturn");
+}
+
+function GetCurrencyCodes_Finished()
+{
+	for (var i=0; i<self.jsreturn.NbrRecs; i++)
+	{
+		dmeObj = self.jsreturn.record[i];
+		Currency[Currency.length] = new CodeDescObject(dmeObj.currency_code,dmeObj.description);
+	}
+	if (self.jsreturn.Next)
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	else 
+	{
+		Currency.sort(sortByName);
+		DrawQualificationListScreen();
+	}
+}
+
+function sortByName(obj1, obj2)
+{
+	var name1 = obj1.description;
+	var name2 = obj2.description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function Do_HS50_1_Call_REFRESH_Finished()
+{
+	DrawQualificationListScreen(true);
+}
+
+function DrawQualificationListScreen(Refresh)
+{
+	if (typeof(QualificationProfile) == "undefined" || (QualTask == "CMP" && typeof(QualificationProfile.CompetencyDetail) == "undefined")
+	|| (QualTask == "CRT" && typeof(QualificationProfile.CertificationDetail) == "undefined") || (QualTask == "EDU" && typeof(QualificationProfile.EducationDetail) == "undefined"))
+	{
+		removeWaitAlert();
+		return;
+	}
+	switch (QualTask)
+	{
+		case "CMP": var QualList = QualificationProfile.CompetencyDetail; break;
+		case "CRT": var QualList = QualificationProfile.CertificationDetail; break;
+		case "EDU": var QualList = QualificationProfile.EducationDetail; break;
+		default: var QualList = new Array(); break;
+	}
+	// Clear the right-hand-side detail frame.
+	ClearDetailScreen();
+	// Draw the list body content.  This is the table of employee qualifications.
+	QualificationContent = '<table id="quallist" border="0" cellspacing="0" cellpadding="0" style="width:100%" role="presentation">'
+	for (var i=0; i<QualList.length; i++)
+	{
+		var tip = QualList[i].description+' - '+getSeaPhrase("VIEW_QUAL","SEA");
+		QualificationContent += '<tr><td class="plaintablecell" style="padding-left:30px" nowrap>'
+		+ '<a href="javascript:;" onclick="parent.QualificationClicked('+i+');return false;" title="'+tip+'">'
+		+ QualList[i].description.replace(/\'/g,"\'")+'<span class="offscreen"> - '+getSeaPhrase("VIEW_QUAL","SEA")+'</span></a></td></tr>'
+	}
+	QualificationContent += '<tr><td class="plaintablecell" style="padding-left:30px">'
+	+ uiButton(getSeaPhrase("ADD","ESS"),"parent.DrawAddDetailContent(\'"+QualTask+"\');return false","margin-right:0px","addbtn");
+	+ '</td></tr></table>'
+	// Draw the list header content.  This is the "Competencies" label.
+	self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("QUALIFICATIONS","ESS");
+	if (QualList.length == 0)
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft" style="padding-left:10px;padding-top:10px">'+getSeaPhrase("QUAL_1","ESS")+'</div><br/><div>'+QualificationContent+'</div>';
+	else
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft" style="position:relative;padding-left:10px;padding-top:10px">'+getSeaPhrase("QUAL_0","ESS")+'</div><br/><div>'+QualificationContent+'</div>';
+	self.left.stylePage();
+	self.left.setLayerSizes();
+	document.getElementById("left").style.visibility = "visible";
+	fitToScreen();
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]));
+	if (Refresh)
+		UpdateComplete();
+}
+
+function QualificationClicked(Index, Refresh)
+{
+	if (typeof(QualificationProfile) == "undefined" || (QualTask == "CMP" && typeof(QualificationProfile.CompetencyDetail) == "undefined")
+	|| (QualTask == "CRT" && typeof(QualificationProfile.CertificationDetail) == "undefined") || (QualTask == "EDU" && typeof(QualificationProfile.EducationDetail) == "undefined"))
+	{
+		return;
+	}
+	var nextFunc = function()
+	{
+		activateTableRow("quallist",Index-1,self.left,false,false);
+		GetQualificationDetail(Index, Refresh);
+	};	
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function GetQualificationDetail(Index, Refresh)
+{
+	var QualObj;
+	switch (QualTask)
+	{
+		case "CMP": QualObj = QualificationProfile.CompetencyDetail[Index]; break;
+		case "CRT": QualObj = QualificationProfile.CertificationDetail[Index]; break;
+		case "EDU": QualObj = QualificationProfile.EducationDetail[Index]; break;
+		default: QualObj = new DetailObject(); break;
+	}
+	var dmeObj = new DMEObject(authUser.prodline,"EMPCODES");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "epcset1";
+	dmeObj.field = "type;code;description;subject;instructor;in-pro-flag;"
+	+ "per-rating;co-sponsored;state;lic-number;date-acquired;renew-date;"
+	+ "renewal-code;renewal-code,xlt;skill-source;currency-code;cost;profic-level;date-returned;seq-nbr;"
+	+ "skill-source.description;currency.description;subject.description;institution.description";
+	dmeObj.key = escape(authUser.company)+"="+escapeEx(QualObj.type)+"=0"+"="+escape(authUser.employee)+"="+escapeEx(QualObj.code);
+	if (QualObj.subject != null || QualObj.seqNbr != null)
+	{
+		if (QualObj.subject != null)
+			dmeObj.key += "="+escapeEx(QualObj.subject);
+		else 
+			dmeObj.key += "="+escape(" ");
+		if (QualObj.seqNbr != null)
+			dmeObj.key += "="+escape(QualObj.seqNbr,1);
+	}
+	if (Refresh)
+		dmeObj.func = 'Paint'+QualTask+'_DetailScreen('+Index+',true)';
+	else 
+		dmeObj.func = 'Paint'+QualTask+'_DetailScreen('+Index+',false)';
+	dmeObj.max = "1";
+	dmeObj.debug = false;
+	DME(dmeObj,"jsreturn");
+}
+
+// Individual Competency Detail Screen.
+function PaintCMP_DetailScreen(Index, Refresh)
+{
+	if (typeof(QualificationProfile) == "undefined" || typeof(QualificationProfile.CompetencyDetail) == "undefined")
+		 return;
+	if (!self.jsreturn.NbrRecs)
+	{
+		var CompObj = QualificationProfile.CompetencyDetail[Index];
+		var CompetencyDesc = getSeaPhrase("QUAL_3","ESS");
+		DrawChangeDetailContent(CompObj, CompetencyDesc, Index, Refresh);
+	}
+	else
+	{
+		EmpCodes = self.jsreturn.record[0];
+		// If we don't have any proficiency levels defined via PCODES or the display will
+		// be read-only, don't bother with an additional call to the PACOMPPROF file.
+		if (Proficiency.length && QualificationProfile.CompetencyDetail[Index].updateFlag == "Y")
+			GetCompProficiencyLevels(EmpCodes.type, EmpCodes.code, Index, Refresh);
+		else
+		{
+			FilteredProficiency = Proficiency;
+			FinishCMP_DetailScreen(Index, Refresh);
+		}
+	}
+}
+
+function FilterProficiencies(formobj, resetToDefault)
+{
+	var code;
+	var type;
+	if (formobj.code.type == "text")
+	{
+		code = formobj.code.value;
+		type = formobj.type.value;
+		if (resetToDefault || NonSpace(code) == 0)
+		{
+			RefreshProficiencyDropDown(Proficiency);
+			return;		
+		}	
+	}
+	else 
+	{
+		if (formobj.code.selectedIndex > 0) 
+		{
+			code = Competency[formobj.code.selectedIndex-1].code;
+			type = Competency[formobj.code.selectedIndex-1].type;
+		}
+		else
+		{	
+			RefreshProficiencyDropDown(Proficiency);
+			return;
+		}
+	}
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){GetCompProficiencyLevels(type, code, -1, false, true);});
+}
+
+function GetCompProficiencyLevels(Type, Code, Index, Refresh, RefreshProf)
+{
+	FilteredProficiency = new Array()
+	RefreshProf = (RefreshProf) ? true : false;
+	var dmeObj = new DMEObject(authUser.prodline,"PACOMPPROF")
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "pcmset1";
+	dmeObj.field = "type;code;description;proficiency.type;proficiency.code;proficiency.description"
+	dmeObj.cond	= "Active";
+	dmeObj.max = "600";
+	dmeObj.key = escape(authUser.company)+"="+escape(" ")+"="+escape(Type,1)+";DF";
+	dmeObj.func = "FilterProficiencyLevels('"+Code+"',"+Index+","+Refresh+",'"+RefreshProf+"')";
+	dmeObj.debug = false;
+	DME(dmeObj,"jsreturn");
+}
+
+function sortByProfDescription(obj1,obj2)
+{
+	var name1 = obj1.proficiency_description;
+	var name2 = obj2.proficiency_description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function FilterProficiencyLevels(Code, Index, Refresh, RefreshProf)
+{
+	FilteredProficiency = FilteredProficiency.concat(self.jsreturn.record)
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next)
+		return;
+	}
+	else
+	{
+		if (FilteredProficiency.length) // Proficiencies are based on competency type and (possibly) code.
+		{
+			FilteredProficiency.sort(sortByProfDescription);
+			var DefaultProficiency = new Array()
+			var Tmp = new Array()
+			for (var i=0; i<FilteredProficiency.length; i++)
+			{
+				var Desc = FilteredProficiency[i].description || FilteredProficiency[i].proficiency_description;
+				if (FilteredProficiency[i].type == "DF")
+					DefaultProficiency[DefaultProficiency.length] = new CodeDescObject(FilteredProficiency[i].proficiency_code,Desc,FilteredProficiency[i].proficiency_type);
+				if (FilteredProficiency[i].code == Code)
+					Tmp[Tmp.length] = new CodeDescObject(FilteredProficiency[i].proficiency_code,Desc,FilteredProficiency[i].proficiency_type);
+			}
+			FilteredProficiency = new Array()
+			if (Tmp.length) // Proficiencies are based on both competency type and code.
+				FilteredProficiency = Tmp
+			else if (DefaultProficiency.length) // Proficiencies are based on competency type.
+				FilteredProficiency = DefaultProficiency
+			else // Proficiencies are not based on competency.
+				FilteredProficiency = Proficiency
+		}
+		else // Proficiencies are not based on competency.
+			FilteredProficiency = Proficiency
+		if (Index != -1)
+			FinishCMP_DetailScreen(Index, Refresh)
+	}
+	if (RefreshProf)
+		RefreshProficiencyDropDown(FilteredProficiency);
+	else
+		removeWaitAlert();	
+}
+
+function RefreshProficiencyDropDown(ProficiencyList)
+{
+	var selObj = self.right.document.qualificationform.proficiency;			
+	var selCode = selObj.options[selObj.selectedIndex].value;
+	var selIndex = 0;
+	if (!ProficiencyList)
+		ProficiencyList = Proficiency;
+	// already set to the defaults	
+	if (ProficiencyList == Proficiency && selObj.options.length == Proficiency.length)
+		return;
+	selObj.innerHTML = "";
+	var tmpObj = self.right.document.createElement("OPTION");
+	tmpObj.value = "";
+	tmpObj.text = "";
+	if (navigator.appName.indexOf("Microsoft") >= 0)
+		selObj.add(tmpObj);
+	else
+		selObj.appendChild(tmpObj);
+	for (var j=0; j<ProficiencyList.length; j++) 
+	{
+		tmpVal = ProficiencyList[j].code;
+		tmpDesc = ProficiencyList[j].description;			
+		tmpObj = self.right.document.createElement("OPTION");
+		tmpObj.value = tmpVal;
+		tmpObj.text = tmpDesc;
+		if (navigator.appName.indexOf("Microsoft") >= 0)
+			selObj.add(tmpObj);
+		else
+			selObj.appendChild(tmpObj);
+		if (selCode == tmpVal)
+			selIndex = j + 1;				
+	}
+	selObj.selectedIndex = selIndex;
+	self.right.styleElement(selObj);
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+}
+
+function FinishCMP_DetailScreen(Index, Refresh)
+{
+	var CompObj = QualificationProfile.CompetencyDetail[Index]
+	var CompetencyDesc = "";
+	var PeRating = parseFloat(EmpCodes.per_rating)
+	if (PeRating == 0)
+		PeRating = "";
+	var toolTip;
+	if (CompObj.updateFlag != "Y")
+	{
+		CompetencyDesc = '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[CompObj.description])+'">'
+		+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[CompObj.description])+'</caption>'
+		+ '<tr><th scope="col" colspan="2"></th></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((CompObj.description)?CompObj.description:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_5","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((MatchForDescription(EmpCodes.profic_level,FilteredProficiency))?MatchForDescription(EmpCodes.profic_level,FilteredProficiency):'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_6","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.skill_source_description)?EmpCodes.skill_source_description:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_7","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.renewal_code_xlt)?EmpCodes.renewal_code_xlt:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_8","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.instructor)?EmpCodes.instructor:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_9","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((PeRating)?PeRating:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_10","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.date_acquired)?EmpCodes.date_acquired:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_11","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.renew_date)?EmpCodes.renew_date:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_12","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.date_returned)?EmpCodes.date_returned:'&nbsp;')+'</td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldliteunderline">'+getSeaPhrase("QUAL_13","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.co_sponsored=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS"))+'</td></tr></table>'
+	}
+	else
+	{
+		CompetencyDesc = '<form name="qualificationform">'
+		+ '<input type="hidden" name="seqnbr" value="'+EmpCodes.seq_nbr+'">'
+		+ '<input type="hidden" name="code" value="'+EmpCodes.code+'">'
+		+ '<input type="hidden" name="type" value="'+EmpCodes.type+'">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[CompObj.description])+'">'
+		+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[CompObj.description])+'</caption>'
+		+ '<tr><th scope="col" colspan="2"></th></tr>'		
+		+ '<tr><th scope="row" class="fieldlabelboldlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="plaintablecelldisplay" nowrap>'+CompObj.description+'</td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="proficiency">'+getSeaPhrase("QUAL_5","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="proficiency" name="proficiency">'+BuildSelect(EmpCodes.profic_level,FilteredProficiency)+'</select></td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></th>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("skillsource");
+			CompetencyDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="'+EmpCodes.skill_source+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="skillsourceDesc" class="plaintablecelldisplay" style="width:200px">'+EmpCodes.skill_source_description+'</span></td></tr>'
+		}
+		else
+			CompetencyDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect(EmpCodes.skill_source,Source)+'</select></td></tr>'
+		CompetencyDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect(EmpCodes.renewal_code)+'</select></td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_8","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" size="10" maxlength="10" value="'+EmpCodes.instructor+'"></td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_9","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="perrating" name="perrating" size="8" maxlength="8" value="'+PeRating+'"></td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+		CompetencyDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="'+EmpCodes.date_acquired+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_11","ESS"));
+		CompetencyDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_11","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="'+EmpCodes.renew_date+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+		CompetencyDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="datereturnedLbl" for="datereturned">'+getSeaPhrase("QUAL_12","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="datereturned" name="datereturned" value="'+EmpCodes.date_returned+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="datereturnedLbl datereturnedFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'datereturned\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("datereturnedFmt")+'</td></tr>'
+		+ '<tr><th scope="row" class="fieldlabelboldliteunderline"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo(EmpCodes.co_sponsored)+'</select></td></tr>'
+		+ '<tr><th scope="row">&nbsp;</th><td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick("+Index+",\'C\');return false")
+		+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-left:5px")
+		+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteQualification_OnClick("+Index+");return false","margin-left:15px")
+		+ '</td></tr></table></form>'
+	}
+	DrawChangeDetailContent(CompObj, CompetencyDesc, Index, Refresh);
+}
+
+// Individual Certification Detail Screen.
+function PaintCRT_DetailScreen(Index, Refresh)
+{
+	if (typeof(QualificationProfile) == "undefined" || typeof(QualificationProfile.CertificationDetail) == "undefined")
+		return;
+	var toolTip;
+	var CertObj = QualificationProfile.CertificationDetail[Index];
+	var CertificationDesc = "";
+	if (!self.jsreturn.NbrRecs)
+		CertificationDesc = getSeaPhrase("QUAL_3","ESS");
+	else
+	{
+		var EmpCodes = self.jsreturn.record[0];
+		if (CertObj.updateFlag != "Y")
+		{
+			CertificationDesc = '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[CertObj.description])+'">'
+			+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[CertObj.description])+'</caption>'	
+			+ '<tr><th scope="col" colspan="2"></th></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((CertObj.description)?CertObj.description:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_14","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((ReturnStateDescription(EmpCodes.state))?ReturnStateDescription(EmpCodes.state):'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_15","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.lic_number)?EmpCodes.lic_number:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_10","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.date_acquired)?EmpCodes.date_acquired:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_12","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.renew_date)?EmpCodes.renew_date:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_7","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.renewal_code_xlt)?EmpCodes.renewal_code_xlt:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_6","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.skill_source_description)?EmpCodes.skill_source_description:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_13","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.co_sponsored=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS"))+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("COST","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.cost)?EmpCodes.cost:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldliteunderline">'+getSeaPhrase("QUAL_16","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.currency_description)?EmpCodes.currency_description:'&nbsp;')+'</td></tr></table>'
+		}
+		else
+		{
+			CertificationDesc = '<form name="qualificationform">'
+			+ '<input type="hidden" name="seqnbr" value="'+EmpCodes.seq_nbr+'">'
+			+ '<input type="hidden" name="type" value="'+EmpCodes.type+'">'
+			+ '<input type="hidden" name="code" value="'+EmpCodes.code+'">'
+			+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[CertObj.description])+'">'
+			+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[CertObj.description])+'</caption>'	
+			+ '<tr><th scope="col" colspan="2"></th></tr>'		
+			+ '<tr><th scope="row" class="fieldlabelboldlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="plaintablecelldisplay" nowrap>'+CertObj.description+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="state">'+getSeaPhrase("QUAL_14","ESS")+'</label></th>'
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				toolTip = dmeFieldToolTip("state");
+				CertificationDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="state" name="state" fieldnm="state" value="'+EmpCodes.state+'" size="2" maxlength="2" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'state\');">'
+				+ '<a href="javascript:parent.openDmeFieldFilter(\'state\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+				+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+				+ '<span id="stateDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+			}
+			else
+				CertificationDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="state" name="state">'+BuildStateSelect(EmpCodes.state)+'</select></td></tr>'
+			CertificationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label for="licnumber">'+getSeaPhrase("QUAL_15","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="licnumber" name="licnumber" size="15" maxlength="20" value="'+EmpCodes.lic_number+'"></td></tr>'
+			toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+			CertificationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+			+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="'+EmpCodes.date_acquired+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+			+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+			toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+			CertificationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_12","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+			+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="'+EmpCodes.renew_date+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+			+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect(EmpCodes.renewal_code)+'</select></td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></th>'
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				toolTip = dmeFieldToolTip("skillsource");
+				CertificationDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="'+EmpCodes.skill_source+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+				+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+				+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+				+ '<span id="skillsourceDesc" class="plaintablecelldisplay" style="width:200px">'+EmpCodes.skill_source_description+'</span></td></tr>'
+			}
+			else
+				CertificationDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect(EmpCodes.skill_source,Source)+'</select></td></tr>'
+			CertificationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo(EmpCodes.co_sponsored)+'</select></td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="cost">'+getSeaPhrase("COST","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="cost" name="cost" size="14" maxlength="14" value="'+parseFloat(EmpCodes.cost)+'"></td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldliteunderline"><label for="currencycode">'+getSeaPhrase("QUAL_16","ESS")+'</label></th>'
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				toolTip = dmeFieldToolTip("currencycode");
+				CertificationDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="currencycode" name="currencycode" fieldnm="currencycode" value="'+EmpCodes.currency_code+'" size="5" maxlength="5" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'currencycode\');">'
+				+ '<a href="javascript:parent.openDmeFieldFilter(\'currencycode\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+				+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+				+ '<span id="currencycodeDesc" class="plaintablecelldisplay" style="width:200px">'+EmpCodes.currency_description+'</span></td></tr>'
+			}
+			else
+				CertificationDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="currencycode" name="currencycode">'+BuildSelect(EmpCodes.currency_code,Currency)+'</select></td></tr>'
+			CertificationDesc += '<tr><th scope="row">&nbsp;</th><td class="plaintablecell">'
+			+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick("+Index+",\'C\');return false")
+			+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-left:5px")
+			+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteQualification_OnClick("+Index+");return false","margin-left:15px")
+			+ '</td></tr></table></form>'
+		}
+	}
+	DrawChangeDetailContent(CertObj, CertificationDesc, Index, Refresh);
+}
+
+// Individual Education Detail Screen.
+function PaintEDU_DetailScreen(Index, Refresh)
+{
+	if (typeof(QualificationProfile) == "undefined" || typeof(QualificationProfile.EducationDetail) == "undefined")
+		return;
+	var toolTip;
+	var EduObj = QualificationProfile.EducationDetail[Index];
+	var EducationDesc = "";
+	if (!self.jsreturn.NbrRecs)
+		EducationDesc = getSeaPhrase("QUAL_3","ESS");
+	else
+	{
+		var EmpCodes = self.jsreturn.record[0];
+		var PeRating = parseFloat(EmpCodes.per_rating);
+		if (PeRating == 0)
+			PeRating = "";
+		if (EduObj.updateFlag != "Y")
+		{
+			EducationDesc = '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[EmpCodes.code])+'">'
+			+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[EmpCodes.code])+'</caption>'
+			+ '<tr><th scope="col" colspan="2"></th></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_17","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.code)?EmpCodes.code:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_18","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.subject_description)?EmpCodes.subject_description:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_19","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((PeRating)?PeRating:'&nbsp')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_20","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.institution_description)?EmpCodes.institution_description:'&nbsp;')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_21","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.renew_date)?EmpCodes.renew_date:'&nbsp')+'</td></tr>'
+			+ '<tr><th scope="row" class="plaintablerowheaderborderlite">'+getSeaPhrase("QUAL_22","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.in_pro_flag=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS"))+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldliteunderline">'+getSeaPhrase("QUAL_13","ESS")+'</th><td class="plaintablecellborderdisplay" nowrap>'+((EmpCodes.co_sponsored=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS"))+'</td></tr></table>'
+		}
+		else
+		{
+			EducationDesc = '<form name="qualificationform">'
+			+ '<input type="hidden" name="seqnbr" value="'+EmpCodes.seq_nbr+'">'
+			+ '<input type="hidden" name="type" value="'+EmpCodes.type+'">'
+			+ '<input type="hidden" name="code" value="'+EmpCodes.code+'">'
+			+ '<input type="hidden" name="svsubject" value="'+EmpCodes.subject+'">'
+			+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_15","SEA",[EmpCodes.code])+'">'
+			+ '<caption class="offscreen">'+getSeaPhrase("TCAP_11","SEA",[EmpCodes.code])+'</caption>'
+			+ '<tr><th scope="col" colspan="2"></th></tr>'			
+			+ '<tr><th scope="row" class="fieldlabelboldlite">'+getSeaPhrase("QUAL_17","ESS")+'</th><td class="plaintablecelldisplay" nowrap>'+EduObj.description+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="subject">'+getSeaPhrase("QUAL_18","ESS")+'</label></th>'
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				toolTip = dmeFieldToolTip("subject");
+				EducationDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="subject" name="subject" fieldnm="subject" value="'+EmpCodes.subject+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'subject\');">'
+				+ '<a href="javascript:parent.openDmeFieldFilter(\'subject\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+				+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+				+ '<span id="subjectDesc" class="plaintablecelldisplay" style="width:200px">'+EmpCodes.subject_description+'</span></td></tr>'
+			}
+			else
+				EducationDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="subject" name="subject">'+BuildSelect(EmpCodes.subject,Subject)+'</select></td></tr>'
+			EducationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_19","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="perrating" name="perrating" size="8" maxlength="8" value="'+PeRating+'"></td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_20","ESS")+'</label></th>'
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				toolTip = dmeFieldToolTip("instructor");
+				EducationDesc += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" fieldnm="instructor" value="'+EmpCodes.instructor+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'instructor\');">'
+				+ '<a href="javascript:parent.openDmeFieldFilter(\'instructor\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+				+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+				+ '<span id="instructorDesc" class="plaintablecelldisplay" style="width:200px">'+EmpCodes.institution_description+'</span></td></tr>'
+			}
+			else
+				EducationDesc += '<td class="plaintablecell" nowrap><select class="inputbox" id="instructor" name="instructor">'+BuildSelect(EmpCodes.instructor,Institution)+'</select></td></tr>'
+			toolTip = uiDateToolTip(getSeaPhrase("QUAL_21","ESS"));
+			EducationDesc += '<tr><th scope="row" class="fieldlabelboldlite"><label id="renewaldateLbl" for="renewaldate">'+getSeaPhrase("QUAL_21","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+			+ '<input class="inputbox" type="text" id="renewaldate" name="renewaldate" value="'+EmpCodes.renew_date+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewaldateLbl renewaldateFmt">'
+			+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewaldate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewaldateFmt")+'</td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="inproflag">'+getSeaPhrase("QUAL_22","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="inproflag" name="inproflag">'+BuildYesNo(EmpCodes.in_pro_flag)+'</select></td></tr>'
+			+ '<tr><th scope="row" class="fieldlabelboldliteunderline"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo(EmpCodes.co_sponsored)+'</select></td></tr>'
+			+ '<tr><th scope="row">&nbsp;</th><td class="plaintablecell">'
+			+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick("+Index+",\'C\');return false")
+			+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-left:5px")
+			+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteQualification_OnClick("+Index+");return false","margin-left:15px")
+			+ '</td></tr></table></form>'
+		}
+	}
+	DrawChangeDetailContent(EduObj, EducationDesc, Index, Refresh);
+}
+
+function DrawChangeDetailContent(QualObj, DetailContent, Index, Refresh)
+{
+/*
+	switch (QualTask)
+	{
+		case "CMP": var TaskDesc = getSeaPhrase("QUAL_23","ESS"); break;
+		case "CRT": var TaskDesc = getSeaPhrase("QUAL_24","ESS"); break;
+		case "EDU": var TaskDesc = getSeaPhrase("QUAL_25","ESS"); break;
+		default: var TaskDesc = getSeaPhrase("QUAL_26","ESS"); break;
+	}
+*/
+	// Draw the detail body content.  This is the individual qualification info.
+	var QualificationContent = DetailContent;
+	// Draw the detail header content.  This is the "Qualification Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = QualificationContent;
+	self.right.stylePage();
+	self.right.setLayerSizes();
+	fitToScreen();
+	document.getElementById("right").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	if (QualObj.updateFlag == "Y")
+		HideListButtons();
+	if (Refresh)
+		UpdateComplete();
+}
+
+function DrawAddDetailContent(Task)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){DisplayAddDetailContent(Task);});
+}
+
+function DisplayAddDetailContent(Task)
+{
+/*
+	switch (Task)
+	{
+		case "CMP": var TaskDesc = getSeaPhrase("QUAL_23","ESS"); break;
+		case "CRT": var TaskDesc = getSeaPhrase("QUAL_24","ESS"); break;
+		case "EDU": var TaskDesc = getSeaPhrase("QUAL_25","ESS"); break;
+		default: var TaskDesc = getSeaPhrase("QUAL_26","ESS"); break;
+	}
+*/
+	var toolTip;
+	var QualificationContent = "";
+	if (Task == "CMP")
+	{
+		// Draw the detail body content.  This is the table of employee qualifications.
+		QualificationContent = '<form name="qualificationform">'
+		+ '<input type="hidden" size="20" maxlength="30" name="qualification" value="">'
+		+ '<input type="hidden" size="10" maxlength="30" name="type" value="">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="code">'+getSeaPhrase("QUAL_4","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("competency");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="code" name="code" fieldnm="competency" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'competency\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'competency\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'+uiRequiredIcon()
+			+ '<span id="competencyDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="code" name="code" onchange="parent.FillQualification(this.form);parent.FilterProficiencies(this.form);">'+BuildSelect("",Competency)+'</select>'+uiRequiredIcon()+'</td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="proficiency">'+getSeaPhrase("QUAL_5","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="proficiency" name="proficiency">'+BuildSelect("",Proficiency)+'</select></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("skillsource");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\')" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="skillsourceDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect("",Source)+'</select></td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect("")+'</select></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_8","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" size="10" maxlength="10" value=""></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_9","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="perrating" name="perrating" size="8" maxlength="8" value=""></td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_11","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_11","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="datereturnedLbl" for="datereturned">'+getSeaPhrase("QUAL_12","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="datereturned" name="datereturned" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="datereturnedLbl datereturnedFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'datereturned\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("datereturnedFmt")+'</td></tr>'
+		+ '<tr><td class="fieldlabelboldliteunderline"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo("")+'</select></td></tr>'
+	}
+	else if (Task == "CRT")
+	{
+		QualificationContent = '<form name="qualificationform">'
+		+ '<input type="hidden" size="20" maxlength="30" name="qualification" value="">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="code">'+getSeaPhrase("QUAL_4","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("certification");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="code" name="code" fieldnm="certification" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'certification\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'certification\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'+uiRequiredIcon()
+			+ '<span id="certificationDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="code" name="code" onchange="parent.FillQualification(this.form);">'+BuildSelect("",Certifications)+'</select>'+uiRequiredIcon()+'</td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="state">'+getSeaPhrase("QUAL_14","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("state");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="state" name="state" fieldnm="state" value="" size="2" maxlength="2" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'state\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'state\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="stateDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="state" name="state">'+BuildStateSelect("")+'</select></td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="licnumber">'+getSeaPhrase("QUAL_15","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="licnumber" name="licnumber" size="15" maxlength="20" value=""></td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_12","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect("")+'</select></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("skillsource");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="skillsourceDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect("",Source)+'</select></td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo("")+'</select></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="cost">'+getSeaPhrase("COST","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="cost" name="cost" size="14" maxlength="14" value=""></td></tr>'
+		+ '<tr><td class="fieldlabelboldliteunderline"><label for="currencycode">'+getSeaPhrase("QUAL_16","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("currencycode");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="currencycode" name="currencycode" fieldnm="currencycode" value="" size="5" maxlength="5" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'currencycode\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'currencycode\')" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="currencycodeDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="currencycode" name="currencycode">'+BuildSelect("",Currency)+'</select></td></tr>'
+	}
+	else if (Task == "EDU")
+	{
+		QualificationContent = '<form name="qualificationform">'
+		+ '<input type="hidden" name="svsubject" value="">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="degree">'+getSeaPhrase("QUAL_17","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("degree");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="degree" name="degree" fieldnm="degree" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'degree\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'degree\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'+uiRequiredIcon()
+			+ '<span id="degreeDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="degree" name="degree">'+BuildSelect("",Degree)+'</select>'+uiRequiredIcon()+'</td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="subject">'+getSeaPhrase("QUAL_18","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("subject");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="subject" name="subject" fieldnm="subject" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'subject\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'subject\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="subjectDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="subject" name="subject">'+BuildSelect("",Subject)+'</select></td></tr>'
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_19","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="perrating" name="perrating" size="8" maxlength="8" value=""></td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_20","ESS")+'</label></td>'
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			toolTip = dmeFieldToolTip("instructor");
+			QualificationContent += '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" fieldnm="instructor" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'instructor\');">'
+			+ '<a href="javascript:parent.openDmeFieldFilter(\'instructor\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+			+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+			+ '<span id="instructorDesc" class="plaintablecelldisplay" style="width:200px"></span></td></tr>'
+		}
+		else
+			QualificationContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="instructor" name="instructor">'+BuildSelect("",Institution)+'</select></td></tr>'
+		toolTip = uiDateToolTip(getSeaPhrase("QUAL_21","ESS"));
+		QualificationContent += '<tr><td class="fieldlabelboldlite"><label id="renewaldateLbl" for="renewaldate">'+getSeaPhrase("QUAL_21","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="renewaldate" name="renewaldate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewaldateLbl renewaldateFmt">'
+		+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewaldate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewaldateFmt")+'</td></tr>'
+		+ '<tr><td class="fieldlabelboldlite"><label for="inproflag">'+getSeaPhrase("QUAL_22","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="inproflag" name="inproflag">'+BuildYesNo("")+'</select></td></tr>'
+		+ '<tr><td class="fieldlabelboldliteunderline"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo("")+'</select></td></tr>'
+	}
+	if (QualificationContent != "")
+	{
+		// Draw the list footer content.  This is the Update Qualification button.
+		QualificationContent += '<tr><td>&nbsp;</td><td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick(-1,\'A\');return false")
+		+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-left:5px")
+		+ '</td></tr></table></form>'
+	}
+	// Draw the detail header content.  This is the "Qualification Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = QualificationContent;
+	self.right.stylePage();
+	self.right.setLayerSizes();
+	fitToScreen();
+	document.getElementById("right").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	HideListButtons();
+}
+
+function HideListButtons()
+{
+	try { self.left.document.getElementById("addbtn").style.visibility = "hidden"; } catch(e) {}
+}
+
+function ShowListButtons()
+{
+	try { self.left.document.getElementById("addbtn").style.visibility = "visible"; } catch(e) {}
+}
+
+function DeleteQualification_OnClick(Index)
+{
+	QualIndex = Index;
+	var qualForm = self.right.document.qualificationform;
+	switch (QualTask)
+	{
+		case "EDU": Do_Edu_Call(qualForm, "PA20.1", "D"); break; // Delete this education record.
+		case "CMP": Do_Cmp_Call(qualForm, "PA21.1", "D"); break; // Delete this competency record.
+		case "CRT": Do_Crt_Call(qualForm, "PA22.1", "D", false, false, false, false); break; // Delete this certification record.
+		default: break;
+	}
+}
+
+function UpdateQualification_OnClick(Index, fc)
+{
+	QualIndex = Index;
+	var qualDoc = self.right.document;
+	var qualForm = self.right.document.qualificationform;
+	// Edit the form for any required fields before passing it to the server.
+	if (QualTask == "CMP" || QualTask == "CRT") // Competencies or Certifications
+	{
+		clearRequiredField(qualForm.dateacquired);
+		clearRequiredField(qualForm.renewdate);
+		if (QualTask == "CMP" && qualForm.datereturned)
+			clearRequiredField(qualForm.datereturned);
+		if (typeof(qualForm.qualification) != "undefined") // Edits for "Add" screen
+		{
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				clearRequiredField(qualForm.code);
+				if (NonSpace(qualForm.code.value) == 0)
+				{					
+					setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+					return;
+				}
+			}
+			else
+			{
+				clearRequiredField(qualDoc.getElementById("code"));
+				if (qualForm.code.selectedIndex == 0)
+				{				
+					setRequiredField(qualDoc.getElementById("code"), getSeaPhrase("QUAL_33","ESS"), qualForm.code);
+					return;
+				}
+			}
+		}
+		else // Edits for "Update" screen
+		{
+			clearRequiredField(qualForm.code);
+			if (NonSpace(qualForm.code.value) == 0)
+			{				
+				setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+				return;
+			}
+		}
+		if (QualTask == "CMP")
+		{
+			clearRequiredField(qualForm.perrating);
+			if (NonSpace(qualForm.perrating.value) && !ValidNumber(qualForm.perrating,6,2))
+			{
+				setRequiredField(qualForm.perrating, getSeaPhrase("INVALID_NO","ESS"));
+				return;
+			}
+		}
+		if (NonSpace(qualForm.dateacquired.value) && !ValidDate(qualForm.dateacquired))
+			return;
+		if (NonSpace(qualForm.renewdate.value) && !ValidDate(qualForm.renewdate))
+			return;
+		if (typeof(qualForm.datereturned) != "undefined" && NonSpace(qualForm.datereturned.value) && !ValidDate(qualForm.datereturned))
+			return;
+	}
+	else if (QualTask == "EDU") // Education - Edits for "Add" and "Update" screens
+	{
+		/*clearRequiredField(qualDoc.getElementById("subject"));*/
+		clearRequiredField(qualForm.renewaldate);
+		if (typeof(qualForm.degree) != "undefined") // Edits for "Add" screen
+		{
+			if (emssObjInstance.emssObj.filterSelect)
+			{
+				clearRequiredField(qualForm.degree);
+				if (NonSpace(qualForm.degree.value) == 0)
+				{
+					setRequiredField(qualForm.degree, getSeaPhrase("QUAL_34","ESS"));
+					return;
+				}
+			}
+			else
+			{
+				clearRequiredField(qualDoc.getElementById("degree"));
+				if (qualForm.degree.options[qualForm.degree.selectedIndex].value == " ")
+				{
+					setRequiredField(qualDoc.getElementById("degree"), getSeaPhrase("QUAL_34","ESS"), qualForm.degree);
+					return;
+				}
+			}
+		}
+		/* Remove this edit - PA20.1 no longer requires a subject.
+		if (qualForm.subject.options[qualForm.subject.selectedIndex].value == " ")
+		{
+			setRequiredField(qualDoc.getElementById("subject"), "Please select a subject.", qualForm.subject);
+			return;
+		}
+		*/
+		if (NonSpace(qualForm.renewaldate.value) && !ValidDate(qualForm.renewaldate))
+			return;
+	}
+	switch (QualTask)
+	{
+		case "EDU": Do_Edu_Call(qualForm, "PA20.1", fc); break; // Update this education record.
+		case "CMP": Do_Cmp_Call(qualForm, "PA21.1", fc); break; // Update this competency record.
+		case "CRT": Do_Crt_Call(qualForm, "PA22.1", fc, false, false, false, false); break; // Update this certification record.
+		default: break;
+	}
+}
+
+function Do_PA20_1_Edu_Call_Finished(fc)
+{
+	ReturnToListScreen(fc);
+}
+
+function Do_PA21_1_Cmp_Call_Finished(fc)
+{
+	ReturnToListScreen(fc);
+}
+
+function Do_PA22_1_Crt_Call_Finished(fc)
+{
+	ReturnToListScreen(fc);
+}
+
+function ReturnToListScreen(fc)
+{
+	if (self.lawheader.gmsgnbr == "000")
+	{
+		var sortType;
+		switch (QualTask)
+		{
+			case "CMP": sortType = 1; break;
+			case "CRT": sortType = 2; break;
+			case "EDU": sortType = 3; break;
+			default: sortType = 1; break;
+		}
+		// Refresh the display.
+		Do_HS50_Call(2,null,"Y",null,"HS50.1","REFRESH",authUser.employee,sortType);
+	}
+	else
+	{
+		removeWaitAlert();
+		seaAlert(self.lawheader.gmsg, null, null, "error");
+	}
+}
+
+function FillQualification(formobj)
+{
+	switch (QualTask)
+	{
+		case "CMP":
+			if (formobj.code.selectedIndex > 0) 
+			{
+				formobj.qualification.value = Competency[formobj.code.selectedIndex-1].description;
+				formobj.type.value = Competency[formobj.code.selectedIndex-1].type;
+			}
+			else 
+			{
+				formobj.qualification.value = "";
+				formobj.type.value = "";
+			}
+			break;
+		case "CRT":
+			if (formobj.code.selectedIndex > 0)
+				formobj.qualification.value = Certifications[formobj.code.selectedIndex-1].description;
+			else
+				formobj.qualification.value = "";
+			break;
+	}
+}
+
+function ClearDetailScreen()
+{
+	document.getElementById("right").style.visibility = "hidden";
+	deactivateTableRows("quallist",self.left,false,false);
+	ShowListButtons();
+}
+
+function ReturnDate(dte)
+{
+	try { self.right.document.forms["qualificationform"].elements[date_fld_name].value = dte; } catch(e) {}
+}
+
+function UpdateComplete()
+{
+	seaPageMessage(getSeaPhrase("UPDATE_COMPLETE","ESS"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnChange(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "state": // state/province
+		case "province":
+			var filterForm = dmeFilter.getFilterForm();
+			var selObj = filterForm.elements["filterField"];
+			var filterField = selObj.options[selObj.selectedIndex].value;
+			if ((filterField == "state") || (filterField == "province")) 
+			{
+				stateProvFilter = filterField;
+				filterForm.elements["filterBtn"].onclick();
+			}
+		break;
+	}
+}
+
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "competency":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_4","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;type;description",
+				"AB;KN;OA;SK",
+				"act-web-comp",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "certification":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_4","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"CE",
+				"act-web-cert",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "degree":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_17","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"ED",
+				"act-web-educ",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "subject":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_18","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"ES",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "instructor":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_20","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"EI",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "skillsource":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_6","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"SS",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "state":
+			dmeFilter.addFilterField("state", 2, getSeaPhrase("STATE_ONLY","ESS"), true);
+			dmeFilter.addFilterField("province", 2, getSeaPhrase("PROVINCE","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "currencycode":
+			dmeFilter.addFilterField("currency-code", 5, getSeaPhrase("QUAL_16","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cucodes",
+				"cucset1",
+				"currency-code;description",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "competency":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;type;description",
+			"AB;KN;OA;SK",
+			"act-web-comp",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "certification":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"CE",
+			"act-web-cert",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "degree":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"ED",
+			"act-web-educ",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "subject":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"ES",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "instructor":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"EI",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "skillsource":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"SS",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "state":
+		if (stateProvFilter == "state") 
+		{
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		} 
+		else 
+		{
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prprovince",
+				"ppvset1",
+				"province;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		}
+		break;
+		case "currencycode":
+			dmeFilter.addFilterField("currency-code", 5, getSeaPhrase("QUAL_16","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"cucodes",
+				"cucset1",
+				"currency-code;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm;
+	switch (fieldNm.toLowerCase())
+	{
+		case "competency":
+			var oldCode = self.right.document.qualificationform.code.value;
+			formElm = self.right.document.qualificationform.qualification;
+			self.right.document.qualificationform.type.value = selRec.type;
+			self.right.document.qualificationform.code.value = selRec.code;
+			self.right.document.qualificationform.qualification.value = selRec.description;
+			self.right.document.getElementById("competencyDesc").innerHTML = selRec.description;
+			if (oldCode != selRec.code)
+				FilterProficiencies(self.right.document.qualificationform);			
+			break;
+		case "certification":
+			formElm = self.right.document.qualificationform.qualification;
+			self.right.document.qualificationform.code.value = selRec.code;
+			self.right.document.qualificationform.qualification.value = selRec.description;
+			self.right.document.getElementById("certificationDesc").innerHTML = selRec.description;
+			break;
+		case "degree":
+			formElm = self.right.document.qualificationform.degree;
+			self.right.document.qualificationform.degree.value = selRec.code;
+			self.right.document.getElementById("degreeDesc").innerHTML = selRec.description;
+			break;
+		case "subject":
+			formElm = self.right.document.qualificationform.subject;
+			self.right.document.qualificationform.subject.value = selRec.code;
+			self.right.document.getElementById("subjectDesc").innerHTML = selRec.description;
+			break;
+		case "instructor":
+			formElm = self.right.document.qualificationform.instructor;
+			self.right.document.qualificationform.instructor.value = selRec.code;
+			self.right.document.getElementById("instructorDesc").innerHTML = selRec.description;
+			break;
+		case "skillsource":
+			formElm = self.right.document.qualificationform.skillsource;
+			self.right.document.qualificationform.skillsource.value = selRec.code;
+			self.right.document.getElementById("skillsourceDesc").innerHTML = selRec.description;
+			break;
+		case "state":
+			formElm = self.right.document.qualificationform.state;
+			if (stateProvFilter == "state")
+				self.right.document.qualificationform.state.value = selRec.state;
+			else
+				self.right.document.qualificationform.state.value = selRec.province;
+			self.right.document.getElementById("stateDesc").innerHTML = selRec.description;
+			break;
+		case "currencycode":
+			formElm = self.right.document.qualificationform.currencycode;
+			self.right.document.qualificationform.currencycode.value = selRec.currency_code;
+			self.right.document.getElementById("currencycodeDesc").innerHTML = selRec.description;
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var fld = [null, null, null];
+	try
+	{
+		switch (fieldNm.toLowerCase())
+		{
+			case "competency":
+			case "certification":
+				fld = [self.right, self.right.document.qualificationform.code, getSeaPhrase("QUAL_4","ESS")];
+				break;
+			case "degree":
+				fld = [self.right, self.right.document.qualificationform.degree, getSeaPhrase("QUAL_17","ESS")];
+				break;
+			case "subject":
+				fld = [self.right, self.right.document.qualificationform.subject, getSeaPhrase("QUAL_18","ESS")];
+				break;
+			case "instructor":
+				fld = [self.right, self.right.document.qualificationform.instructor, getSeaPhrase("QUAL_20","ESS")];
+				break;
+			case "skillsource":
+				fld = [self.right, self.right.document.qualificationform.skillsource, getSeaPhrase("QUAL_6","ESS")];
+				break;
+			case "state":
+				fld = [self.right, self.right.document.qualificationform.state, getSeaPhrase("STATE_ONLY","ESS")];
+				break;
+			case "currencycode":
+				fld = [self.right, self.right.document.qualificationform.currencycode, getSeaPhrase("QUAL_16","ESS")];
+				break;
+			default: break;
+		}
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	switch (fieldNm.toLowerCase())
+	{
+		case "competency":
+			self.right.document.qualificationform.type.value = "";
+			self.right.document.qualificationform.code.value = "";
+			self.right.document.qualificationform.qualification.value = "";
+			self.right.document.getElementById("competencyDesc").innerHTML = "";
+			FilterProficiencies(self.right.document.qualificationform,true);			
+			break;
+		case "certification":
+			self.right.document.qualificationform.code.value = "";
+			self.right.document.qualificationform.qualification.value = "";
+			self.right.document.getElementById("certificationDesc").innerHTML = "";
+			break;
+		case "degree":
+			self.right.document.qualificationform.degree.value = "";
+			self.right.document.getElementById("degreeDesc").innerHTML = "";
+			break;
+		case "subject":
+			self.right.document.qualificationform.subject.value = "";
+			self.right.document.getElementById("subjectDesc").innerHTML = "";
+			break;
+		case "instructor":
+			self.right.document.qualificationform.instructor.value = "";
+			self.right.document.getElementById("instructorDesc").innerHTML = "";
+			break;
+		case "skillsource":
+			self.right.document.qualificationform.skillsource.value = "";
+			self.right.document.getElementById("skillsourceDesc").innerHTML = "";
+			break;
+		case "state":
+			self.right.document.qualificationform.state.value = "";
+			self.right.document.getElementById("stateDesc").innerHTML = "";
+			break;
+		case "currencycode":
+			self.right.document.qualificationform.currencycode.value = "";
+			self.right.document.getElementById("currencycodeDesc").innerHTML = "";
+			break;
+		default: break;
+	}	
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm)
+	{
+		case "competency":
+		case "certification":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_4","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "degree":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_17","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "subject":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_18","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "instructor":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_20","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "skillsource":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_6","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "state":
+			if (stateProvFilter == "state") 
+			{
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+				selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+				selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("STATE_ONLY","ESS")+'</th>'
+				selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.state) ? tmpObj.state : '&nbsp;'
+					selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</a></td></tr>'
+				}
+			} 
+			else 
+			{
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+				selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+				selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("PROVINCE","ESS")+'</th>'
+				selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.province) ? tmpObj.province : '&nbsp;'
+					selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</a></td></tr>'
+				}
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "currencycode":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_16","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.currency_code) ? tmpObj.currency_code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.50) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;				
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	leftFrame.style.width = parseInt(winWidth*.50) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.left.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.left.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	rightFrame.style.width = parseInt(winWidth*.50) + "px";
+	rightFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.right.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.right.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		leftFrame.style.left = "";
+		leftFrame.style.right = "0px";	
+		rightFrame.style.left = "0px";
+	}
+	else
+		rightFrame.style.left = parseInt(winWidth*.50) + "px";
+}
+var timer = setTimeout("OpenCompetencies()", 3000);
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenCompetencies()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="left" name="left" title="Main Content" level="2" tabindex="0" class="contentframe" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;top:32px;width:320px;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" title="Secondary Content" level="3" tabindex="0" class="contentframe" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;left:320px;top:32px;width:480px;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/qualificationsheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/qualifications.htm,v 1.21.2.81 2014/02/25 22:49:12 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

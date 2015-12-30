@@ -1,0 +1,97 @@
+<HTML>
+<!--
+#-------------------------------------------------------------------------------------
+# Copyright (c) 2004 Siemens Medical Solutions Health Services Corporation.
+# All rights reserved. This software is proprietary to Siemens.
+# It is protected by copyright laws in the US and abroad, and is licensed for use
+# by customers only in strict accordance with the license agreement governing its use.
+#-------------------------------------------------------------------------------------
+# Module:	smwspwd.htm
+#
+# Description:	Change Web Server Pwd
+#
+# Notes:
+#
+# History:      Date	 Who	Charm/comment
+#               -------- ------	-------------
+#               12/13/04 phm1	Charm 607 - change name of function to Change Web Server Pwd
+#		07/08/09 ndf	Modified sys value=WEB to =LDAP for LSF9 per smchangepswd.cgi change on 02/23/07.
+#
+#-------------------------------------------------------------------------------------
+-->
+<HEAD>
+	<link id="StyleLink" type="text/css" href="/lawson/smnet/smstyle.css" rel="stylesheet">
+<TITLE>Change Web Password</TITLE></HEAD><BODY>
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+<SPAN class=smWelcome>Change Web Server Pwd</SPAN>
+<hr size="2" width="90%" align="left">
+<p>Use this form to change your Web Server password. Password must be 6-8 characters in length and include 2 numbers.</p>
+
+  <script language="javascript">
+  <!--
+
+
+  //
+  // This function verifies data before submit.
+  //
+  function isConfirmed(form)
+  {
+	if (form.oldpassword.value == "") {
+	   alert("You must enter Old Password")
+	   form.oldpassword.focus()
+	   return false
+	}
+	if (form.newpassword.value == "") {
+	   alert("You must enter New Password")
+	   form.newpassword.focus()
+	   return false
+	}
+	if (form.reenterpassword.value == "") {
+	   alert("You must enter Confirm Password")
+	   form.reenterpassword.focus()
+	   return false
+	}
+	if (form.oldpassword.value == form.newpassword.value ) {
+	   alert("Your New Password can not be the same as your Old Password.")
+	   form.newpassword.focus()
+	   return false
+	}
+	if (form.newpassword.value != form.reenterpassword.value ) {
+	   alert("New Password does not match Confirm Password")
+	   form.reenterpassword.focus()
+	   return false
+	}
+	return true
+  }
+  //-->
+  </script>
+
+  
+
+<form action="/cgi-lawson/smchangepswd.cgi" method="GET">
+<input type="hidden" name=caller value="Change Web Server Pwd">
+<input type="hidden" name=sys value=LDAP>
+
+<table width="50%" border="0">
+<tbody>
+<tr>
+	<td align="right"><label for="oldpassword" class="smLabel"><b>Old Password:</b></td>
+	<td align="left"><input type="password" name="oldpassword" size=8 maxlength=8>
+</tr>
+<tr>
+	<td align="right"><label for="newpassword" class="smLabel"><b>New Password:<b></td>
+	<td><input type="password" name="newpassword" size=8 maxlength=8>
+</tr>
+<tr>
+	<td align="right"><label for="reenterpassword" class="smLabel"><b>Confirm Password:</b></td>
+	<td><input type="password" name="reenterpassword" size=8 maxlength=8>
+</tr>
+<tr>
+</tr>
+<tr>
+	<td> </td>
+	<td><input type="submit" name="Submit" value="Submit" onClick="return isConfirmed(this.form)">
+</tr>
+</tbody>
+</form>
+

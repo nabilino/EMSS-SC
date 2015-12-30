@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="ptbr" version="10.0">
+		<phrase id="MILITARY_SERVICE"><![CDATA[Serviço militar]]></phrase>
+		<phrase id="BRANCH"><![CDATA[Filial]]></phrase>
+		<phrase id="SPECIALTY"><![CDATA[Especialidade]]></phrase>
+		<phrase id="RANK"><![CDATA[Pré]]></phrase>
+		<phrase id="SERVICE_YEARS"><![CDATA[Anos de serviço]]></phrase>
+		<phrase id="SERVICE_MONTHS"><![CDATA[Meses de serviço]]></phrase>
+		<phrase id="DISCHARGE_DATE"><![CDATA[Data de dispensa]]></phrase>
+		<phrase id="DISCHARGE_TYPE"><![CDATA[Tipo de dispensa]]></phrase>
+		<phrase id="NATIONAL_GUARD"><![CDATA[Guarda Nacional]]></phrase>
+		<phrase id="RESERVES"><![CDATA[Reservas]]></phrase>
+		<phrase id="DISHONORABLE"><![CDATA[Desonrosa]]></phrase>
+		<phrase id="HONORABLE"><![CDATA[Honrosa]]></phrase>
+		<phrase id="LESS_HONORABLE"><![CDATA[Menos honrosa]]></phrase>
+		<phrase id="MEDICAL"><![CDATA[Médica]]></phrase>
+		<phrase id="OTHER"><![CDATA[Outros]]></phrase>
+		<phrase id="DRAFT_STATUS"><![CDATA[Status de alistamento]]></phrase>
+		<phrase id="RANK_ATTAINED"><![CDATA[Patente obtida]]></phrase>
+		<phrase id="BRANCH_REQUIRED"><![CDATA[Ramo é obrigatório.]]></phrase>
+		<phrase id="NO_MILITARY_RECORDS"><![CDATA[Você não possui informações do serviço militar para exibir.]]></phrase>
+		<phrase id="CHANGE_MILITARY_RECORD"><![CDATA[Alterar informações militares]]></phrase>
+		<phrase id="AIR_FORCE"><![CDATA[Força aérea]]></phrase>
+		<phrase id="ARMY"><![CDATA[Exército]]></phrase>
+		<phrase id="COAST_GUARD"><![CDATA[Guarda costeira]]></phrase>
+		<phrase id="MARINE_CORP"><![CDATA[Marinha]]></phrase>
+		<phrase id="NAVY"><![CDATA[Marinha de Guerra]]></phrase>
+		<phrase id="OTHER"><![CDATA[Outros]]></phrase>
+		<phrase id="NO_BALANCE_DETAILS"><![CDATA[Não existem detalhes de transações para este saldo.]]></phrase>
+		<phrase id="TRAN_TYPE_1"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_2"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_3"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_4"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_5"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_11"><![CDATA[Vendido através do Plano de benefícios]]></phrase>
+		<phrase id="TRAN_TYPE_12"><![CDATA[Adquirido através do Plano de benefícios]]></phrase>
+		<phrase id="TRAN_TYPE_21"><![CDATA[Provisão]]></phrase>
+		<phrase id="TRAN_TYPE_22"><![CDATA[Alocação]]></phrase>
+		<phrase id="TRAN_TYPE_31"><![CDATA[Movido para o Saldo disponível]]></phrase>
+		<phrase id="TRAN_TYPE_32"><![CDATA[Movido para o Saldo disponível]]></phrase>
+		<phrase id="TRAN_TYPE_33"><![CDATA[Provisão]]></phrase>
+		<phrase id="TRAN_TYPE_34"><![CDATA[Alocação]]></phrase>
+		<phrase id="TRAN_TYPE_35"><![CDATA[Saldo de transferência estabelecido]]></phrase>
+		<phrase id="TRAN_TYPE_42"><![CDATA[Perdido devido ao limite no saldo]]></phrase>
+		<phrase id="TRAN_TYPE_43"><![CDATA[Perdido devido ao limite no saldo]]></phrase>
+		<phrase id="TRAN_TYPE_44"><![CDATA[Perdido devido ao limite de transporte]]></phrase>
+		<phrase id="TRAN_TYPE_45"><![CDATA[Perdido - Período de transferência expirado]]></phrase>
+		<phrase id="TRAN_TYPE_46"><![CDATA[Perdido - Período de transferência expirado]]></phrase>
+		<phrase id="TRAN_TYPE_47"><![CDATA[Redefinição do saldo de transferência (não perdido)]]></phrase>
+		<phrase id="TRAN_TYPE_48"><![CDATA[Perdido devido ao limite no saldo]]></phrase>
+		<phrase id="TRAN_TYPE_51"><![CDATA[Ajustar para alocação]]></phrase>
+		<phrase id="TRAN_TYPE_52"><![CDATA[Ajustar para alocação]]></phrase>
+		<phrase id="TRAN_TYPE_61"><![CDATA[Utilizar]]></phrase>
+		<phrase id="TRAN_TYPE_63"><![CDATA[Pagamento]]></phrase>
+		<phrase id="TRAN_TYPE_71"><![CDATA[Saldo removido]]></phrase>
+		<phrase id="TRAN_TYPE_72"><![CDATA[Saldo removido]]></phrase>
+		<phrase id="TRAN_TYPE_73"><![CDATA[Saldo removido]]></phrase>
+		<phrase id="TRAN_TYPE_74"><![CDATA[Saldo removido]]></phrase>
+		<phrase id="TRAN_TYPE_75"><![CDATA[Saldo removido]]></phrase>
+		<phrase id="TRAN_TYPE_81"><![CDATA[Transferir de outro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_82"><![CDATA[Transferir de outro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_83"><![CDATA[Transferir de outro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_84"><![CDATA[Transferir de outro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_85"><![CDATA[Transferir de outro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_91"><![CDATA[Detalhe consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_92"><![CDATA[Detalhe consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_93"><![CDATA[Detalhe consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_94"><![CDATA[Detalhe consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_95"><![CDATA[Detalhe consolidado]]></phrase>		
+		<phrase id="CONTNBR_0"><![CDATA[Números de contato adicionais]]></phrase>
+		<phrase id="CONTNBR_1"><![CDATA[Descrição]]></phrase>
+		<phrase id="CONTNBR_2"><![CDATA[Números de contato]]></phrase>
+		<phrase id="CONTNBR_3"><![CDATA[Alterar detalhes do número de contato]]></phrase>
+		<phrase id="CONTNBR_4"><![CDATA[Números de contato]]></phrase>
+		<phrase id="CONTNBR_5"><![CDATA[Para adicionar um número de contato, clique no botão ‘Adicionar'.]]></phrase>
+		<phrase id="CONTNBR_6"><![CDATA[Para alterar ou visualizar detalhes adicionais dos números de contato listados abaixo, clique em um tipo de telefone.]]></phrase>
+		<phrase id="CONTNBR_7"><![CDATA[Tipo de contato]]></phrase>
+		<phrase id="CONTNBR_8"><![CDATA[Atualizando detalhes de contato]]></phrase>
+		<phrase id="CONTNBR_9"><![CDATA[As informações de contato foram atualizadas.]]></phrase>
+		<phrase id="CONTNBR_10"><![CDATA[Tem certeza que deseja excluir esse número de contato?]]></phrase>
+		<phrase id="CONTNBR_11"><![CDATA[As informações de contato foram adicionadas.]]></phrase>
+		<phrase id="CONTNBR_12"><![CDATA[Utilizar]]></phrase>
+		<phrase id="CONTNBR_13"><![CDATA[Pagamento]]></phrase>
+		<phrase id="CONTNBR_14"><![CDATA[Para visualizar detalhes adicionais dos números de contato listados abaixo, clique em um tipo de telefone.]]></phrase>
+		<phrase id="CONTNBR_15"><![CDATA[O tipo de contato é obrigatório.]]></phrase>
+		<phrase id="CONTNBR_16"><![CDATA[O número de telefone é obrigatório.]]></phrase>
+		<phrase id="SERVICE_DATE"><![CDATA[Data serv.]]></phrase>
+		<phrase id="SORT_BY_SERVICE_DATE"><![CDATA[Classificar por Data de serviço]]></phrase>
+		<phrase id="PERSONAL_EMAIL"><![CDATA[E-mail pessoal]]></phrase>
+		<phrase id="WORK_CONTACTS"><![CDATA[Contatos de trabalho]]></phrase>
+		<phrase id="CONTACT_DETAILS"><![CDATA[Detalhes de contato]]></phrase>
+		<phrase id="EMPLOYEE_STATUS"><![CDATA[Status do funcionário]]></phrase>
+		<phrase id="FTE"><![CDATA[FTE]]></phrase>
+		<phrase id="TOTAL_FTE"><![CDATA[FTE total]]></phrase>
+		<phrase id="INVALID_SSN"><![CDATA[O número de previdência social inserido não é válido para seu país.]]></phrase>
+		<phrase id="PR_LOCKED_OUT"><![CDATA[Acesso negado. Um ciclo de folha de pagamento está atualmente em andamento. Tente novamente mais tarde.]]></phrase>
+		<phrase id="HR_APP_9011_VER_ERR"><![CDATA[Este aplicativo requer o aplicativo Lawson HR versão 9.0.1 MSP#1 ou mais recente.]]></phrase>
+		<phrase id="HR_APP_1000_VER_ERR"><![CDATA[Este aplicativo requer o aplicativo Lawson HR versão 10.0.0 ou mais recente.]]></phrase>
+		<phrase id="HR_APP_VER_ERR"><![CDATA[Este aplicativo requer o aplicativo Lawson HR versão {0} ou mais recente.]]></phrase>		
+		<phrase id="MULTIPLE_JOBS_POSITION"><![CDATA[Vários trabalhos/cargos]]></phrase>
+		<phrase id="IND_SUPERVISOR"><![CDATA[Supervisor indireto]]></phrase>
+		<phrase id="ANNUAL_HOURS"><![CDATA[Horas anuais]]></phrase>
+		<phrase id="USER_AMOUNT"><![CDATA[Quantia do usuário]]></phrase>
+		<phrase id="EXPENSE_COMPANY"><![CDATA[Empresa de despesa]]></phrase>
+		<phrase id="EXP_ACCOUNT_UNIT"><![CDATA[Unidade contábil da despesa]]></phrase>
+		<phrase id="EXP_ACCOUNT"><![CDATA[Conta da despesa]]></phrase>
+		<phrase id="EXP_SUB_ACCOUNT"><![CDATA[Subconta da despesa]]></phrase>
+		<phrase id="PRO_SALARY"><![CDATA[Salário prorrateado]]></phrase>
+		<phrase id="ASSIGN_DATE"><![CDATA[Data de atribuição]]></phrase>
+		<phrase id="ALT_PAY_RATES"><![CDATA[Taxas de pagamento alternativas]]></phrase>
+		<phrase id="PAY_RATES"><![CDATA[Taxas de pagamento]]></phrase>
+		<phrase id="PAY_CODE"><![CDATA[Código de pagamento]]></phrase>
+		<phrase id="PROFILE_ERR_1"><![CDATA[Número de contato]]></phrase>
+		<phrase id="PROFILE_ERR_2"><![CDATA[Saída inválida retornada do servlet Perfil.]]></phrase>
+		<phrase id="PROFILE_ERR_3"><![CDATA[Linha de produto não encontrada para o usuário ]]></phrase>
+		<phrase id="PROFILE_ERR_4"><![CDATA[Números de contato ]]></phrase>
+		<phrase id="PROFILE_ERR_5"><![CDATA[Entre em contato com o administrador do sistema para obter assistência.]]></phrase>
+		<phrase id="TIME_OFF_REQUEST"><![CDATA[Solicitação de tempo livre]]></phrase>
+		<phrase id="TIME_OFF_REQUESTS"><![CDATA[Solicitações de tempo livre]]></phrase>
+		<phrase id="MGR_TIME_OFF_REQUEST"><![CDATA[Solicitação de tempo livre do gerente]]></phrase>
+		<phrase id="NO_LEAVE_RULES"><![CDATA[Não há regras de solicitação de férias configuradas para a empresa]]></phrase>
+		<phrase id="AVAILABLE_BALANCE"><![CDATA[Saldo disponível]]></phrase>
+		<phrase id="PENDING_REQUESTS"><![CDATA[Solicitações pendentes]]></phrase>
+		<phrase id="PROJECTED_BALANCE"><![CDATA[Saldo projetado]]></phrase>
+		<phrase id="RETURN_DATE"><![CDATA[Data de dev.]]></phrase>
+		<phrase id="ADD_REQUEST"><![CDATA[Adicionar solicitação]]></phrase>
+		<phrase id="UPDATE_REQUEST"><![CDATA[Atualizar solicitação]]></phrase>
+		<phrase id="OPEN_COMMENTS"><![CDATA[Abrir comentários]]></phrase>
+		<phrase id="CANCEL_REQUEST"><![CDATA[Cancelar solicitação]]></phrase>
+		<phrase id="CANCEL_THIS_REQUEST"><![CDATA[Cancelar esta solicitação]]></phrase>
+		<phrase id="NEW_REQUEST"><![CDATA[Nova solicit.]]></phrase>
+		<phrase id="LEAVE_OF_ABSENCE"><![CDATA[Licença]]></phrase>
+		<phrase id="SINGLE_DAY"><![CDATA[Um dia]]></phrase>
+		<phrase id="DATE_RANGE"><![CDATA[Intervalo de datas]]></phrase>
+		<phrase id="ALL_DAY"><![CDATA[Dia todo]]></phrase>
+		<phrase id="HALF_DAY"><![CDATA[Meio dia]]></phrase>
+		<phrase id="APPROVER"><![CDATA[Aprovador]]></phrase>
+		<phrase id="SUBMIT"><![CDATA[Enviar]]></phrase>
+		<phrase id="SELECT_REQUEST_TYPE"><![CDATA[Selecione um tipo de solicitação.]]></phrase>
+		<phrase id="LEAVE_BEGIN_DATE"><![CDATA[Início da licença]]></phrase>
+		<phrase id="LEAVE_ESTIMATED_RETURN"><![CDATA[Retorno estimado]]></phrase>
+		<phrase id="LEAVE_REASON"><![CDATA[Motivo da licença]]></phrase>
+		<phrase id="CONFIRM_CANCEL_TIME_OFF_REQUEST"><![CDATA[Tem certeza que deseja cancelar esta solicitação de tempo livre?]]></phrase>
+		<phrase id="DATE_OR_RANGE_REQUIRED"><![CDATA[Uma data ou um intervalo de datas é obrigatório.]]></phrase>
+		<phrase id="ENTER_DATE_OR_RANGE"><![CDATA[Insira uma data ou um intervalo de datas, mas não ambos.]]></phrase>
+		<phrase id="INVALID_END_DATE"><![CDATA[A data final deve ser posterior à data inicial.]]></phrase>
+		<phrase id="END_DATE_REQUIRED"><![CDATA[A data final é obrigatória.]]></phrase>
+		<phrase id="START_DATE_REQUIRED"><![CDATA[A data de início é obrigatória.]]></phrase>
+		<phrase id="HOURS_REQUIRED"><![CDATA[O número de horas é obrigatório.]]></phrase>
+		<phrase id="ENTER_HOURS"><![CDATA[Insira um número de horas.]]></phrase>
+		<phrase id="LEAVE_DATE_REQUIRED"><![CDATA[A data de início da licença é obrigatória.]]></phrase>
+		<phrase id="LEAVE_REASON_REQUIRED"><![CDATA[O motivo da licença é obrigatório.]]></phrase>
+		<phrase id="INVALID_RETURN_DATE"><![CDATA[A data estimada do retorno dever ser posterior à data de início da licença.]]></phrase>
+		<phrase id="TIME_OFF_REQUEST_SUBMITTED"><![CDATA[A solicitação de tempo livre foi enviada.]]></phrase>
+		<phrase id="TIME_OFF_REQUEST_CANCELLED"><![CDATA[A solicitação de tempo livre foi cancelada.]]></phrase>
+		<phrase id="CANNOT_REQUEST_TIME_OFF"><![CDATA[Você não cumpre os requisitos para este plano nas datas selecionadas. Não é possível solicitar tempo livre. Entre em contato com o departamento de RH.]]></phrase>
+		<phrase id="TIME_OFF_MAX_HOURS"><![CDATA[Você não pode solicitar mais de {0} horas por dia.]]></phrase>
+		<phrase id="TIME_OFF_MAX_HOURS_DATE"><![CDATA[Limite de horas excedido para a data {1}.]]></phrase>
+		<phrase id="CANCELLING_REQUEST"><![CDATA[Cancelando solicitação...]]></phrase>
+		<phrase id="SUBMITTING_REQUEST"><![CDATA[FTE]]></phrase>
+		<phrase id="REFRESHING_DATA"><![CDATA[Atualizando dados. Aguarde...]]></phrase>
+		<phrase id="POSITIVE_VALUE"><![CDATA[O valor deve ser positivo.]]></phrase>
+		<phrase id="COMMENTS_UPDATED"><![CDATA[Os comentários foram atualizados.]]></phrase>
+		<phrase id="APPROVE"><![CDATA[Aprovar]]></phrase>
+		<phrase id="REJECT"><![CDATA[Rejeitar]]></phrase>
+		<phrase id="SELECT_ALL"><![CDATA[Selecionar tudo]]></phrase>
+		<phrase id="SELECT"><![CDATA[Selecionar]]></phrase>
+		<phrase id="SELECT_REQUEST"><![CDATA[Você deve selecionar a solicitação na qual deseja realizar ações.]]></phrase>
+		<phrase id="SUBMITTING_STATUS_CHANGE"><![CDATA[Enviando alteração de status...]]></phrase>
+		<phrase id="TIME_OFF_STATUS_CHANGE_SUBMITTED"><![CDATA[A alteração do status de tempo livre foi enviada.]]></phrase>
+		<phrase id="DIRECT_REPORT_TIME_OFF_REQUESTS"><![CDATA[Solicitações de tempo livre no relatório direto]]></phrase>
+		<phrase id="NEG_BAL_WARNING"><![CDATA[Essa solicitação de tempo livre resultará em saldo negativo. OK para continuar?]]></phrase>
+		<phrase id="NEG_BAL_ERROR"><![CDATA[Essa solicitação de tempo livre resultará em saldo negativo. Não é possível continuar.]]></phrase>
+		<phrase id="SELECT_TIME_OFF_REQUEST_TYPE"><![CDATA[Selecione um tipo de solicitação de tempo livre.]]></phrase>
+		<phrase id="SELECT_REQUEST_TYPE_VIEW"><![CDATA[Vários trabalhos/cargos]]></phrase>
+		<phrase id="SUBMITTED"><![CDATA[Sugerido]]></phrase>
+		<phrase id="PENDING"><![CDATA[Pendente]]></phrase>
+		<phrase id="CANCELLED"><![CDATA[Cancelado(a)]]></phrase>
+		<phrase id="REJECTED"><![CDATA[Rejeitado(a)]]></phrase>
+		<phrase id="NO_TIME_OFF_REQUESTS"><![CDATA[Valor do usuário]]></phrase>
+		<phrase id="NO_BALANCES"><![CDATA[Empresa de despesas]]></phrase>
+		<phrase id="ERROR_RETRIEVING_RECORD_COMMENTS"><![CDATA[Erro ao recuperar comentários do registro {0}.]]></phrase>
+		<phrase id="ERROR_UPDATING_COMMENTS"><![CDATA[Erro ao atualizar comentários.]]></phrase>
+		<phrase id="APPLICATION_ERROR"><![CDATA[Erro do aplicativo]]></phrase>
+		<phrase id="YOU_HAVE_SELECTED"><![CDATA[Você selecionou {0}.]]></phrase>
+		<phrase id="NUMBER_OF_FULL_DAYS"><![CDATA[{0} dia(s) inteiro(s).]]></phrase>
+		<phrase id="NUMBER_OF_HALF_DAYS"><![CDATA[{0} meio(s) dia(s).]]></phrase>
+		<phrase id="NUMBER_OF_HOURS_PER_DAY"><![CDATA[Salário pro rata]]></phrase>
+		<phrase id="UPDATING_COMMENTS"><![CDATA[Atualizando comentários...]]></phrase>
+		<phrase id="NO_REQUEST_TYPES"><![CDATA[Você não pode adicionar uma solicitação. Atualmente não há nenhum tipo de solicitação para escolha.]]></phrase>
+		<phrase id="CONTACT_HR"><![CDATA[Entre em contato com o departamento de RH para obter assistência.]]></phrase>
+		<phrase id="DUPLICATE_TIME_OFF_REQUEST"><![CDATA[Solicitação de dia livre para a data {0} já existe.]]></phrase>
+		<phrase id="CONFIRM_APPROVE_REQUESTS"><![CDATA[Aprovar todas as solicitações selecionadas?]]></phrase>
+		<phrase id="CONFIRM_REJECT_REQUESTS"><![CDATA[Rejeitar todas as solicitações selecionadas?]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/ptbr/Attic/seamsgs.xml,v 1.1.4.4 2013/10/08 14:25:47 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************--> 

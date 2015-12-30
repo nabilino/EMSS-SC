@@ -1,0 +1,494 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/HotkeysTab.htm,v 1.9.2.3.4.5.14.1.2.5 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+
+<!-- the input elements table (used in both browsers) -->
+<table width="700px" border="0" cellpadding="0" cellspacing="0" style="margin-top:15px;margin-left:15px;">
+	<tr>
+		<td width="200px" align="left" valign="top">
+			<label id="lblSelectHotkeySet" for="selHotkeySet" class="xTLabel" 
+					style="position:relative;text-align:left;">Select hotkey set:
+			</label>
+	    </td>
+		<td width="260px" align="left" valign="top">
+			<label id="lblAvailHotkeyActions" for="selHotkeySet" class="xTLabel" 
+					style="position:relative;text-align:left;">Available hotkey actions:
+			</label>
+	    </td>
+		<td width="240px" align="left" valign="top">
+			<label id="lblAssignedHotkey" for="txtHotkey" class="xTLabel" 
+					style="position:relative;margin-left:10px;">Assigned hotkey:
+			</label>
+		</td>
+	</tr>
+	<tr>
+	   <td width="200px" align="left" valign="top">
+			<select id="selHotkeySet" class="xtTextBox" style="width:140px;" onchange="window.tabMgr.tabs['tabHotkeys'].onSetChange(event,this)">
+				<option value="portal">Portal
+				<option value="forms">ERP Applications
+				<option value="reports">ERP Reports
+			</select><br/>
+			<div id="txtHotkeySet" class="xTListText" 
+				style="overflow:hidden;margin-top:8px;width:160px;height:60px;border:0px;background-color:#D4DFF0;">
+			</div>
+			<button id="btnRestoreHotkeys" class="xTToolBarButton" style="width:75px;height:20px;" 
+				onclick="window.tabMgr.tabs['tabHotkeys'].onRestoreKeys(event,this)" title="Restore default hotkey assignments">Defaults</button>
+		</td>
+	   <td align="left" valign="top">
+			<select id="selHotkeyActions" class="xTListText" size="8" 
+				onchange="window.tabMgr.tabs['tabHotkeys'].onKeySelectionChange()" style="width:240px;" >
+			</select>
+		</td>
+		<td align="left" valign="top">
+			<div id="txtHotkey" class="xtTextBox" 
+				style="position:relative;width:140;margin-left:10px;padding:2px;border:1px solid #6699CC;background-color:#D4DFF0;">
+			</div>
+		</td>
+	</tr>
+	<tr><td colspan="3"><HR style="height:1px;width:700px;color:#6699CC"></td></tr>
+	<tr>
+		<td colspan="2" valign="top" align="left" width="460px">
+			<label id="lblHotkeyHelp1" class="xTLabel" 
+					style="position:relative;text-align:left;width:260px;">To select new hotkey assignment:
+			</label>
+			<button id="btnBindNewHotkey" class="xTToolBarButtonDisabled" style="margin-left:0px;width:75px;height:20px;" disabled
+				onclick="window.tabMgr.tabs['tabHotkeys'].onAssignKey()" title="Bind new hotkey assignment">Assign</button>
+			<button id="btnClearNewHotkey" class="xTToolBarButtonDisabled" style="width:75px;height:20px;margin-left:4px;" disabled 
+				onclick="window.tabMgr.tabs['tabHotkeys'].onClearKey(event,this)" title="Clear new hotkey assignment">Clear</button>
+
+			<label id="lblHotkeyHelp2" class="xTLabel" 
+					style="position:relative;text-align:left;width:180px;">Click the 'Record' button,
+			</label>
+			<button id="btnRecordNewHotkey" class="xTToolBarButton" style="margin-left:160px;width:75px;height:20px;display:inline;" accesskey="R" 
+				onclick="window.tabMgr.tabs['tabHotkeys'].onRecordKey()" title="Record new hotkey assignment"><U>R</U>ecord</button>
+
+			<label id="lblHotkeyHelpOr" class="xTLabel" 
+					style="position:relative;text-align:left;width:200px;font-weight:bold">&nbsp;&nbsp&nbsp-&nbsp;OR&nbsp;-
+			</label>
+			<br/>
+			<label id="lblHotkeyHelp4" class="xTLabel" 
+					style="position:relative;text-align:left;width:400px;">Click on the desired key combination on the keyboard below.
+			</label>
+
+			<span id="txtRecording" class="xTListText" style="display:none;margin-left:12px;text-align:left;overflow:hidden;">
+				Recording new hotkey...Press 'Esc' when done.
+			</span>
+		</td>
+		<td valign="top">
+			<label id="lblNewHotkeyAssignment" for="txtNewHotkey" class="xTLabel" 
+					style="position:relative;text-align:left;margin-left:10px;">New hotkey to assign:
+			</label>
+			<br/>
+			<div type="text" id="txtNewHotkey" class="xtTextBox" 
+				style="position:relative;width:140;margin-left:10px;padding:2px;border:1px solid #6699CC;background-color:#D4DFF0;">&nbsp;
+			</div>
+			<br/>
+			<label id="lblNewHotkeyBinding" class="xTLabel" 
+					style="position:relative;text-align:left;width:260px;margin-left:10px;">&nbsp;
+			</label>
+			<br/>
+			<div type="text" id="txtNewHotkeyBinding" class="xtTextBox" 
+				style="position:relative;width:280;margin-left:10px;height:40;padding:2px;border:0px solid #6699CC;background-color:#D4DFF0;">&nbsp;
+			</div>
+		</td>
+	</tr>
+</table>
+
+<!-- the hotkys tab HTML (for IE)-->
+<table id="USkeyboard_IE" border="0" width="700px" cellpadding="0" cellspacing="0" 
+			style="margin-left:15px;visibility:hidden;display:none;">
+	<tr>
+		<td>
+		<button id="Esc" class="keyButtonDisabled" disabled hidefocus keycode="27" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Esc</button>
+		<button id="F1" class="keyButton" style="margin-left:30px;" hidefocus keycode="112" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F1</button>
+		<button id="F2" class="keyButton" hidefocus keycode="113" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F2</button>
+		<button id="F3" class="keyButton" hidefocus keycode="114" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F3</button>
+		<button id="F4" class="keyButton" hidefocus keycode="115" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F4</button>
+		<button id="F5" class="keyButton" style="margin-left:15px;" hidefocus keycode="116" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F5</button>
+		<button id="F6" class="keyButton" hidefocus keycode="117" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F6</button>
+		<button id="F7" class="keyButton" hidefocus keycode="118" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F7</button>
+		<button id="F8" class="keyButton" hidefocus keycode="119" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F8</button>
+		<button id="F9" class="keyButton" style="margin-left:15px;" hidefocus keycode="120" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F9</button>
+		<button id="F10" class="keyButton" hidefocus keycode="121" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F10</button>
+		<button id="F11" class="keyButton" hidefocus keycode="122" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F11</button>
+		<button id="F12" class="keyButton" hidefocus keycode="123" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F12</button>
+		</td>
+	</tr>
+	<tr><td style="height:10px;">&nbsp;</td></tr>
+	<tr>
+		<td align="left" style="text-align:left;">
+		<button id="tilde" class="keyButtonDisabled" disabled>~</button>
+		<button id="1" class="keyButton" hidefocus keycode="49" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">1</button>
+		<button id="2" class="keyButton" hidefocus keycode="50" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">2</button>
+		<button id="3" class="keyButton" hidefocus keycode="51" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">3</button>
+		<button id="4" class="keyButton" hidefocus keycode="52" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">4</button>
+		<button id="5" class="keyButton" hidefocus keycode="53" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">5</button>
+		<button id="6" class="keyButton" hidefocus keycode="54" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">6</button>
+		<button id="7" class="keyButton" hidefocus keycode="55" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">7</button>
+		<button id="8" class="keyButton" hidefocus keycode="56" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">8</button>
+		<button id="9" class="keyButton" hidefocus keycode="57" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">9</button>
+		<button id="0" class="keyButton" hidefocus keycode="48" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">0</button>
+		<button id="dash" class="keyButtonDisabled" disabled>-</button>
+		<button id="plus" class="keyButtonDisabled" disabled>+</button>
+		<button id="bs" class="keyButtonDisabled" disabled style="width:60px;">Backsp</button>
+		<button id="Insert" class="keyButton" style="margin-left:15px;" hidefocus keycode="45" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Ins</button>
+		<button id="Home" class="keyButton" hidefocus keycode="36" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Hm</button>
+		<button id="PageUp" class="keyButton" hidefocus keycode="33" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">PgU</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="Tab" class="keyButtonDisabled" style="width:45px;" disabled hidefocus keycode="9" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Tab</button>
+		<button id="Q" class="keyButton" hidefocus keycode="81" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Q</button>
+		<button id="W" class="keyButton" hidefocus keycode="87" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">W</button>
+		<button id="E" class="keyButton" hidefocus keycode="69" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">E</button>
+		<button id="R" class="keyButton" hidefocus keycode="82" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">R</button>
+		<button id="T" class="keyButton" hidefocus keycode="84" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">T</button>
+		<button id="Y" class="keyButton" hidefocus keycode="89" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Y</button>
+		<button id="U" class="keyButton" hidefocus keycode="85" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">U</button>
+		<button id="I" class="keyButton" hidefocus keycode="73" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">I</button>
+		<button id="O" class="keyButton" hidefocus keycode="79" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">O</button>
+		<button id="P" class="keyButton" hidefocus keycode="80" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">P</button>
+		<button id="[" class="keyButtonDisabled" disabled>[</button>
+		<button id="]" class="keyButtonDisabled" disabled>]</button>
+		<button id="\\" class="keyButtonDisabled" disabled style="width:45px;">\</button>
+		<button id="Delete" class="keyButton" style="margin-left:15px;" hidefocus keycode="46" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Del</button>
+		<button id="End" class="keyButton" hidefocus keycode="35" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">End</button>
+		<button id="PageDn" class="keyButton" hidefocus keycode="34" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">PgD</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="caps" class="keyButtonDisabled" disabled style="width:60px;">Caps</button>
+		<button id="A" class="keyButton" hidefocus keycode="65" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">A</button>
+		<button id="S" class="keyButton" hidefocus keycode="83" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">S</button>
+		<button id="D" class="keyButton" hidefocus keycode="68" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">D</button>
+		<button id="F" class="keyButton" hidefocus keycode="70" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F</button>
+		<button id="G" class="keyButton" hidefocus keycode="71" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">G</button>
+		<button id="H" class="keyButton" hidefocus keycode="72" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">H</button>
+		<button id="J" class="keyButton" hidefocus keycode="74" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">J</button>
+		<button id="K" class="keyButton" hidefocus keycode="75" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">K</button>
+		<button id="L" class="keyButton" hidefocus keycode="76" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">L</button>
+		<button id=";" class="keyButtonDisabled" disabled>;</button>
+		<button id="'" class="keyButtonDisabled" disabled>'</button>
+		<button id="Enter" class="keyButtonDisabled" disabled hidefocus keycode="13" style="width:60px;"
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Enter</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="shiftLeft" class="keyButton" style="width:75px;" isModifier="shift" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Shift</button>
+		<button id="Z" class="keyButton" hidefocus keycode="90" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Z</button>
+		<button id="X" class="keyButton" hidefocus keycode="88" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">X</button>
+		<button id="C" class="keyButton" hidefocus keycode="67" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">C</button>
+		<button id="V" class="keyButton" hidefocus keycode="86" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">V</button>
+		<button id="B" class="keyButton" hidefocus keycode="66" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">B</button>
+		<button id="N" class="keyButton" hidefocus keycode="78" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">N</button>
+		<button id="M" class="keyButton" hidefocus keycode="77" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">M</button>
+		<button id="<" class="keyButtonDisabled" disabled>&lt;</button>
+		<button id=">" class="keyButtonDisabled" disabled>&gt;</button>
+		<button id="?" class="keyButtonDisabled" disabled>?</button>
+		<button id="shiftRight" class="keyButton" style="width:75px;" isModifier="shift" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Shift</button>
+		<button id="UpArrow" class="keyButton" style="margin-left:45px;" hidefocus keycode="38" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">&nbsp;
+		</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="ctrlLeft" class="keyButton" style="width:45px;" isModifier="ctrl" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Ctrl</button>
+		<button id="windowsLeft" class="keyButtonDisabled" disabled style="width:40px;">&nbsp;</button>
+		<button id="altLeft" class="keyButton" style="width:40px;" isModifier="alt" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Alt</button>
+		<button id="space" class="keyButtonDisabled" disabled style="width:165px;">Space Bar</button>
+		<button id="altRight" class="keyButton" style="width:40px;" isModifier="alt" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Alt</button>
+		<button id="windowsRight" class="keyButtonDisabled" disabled style="width:40px;">&nbsp;</button>
+		<button id="menuRight" class="keyButtonDisabled" disabled style="width:40px;">&nbsp;</button>
+		<button id="ctrlRight" class="keyButton" style="width:40px;" isModifier="ctrl" hidefocus 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Ctrl</button>
+		<button id="LeftArrow" class="keyButton" style="margin-left:15px;" hidefocus keycode="37" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">&nbsp;
+		</button>
+		<button id="DownArrow" class="keyButton" hidefocus keycode="40" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">&nbsp;
+		</button>
+		<button id="RightArrow" class="keyButton" hidefocus keycode="39" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">&nbsp;
+		</button>
+		</td>
+	</tr>
+</table>
+
+<!-- the hotkys tab HTML (for non-IE)-->
+<table id="USkeyboard_NS" border="0" width="700px" cellpadding="0" cellspacing="0" 
+			style="margin-left:15px;visibility:hidden;display:none;">
+	<tr>
+		<td>
+		<button id="Esc" class="keyButtonDisabled" disabled keycode="27" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Esc</button>
+		<button id="F1" class="keyButton" style="position:relative;margin-left:26px;" keycode="112" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F1</button>
+		<button id="F2" class="keyButton" style="position:relative;left:-4px;" keycode="113" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F2</button>
+		<button id="F3" class="keyButton" style="position:relative;left:-8px;" keycode="114" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F3</button>
+		<button id="F4" class="keyButton" style="position:relative;left:-12px;" keycode="115" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F4</button>
+		<button id="F5" class="keyButton" style="position:relative;margin-left:2px;" keycode="116" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F5</button>
+		<button id="F6" class="keyButton" style="position:relative;left:-4px;" keycode="117" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F6</button>
+		<button id="F7" class="keyButton" style="position:relative;left:-8px;" keycode="118" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F7</button>
+		<button id="F8" class="keyButton" style="position:relative;left:-12px;" keycode="119" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F8</button>
+		<button id="F9" class="keyButton" style="margin-left:2px;" keycode="120" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F9</button>
+		<button id="F10" class="keyButton" style="position:relative;left:-4px;" keycode="121" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F10</button>
+		<button id="F11" class="keyButton" style="position:relative;left:-8px;" keycode="122" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F11</button>
+		<button id="F12" class="keyButton" style="position:relative;left:-12px;" keycode="123" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F12</button>
+		</td>
+	</tr>
+	<tr><td style="height:10px;">&nbsp;</td></tr>
+	<tr>
+		<td align="left" style="text-align:left;">
+		<button id="tilde" class="keyButtonDisabled" disabled>~</button>
+		<button id="1" class="keyButton" style="position:relative;left:-4px;" keycode="49" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">1</button>
+		<button id="2" class="keyButton" style="position:relative;left:-8px;" keycode="50" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">2</button>
+		<button id="3" class="keyButton" style="position:relative;left:-12px;" keycode="51" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">3</button>
+		<button id="4" class="keyButton" style="position:relative;left:-16px;" keycode="52" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">4</button>
+		<button id="5" class="keyButton" style="position:relative;left:-20px;" keycode="53" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">5</button>
+		<button id="6" class="keyButton" style="position:relative;left:-24px;" keycode="54" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">6</button>
+		<button id="7" class="keyButton" style="position:relative;left:-28px;" keycode="55" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">7</button>
+		<button id="8" class="keyButton" style="position:relative;left:-32px;" keycode="56" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">8</button>
+		<button id="9" class="keyButton" style="position:relative;left:-36px;" keycode="57" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">9</button>
+		<button id="0" class="keyButton" style="position:relative;left:-40px;" keycode="48" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">0</button>
+		<button id="dash" class="keyButtonDisabled" style="position:relative;left:-44px;" disabled>-</button>
+		<button id="plus" class="keyButtonDisabled" style="position:relative;left:-48px;" disabled>+</button>
+		<button id="bs" class="keyButtonDisabled" disabled style="position:relative;left:-52px;width:60px;">Backsp</button>
+		<button id="Insert" class="keyButton" keycode="45" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;margin-left:-15px;">Ins
+		</button>
+		<button id="Home" class="keyButton" style="position:relative;left:-4px;" keycode="36" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Hm</button>
+		<button id="PageUp" class="keyButton" style="position:relative;left:-8px;" keycode="33" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">PgU</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="Tab" class="keyButtonDisabled" style="position:relative;width:45px;" disabled keycode="9" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Tab</button>
+		<button id="Q" class="keyButton" keycode="81" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Q</button>
+		<button id="w" class="keybutton" style="position:relative;left:-6px;" keycode="87" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">W</button>
+		<button id="E" class="keyButton" style="position:relative;left:-10px;" keycode="69" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">E</button>
+		<button id="R" class="keyButton" style="position:relative;left:-14px;" keycode="82" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">R</button>
+		<button id="T" class="keyButton" style="position:relative;left:-20px;" keycode="84" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">T</button>
+		<button id="Y" class="keyButton" style="position:relative;left:-24px;" keycode="89" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Y</button>
+		<button id="U" class="keyButton" style="position:relative;left:-28px;" keycode="85" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">U</button>
+		<button id="I" class="keyButton" style="position:relative;left:-32px;" keycode="73" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">I</button>
+		<button id="O" class="keyButton" style="position:relative;left:-36px;" keycode="79" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">O</button>
+		<button id="P" class="keyButton" style="position:relative;left:-40px;" keycode="80" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">P</button>
+		<button id="[" class="keyButtonDisabled" style="position:relative;left:-44px;" disabled>[</button>
+		<button id="]" class="keyButtonDisabled" style="position:relative;left:-48px;" disabled>]</button>
+		<button id="\\" class="keyButtonDisabled" disabled style="position:relative;left:-52;width:45px;">\</button>
+		<button id="Delete" class="keyButton" keycode="46" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;margin-left:-15px;">Del
+		</button>
+		<button id="End" class="keyButton" style="position:relative;left:-4px;" keycode="35" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">End</button>
+		<button id="PageDn" class="keyButton" style="position:relative;left:-8px;" keycode="34" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">PgD</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="caps" class="keyButtonDisabled" disabled style="position:relative;width:60px;">Caps</button>
+		<button id="A" class="keyButton" style="position:relative;left:-8px;" keycode="65" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">A</button>
+		<button id="S" class="keyButton" style="position:relative;left:-12px;" keycode="83" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">S</button>
+		<button id="D" class="keyButton" style="position:relative;left:-16px;" keycode="68" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">D</button>
+		<button id="F" class="keyButton" style="position:relative;left:-20px;" keycode="70" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">F</button>
+		<button id="G" class="keyButton" style="position:relative;left:-24px;" keycode="71" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">G</button>
+		<button id="H" class="keyButton" style="position:relative;left:-28px;" keycode="72" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">H</button>
+		<button id="J" class="keyButton" style="position:relative;left:-32px;" keycode="74" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">J</button>
+		<button id="K" class="keyButton" style="position:relative;left:-36px;" keycode="75" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">K</button>
+		<button id="L" class="keyButton" style="position:relative;left:-40px;" keycode="76" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">L</button>
+		<button id=";" class="keyButtonDisabled" style="position:relative;left:-44px;" disabled>;</button>
+		<button id="'" class="keyButtonDisabled" style="position:relative;left:-48px;" disabled>'</button>
+		<button id="Enter" class="keyButtonDisabled" disabled keycode="13" style="position:relative;left:-50px;width:64px;"
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Enter</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="shiftLeft" class="keyButton" style="position:relative;width:75px;" isModifier="shift" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Shift</button>
+		<button id="Z" class="keyButton" style="position:relative;left:-4px;" keycode="90" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Z</button>
+		<button id="X" class="keyButton" style="position:relative;left:-8px;" keycode="88" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">X</button>
+		<button id="C" class="keyButton" style="position:relative;left:-12px;" keycode="67" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">C</button>
+		<button id="V" class="keyButton" style="position:relative;left:-16px;" keycode="86" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">V</button>
+		<button id="B" class="keyButton" style="position:relative;left:-20px;" keycode="66" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">B</button>
+		<button id="N" class="keyButton" style="position:relative;left:-24px;" keycode="78" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">N</button>
+		<button id="M" class="keyButton" style="position:relative;left:-28px;" keycode="77" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">M</button>
+		<button id="<" class="keyButtonDisabled" style="position:relative;left:-32px;" disabled>&lt;</button>
+		<button id=">" class="keyButtonDisabled" style="position:relative;left:-36px;" disabled>&gt;</button>
+		<button id="?" class="keyButtonDisabled" style="position:relative;left:-40px;" disabled>?</button>
+		<button id="shiftRight" class="keyButton" style="position:relative;left:-44px;width:78px;" isModifier="shift"  
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Shift</button>
+		<button id="UpArrow" class="keyButton" keycode="38" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;margin-left:26px;">&nbsp;
+		</button>
+		</td>
+	</tr>
+	<tr>
+		<td>
+		<button id="ctrlLeft" class="keyButton" style="position:relative;width:45px;" isModifier="ctrl"  
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Ctrl</button>
+		<button id="windowsLeft" class="keyButtonDisabled" disabled style="position:relative;left:-4px;width:40px;">&nbsp;</button>
+		<button id="altLeft" class="keyButton" style="position:relative;left:-8px;width:40px;" isModifier="alt"  
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Alt</button>
+		<button id="space" class="keyButtonDisabled" disabled style="position:relative;left:-12px;width:172px;">Space Bar</button>
+		<button id="altRight" class="keyButton" style="position:relative;left:-16px;width:40px;" isModifier="alt"  
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Alt</button>
+		<button id="windowsRight" class="keyButtonDisabled" disabled style="position:relative;left:-20px;width:34px;">&nbsp;</button>
+		<button id="menuRight" class="keyButtonDisabled" disabled style="position:relative;left:-24px;width:34px;">&nbsp;</button>
+		<button id="ctrlRight" class="keyButton" style="position:relative;left:-28px;width:44px;" isModifier="ctrl"  
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)">Ctrl</button>
+		<button id="LeftArrow" class="keyButton" keycode="37" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;margin-left:15px;">&nbsp;
+		</button>
+		<button id="DownArrow" class="keyButton" keycode="40" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;left:-4px;">&nbsp;
+		</button>
+		<button id="RightArrow" class="keyButton" keycode="39" 
+			onclick="window.tabMgr.tabs['tabHotkeys'].onClickKey(event,this)"
+			style="position:relative;left:-8px;">&nbsp;
+		</button>
+		</td>
+	</tr>
+</table>

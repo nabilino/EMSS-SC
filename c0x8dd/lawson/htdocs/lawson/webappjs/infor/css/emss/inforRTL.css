@@ -1,0 +1,182 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/emss/Attic/inforRTL.css,v 1.1.4.9.2.5 2014/02/04 18:43:20 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* **** Used for Infor RTL styling *****************************/
+button.pushButtonStyler
+{  
+	margin-left : 2px;
+	margin-right : 2px;
+}
+.panebody, .panebodynested, .panebodylite
+{
+    float : right;
+}
+.helppanebody
+{
+    float : right;
+}
+.panebodylite2
+{
+    float : right;
+}
+.panefooter
+{
+	left : auto;
+	right : 0px;
+	position : relative;
+	float : none;
+	padding-right : 5px;
+	display : block;
+}
+.helpicon
+{
+	right : 0px;	
+}
+.calendaricon, .searchicon
+{
+	text-align : right;
+}
+.fieldlabel, .fieldlabelleft, .fieldlabelboldleft, .fieldlabelboldliteleft,
+.fieldlabelboldliteunderlineleft
+{
+	text-align : right;
+}
+.fieldlabelbold, .fieldlabelboldlite, .fieldlabelboldliteunderline
+{
+	text-align : left;
+}
+.fieldlabelboldwhiteblue, .fieldlabelboldwhitegreen
+{
+	text-align : right;
+}
+.fieldlabelgovt1
+{
+	text-align : right;
+}
+.fieldlabelgovt4
+{
+	text-align : right;
+}
+.fieldlabelgovt5
+{
+	text-align : right;
+}
+.fieldlabelgovt6
+{
+	text-align : right;
+}
+.plaintablerowheaderbold
+{
+	text-align : left;
+}
+.plaintablerowheader, .plaintablerowheaderborder, .plaintablerowheaderborderbottom, .plaintablerowheaderborderwhite, 
+.plaintablerowheaderborderwhiteOverDue, .plaintablerowheaderborderlite, .plaintablerowheaderlite, 
+.plaintablerowheaderbordertall, .plaintableheadertallwhiteright, .plaintableheaderborderright,
+.plaintableheaderwhiteright, .plaintablerowheaderborderlitewhite
+{
+	text-align : left;
+}
+.plaintablecelldisplayright, .plaintablecellborderdisplayright, .plaintablecellborderright, .plaintablecellboldborderright,
+.plaintablecellright, .plaintablecellboldright, .plaintablecellredright, .plaintablecellsmallright
+{
+	text-align : left;
+}
+.plaintableheaderborder, .plaintableheaderbordergreytop, .plaintableheaderbordergrey, .plaintableheaderbordergreybluetop,
+.plaintableheaderborderdarkgreybluetop, .plaintableheaderbordergreywhite, .plaintableheaderbordertall, .plaintableheader, 
+.plaintableheaderwhite, .plaintableheadertall, .plaintableheadertallwhite, .plaintableheaderborderlite, 
+.plaintableheaderborderactive, .plaintableheaderbordertalllite, .plaintableheaderlite, .plaintableheaderactive, 
+.plaintableheadertalllite, .plaintablecellbold, .plaintablecellboldnopadding, .plaintablecellboldborder, .plaintableheaderbordersidesbold,
+.plaintablecellborderlite, .plaintablecellborderactive, .plaintablecellborderactive2,
+.plaintablecellborder, .plaintablecellborder2, .plaintablecellborderredfont, .plaintablecellbordertall, 
+.plaintablecellborderleft, .plaintablecellborderyellowbg, .plaintablecellbordergreenbg, .plaintablecell, 
+.plaintablecellnopadding, .plaintablecellsmall, .plaintablecelllite, .plaintablecellactive, .plaintablecelltall, 
+.plaintablecellborderyellowbg, plaintablecellbordergreenbg, .plaintableheaderbordersides,
+.plaintablecellborderdisplay, .plaintablecelldisplay, .plaintablecellbordertalldisplay,
+.plaintablerowheaderdisplay, .plaintablerowheaderborderbottomdisplay, .plaintablerowheaderborderbottomleft,
+.plaintablecellred, .plaintablecellredactive, .plaintablecellborder2, .tablecellborder,
+.tablecellborderyellowbg, .tablecellbordergreenbg, plaintableheaderbordersidesonly2, .plaintablerowheaderborderbottomblue
+{
+	text-align : right;
+}
+.balanceinnertotals
+{
+	text-align : right;
+}
+.balanceinnerdetails
+{
+	text-align : right;
+}
+.balanceinnerdetails hr
+{
+	text-align : right;
+}
+.balancetotals
+{
+	text-align : right;
+}
+.balancedetails
+{
+	text-align : right;
+}
+table.filterTable thead
+{
+    text-align : right;
+}
+table.filterTable th
+{
+    text-align : right;
+}
+table.filterListTable thead
+{
+    text-align : right;
+}
+table.filterListTable th
+{
+    text-align : right;
+}
+.datestring
+{
+	text-align : right;
+	padding-right : 3px;	
+}
+.buttonBar
+{
+	float : left;
+	padding-left : 15px;
+}
+.textAlignLeft
+{
+	text-align : right;
+}
+.textAlignRight
+{
+	text-align : left;
+}
+.floatLeft
+{
+	float : right;
+}
+.floatRight
+{
+	float : left;
+}

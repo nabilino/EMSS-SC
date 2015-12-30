@@ -1,0 +1,1370 @@
+<html>
+<head>
+<title>Military Service</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var EmpInfo = null;
+var MilitaryRecords = null;
+var VeteranStatuses = null;
+var BranchNames = null;
+var ServiceStatuses = null;
+var DischargeTypes = null;
+var MilitaryComments = null;
+var CommentDtlLines = null;
+var updatetype;
+var appObj;
+var HR90_DTL_FIELD_SIZE = 60;
+var HR90_NBR_DETAIL_LINES = 11;
+
+function OpenMilitary()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitMilitaryService()'|desiredEdit='EM'");
+}
+
+function InitMilitaryService()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));	
+	document.title = getSeaPhrase("MILITARY_SERVICE","SEA");
+	setTaskHeader("header",getSeaPhrase("MILITARY_SERVICE","SEA"),"Personal");
+	StoreDateRoutines();
+	StoreValueLists();
+}
+
+function DropDownItem(code, description)
+{
+	this.code = (typeof(code) != "undefined") ? code : null;
+	this.description = (typeof(description) != "undefined") ? description : null;
+}
+
+function StoreValueLists()
+{
+	ServiceStatuses = new Array(new DropDownItem("NG",getSeaPhrase("NATIONAL_GUARD","SEA")),
+		new DropDownItem("RE",getSeaPhrase("RESERVES","SEA")));
+	DischargeTypes = new Array(new DropDownItem("D",getSeaPhrase("DISHONORABLE","SEA")),
+		new DropDownItem("H",getSeaPhrase("HONORABLE","SEA")),
+		new DropDownItem("L",getSeaPhrase("LESS_HONORABLE","SEA")),
+		new DropDownItem("M",getSeaPhrase("MEDICAL","SEA")),
+		new DropDownItem("D",getSeaPhrase("OTHER","SEA")));
+	BranchNames = new Array(new DropDownItem("AF",getSeaPhrase("AIR_FORCE","SEA")),
+		new DropDownItem("AR",getSeaPhrase("ARMY","SEA")),
+		new DropDownItem("CG",getSeaPhrase("COAST_GUARD","SEA")),
+		new DropDownItem("MC",getSeaPhrase("MARINE_CORP","SEA")),
+		new DropDownItem("NA",getSeaPhrase("NAVY","SEA")),
+		new DropDownItem("OT",getSeaPhrase("OTHER","SEA"))); 		
+	ServiceStatuses = ServiceStatuses.sort(sortByDescription);
+	DischargeTypes = DischargeTypes.sort(sortByDescription);
+	BranchNames = BranchNames.sort(sortByDescription);		
+	GetLawsonApplicationVersion();	
+}
+
+function GetLawsonApplicationVersion()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       		setTimeout("GetLawsonApplicationVersion()", 10);
+       		return;
+	}
+	GetEmployeeInfo();
+}
+
+function GetEmployeeInfo()
+{
+	var dmeObj = new DMEObject(authUser.prodline, "paemployee");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.field = "employee.work-country;veteran;veteran.description;"
+	+ "draft-status;final-rank;cur-status";
+	dmeObj.key = parseInt(authUser.company,10) + "=" + parseInt(authUser.employee,10);
+	dmeObj.func = "GetVeteranStatuses()";
+	dmeObj.max = "1";
+	dmeObj.otmmax = "1";
+	dmeObj.exclude = "drill;keys;sorts";
+  	DME(dmeObj,"jsreturn");
+}
+
+function GetVeteranStatuses()
+{
+	EmpInfo = self.jsreturn.record[0];
+
+	if (VeteranStatuses == null)
+	{
+		VeteranStatuses = new Array();
+		
+		// if we are running on 8.1.1 applications or newer, perform a DME to get the veteran status select;
+		// otherwise use a hard-coded value list.
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "8.1.1")
+		{
+			if (!emssObjInstance.emssObj.filterSelect)
+			{
+				var dmeObj = new DMEObject(authUser.prodline,"HRCTRYCODE");
+					dmeObj.out = "JAVASCRIPT";
+					dmeObj.index = "ctcset1";
+					dmeObj.field = "hrctry-code;description";
+					dmeObj.key = "VS";
+					if (EmpInfo.employee_work_country)
+						dmeObj.key += "=" + EmpInfo.employee_work_country;
+					dmeObj.cond = "active";
+					dmeObj.max = "600";
+					dmeObj.func = "StoreVeteranStatuses()";
+					dmeObj.exclude = "drill;keys;sorts";
+				DME(dmeObj,"jsreturn");
+				return;
+			}
+		}
+		else
+		{
+			VeteranStatuses[0] = new Object();
+			VeteranStatuses[0].hrctry_code = "N";
+			VeteranStatuses[0].description = getSeaPhrase("NO","ESS");
+			VeteranStatuses[1] = new Object();
+			VeteranStatuses[1].hrctry_code = "Y";
+			VeteranStatuses[1].description = getSeaPhrase("YES","ESS");
+			VeteranStatuses[2] = new Object();
+			VeteranStatuses[2].hrctry_code = "1";
+			VeteranStatuses[2].description = getSeaPhrase("VETERAN","ESS");
+			VeteranStatuses[3] = new Object();
+			VeteranStatuses[3].hrctry_code = "2";
+			VeteranStatuses[3].description = getSeaPhrase("DISABLED_VET","ESS");
+			VeteranStatuses[4] = new Object();
+			VeteranStatuses[4].hrctry_code = "3";
+			VeteranStatuses[4].description = getSeaPhrase("VIETNAM_VET","ESS");
+			VeteranStatuses[5] = new Object();
+			VeteranStatuses[5].hrctry_code = "4";
+			VeteranStatuses[5].description = getSeaPhrase("DISABLED_VIETNAM_VET","ESS");
+			VeteranStatuses[6] = new Object();
+			VeteranStatuses[6].hrctry_code = "5";
+			VeteranStatuses[6].description = getSeaPhrase("GULF_WAR_VET","ESS");
+			VeteranStatuses[7] = new Object();
+			VeteranStatuses[7].hrctry_code = "6";
+			VeteranStatuses[7].description = getSeaPhrase("SPECIAL_DISABLED_VET","ESS");
+			VeteranStatuses[8] = new Object();
+			VeteranStatuses[8].hrctry_code = "7";
+			VeteranStatuses[8].description = getSeaPhrase("OTHER_VET","ESS");
+		}
+		ShowSummary();
+		GetMilitaryRecords();
+	}
+	else
+	{
+		ShowSummary();
+		removeWaitAlert();
+	}
+	fitToScreen();
+}
+
+function StoreVeteranStatuses()
+{
+	VeteranStatuses = VeteranStatuses.concat(self.jsreturn.record);
+	
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+	
+	VeteranStatuses = VeteranStatuses.sort(sortByDescription);
+	ShowSummary();
+	GetMilitaryRecords();
+	fitToScreen();
+}
+
+function DrawVeteranSelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+	for (var i=0; i<VeteranStatuses.length; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + VeteranStatuses[i].hrctry_code + "'";
+		if (VeteranStatuses[i].hrctry_code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + VeteranStatuses[i].description;
+	}
+	return codeselect.join("");
+}
+
+function GetBranchNameDesc(branch, defaultValue)
+{
+	var len = (BranchNames) ? BranchNames.length : 0;
+	var desc = (typeof(defaultValue) != "undefined") ? defaultValue : branch;
+	for (var i=0; i<len; i++)
+	{
+		if (BranchNames[i].code == branch)
+		{
+			desc = BranchNames[i].description;
+			break;
+		}	
+	}
+	return desc;	
+}
+
+function ShowSummary()
+{
+	var sb = new Array();
+	sb[sb.length] = '<form name="summaryform">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+	+ '<tr><td class="plaintablerowheader" style="padding-top:5px">'+getSeaPhrase("VETERAN_STATUS","ESS")+'</td>'
+	+ '<td class="plaintablecell" style="text-align:left:padding-top:5px" nowrap>';
+
+	if (emssObjInstance.emssObj.filterSelect && appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "8.1.1")
+	{
+		sb[sb.length] = '<input type="text" name="veteran" id="veteran" class="inputbox" size="4" maxlength="4" '
+		+ 'value="' + EmpInfo.veteran + '" onkeyup="document.getElementById(\'xlt_veteran\').innerHTML=\'\';"/>'
+		+ '<a href="" onclick="parent.openDmeFieldFilter(\'veteran\');return false">'
+		+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">'
+		+ '</a>'
+		+ '<span style="text-align:left;width:200px" class="fieldlabel" id="xlt_veteran">' + EmpInfo.veteran_description + '</span>';
+	}
+	else
+	{
+		sb[sb.length] = '<select name="veteran">'
+		+ DrawVeteranSelect(EmpInfo.veteran)
+		+ '</select>';
+	}
+
+	sb[sb.length] = '<tr><td class="plaintablerowheader">'+getSeaPhrase("DRAFT_STATUS","SEA")+'</td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="draftstatus" value="' + EmpInfo.draft_status
+	+ '" size="3" maxlength="3" onfocus="this.select()"></tr>'	
+	
+	sb[sb.length] = '<tr><td class="plaintablerowheader">'+getSeaPhrase("RANK_ATTAINED","SEA")+'</td>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="rankattained" value="' + EmpInfo.final_rank
+	+ '" size="3" maxlength="3" onfocus="this.select()"></tr>'
+
+	sb[sb.length] = '<tr><th class="plaintablerowheaderborderbottom">'+getSeaPhrase("ACTIVE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="servicestatus">'
+	+ DrawServiceStatusSelect(EmpInfo.cur_status)
+	sb[sb.length] = '</select><td></tr>'
+	
+	sb[sb.length] = '<tr><td>&nbsp;</td><td class="plaintablecell" style="text-align:left">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessStatus();return false","margin-top:10px")
+	+ '</td></tr></table></form>'
+
+	self.summary.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STATUS","ESS");
+	self.summary.document.getElementById("paneBody").innerHTML = sb.join("");
+	self.summary.stylePage();
+    self.summary.setLayerSizes();
+	document.getElementById("summary").style.visibility = "visible";
+}
+
+function DrawServiceStatusSelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+
+	for (var i=0; i<ServiceStatuses.length; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + ServiceStatuses[i].code + "'";
+		if (ServiceStatuses[i].code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + ServiceStatuses[i].description;
+	}
+	return codeselect.join("");
+}
+
+function ProcessStatus()
+{
+	var summaryForm = self.summary.document.forms["summaryform"];
+
+	for (var i=0; i<summaryForm.elements.length; i++)
+	{
+		if (NonSpace(summaryForm.elements[i].value) == 0)
+		{
+			summaryForm.elements[i].value = " ";
+		}	
+	}
+
+	var agsObj = new AGSObject(authUser.prodline, "PA14.1");
+	agsObj.event = "CHG";
+	agsObj.rtn = "DATA"; //brentd "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=C"
+		+ "&PEM-COMPANY=" + escape(parseInt(authUser.company,10),1)
+		+ "&PEM-EMPLOYEE=" + escape(parseInt(authUser.employee,10),1)
+		+ "&PEM-VETERAN=" + escape(summaryForm.elements["veteran"].value,1)
+		+ "&PEM-DRAFT-STATUS=" + escape(summaryForm.elements["draftstatus"].value,1)
+		+ "&PEM-FINAL-RANK=" + escape(summaryForm.elements["rankattained"].value,1)
+		+ "&PEM-CUR-STATUS=" + escape(summaryForm.elements["servicestatus"].value,1)
+	agsObj.func = "parent.HandlePA14Response('E')";
+	updatetype = "MIL";
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+	
+	for (var i=0; i<summaryForm.elements.length; i++)
+	{
+		if (NonSpace(summaryForm.elements[i].value) == 0)
+		{
+			summaryForm.elements[i].value = "";
+		}	
+	}	
+	
+	AGS(agsObj, "jsreturn");
+}
+
+function GetMilitaryRecords()
+{
+	MilitaryRecords = new Array();
+
+	var dmeObj = new DMEObject(authUser.prodline, "military");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "milset1";
+	dmeObj.field = "br-service;seq-nbr;serv-spec;years-served;mnths-served;rank-attained;"
+		+ "dischg-type;dischg-date;emp-comments.seq-nbr";
+	dmeObj.key = parseInt(authUser.company,10) + "=0=" + parseInt(authUser.employee,10);
+	dmeObj.func = "StoreMilitaryRecords()";
+	dmeObj.max = "600";
+	dmeObj.otmmax = "1";
+	dmeObj.exclude = "drill;keys;sorts";
+	DME(dmeObj, "jsreturn");
+}
+
+function StoreMilitaryRecords()
+{
+	MilitaryRecords = MilitaryRecords.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next != "")
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	document.getElementById("right").style.visibility = "hidden";
+
+	var commentsExist = false;
+	var sb = new Array();
+ 	
+	if (MilitaryRecords.length > 0)
+	{
+  		sb[sb.length] = '<table id="militaryTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+		+ '<tr><th scope="col" class="plaintableheaderborder" style="width:50%;text-align:center">'+getSeaPhrase("BRANCH","SEA")+'</th>'
+		+ '<th scope="col" class="plaintableheaderborder" style="width:50%;text-align:center">'+getSeaPhrase("SPECIALTY","SEA")+'</th></tr>'
+	
+	  	for (var i=0; i<MilitaryRecords.length; i++)
+	   	{
+	      	var militaryRec = MilitaryRecords[i];
+	      	commentsExist = (typeof(militaryRec.Rel_emp_comments) != "undefined") ? true : false;
+	      	sb[sb.length] = '<tr><td class="plaintablecellborder" style="width:50%">'
+	      	+ '<a href="javascript:void(0);" onclick="parent.ShowMilitaryDetail('+i+',\'C\');return false;"'
+			+ ' onmouseover="window.status=\''+getSeaPhrase("CHANGE_MILITARY_RECORD","SEA").replace(/\'/g,"\\'")+'\';return true"'
+			+ ' onmouseout="window.status=\' \';return true" nowrap>'
+			+ GetBranchNameDesc(militaryRec.br_service) +'</a></td>'
+			+ '<td class="plaintablecellborder" style="width:50%" nowrap>'
+			+ ((militaryRec.serv_spec) ? militaryRec.serv_spec : '&nbsp;')
+			+ '</td></tr>';
+		}
+		
+		sb[sb.length] = '</table>';
+	}
+	else
+	{
+		sb[sb.length] = '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">'+getSeaPhrase("NO_MILITARY_RECORDS","SEA")+'</div>';	
+	}
+
+	sb[sb.length] = '<div style="text-align:right;padding-right:5px">'
+	+ uiButton(getSeaPhrase("ADD","ESS"),"parent.ShowMilitaryDetail(-1,\'A\');return false",false,"addbtn")
+	+ '</div>';
+
+	self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MILITARY_SERVICE","SEA");
+	self.left.document.getElementById("paneBody").innerHTML = sb.join("");
+	self.left.stylePage();
+	self.left.setLayerSizes();
+	
+	if (commentsExist && MilitaryComments == null)
+	{
+		GetMilitaryComments();
+	}
+	else if (MilitaryRecords.length == 0)
+	{
+		MilitaryComments = null;
+		ShowMilitaryComments();
+	}
+	else if (MilitaryComments == null)
+	{
+		ShowMilitaryComments();
+	}	
+	
+	document.getElementById("left").style.visibility = "visible";
+	removeWaitAlert();	
+}
+
+function GetMilitaryComments()
+{
+	showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+	MilitaryComments = new Array();
+	var dmeObj = new DMEObject(authUser.prodline, "pacomments");
+	dmeObj.out = "XML";
+	dmeObj.index = "pacset1";
+	dmeObj.field = "cmt-text";
+	dmeObj.key = parseInt(authUser.company,10) + "=0=MI=" + parseInt(authUser.employee,10)
+		+ "=" + escape(" ") + "=" + escape(" ");
+	dmeObj.max = "600";
+	dmeObj.func = "GetMoreMilitaryComments()";
+	DME(dmeObj, "jsreturn");
+}
+
+function GetMoreMilitaryComments() 
+{
+	var cmtRecs = self.jsreturn.record;
+	var nbrRecs = cmtRecs.length;
+	var blankLine = new Array();
+	var foundNonBlankLine = false;
+
+	for (var i=0; i<nbrRecs; i++) 
+	{
+		var cmtText = cmtRecs[i].cmt_text;
+
+		// Handle carriage returns and trailing spaces.
+		// A carriage return gets returned from DME as a single comment line containing only
+		// an empty string.  Convert it back to a carriage return so it will get formatted
+		// properly in the text area.
+		if (cmtText == "") 
+		{
+			// Retain carriage returns.  If the carriage return is not at the beginning of
+			// the comments or at the end, add an additional carriage return in order to
+			// preserve the paragraph break.
+			cmtText = unescape("%0D%0A");
+			blankLine[MilitaryComments.length] = true; // store a flag that this line is blank
+		} 
+		else 
+		{
+			foundNonBlankLine = true;
+		}
+
+		// Store the line of comment text in the MilitaryComments array.  Make sure any escaped double
+		// quote or backslash characters appear correctly in the text area.
+		MilitaryComments[MilitaryComments.length] = cmtText.replace(/\\\\"/g,'"').replace(/\\\\/g,'\\');
+
+		// If the current line does not start with white space, append a space character to the
+		// end of the previous line so that words do not run together in the text area.  This is
+		// necessary because DME trims the whitespace off of the end of each line.
+		if (MilitaryComments.length > 1) 
+		{
+			var thisLine = MilitaryComments[MilitaryComments.length-1];
+			var prevLine = MilitaryComments[MilitaryComments.length-2];
+			if ((thisLine.charAt(0) != " ")
+			&& (!blankLine[MilitaryComments.length-2])
+			&& (prevLine.length < HR90_DTL_FIELD_SIZE)) 
+			{
+				MilitaryComments[MilitaryComments.length-2] += " ";
+			}
+		}
+	}
+
+	if (self.jsreturn.Next) 
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	} 
+	else 
+	{
+		ShowMilitaryComments();
+		removeWaitAlert();
+	}
+}
+
+function ShowMilitaryComments()
+{
+	if (MilitaryRecords == null || MilitaryRecords.length == 0)
+	{
+		document.getElementById("comments").style.visibility = "hidden";
+		return;
+	}
+	
+	var sb = new Array();
+	sb[sb.length] = '<form name="commentsform" onsubmit="return false;">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+	+ '<tr><th class="plaintablerowheaderborderbottom" align="left">'+getSeaPhrase("COMMENTS","ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><textarea type="text" name="militaryComments" id="militaryComments" value="" rows="4" cols="31"'
+	+ ' onfocus="this.select()"></textarea>'
+	+ '</td></tr>'
+	
+	sb[sb.length] = '<tr><td>&nbsp;</td><td class="plaintablecell" style="text-align:left">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateComments();return false","margin-top:10px")
+	if (MilitaryComments != null)
+		sb[sb.length] = uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteMilitaryComments();return false","margin-top:10px")
+	sb[sb.length] = '</td></tr></table></form>'
+	
+	self.comments.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMMENTS","ESS");
+	self.comments.document.getElementById("paneBody").innerHTML = sb.join("");
+	self.comments.stylePage();
+	self.comments.setLayerSizes();
+	if (MilitaryComments != null)
+	{
+		var commentsForm = self.comments.document.forms["commentsform"];
+		commentsForm.elements["militaryComments"].value = MilitaryComments.join("");
+	}
+	document.getElementById("comments").style.visibility = "visible";
+}
+
+function UpdateComments()
+{
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+	StoreComments();
+	if (MilitaryComments != null)
+		DeleteMilitaryComments(0);
+	else
+		ProcessComments(0);
+}
+
+function DeleteMilitaryComments(dtlLineCounter) 
+{
+	var agsObj = new AGSObject(authUser.prodline, "HR90.1");
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.event = "CHG";
+	agsObj.field = "FC=D"
+		+ "&PAC-COMPANY=" + parseInt(authUser.company,10)
+		+ "&PAC-EMP-APP=0"
+		+ "&PAC-EMPLOYEE=" + parseInt(authUser.employee,10)
+		+ "&PAC-CMT-TYPE=MI"
+	agsObj.func = "parent.PurgeDeletedMilitaryComments(" + dtlLineCounter +")";
+	agsObj.debug = false;
+	updatetype = "PAC";
+	AGS(agsObj, "jsreturn");
+}
+
+function PurgeDeletedMilitaryComments(dtlLineCounter) 
+{
+	// Ignore the delete error if someone deleted the comments manually on HR90
+	// (the error will be message number 12, "No More Records To View")--in that case, we
+	// can just add new comments. If any other error was returned while deleting comments,
+	// abort the update.
+	if (Number(self.lawheader.gmsgnbr) != 0 && Number(self.lawheader.gmsgnbr) != 12) 
+	{
+		FinishComments(true);
+		return;
+	}
+	if (typeof(dtlLineCounter) != "undefined")
+		ProcessComments(dtlLineCounter);
+	else
+	{
+		MilitaryComments = null;
+		ShowMilitaryComments();
+		removeWaitAlert();
+	}	
+}
+
+function ProcessComments(dtlLineCounter) 
+{	
+	// if an error was returned or no new comments exist, abort the update
+	if ((dtlLineCounter > 0 && Number(self.lawheader.gmsgnbr) != 0) || (CommentDtlLines.length == 0)) 
+	{
+		FinishComments(true);
+		return;
+	}
+
+	var agsObj = new AGSObject(authUser.prodline, "HR90.1");
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.event = "ADD";
+	agsObj.field = "FC=A"
+		+ "&PAC-COMPANY=" + parseInt(authUser.company,10)
+		+ "&PAC-EMP-APP=0"
+		+ "&PAC-EMPLOYEE=" + parseInt(authUser.employee,10)
+		+ "&PAC-CMT-TYPE=MI"
+
+	var lineNbr = 0;
+	var j;
+	for (j = dtlLineCounter; ((j < CommentDtlLines.length) && (lineNbr < HR90_NBR_DETAIL_LINES)); j++) 
+	{
+		lineNbr++;
+		agsObj.field += "&LINE-FC" + lineNbr + "=A"
+			+ "&PAC-CMT-TEXT" + lineNbr + "=" + escape(CommentDtlLines[j], 1)
+			+ "&PAC-PRINT-CODE" + lineNbr + "=Y";
+	}
+
+	if ((CommentDtlLines.length - dtlLineCounter) > HR90_NBR_DETAIL_LINES) 
+	{
+		agsObj.func = "parent.ProcessComments(" + j + ")";
+	} 
+	else 
+	{
+		agsObj.func = "parent.FinishComments()";
+	}
+
+	agsObj.debug = false;
+	updatetype = "PAC";
+	AGS(agsObj, "jsreturn");
+}
+
+function StoreComments() 
+{
+	var formData = self.comments.document.forms["commentsform"];
+	CommentDtlLines = new Array();
+	var commentText = formData.elements["militaryComments"].value;
+
+	//  Parse carriage returns and split the lines into manageable strings for HR90.
+	ParseCommentText(commentText);
+}
+
+// The next two functions handle parsing of user-entered comments.
+// Parse the user-entered review comment text and prepare it for update on HR90.
+// Append each line to the global CommentDtlLines array.  It is assumed that
+// the commentText parameter is an unescaped string.
+function ParseCommentText(commentText) 
+{
+	// If the literal text %0A or %0D is found in the unescaped comment text, replace each
+	// with escaped literal characters.  If we don't do this, when inquiring on this data,
+	// the Javascript output from DME will insert a carriage return before ending the string,
+	// causing an 'unterminated string constant' error.
+	if ((commentText.indexOf("%0D") != -1) || (commentText.indexOf("%0A") != -1)) 
+	{
+		commentText = commentText.replace(/%0D/g,"\\%\\0\\D");
+		commentText = commentText.replace(/%0A/g,"\\%\\0\\A");
+	}
+
+	var tmpText = escape(commentText, 1);
+	var newLineComments = new Array(); // Splits the comment text by carriage returns
+	var tmpLines;
+
+	// First, check to see if this line has any carriage returns in it.  If so, create a
+	// new blank line for each one.  Handle operating system specific encodings.  If a
+	// carriage return exists, the line will be split into two lines.
+	// Windows encodes carriage returns as \r\n, or %0D%0A
+	if (tmpText.indexOf("%0D%0A") != -1) 
+	{
+		tmpLines = tmpText.split("%0D%0A");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// Unix encodes carriage returns as \r, or %0D
+	else if (tmpText.indexOf("%0D") != -1) 
+	{
+		tmpLines = tmpText.split("%0D");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// Macintosh encodes carriage returns as \n, or %0A
+	else if (tmpText.indexOf("%0A") != -1) 
+	{
+		tmpLines = tmpText.split("%0A");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// If this line does not contain any carriage returns, then pass it directly
+	// to the chunkUupCommentString() function.
+	else 
+	{
+		newLineComments[0] = commentText;
+	}
+
+	// Now that the carriage returns are removed, chunk up each string so we are left
+	// with lines that can be updated on HR90.
+	for (var k=0; k<newLineComments.length; k++) 
+	{
+		ChunkUpCommentString(newLineComments[k]);
+	}
+}
+
+// Chunk up the parameter string into lines which are the right size for HR90.
+// Check to see if the string is less than a full HR90 line size.  If it is,
+// or the string takes up the full HR90 line and contains no white space, then
+// add it as it is.  Otherwise, trim the string at the word before the last space
+// character.  If the string is longer than the maximum character size for a
+// detail line on HR90, then chunk it up into multiple lines, using the rules
+// listed above for each line.
+function ChunkUpCommentString(commentText) 
+{
+	// Keep a count of what character we are at as we break up the comments string
+	// into lines for update on HR90.
+	var charCnt = 0;
+
+	if (commentText == "") 
+	{
+		CommentDtlLines[CommentDtlLines.length] = "";
+		return;
+	}
+
+	while (charCnt < commentText.length) 
+	{
+		var truncatedLine = false; // true if we trim the end of the comment line
+		var cmtLine;
+
+		// HR90 can handle up to HR90_DTL_FIELD_SIZE characters on one line.  Grab that many
+		// characters and process that string to see if we need to trim the end so we do not
+		// get any words split on two lines.
+		if ((charCnt + HR90_DTL_FIELD_SIZE) > commentText.length) 
+		{
+			cmtLine = commentText.substring(charCnt, (charCnt + commentText.length));
+		} 
+		else 
+		{
+			cmtLine = commentText.substring(charCnt, (charCnt + HR90_DTL_FIELD_SIZE));
+		}
+
+		if (cmtLine.length < HR90_DTL_FIELD_SIZE) 
+		{
+			// this string is less than a full HR90 line; add it as is.
+			truncatedLine = true;
+			CommentDtlLines[CommentDtlLines.length] = cmtLine;
+			charCnt += cmtLine.length;
+		} 
+		else 
+		{
+			if (cmtLine.charAt(cmtLine.length - 1) != " ") 
+			{
+				var j = cmtLine.length - 1;
+				while ((j >= 0) && (cmtLine.charAt(j) != " ")) 
+				{
+					j--;
+				}
+				if (j < 0) 
+				{
+					// this string fills the whole HR90 line and contains no white space;
+					// add it as is.
+					CommentDtlLines[CommentDtlLines.length] = cmtLine;
+				} 
+				else 
+				{
+					// break this string at the last available space character
+					truncatedLine = true;
+					CommentDtlLines[CommentDtlLines.length] = cmtLine.substring(0, j + 1);
+					charCnt += (j + 1);
+				}
+			} 
+			else 
+			{
+				// this string fills the whole HR90 line but ends in a space character;
+				// add it as is.
+				CommentDtlLines[CommentDtlLines.length] = cmtLine;
+			}
+		}
+
+		// If this line was not trimmed, then move the character count up to the next block of
+		// text to process.
+		if (!truncatedLine) 
+		{
+			charCnt += HR90_DTL_FIELD_SIZE;
+		}
+	}
+}
+
+function FinishComments(errorReturned)
+{
+	if (!errorReturned)
+	{
+		if (Number(self.lawheader.gmsgnbr) != 0)
+		{
+		 	seaAlert(self.lawheader.gmsg);
+			removeWaitAlert();
+		}
+		else
+		{
+			seaAlert(getSeaPhrase("UPDATE_COMPLETE","ESS"));
+			showWaitAlert(getSeaPhrase("WAIT","ESS"));
+			GetMilitaryComments();
+		}
+	}
+	else
+		removeWaitAlert();
+}
+
+function ShowMilitaryDetail(i, action)
+{
+	activateTableRow("militaryTbl", i, self.left);
+	var militaryRec = (action == "C") ? MilitaryRecords[i] : null;
+	var sb = new Array();
+
+	sb[sb.length] = '<form name="militaryform">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+	+ '<tr style="padding-top:5px"><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("BRANCH","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap>'
+	
+	if (action == "C")
+	{
+		sb[sb.length] = '<input class="inputbox" type="hidden" name="branch" value="' + militaryRec.br_service
+		+ '">'+GetBranchNameDesc(militaryRec.br_service)
+	}
+	else
+	{
+		sb[sb.length] = '<input type="text" name="branch" id="branch" class="inputbox" style="text-transform:uppercase" size="2" maxlength="2" '
+		+ 'value="" onchange="parent.right.document.getElementById(\'xlt_branch\').innerHTML=parent.GetBranchNameDesc(this.value.toUpperCase(),\'\');"/>'
+		+ '<a href="" onclick="parent.openFieldValueList(\'branch\');return false">'
+		+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">'
+		+ '</a>'+uiRequiredIcon()+'<span style="text-align:left;width:200px" class="fieldlabel" id="xlt_branch"></span>';	
+	}
+	
+	sb[sb.length] = '</td></tr><tr><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("SPECIALTY","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="specialty" value="' + ((action == "C") ? militaryRec.serv_spec : '')
+	+ '" size="20" maxlength="20" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("RANK","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="rank" value="' + ((action == "C") ? militaryRec.rank_attained : '')
+	+ '" size="3" maxlength="3" onfocus="this.select()"></td></tr>'
+
+	sb[sb.length] = '<tr><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("SERVICE_YEARS","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="years">'
+	+ DrawNumberSelect(((action == "C") ? militaryRec.years_served : 0), 0, 99)
+	+ '</select><td></tr>'	
+	
+	sb[sb.length] = '<tr><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("SERVICE_MONTHS","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="months">'
+	+ DrawNumberSelect(((action == "C") ? militaryRec.mnths_served : 0), 0, 11)
+	+ '</select><td></tr>'	
+	
+	sb[sb.length] = '<tr><th class="fieldlabelboldlite" style="text-align:left">'+getSeaPhrase("DISCHARGE_DATE","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="dischargedate" value="' + ((action == "C") ? militaryRec.dischg_date : "")
+	+ '"size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this);">'
+	+ '<a href="javascript:void(0);" onclick="parent.DateSelect(\'dischargedate\');return false;"'
+	+ ' onmouseover="window.status=\''+getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+    + ' onmouseout="window.status=\'\';return true">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan()+'</td></tr>'
+		
+	sb[sb.length] = '<tr><th class="fieldlabelboldliteunderline" style="text-align:left">'+getSeaPhrase("DISCHARGE_TYPE","SEA")+'</th>'
+	+ '<td class="plaintablecell" nowrap><select class="inputbox" name="dischargetype">'
+	+ DrawDischargeTypesSelect(((action == "C") ? militaryRec.dischg_type : ""))
+	sb[sb.length] = '</select><td></tr>'		
+		
+	sb[sb.length] = '<tr><td>&nbsp;</td><td class="plaintablecell" style="text-align:left">'
+	
+	if (action == "C")
+	{
+		sb[sb.length] = uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessMilitaryRecord(\'"+action+"\');return false","margin-top:10px")
+		+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CloseMilitaryDetail();return false","margin-top:10px;margin-right:15px")
+		+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteMilitaryRecord("+i+");return false","margin-top:10px")
+	}
+	else
+	{
+		sb[sb.length] = uiButton(getSeaPhrase("ADD","ESS"),"parent.ProcessMilitaryRecord(\'"+action+"\');return false","margin-top:10px")
+		+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CloseMilitaryDetail();return false","margin-top:10px;margin-right:15px")	
+	}
+	sb[sb.length] = '</td></tr></table>'
+	
+	if (action == "C")
+		sb[sb.length] = '<input class="inputbox" type="hidden" name="seqnbr" value="' + militaryRec.seq_nbr + '">'
+	sb[sb.length] = '</form>'
+
+	try 
+	{
+		self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = sb.join("");
+		self.right.document.forms["militaryform"].elements["dischargedate"].setAttribute("styler_dir", self.right.CalendarObject.OPEN_CENTER);
+	}
+	catch(e) {}
+	try
+	{	
+		self.right.stylePage();
+    	self.right.setLayerSizes();
+    	if (action == "C")
+    		self.right.document.forms["militaryform"].elements["specialty"].focus();
+    	else
+    		self.right.document.forms["militaryform"].elements["branch"].focus();
+	}
+	catch(e) {}
+	document.getElementById("right").style.visibility = "visible";
+}
+
+function DrawDischargeTypesSelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+
+	for (var i=0; i<DischargeTypes.length; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + DischargeTypes[i].code + "'";
+		if (DischargeTypes[i].code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + DischargeTypes[i].description;
+	}
+	return codeselect.join("");
+}
+
+function DrawServiceYearsSelect(selectedvalue)
+{
+	selectedvalue = Number(selectedvalue);
+	var codeselect = new Array();
+
+	for (var i=0; i<100; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + i + "'";
+		if (i == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + i;
+	}
+	return codeselect.join("");
+}
+
+function DrawNumberSelect(selectedvalue, startnum, endnum)
+{
+	startnum = (typeof(startnum) != "undefined") ? Number(startnum) : 0;
+	endnum = (typeof(endnum) != "undefined") ? Number(endnum) : 0;
+	selectedvalue = Number(selectedvalue);
+	var codeselect = new Array();
+
+	for (var i=startnum; i<(endnum+1); i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + i + "'";
+		if (i == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + i;
+	}
+	return codeselect.join("");
+}
+
+function DeleteMilitaryRecord(i)
+{
+	var militaryRec = MilitaryRecords[i];
+
+	var agsObj = new AGSObject(authUser.prodline, "PA14.1");
+	agsObj.event = "CHG";
+	agsObj.rtn = "DATA"; //brentd "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=C"
+		+ "&PEM-COMPANY=" + escape(parseInt(authUser.company,10),1)
+		+ "&PEM-EMPLOYEE=" + escape(parseInt(authUser.employee,10),1)
+		+ "&PT-MIL-BR-SERVICE=" + escape(militaryRec.br_service,1)
+		+ "&PT-MIL-SEQ-NBR=" + escape(parseInt(militaryRec.seq_nbr,10),1)
+		+ "&LINE-FC1=D"
+		+ "&MIL-BR-SERVICE1=" + escape(militaryRec.br_service,1)
+		+ "&MIL-SEQ-NBR1=" + escape(parseInt(militaryRec.seq_nbr,10),1)
+	agsObj.func = "parent.HandlePA14Response('M')";	
+	updatetype = "MIL";
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+	AGS(agsObj,"jsreturn");
+}
+
+function CloseMilitaryDetail()
+{
+	deactivateTableRows("militaryTbl", self.left);
+	document.getElementById("right").style.visibility = "hidden";
+	document.getElementById("left").style.visibility = "visible";
+}
+
+function ReturnDate(date)
+{
+   	self.right.document.forms["militaryform"].elements[date_fld_name].value = date;
+}
+
+function ProcessMilitaryRecord(action)
+{
+	var militaryForm = self.right.document.forms["militaryform"];
+
+	for (var i=0; i<militaryForm.elements.length; i++)
+	{
+		if (NonSpace(militaryForm.elements[i].value) == 0)
+			militaryForm.elements[i].value = " ";
+	}
+
+	clearRequiredField(militaryForm.elements["dischargedate"]);
+	
+	if (action == "A")
+	{
+		clearRequiredField(militaryForm.elements["branch"]);
+		if (NonSpace(militaryForm.elements["branch"].value) == 0)
+		{
+			setRequiredField(militaryForm.elements["branch"]);
+			seaAlert(getSeaPhrase("BRANCH_REQUIRED","SEA"));
+			removeWaitAlert();
+			militaryForm.elements["branch"].focus();
+			militaryForm.elements["branch"].select();
+			return;
+		}
+		else
+			militaryForm.elements["branch"].value = militaryForm.elements["branch"].value.toUpperCase();		
+	}
+
+	if (NonSpace(militaryForm.elements["dischargedate"].value) > 0 && ValidDate(militaryForm.elements["dischargedate"]) == false)
+    {
+    	setRequiredField(militaryForm.elements["dischargedate"]);
+       	return;
+    }
+	
+	var agsObj = new AGSObject(authUser.prodline, "PA14.1");
+	agsObj.event = "CHG";
+	agsObj.rtn = "DATA"; //brentd "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=C"
+		+ "&PEM-COMPANY=" + escape(parseInt(authUser.company,10),1)
+		+ "&PEM-EMPLOYEE=" + escape(parseInt(authUser.employee,10),1)
+		
+	if (action == "C")	
+	{
+		agsObj.field += "&PT-MIL-BR-SERVICE=" + escape(militaryForm.elements["branch"].value,1)
+		+ "&PT-MIL-SEQ-NBR=" + escape(parseInt(militaryForm.elements["seqnbr"].value,10),1)
+	}
+	
+	agsObj.field += "&LINE-FC1=" + action
+		+ "&MIL-BR-SERVICE1=" + escape(militaryForm.elements["branch"].value,1)
+		+ "&MIL-SERV-SPEC1=" + escape(militaryForm.elements["specialty"].value,1)
+		+ "&MIL-RANK-ATTAINED1=" + escape(militaryForm.elements["rank"].value,1)
+		+ "&MIL-YEARS-SERVED1=" + escape(parseInt(militaryForm.elements["years"].value,10),1)
+		+ "&MIL-MNTHS-SERVED1=" + escape(parseInt(militaryForm.elements["months"].value,10),1)
+		+ "&MIL-DISCHG-DATE1=" + escape(formjsDate(militaryForm.elements["dischargedate"].value),1)
+		+ "&MIL-DISCHG-TYPE1=" + escape(militaryForm.elements["dischargetype"].value,1)
+		
+	if (action == "C")
+		agsObj.field += "&MIL-SEQ-NBR1=" + escape(parseInt(militaryForm.elements["seqnbr"].value,10),1)
+	agsObj.func = "parent.HandlePA14Response('M')";
+	updatetype = "MIL";
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+	
+	for (var i=0; i<militaryForm.elements.length; i++)
+	{
+		if (NonSpace(militaryForm.elements[i].value) == 0)
+			militaryForm.elements[i].value = "";
+	}	
+	
+	AGS(agsObj, "jsreturn");
+}
+
+function HandlePA14Response(type)
+{
+	if (Number(self.lawheader.gmsgnbr) != 0)
+	{
+	 	seaAlert(self.lawheader.gmsg);
+		removeWaitAlert();
+	}
+	else
+	{
+		seaAlert(getSeaPhrase("UPDATE_COMPLETE","ESS"));
+		showWaitAlert(getSeaPhrase("WAIT","ESS"));
+		// refresh only the type of data that was updated (employee or military)
+		if (type == "E")
+			GetEmployeeInfo();
+		else
+			GetMilitaryRecords();
+	}
+}
+
+function sortByDescription(obj1, obj2)
+{
+	if (obj1.description < obj2.description)
+		return -1;
+	else if (obj1.description > obj2.description)
+		return 1;
+	else
+		return 0;
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "veteran": // veteran status
+			var keyStr = "VS";
+			if (EmpInfo && EmpInfo.employee_work_country)
+				keyStr += "=" + EmpInfo.employee_work_country;
+			dmeFilter.addFilterField("hrctry-code", 4, getSeaPhrase("VETERAN_STATUS","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"hrctrycode",
+				"ctcset1",
+				"hrctry-code;description",
+				keyStr,
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "veteran": // veteran status
+		var keyStr = "VS";
+		if (EmpInfo && EmpInfo.employee_work_country)
+			keyStr += "=" + EmpInfo.employee_work_country;
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"hrctrycode",
+			"ctcset1",
+			"hrctry-code;description",
+			keyStr,
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = self.summary.document.getElementById(fieldNm.toLowerCase());
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "veteran": // veteran status
+			formElm.value = selRec.hrctry_code;
+			try { self.summary.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description; } catch(e) {}
+			break;	
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	}
+	catch(e)
+	{}
+	formElm.focus();
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var formObj = null;
+	switch(fieldNm.toLowerCase())
+	{
+		case "veteran": // veteran status
+			formObj = self.summary;
+			break;	
+		case "branch": // military branch
+			formObj = self.right;
+			break;	
+		default:
+			break;
+	}
+	var formElm = (formObj) ? formObj.document.getElementById(fieldNm.toLowerCase()) : null;
+	fld = [formObj, formElm];
+	return fld;
+}
+
+function valueListFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec;
+	var formElm = self.right.document.getElementById(fieldNm.toLowerCase());
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "branch": // branch
+			selRec = BranchNames[recIndex];
+			formElm.value = selRec.code;
+			try { self.right.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description; } catch(e) {}
+			break;	
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	}
+	catch(e)
+	{}
+	formElm.focus();
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+
+	switch(fieldNm)
+	{
+		case "veteran": // veteran status
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px"  styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("VETERAN_STATUS","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.hrctry_code) ? tmpObj.hrctry_code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		removeWaitAlert();
+	} 
+	catch(e) {}
+}
+
+function drawValueListContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var nbrRecs = (BranchNames) ? BranchNames.length : 0;
+
+	switch(fieldNm)
+	{
+		case "branch": // branch		
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px"  styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("BRANCH","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrRecs; i++)
+			{
+				tmpObj = BranchNames[i];
+				selectHtml[i+1] = '<tr onclick="valueListFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'			
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		removeWaitAlert();
+	} 
+	catch(e) {}
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winHeight = 464;
+	var winWidth = 400;	
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentLeftBorderWidth = parseInt(winWidth*.49,10) - 10;
+	var contentLeftWidth = (window.styler && window.styler.showLDS) ? contentLeftBorderWidth - 10 : contentLeftBorderWidth;
+	var contentRightBorderWidth = parseInt(winWidth*.51,10) - 10;
+	var contentRightWidth = (window.styler && window.styler.showLDS) ? contentRightBorderWidth - 10 : contentRightBorderWidth;
+
+	if (winHeight - 203 > 0)
+	{
+		leftFrame.style.height = (winHeight - 203) + "px";
+		rightFrame.style.height = (winHeight - 203) + "px";
+	}
+	
+	try
+	{
+		if (!window.styler || !window.styler.showLDS || navigator.appName.indexOf("Microsoft") == -1)
+			self.left.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.width = "100%";
+		self.left.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e)
+	{}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenMilitary()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:100%;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="summary" name="summary" style="position:absolute;top:32px;left:0px;width:49%;height:171px;visibility:hidden" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>	
+	<iframe id="left" name="left" style="position:absolute;top:203px;left:0px;width:49%;height:261px;visibility:hidden" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="right" name="right" style="position:absolute;top:203px;left:49%;width:51%;height:261px;visibility:hidden" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="comments" name="comments" style="position:absolute;top:32px;left:49%;width:51%;height:171px;visibility:hidden" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="position:absolute;visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no" frameborder="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="position:absolute;visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/esslawheader.htm" marginwidth="0" marginheight="0" scrolling="no" frameborder="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/military.htm,v 1.1.2.4.4.1 2011/09/08 18:35:05 brentd Exp $ -->

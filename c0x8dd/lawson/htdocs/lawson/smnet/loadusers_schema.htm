@@ -1,0 +1,86 @@
+<html>
+<head>
+<title>Loadusers CSV </title>
+</head>
+<body>
+
+<hr size=1>
+<a name="massadd"><font color=#0000FF><b>Mass Add</font></b></a>
+<br>
+<br>
+The CSV file must contain headers.  The header line must contain the required RM attributes.
+<br>
+Each employee record must have a value for required RM attributes.
+<br>
+Required attributes in <font color=#FF0000>red</font>
+<p>
+<ul>
+<li><font color=#FF0000>userid</font></li>
+<li>osid n/a for Self Service</li>
+<li><font color=#FF0000>ospasswd</font></li>
+<li><font color=#FF0000>fname</font></li>
+<li><font color=#FF0000>lname</font></li>
+<li><font color=#FF0000>checkls</font> Values YES or NO
+</li>
+<li>role<b>  Separate multiple roles with commas</b>, for example, Role = "Role1,Role2".
+</li>
+<li>email</li>
+<li>access</li>
+<li>group  <b>Separate multiple groups with commas</b>, for example, Role = "Group1,Group2".
+</li>
+<li><font color=#FF0000>portaladmin</font>  Y or N</li>
+<li><font color=#FF0000>addins</font> Y or N</li>
+<li><font color=#FF0000>wfuser</font> 0 or 1</li>
+<li><font color=#FF0000>prodline</font></li>
+<li><font color=#FF0000>portalrole</font></li>
+<li>essservice  If creating Employee Self Service IDs this attribute is required
+</li>
+<li><font color=#FF0000>company</font></li>
+<li><font color=#FF0000>employee</font></li>
+<li>rssservice  If creating RQC Self Service IDs this attribute is required
+</li>
+<li>requester</li>
+<li>vssservice</li>
+<li>vendor</li>
+<li>vendorgroup</li>
+<li>cssservice</li>
+<li>customer</li>
+<li>customergroup</li>
+<li>fssservice</li>
+<li>activitylist</li>
+<li>acgrpcollect</li>
+</ul>
+
+<hr size=1>
+<a name="massdelete"><font color=#0000FF><b>Mass Delete</font></b></a>
+<br>
+<br>
+The CSV file must contain headers.
+<br>
+<br>
+Required attributes in CSV file:
+<p>
+<ul>
+<li><font color=#FF0000>userid</font></li>
+<li><font color=#FF0000>fname</font></li>
+<li><font color=#FF0000>lname</font></li>
+</ul>
+
+<hr size=1>
+<a name="massdisable"><font color=#0000FF><b>Mass Disable</font></b></a>
+<br>
+<br>
+The CSV file must contain headers.
+<br>
+<br>
+Required attributes in CSV file:
+<p>
+<ul>
+<li><font color=#FF0000>userid</font></li>
+<li><font color=#FF0000>fname</font></li>
+<li><font color=#FF0000>lname</font></li>
+</ul>
+
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+body
+{background-color: #cdc9a5}
+
+a:link
+{color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+position: relative;
+vertical-align: bottom}
+
+a:hover
+{color: #838b83;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+position: relative;
+vertical-align: bottom}
+
+a:visited
+{color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+position: relative;
+vertical-align: bottom}
+
+select
+{background-color: #ffffff;
+border: 1px #104e8b inset;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt}
+
+th
+{border: none;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-style: normal;
+font-weight: bold;
+text-align: center;
+vertical-align: bottom;
+padding-left: 1px;
+padding-right: 1px}
+
+td
+{border: none;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-style: normal;
+font-weight: normal;
+vertical-align: bottom;
+padding-left: 1px;
+padding-right: 1px}
+
+input.singleborder
+{background-color: #ffffff;
+border: 1px #104e8b inset;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt}
+
+.nounderline
+{text-decoration: none}
+
+.floatwindow
+{background-color: #fffacd;
+position: absolute}
+
+.flatwindow
+{background-color: #fffacd;
+border: 1px #104e8b solid;
+position: absolute}
+
+.3DWindow
+{background-color: #fffacd;
+border: 1px #104e8b outset;
+position: absolute}
+
+.ButtonWindow
+{position: relative}
+
+.app
+{background-color: #cdc9a5;
+color: #000000;
+link-color: #104e8b}
+
+.rowheader
+{background-color: #cdc9a5;
+color: #ffffff;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 14pt;
+font-weight: bold;
+text-align: center}
+
+.roweven
+{background-color: #cdc9a5;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;}
+
+.cellhighlighted
+{background-color: #cdc9a5;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;}
+
+.rowodd
+{background-color: #fffacd;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;}
+
+.nonactiveTextbox
+{background-color: #ffffff;
+border: 1px #b0c4de inset;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-style: normal;
+font-weight: normal}
+
+.activeTextbox
+{background-color: #cdc9a5;
+border: 1px #b0c4de inset;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-style: normal;
+font-weight: normal}
+
+.tabbedinactive
+{background-color: #cdc9a5;
+border-right: 1px #000000 solid;
+color: #000000;
+cursor: hand;
+font-weight: normal;
+height: 100%;
+overflow: hidden;
+text-align: center;
+text-decoration: none;
+padding-top:1px}
+
+.tabbedactive
+{background-color: #fffacd;
+border-right: 1px #000000 solid;
+color: #104e8b;
+cursor: hand;
+font-weight: bold;
+height: 100%;
+overflow: hidden;
+text-align: center;
+text-decoration: none;
+padding-top:1px}
+
+.noborder
+{border: 0px}
+
+.border
+{border: 1px #000000 solid}
+
+.titlebar
+{background-color: #104e8b;
+border: 1px #000000 solid;
+color: #b9d3ee;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+height: 20px;
+left: 0px;
+margin-left: 1px;
+padding: 0px;
+position: relative;
+top: 0px;}
+
+.titlebarcontents
+{color: #b9d3ee;
+font-size: 11pt;
+font-weight: bold;
+left: 0px;
+margin: 0px;
+overflow: hidden;
+padding: 0px;
+position: relative;
+top: 0px;}
+
+.header
+{font-family: Arial, Helvetica, Verdana, sans-serif;
+position: relative;
+width: 100%}
+
+.headercontents
+{font-family: Arial, Helvetica, Verdana, sans-serif;
+position: relative;
+width: 100%}
+
+.main
+{background-color: #fffacd;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+left: 0px;
+position: relative;
+top: 0px;
+width: 100%}
+
+.maincontents
+{left: 0px;
+overflow: auto;
+position: relative;
+scrollbar-face-color: #cdc9a5;
+top: 0px;
+width: 100%}
+
+.maincontentsN6
+{left: 0px;
+margin-bottom: auto;
+margin-right: auto;
+margin-top: auto;
+overflow: auto;
+padding-bottom: 0px;
+padding-right: 0px;
+padding-top: 0px;
+position: relative;
+scrollbar-face-color: #cdc9a5;
+top: 0px;
+width: 98%}
+
+.footer
+{background-color: #fffacd;
+bottom: 0px;
+color: #000000;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+height: 35px;
+left: 0px;
+margin-bottom: auto;
+margin-right: auto;
+margin-top: auto;
+position: relative;
+top: 0px;
+width: 100%}
+
+.footercontents
+{align: center;
+font-weight: bold;
+height: 35px;
+left: 0px;
+margin-bottom: 0px;
+margin-right: 0px;
+margin-top: 0px;
+padding-bottom: 0;
+padding-right: 0px;
+padding-top: 0;
+position: relative;
+top: 0px;
+width: 100%}
+
+.footercontentsN6
+{align: center;
+font-weight: bold;
+height: 35px;
+left: 0px;
+margin-bottom: 0px;
+margin-right: 0px;
+margin-top: 0px;
+padding-bottom: 0px;
+padding-right: 0px;
+padding-top: 0px;
+position: relative;
+top: 3px;
+width: 100%}
+
+.button
+{border: 2px #fffacd outset;
+color: #000000;
+cursor: pointer;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-weight: bold;
+height: 20px;
+padding-bottom: 1px;
+padding-left: 3px;
+padding-right: 3px;
+padding-top: 1px;
+text-align: center}
+
+.buttondisabled
+{border: 2px #fffacd outset;
+color: #A0A0A0;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 10pt;
+font-weight: bold;
+padding-bottom: 1px;
+padding-left: 3px;
+padding-right: 3px;
+padding-top: 1px;
+text-align: center}
+
+.labelheader
+{font-size: 10pt;
+font-weight: bold}
+
+.labelnormal
+{font-size: 10pt;
+font-weight: normal}
+
+.mainbuttons
+{bottom: 10px;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+height: 20px;
+left: 0px;
+margin-bottom: 0px;
+margin-right: 0px;
+margin-top: 0px;
+padding-bottom: 0px;
+padding-right: 0px;
+padding-top: 0px;
+position: absolute;
+width: 100%}
+
+.mainbuttonscontents
+{color: #8b8970;
+font-size: 11pt;
+font-weight: bold;
+height: 20px;
+left: 0px;
+margin-bottom: 0px;
+margin-right: 0px;
+margin-top: 0px;
+padding-bottom: 0px;
+padding-right: 0px;
+padding-top: 0px;
+position: relative;
+top: 2px;
+width: 100%}
+
+.alert
+{display: block;
+font-family: Arial, Helvetica, Verdana, sans-serif;
+font-size: 18pt;
+font-weight: bold;
+text-align: center;
+vertical-align: baseline}
+
+.outline
+{border: 1px #ffffff solid;
+color: #ffffff;
+display: inline}
+
+.nooutline
+{border: 0px #8b8970 solid;
+color: #b9d3ee;
+display: inline}
+
+.nodisplay
+{display: none}
+
+.dodisplay
+{display: block}
+
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/skins/cheesecake.css,v 1.3 2003/04/18 16:08:04 keno Exp $ -->

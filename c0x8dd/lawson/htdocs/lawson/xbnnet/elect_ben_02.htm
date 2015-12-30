@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Enroll in Benefit Plan</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	setWinTitle(getSeaPhrase("ENROLL_PLAN","BEN"));
+	REC_TYPE=2
+	var flexflag=0
+	var empflag=0
+	var compflag=0
+	var head=''
+	var bod=''
+	var bod2=''
+	//determineCoverage returns true if plan is not based on another plan
+	//false if it is navigating back to the avail plans screen
+	//and the new coverage if it is based on another plan
+	var cont = parent.parent.determineCoverage(2);
+	if (cont) 
+	{
+		if (parent.parent.SelectedPlan[4]=="E") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("EMPLOYEE","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'
+		}
+		else if (parent.parent.SelectedPlan[4]=="S") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'
+		}
+		else if (parent.parent.SelectedPlan[4]=="D") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'
+		}
+		else if (parent.parent.SelectedPlan[4]=="B")
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'
+			bod2 += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")+'</td>'
+			bod2 += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[7])+'</td>'
+		}
+		else if (parent.parent.SelectedPlan[4]=="P") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DOM_PARTNER","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'			
+		}
+		else if (parent.parent.SelectedPlan[4]=="O") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE_OR_PARTNER","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'			
+		}		
+		else if (parent.parent.SelectedPlan[4]=="R") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("PARTNER_DEPS","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'			
+		}		
+		else if (parent.parent.SelectedPlan[4]=="C") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DOM_PARTNER","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'			
+			bod2 += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")+'</td>'
+			bod2 += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[7])+'</td>'		
+		}
+		else if (parent.parent.SelectedPlan[4]=="A") 
+		{
+			bod += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("SPOUSE_OR_PARTNER","BEN")+'</td>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'			
+			bod2 += '<tr><td class="plaintablecellborder" style="text-align:center">'+getSeaPhrase("DEPENDENTS","BEN")+'</td>'
+			bod2 += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[7])+'</td>'		
+		}		
+		else
+			bod += '<tr><td class="plaintablecellborderright">&nbsp;</td><td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[14])+'</td>'
+		if (parent.parent.SelectedPlan[20]!="") 
+		{
+			head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[20])
+			if (parent.parent.EMP_CONT_TYPE=="P")
+				bod += getSeaPhrase("PER","BEN")
+			bod += '</td>'
+			if (parent.parent.SelectedPlan[4]=="B" || parent.parent.SelectedPlan[4]=="C" || parent.parent.SelectedPlan[4]=="A")
+				bod2 += '<td class="plaintablecellborderright">&nbsp;</td>'
+		}
+		if (parent.parent.SelectedPlan[18]!="") 
+		{
+			head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("COST","BEN")+'</th>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[18])
+			if (parent.parent.EMP_CONT_TYPE=="P")
+				bod += getSeaPhrase("PER","BEN")
+			bod += '</td>'
+			if (parent.parent.SelectedPlan[4]=="B" || parent.parent.SelectedPlan[4]=="C" || parent.parent.SelectedPlan[4]=="A")
+				bod2 += '<td class="plaintablecellborderright">&nbsp;</td>'
+		}
+		if (parent.parent.SelectedPlan[24]!="") 
+		{
+			head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("CO_COST","BEN")+'</th>'
+			bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.parent.SelectedPlan[24])
+			if (parent.parent.EMP_CONT_TYPE=="P")
+				bod += getSeaPhrase("PER","BEN")
+			bod += '</td>'
+			if (parent.parent.SelectedPlan[4]=="B" || parent.parent.SelectedPlan[4]=="C" || parent.parent.SelectedPlan[4]=="A")
+				bod2 += '<td class="plaintablecellborderright">&nbsp;</td>'
+		}
+		head += '</tr>'
+		if (bod)
+			bod += '</tr>'
+		if (bod2)
+			bod2 += '</tr>'
+		var docHeader = parent.header(parent.planMessages(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16]));
+		var docFooter = parent.footer(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16]);
+		var html = '<div class="plaintableborder" style="padding:0px">'
+		html += docHeader
+		html += '<table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" role="presentation">'
+		html += '<tr><td class="plaintablecell" valign="top">'
+		html += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_15","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'">'
+		head += '<caption class="offscreen">'+getSeaPhrase("TCAP_11","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'</caption>'
+		html += '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("COVERAGE","BEN")+'</th><th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>&nbsp;</th>'
+		html += head
+		html += bod
+		html += bod2
+		html += '</table>'
+		html += '</td></tr></table>'
+		html += docFooter
+		html += '</div>'
+		document.getElementById("paneBody").innerHTML = html;
+		document.getElementById("paneHeader").innerHTML = getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8];
+	}
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_02.htm,v 1.14.2.33 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

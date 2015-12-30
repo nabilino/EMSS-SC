@@ -1,0 +1,176 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/formhelp.htm,v 1.9.2.11.4.3.12.1.2.3 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Form Help</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css">
+<style type="text/css">
+	a:active {color: #0000CC}
+	a:hover {color: #CC0033}
+	a:link {color: #3366CC}
+	a:visited {color: #9999CC}
+	pre {font-family: Verdana, Arial, Helvetica, sans-serif; font-size:9pt;}
+	.tabpadding {margin-left: 10px; margin-right: 10px;}
+	.contentDiv {position:absolute;top:80px;left:10px;height:80%;width:96%;background-color:#D4DFF0;border-top:1px solid #999999;border-bottom: 1px solid #999999; border-left: 1px solid #999999; border-right: 1px solid #999999;overflow: auto; scrollbar-face-color: #6699CC; scrollbar-track-color: #90AFC0; scrollbar-highlight-color: white; scrollbar-arrow-color: white;}
+</style>
+
+<script language="javascript" src="../servenv.js"></script>
+<script>
+
+var lawForm=window.opener.formWnd;					// reference to form content window
+var lawsonPortal=window.opener.lawsonPortal;		// reference to portal object
+window.document.title = lawForm.strTitle + " " + lawsonPortal.getPhrase("LBL_HELP");
+
+//-----------------------------------------------------------------------------
+function initHelp()
+{
+	// build Transform call
+	var xslURL=window.opener.getFullUrl(lawsonPortal.path+"/forms/formhelp.xsl");
+	var objPropApi=escape("/cgi-lawson/objprop.exe?"+lawForm.strPDL+"&"+lawForm.strTKN+"&OUT=XML")
+	var transAPI="_XML="+objPropApi+"&_XSL1="+xslURL+"&_OUT=html";
+
+	// call the Transform servlet
+	var strHTML="";
+	var oResponse=window.opener.httpRequest("/servlet/Transform?"+transAPI,
+					null,"text/plain","text/html",false);
+	if (!oResponse || oResponse.status)
+	{
+		strHTML="Error retrieving form help:\n"
+		if (oResponse)
+			strHTML+=window.opener.getHttpStatusMsg(oResponse.status);
+	}
+	else
+	{
+		strHTML=oResponse;
+		var iPos=strHTML.indexOf("CDATA[")
+		if (iPos != -1)
+		{
+			strHTML=strHTML.substr(iPos+6)
+			iPos=strHTML.indexOf(']]')
+			strHTML="Error reported: "+strHTML.substr(0,iPos)+"\n/servlet/Transform?"+transAPI
+		}
+	}
+
+	// set help text
+	document.getElementById("helpDiv").innerHTML=strHTML
+
+	// save window reference on portal window
+	lawForm.helpWnd=window;
+
+	// set element text
+	var btn=document.getElementById("btnClose");
+	btn.value=lawsonPortal.getPhrase("LBL_CLOSE");
+	btn.setAttribute("title",lawsonPortal.getPhrase("LBL_CLOSE_WINDOW"));
+
+	document.getElementById("formTitle").innerHTML=lawForm.strTitle + " (" + 
+		lawForm.strTKN + ")";
+	var tabBtn=document.getElementById("tabMainBtn");
+	tabBtn.innerHTML=lawsonPortal.getPhrase("LBL_GENERAL");
+	var tab=document.getElementById("tabMain");
+	var img=document.getElementById("imgTabBottom");
+	img.style.width=tab.offsetWidth-2;
+
+	// hide the knowledgebase access?
+	var aSearch=document.getElementById("aSearch");
+	if (aSearch)
+	{
+		var	bAccess=false;
+		try {
+			bAccess=window.opener.oUserProfile.oRole.getAccessKnowledgeBase();
+		} catch (e) { }
+		if (!bAccess)
+			aSearch.style.display="none";
+		else
+		{
+			var href=aSearch.getAttribute("href");
+			href+=lawForm.strTKN;
+			aSearch.setAttribute("href",href);
+			aSearch.innerHTML=lawsonPortal.getPhrase("LBL_KNOWLEDGE_SEARCH");
+		}
+	}
+
+	// set content div width for IE (because netscape is lame)
+	if (lawsonPortal.browser.isIE)
+		document.getElementById("contentDiv").style.width="98%";
+
+	// make document visible and set focus
+	document.body.style.visibility="visible";
+	btn.focus()
+}
+function hlpOnUnload()
+{
+	try { 
+		lawForm.helpWnd=null;
+		window.opener.formWnd=null;
+	} catch (e) { }
+}
+//-----------------------------------------------------------------------------
+function hlpKeyDown(e)
+{
+	var evt = (e ? e : window.event);
+	if (evt.keyCode == 27)	// Esc
+		window.close()
+}
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body onload="initHelp()" onunload="hlpOnUnload()" onkeydown="hlpKeyDown(event)" style="margin:6px;visibility:hidden;">
+
+	<!-- logo and title container -->
+	<div style="position:absolute;left:10px;top:6px;">
+		<input type="button" id="btnClose" class="xTToolBarButton" style="width:70px;margin-top:4px;margin-right:8px;" 
+				onclick="window.close()" value="Close" title="Close Window">
+		</input>
+		<span id="formTitle" class="ptFormTitle">title</span>
+	</div>
+
+	<!-- main header divider -->
+	<img style="position:absolute;top:42px;left:10px;right:0px;height:3px;width:100%;"
+		src="../images/portal_topdivider.gif">
+	</img>
+
+	<!-- tabs div -->
+	<div id="divTabs" class="tabContainer" style="position:absolute;top:55px;left:10px;height:25px;width:98%;">
+		<div id="tabMain" class="activeTab">
+			<button id="tabMainBtn">General</button>
+		</div>
+	</div>
+	<img id="imgTabBottom" src="../images/ico_tab_bottom_active.gif" 
+		style="display:inline;position:absolute;top:80px;height:1px;left:11px;width:75px;z-index:100;" />
+
+	<!-- tab content divs -->
+	<div id="contentDiv" class="contentDiv" tabIndex="1" hideFocus="1">
+		<div id="tab_main" idx="0" style="margin-top:20px;">
+			<span id="helpDiv" style="margin-left:10px;margin-right:10px;"></span>
+		</div>
+	</div>
+
+	<!-- knowledge base link -->
+	<div style="position:absolute;top:92%;left:10px;margin-top:.75em;">
+		<a id="aSearch" href="http://knowledgebase.lawson.com?query=" target="_new">Search the Knowledge Base</a>
+	</div>
+
+</body>
+</html>

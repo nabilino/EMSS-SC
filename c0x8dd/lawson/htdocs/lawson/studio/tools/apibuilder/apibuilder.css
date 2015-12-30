@@ -1,0 +1,203 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/tools/apibuilder/apibuilder.css,v 1.2.34.2 2012/08/08 12:48:55 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */
+Body
+{
+	background-color:threedface;
+	font-family:Tahoma, Arial;
+	font-weight:normal;
+	margin:0px;
+	overflow:hidden;
+}
+.apClickDiv
+{
+	background-color:white;
+    color:black;
+	cursor:hand;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+	font-weight:normal;
+	margin-left:0px;
+	position:relative;
+	text-align:left;
+}
+.apInputDiv
+{
+	margin-left:0px;
+	padding-bottom:3px;
+	width:100%;
+}
+.apLabel
+{
+    color:black;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+    text-align:left;
+}
+.apLabelInput
+{
+    color:black;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+	padding-right:3px;
+	position:relative;
+	white-space:nowrap;
+	width:120px;
+}
+.apLabelInputHidden
+{
+    color:black;
+    font-family:Verdana, Tahoma, Arial;
+	font-style:italic;
+    font-size:8pt;
+	padding-right:3px;
+	position:relative;
+	white-space:nowrap;
+	width:120px;
+}
+.apList
+{
+	background-color:white;
+    border: white 2px solid;
+	border-style:inset;
+    color:black;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+	overflow:auto;
+	padding-left:10px;
+	position:absolute;
+    text-align:left;
+}
+.apListText
+{
+	color:black;
+	cursor:default;
+	font-family:Courier New;
+	font-size: 8pt;
+	position:relative;
+}
+.apListTextBar
+{
+	background-color: threedface;
+    border-color: threedhighlight threedshadow threedshadow threedhighlight;
+	border-width: 1px;
+	border-style: solid;
+	color: buttontext;
+	cursor:default;
+	height:20px;
+	font-family:Courier New;
+	font-size: 8pt;
+	whitespace:nowrap;
+	width:90%;
+}
+.apRoute
+{
+	background-color:window;
+    border: white 2px solid;
+	border-style:inset;
+	color:menutext;
+	cursor:default;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	padding-left:10px;
+	padding-right:6px;
+	padding-top:7px;
+	white-space:nowrap;
+}
+.apSectionLabel
+{
+	color:black;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+	padding:1px;
+	position:absolute;
+	text-align:left;
+	white-space:nowrap;
+}
+.apLinkLabel
+{
+    color:black;
+	cursor:hand;
+	display:inline;
+    font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+	position:relative;
+	text-decoration:underline;
+	white-space:nowrap;
+}
+.apSpecHidden
+{
+	color:black;
+	cursor:hand;
+	font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+    font-weight:normal;
+	font-style:italic;
+	margin-left:0px;
+	position:relative;
+	text-align:left;
+	white-space:nowrap;
+}
+.apSpecLabel
+{
+	color:black;
+	font-family:Verdana, Tahoma, Arial;
+    font-size:8pt;
+    font-weight:normal;
+	margin-left:0px;
+	position:relative;
+	text-align:left;
+	white-space:nowrap;
+}
+.apTabArea
+{
+	position:absolute;
+}
+.apTextBox
+{
+    background-color: white;
+    border: white 2px solid;
+	border-style:inset;
+	color:black;
+	cursor:default;
+	font-family:Courier New;
+	font-size: 8pt;
+    height: 20px;
+	position:relative;
+	text-align:left;
+}
+.apViewButton
+{
+	background-color:buttonface;
+	border:1px;
+	border-style:solid;
+	border-color:buttonface;
+	color:buttontext;
+	cursor:default;
+	font-family: Tahoma, Arial;
+	font-size:8pt;
+	padding-left:10px;
+	text-align:center;
+	white-space:nowrap;
+}
+

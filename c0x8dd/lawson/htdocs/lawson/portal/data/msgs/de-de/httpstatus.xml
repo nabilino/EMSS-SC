@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/de-de/Attic/httpstatus.xml,v 1.1.2.2.16.2 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="dede">
+		<phrase id="100">Die Anforderung kann fortgesetzt werden.</phrase>
+		<phrase id="101">Der Server hat die Protokolle in einem Upgrade-Header geändert.</phrase>
+		<phrase id="200">Anforderung erfolgreich abgeschlossen.</phrase>
+		<phrase id="201">Die Anforderung wurde erfüllt, und eine neue Ressource wurde erstellt.</phrase>
+		<phrase id="202">Die Anforderung befindet sich in Bearbeitung, ist aber noch nicht abgeschlossen.</phrase>
+		<phrase id="203">Die im Einheiten-Header zurückgegebenen Metadaten entsprechen nicht dem kompletten Satz auf dem Ursprungsserver.</phrase>
+		<phrase id="204">Der Server hat die Anforderung erfüllt, jedoch gibt es keine neuen Infos zum zurücksenden.</phrase>
+		<phrase id="205">Die Anforderung wurde erfüllt und das Client-Programm setzt die Dokumentansicht zurück, in der die Anforderung gesendet wurde, damit der Benutzer eine neue Eingabeaktion vornehmen kann.</phrase>
+		<phrase id="206">Der Server hat die teilweise GET-Anfoderung der Ressource erfüllt.</phrase>
+		<phrase id="300">Der Server wusste nicht, was er zurückgeben soll.</phrase>
+		<phrase id="301">Die angeforderte Ressource wurde einer neuen permanenten URI (Uniform Resource Identifier) zugewiesen. Alle künftigen Verweise auf diese Ressource müssen über eine der zurückgegeben URIs erfolgen.</phrase>
+		<phrase id="302">Die angeforderte Ressource wird temporär unter einer anderen URI (Uniform Resource Identifier) geführt.</phrase>
+		<phrase id="303">Die Antwort auf die Anforderung befindet sich unter einer anderen URI (Uniform Resource Identifier) und muss mit Hilfe eines GET HTTP von der Ressource abgerufen werden.</phrase>
+		<phrase id="304">Die angeforderte Ressource wurde nicht geändert.</phrase>
+		<phrase id="305">Auf die angeforderte Ressource muss über den Proxy im Standortfeld zugegriffen werden.</phrase>
+		<phrase id="307">Die umgeleitete Anforderung behält Ihr HTTP-Verb bei. HTTP/1.1 - Verhalten.</phrase>
+		<phrase id="400">Die Anforderung konnte wegen ungültiger Syntax nicht vom Server verarbeitet werden.</phrase>
+		<phrase id="401">Die angeforderte Ressource erfordert Benutzerauthentifizierung.</phrase>
+		<phrase id="402">Derzeit nicht im HTTP-Protokoll implementiert.</phrase>
+		<phrase id="403">Der Server versteht die Anforderung, verweigert aber ihre Erfüllung.</phrase>
+		<phrase id="404">Der Server hat keine Daten gefunden, die der angeforderten URI (Uniform Resource Identifier) entsprechen.</phrase>
+		<phrase id="405">Das verwendete HTTP-Verb ist nicht zulässig.</phrase>
+		<phrase id="406">Keine für den Kunden akzeptablen Antworten gefunden.</phrase>
+		<phrase id="407">Proxy-Authentifizierung erforderlich.</phrase>
+		<phrase id="408">Server hat beim Warten auf Anforderung das Zeitlimit überschritten.</phrase>
+		<phrase id="409">Die Anforderung konnte wegen eines Konflikts mit dem aktuellen Status der Ressource nicht abgeschlossen werden. Der Benutzer muss mit weiteren Informationen erneut übergeben.</phrase>
+		<phrase id="410">Die angeforderte Ressource ist auf dem Server nicht mehr verfügbar. Es ist keine Weiterleitungsadresse bekannt.</phrase>
+		<phrase id="411">Der Server akzeptiert die Anforderung ohne eine definierte Inhaltslänge nicht.</phrase>
+		<phrase id="412">Die in mindestens einem Feld des Anforderungskopfs angegebene Voraussetzung ergab beim Testen auf dem Server 'Falsch'.</phrase>
+		<phrase id="413">Der Server bearbeitet diese Anforderung nicht, weil die Anforderungseinheit größer ist, als sie der Server verarbeiten kann oder darf.</phrase>
+		<phrase id="414">Der Server bearbeitet diese Anforderung nicht, weil die Anforderungs-URI zu lang ist, als dass der Server sie auflösen darf.</phrase>
+		<phrase id="415">Der Server bearbeitet diese Anforderung nicht, weil die angeforderte Einheit in einem von der angeforderten Ressource für die angeforderte Methode nicht unterstützten Format vorliegt.</phrase>
+		<phrase id="449">Passen Sie die Anforderung entsprechend an, und wiederholen Sie sie.</phrase>
+		<phrase id="500">Auf dem Server ist eine unerwartete Bedingung aufgetreten, die die Erfüllung der Anforderung verhinderte.</phrase>
+		<phrase id="501">Der Server unterstützt die für die Erfüllung der Anforderung erforderlichen Funktionen nicht.</phrase>
+		<phrase id="502">In seiner Funktion als Gateway oder Proxy hat der Server eine ungültige Antwort vom Upstream-Server erhalten, auf den er beim Versuch die Anforderung zu erfüllen, zugegriffen hat.</phrase>
+		<phrase id="503">Der Service ist momentan überlastet.</phrase>
+		<phrase id="504">Anforderung hat beim Warten auf ein Gateway das Zeitlimit überschritten.</phrase>
+		<phrase id="505">Der Server unterstützt die in der Anforderungsmeldung verwendete Version des HTTP-Protokolls nicht.</phrase>
+	</Translate>
+</LAWXML>

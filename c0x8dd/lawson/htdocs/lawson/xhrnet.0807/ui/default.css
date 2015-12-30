@@ -1,0 +1,36 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/default.css,v 1.1.2.7 2012/06/29 17:12:17 brentd Exp $ */
+/* Version: 8-)@(#)@10.00.02.00.29 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+body
+{
+   	background-color : #ffffff;
+   	color : #000000;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-weight : normal;
+   	font-size : 12px;
+   	margin : 0px;
+}
+
+.helpicon, .calendaricon, .searchicon, .helpwindowicon, .splashicon 
+{
+	display : none;
+}

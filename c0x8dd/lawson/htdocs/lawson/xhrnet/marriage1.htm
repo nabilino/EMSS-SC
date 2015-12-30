@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Life Event Related Links</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/xhrnet/depinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var Count = 0;
+var UpdateFlag = false;
+var pgmname = "marriage1";
+var dateneeded = (window.location.search)?getVarFromString("date",unescape(window.location.search)):"";
+var MarriageEvents = new Array();
+var Benefits = new Array();
+var EmpInfo = new Array();
+EmpInfo.employee_work_country = "";
+// Default all access to "Deny" except for Life Events Benefits Enrollment
+var autodeposit = false;
+var withholding = false;
+var beneficiary = false;
+var homeaddress = false;
+var dependents = false;
+var emergency = false;
+var benefits = true;
+
+function OpenMarriage()
+{
+	authUser = null;
+	try
+	{
+		// Check if a parent or opener document has already done an authenticate, otherwise go get the webuser info.
+		if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+		{
+			authUser = parent.authUser
+			if (typeof(parent.EmpInfo) != "undefined" && parent.EmpInfo != null)
+				EmpInfo = parent.EmpInfo
+		}
+		else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+		{
+			authUser = opener.authUser
+			if (typeof(opener.EmpInfo) != "undefined" && opener.EmpInfo != null)
+				EmpInfo = opener.EmpInfo
+		}
+	}
+	catch(e)
+	{
+		authUser =  null;
+		EmpInfo = new Array();
+		CalledEmpInfo = false;		
+	}
+	if (!authUser)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='GetEmdepend()'|officeObjects=true|desiredEdit='EM'")
+		return
+	}
+	GetEmdepend()
+}
+
+function GetEmdepend()
+{	
+	stylePage();
+	setWinTitle(parent.getSeaPhrase("LIFE_EVENT_LINKS","SEA"));
+	var nextFunc = function()
+	{
+		GetDepInfo(authUser.prodline,authUser.company,authUser.employee,"","GetBenefits()","");
+	};
+	parent.showWaitAlert(parent.getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function GetBenefits()
+{
+	if (DepInfo.length > 0) EmpInfo.employee_work_country = DepInfo[0].employee_work_country
+	var object = new DMEObject(authUser.prodline, "benefit");
+	object.out = "JAVASCRIPT";
+	object.index = "benset3";
+	object.field = "plan-type;employee.work-country";
+	object.key = parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10);
+	object.func = "CreateTaskList()";
+	object.max = "600";
+	DME(object, "jsreturn");
+}
+
+function CreateTaskList()
+{
+  	Benefits = Benefits.concat(self.jsreturn.record);
+	if (self.jsreturn.Next != "")
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+   	if (Benefits.length > 0) 
+   		EmpInfo.employee_work_country = Benefits[0].employee_work_country;
+   	if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var Bookmarks = authUser.OfficeObject;
+		for (var i=0; i<authUser.NbrOfOfficeObj; i++)
+		{
+			var bkName = Bookmarks[i].name.toUpperCase(); // the Lawson-assigned task
+			var bkLawName = (Bookmarks[i].lawnm) ? Bookmarks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+			if (bkLawName != "")
+			{
+				if (bkLawName == "XMLHRAUTODEPOSIT1" || bkLawName == "XMLHRAUTODEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkLawName == "XMLHRWITHHOLDING1" || bkLawName == "XMLHRWITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if ( bkLawName == "XMLHRBENEFICIARY" || bkLawName == "XMLHRBENEFICIARY1")
+				{
+					// grant access to beneficiary
+					beneficiary = true;
+				}
+				else if (bkLawName == "XMLHRHOMEADDRESS")
+				{
+					// grant access to home address
+					homeaddress = true;
+				}
+				else if (bkLawName == "XMLHRDEPENDENTS1" || bkLawName == "XMLHRDEPENDENTS")
+				{
+					// grant access to dependents
+					dependents = true;
+				}
+				else if (bkLawName == "XMLHREMERGENCY1" || bkLawName == "XMLHREMERGENCY")
+				{
+					// grant access to emergency contacts
+					emergency = true;
+				}
+			}
+			else
+			{
+				if (bkName == "DIRECT DEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkName == "TAX WITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if (bkName == "BENEFICIARY")
+				{
+					// grant access to beneficiary
+					beneficiary = true;
+				}
+				else if (bkName == "HOME ADDRESS")
+				{
+					// grant access to home address
+					homeaddress = true;
+				}
+				else if (bkName == "DEPENDENTS")
+				{
+					// grant access to dependents
+					dependents = true;
+				}
+				else if (bkName == "EMERGENCY")
+				{
+					// grant access to emergency contacts
+					emergency = true;
+				}
+			}
+		}
+	}
+    VerifyAutoDeposit();
+}
+
+function VerifyAutoDeposit()
+{
+ 	// If there is an AUTODEPOSIT task set to "I" ("Include"), verify the employee's work country before displaying in the list of items the employee can update.
+    if (autodeposit)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) || (DepInfo.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || (Benefits.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+			autodeposit = (EmpInfo.employee_work_country != "US" && EmpInfo.employee_work_country != "CA") ? false : true;
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee","employee.work-country;","CheckEmpWorkCountry(\"autodeposit\",true)");
+			return;
+		}
+	}
+	VerifyWithholding();
+}
+
+function VerifyWithholding()
+{
+	// If there is a WITHHOLDING task set to "I" ("Include"), verify the employee's work country before displaying in the list of items the employee can update.
+    if (withholding)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) || (DepInfo.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || (Benefits.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+			withholding = (EmpInfo.employee_work_country != "US") ? false : true;
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee","employee.work-country;","CheckEmpWorkCountry(\"withholding\",true)");
+			return;
+		}
+	}
+	FinishTaskList();
+}
+
+function CheckEmpWorkCountry(taskdesc, next)
+{
+	switch (taskdesc)
+	{
+		case "autodeposit":
+			autodeposit = (EmpInfo.employee_work_country != "US" && EmpInfo.employee_work_country != "CA") ? false : true;
+			if (next) VerifyWithholding();
+			break
+		case "withholding":
+			withholding = (EmpInfo.employee_work_country != "US") ? false : true;
+			if (next) FinishTaskList();
+			break;
+		default:
+			FinishTaskList();
+			break;
+	}
+}
+
+function FinishTaskList()
+{
+	if (beneficiary && Benefits.length > 0)
+	{
+		for (var n=0; n<Benefits.length; n++)
+		{
+		 	if (Benefits[n].plan_type == "DB" || Benefits[n].plan_type == "DC" || Benefits[n].plan_type == "DI" || Benefits[n].plan_type == "EL")
+		  	{
+		    	MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("BENEFICIARIES","ESS"),"beneficiaries");
+	            break;
+	      	}
+	  	}
+   	}
+	// Don't require current benefits. Let Benefits Enrollment verify eligibility.
+	if (benefits)
+		MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("BENEFITS","ESS"),"benefits");
+	if (dependents)
+		MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_4","ESS"),"dependentaddress");
+   	if (autodeposit)
+  		MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_1","ESS"),"directdeposit");
+	if (emergency)
+		MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_3","ESS"),"emergencycontacts");
+	if (homeaddress)
+		MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("HOME_ADDR_0","ESS"),"homeaddress");
+   	if (withholding)
+      	MarriageEvents[MarriageEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_2","ESS"),"w4form");
+	DrawMarriageScreen();
+}
+
+function DrawMarriageScreen()
+{
+  	var MarriageContent = '<table border="0" cellspacing="0" cellpadding="0" styler="list" role="presentation">'
+  	+ '<tr><th>&nbsp;</th><th>&nbsp;</th></tr>'
+  	for (var i=0; i<MarriageEvents.length; i++)
+  	{
+  		var tip = MarriageEvents[i].text+' - '+parent.getSeaPhrase("OPEN_LINK_TO","SEA");
+        MarriageContent += '<tr><td class="fieldlabel" valign="top">'
+		MarriageContent += uiCheckmarkIcon(MarriageEvents[i].param_name+"_checkmark","visibility:hidden")
+     	MarriageContent += '</td><td class="fieldlabelleft"><a href="javascript:parent.Process(\''+MarriageEvents[i].param_name+'\');" title="'+tip+'">'+MarriageEvents[i].text+'<span class="offscreen"> - '+parent.getSeaPhrase("OPEN_LINK_TO","SEA")+'</span></a></td></tr>'
+  	}
+	MarriageContent += '</table>'
+	self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("ADDL_CHANGES","ESS")
+	self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:20px;padding-right:20px;padding-top:20px;padding-bottom:20px">'
+	+'<div class="fieldlabelboldleft">'+parent.getSeaPhrase("MARRIAGE_CHANGE_INFO_1","ESS")+'</div>'
+	+'</div><div style="padding-left:20px;padding-right:20px">'+MarriageContent+'</div>';
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+	parent.removeWaitAlert(parent.getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();
+}
+
+function setImageVisibility(imgID, visibleState)
+{
+	var imgs = window.MAIN.document.images;
+	var i = 0;
+	var found = false;
+	while (i<imgs.length && !found)
+	{
+		if (imgs[i].id == imgID)
+		{
+			found = true;
+			imgs[i].style.visibility = visibleState;
+		}
+		i++;
+	}
+}
+
+function Process(eventname)
+{
+   	if (eventname == "homeaddress")
+   	{
+		parent.toggleFrame("relatedtask", false);
+		parent.toggleFrame("fullrelatedtask", false);
+		parent.toggleFrame("left", true);
+		parent.toggleFrame("right", true);   		
+		//force reload to check for payroll lockout
+   		//if (parent.emssObjInstance.emssObj.payrollLockout || parent.right.location.href.indexOf("empaddress.htm")==-1)
+   		//{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.right.location.replace("/lawson/xhrnet/empaddress.htm?from=marriage");
+   			removeHelpIcon();
+   		//}
+    }
+   	else if (eventname == "dependentaddress")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);   		
+   		if (parent.fullrelatedtask.location.href.indexOf("dependents.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/dependents.htm?from=marriage&date="+escape(dateneeded,1));
+   			removeHelpIcon();
+   		}
+  	}
+   	else if (eventname == "w4form")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);   		
+		//force reload to check for payroll lockout
+   		if (parent.emssObjInstance.emssObj.payrollLockout || parent.fullrelatedtask.location.href.indexOf("w4.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/w4/w4.htm?from=marriage");
+   			removeHelpIcon();
+   		}
+   	}
+   	else if (eventname == "directdeposit")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);   		
+		//force reload to check for payroll lockout
+   		if (parent.emssObjInstance.emssObj.payrollLockout || parent.fullrelatedtask.location.href.indexOf("directdeposit.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/directdeposit/directdeposit.htm?from=marriage");
+   			removeHelpIcon();
+   		}
+   	}
+  	else if (eventname == "emergencycontacts")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);  		
+   		if (parent.fullrelatedtask.location.href.indexOf("emergcnt.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/emergcnt.htm?from=marriage");
+   			removeHelpIcon();
+   		}
+    }
+   	else if (eventname == "benefits")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);   		
+   		//if (parent.fullrelatedtask.location.href.indexOf("benleenroll.htm")==-1)
+   		//{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xbnnet/benleenroll.htm?event=M&date="+escape(dateneeded,1));
+   			removeHelpIcon();
+   		//}
+   	}
+    else if (eventname == "beneficiaries")
+   	{
+   		parent.toggleFrame("left", false);
+   		parent.toggleFrame("right", false);   		
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", true);    	
+   		if (parent.fullrelatedtask.location.href.indexOf("SHR002.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/Beneficiaries/SHR002.htm?from=marriage");
+   			removeHelpIcon();
+   		}
+   	}
+   	parent.fitToScreen();
+}
+
+function EventsArray(text, paramname)
+{
+    this.text = text
+    this.param_name = paramname
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenMarriage()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:0%;top:0px;width:100%;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/marriage1.htm,v 1.20.2.65 2014/02/17 21:29:54 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

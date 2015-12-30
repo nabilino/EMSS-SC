@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/fr-ca/Attic/httpstatus.xml,v 1.1.2.1.4.3.6.1.8.3 2012/08/08 12:37:19 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="fr-ca">
+		<phrase id="100">La requête peut être poursuivie.</phrase>
+		<phrase id="101">Le serveur a commuté vers des protocoles dans un en-tête mis à niveau.</phrase>
+		<phrase id="200">La requête a été exécutée avec succès.</phrase>
+		<phrase id="201">La requête a été exécutée et une nouvelle ressource a été créée.</phrase>
+		<phrase id="202">La requête est en cours de traitement, mais n&apos;a pas été exécutée complètement.</phrase>
+		<phrase id="203">Les méta-informations renvoyées dans l&apos;en-tête de l&apos;entité ne correspondent pas à l&apos;ensemble final disponible sur le serveur d&apos;origine.</phrase>
+		<phrase id="204">Le serveur a exécuté la requête, mais il n&apos;y a aucune nouvelle information à renvoyer.</phrase>
+		<phrase id="205">La requête a été exécutée et le programme client devrait réinitialiser l&apos;affichage du document à l&apos;origine de l&apos;envoi de la requête, de manière à ce que l&apos;utilisateur puisse initialiser facilement une nouvelle action.</phrase>
+		<phrase id="206">Le serveur a exécuté la requête partielle GET pour la ressource.</phrase>
+		<phrase id="300">Le serveur n&apos;a pas su quoi renvoyer.</phrase>
+		<phrase id="301">La ressource requise a été affectée à un URI permanent (Uniform Resource Identifier), et à l&apos;avenir, toute référence à cette ressource devra se faire par le biais de l&apos;un des URI renvoyés.</phrase>
+		<phrase id="302">La ressource requise réside momentanément sous un autre URI (Uniform Resource Identifier).</phrase>
+		<phrase id="303">La réponse à la requête peut être trouvée sous un URI (Uniform Resource Identifier) différent et peut être récupérée par le biais de GET HTTP sur la ressource en question.</phrase>
+		<phrase id="304">La ressource requise n&apos;a pas été modifiée.</phrase>
+		<phrase id="305">Il faut accéder à la ressource requise par le proxy indiqué dans le champ de localisation.</phrase>
+		<phrase id="307">La requête redirigée garde le même terme HTTP. Comportement HTTP/1.1.</phrase>
+		<phrase id="400">La requête n&apos;a pu être traitée par le serveur en raison d&apos;une syntaxe invalide.</phrase>
+		<phrase id="401">La ressource requise nécessite l&apos;authentification de l&apos;utilisateur.</phrase>
+		<phrase id="402">Non mis en place actuellement dans le protocole HTTP.</phrase>
+		<phrase id="403">Le serveur a compris la requête, mais refuse de l&apos;exécuter.</phrase>
+		<phrase id="404">Le serveur n&apos;a rien trouvé de correspondant à l&apos;URI (Uniform Resource Identifier) requis.</phrase>
+		<phrase id="405">Le terme HTTP utilisé n&apos;est pas autorisé.</phrase>
+		<phrase id="406">Impossible de trouver une réponse acceptable pour le client.</phrase>
+		<phrase id="407">Authentification proxy requise.</phrase>
+		<phrase id="408">Le délai d&apos;attente du serveur a expiré pour la requête.</phrase>
+		<phrase id="409">La requête n&apos;a pu être exécutée en raison d&apos;un conflit relatif à l&apos;état actuel de la ressource. L&apos;utilisateur doit soumettre à nouveau la requête en fournissant plus d&apos;informations.</phrase>
+		<phrase id="410">La ressource requise n&apos;est plus disponible sur le serveur et aucune adresse de transfert n&apos;est connue.</phrase>
+		<phrase id="411">Le serveur refuse d&apos;accepter la requête si la longueur du contenu n&apos;est pas définie.</phrase>
+		<phrase id="412">La condition préalable donnée dans un ou plusieurs des champs de l&apos;en-tête de la requête a été évaluée comme étant fausse lors de tests effectués sur le serveur.</phrase>
+		<phrase id="413">Le serveur refuse de traiter la requête car l&apos;entité de requête est plus importante que ce que le serveur est en mesure de traiter.</phrase>
+		<phrase id="414">Le serveur refuse de traiter la requête car l&apos;URI (Uniform Resource Identifier) est plus long que ce que le serveur est en mesure d&apos;interpréter.</phrase>
+		<phrase id="415">Le serveur refuse de traiter la requête car le format de l&apos;entité de la requête n&apos;est pas pris en charge par la ressource requise pour cette méthode.</phrase>
+		<phrase id="449">Soumettez la requête de nouveau après avoir effectué les actions nécessaires.</phrase>
+		<phrase id="500">Le serveur a rencontré une condition inattendue qui l&apos;a empêché de traiter la requête.</phrase>
+		<phrase id="501">Le serveur ne prend pas en charge la fonctionnalité nécessaire au traitement de la requête.</phrase>
+		<phrase id="502">Lorsqu&apos;il était utilisé comme passerelle ou proxy en tentant d&apos;exécuter la requête, le serveur a reçu une réponse invalide du serveur en amont.</phrase>
+		<phrase id="503">Le service est momentanément surchargé.</phrase>
+		<phrase id="504">Le délai d&apos;attente d&apos;une passerelle a expiré pour la requête.</phrase>
+		<phrase id="505">Le serveur ne prend pas en charge ou refuse de prendre en charge la version du protocole HTTP utilisée dans le message de requête.</phrase>
+	</Translate>
+</LAWXML>

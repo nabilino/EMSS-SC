@@ -1,0 +1,156 @@
+<html>
+<head>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script>
+var nbrRecs = -1;
+var nbrRpts = -1;
+var seqNbr = "";
+var begnDate = "";
+var FC = "";
+var nextEmployee = "";
+var HSUCode = "";
+var HSUOpCode = "";
+
+function moveTrailingSign(amt)
+{
+	var retAmt = amt;
+	var sign = retAmt.charAt(retAmt.length-1);
+
+	var j = 0;
+	while (retAmt.charAt(j) == " ")
+		j++;
+
+	retAmt = retAmt.substring(j,retAmt.length);
+
+	if (sign == "+" || sign == "-")
+	{
+		if (sign == "-")
+			retAmt = "-"+retAmt.substring(0,retAmt.length-1);
+		else
+			retAmt = retAmt.substring(0,retAmt.length-1);
+	}
+	return retAmt;
+}
+
+function V(fldnbr, fldval)
+{
+	if (parent.UpdateType == "HS10")
+	{
+		if (fldnbr.indexOf("PT-FC") != -1)
+		{
+			if (fldval == "+")
+				FC = "%2B";
+			else
+				FC = fldval;
+		}
+		else if (fldnbr.indexOf("PT-PTF-EMPLOYEE") != -1)
+		{
+			if (fldval == 0)
+				nextEmployee == "";
+			else
+				nextEmployee = fldval;
+		}
+		else if (fldnbr.indexOf("PT-HSU-CODE") != -1)
+		{
+			HSUCode = fldval;
+		}
+		else if (fldnbr.indexOf("PT-HSU-OP-CODE") != -1)
+		{
+			HSUOpCode = fldval;
+		}
+		else if (fldnbr.indexOf("PTF-EMPLOYEE") == 0 && nbrRpts < parent.directReportArray.length)
+		{
+			nbrRpts = parent.directReportArray.length;
+			parent.directReportArray[nbrRpts] = new parent.DirectReportObject();
+			parent.directReportArray[nbrRpts].employeeNbr = fldval;
+		}
+		else if (fldnbr.indexOf("PTF-FULL-NAME") != -1 && nbrRpts >= 0 && nbrRpts < parent.directReportArray.length)
+		{
+			parent.directReportArray[nbrRpts].fullName = fldval;
+		}
+	}
+	else
+	{
+		if (fldnbr.indexOf("PT-PRH-SEQ-NBR") != -1)
+		{
+			seqNbr = fldval;
+		}
+		else if (fldnbr.indexOf("PT-PRH-BEG-DATE") != -1)
+		{
+			begnDate = fldval;
+		}
+		else if (fldnbr.indexOf("PRH-BEG-DATE") != -1)
+		{
+			nbrRecs = parent.historyArray.length;
+			parent.historyArray[nbrRecs] = new parent.HistoryObject();
+			parent.historyArray[nbrRecs].effective = fldval;
+			parent.historyArray[nbrRecs].fldHash["PRH-BEG-DATE"] = true;
+		}
+		else if (fldnbr.indexOf("PRH-PAY-RATE") != -1 && nbrRecs >= 0 && nbrRecs < parent.historyArray.length && !parent.historyArray[nbrRecs].fldHash["PRH-PAY-RATE"])
+		{
+			if (fldval == "")
+				parent.historyArray[nbrRecs].rate = "0.00";
+			else if (fldval.indexOf(".") != -1)
+				parent.historyArray[nbrRecs].rate = fldval;
+			else
+				parent.historyArray[nbrRecs].rate = fldval.substring(0,fldval.length-4)+'.'+fldval.substring(fldval.length-4,fldval.length);
+			parent.historyArray[nbrRecs].fldHash["PRH-PAY-RATE"] = true;
+		}
+		else if (fldnbr.indexOf("PRH-ANNUAL-SALARY") != -1 && nbrRecs >= 0 && nbrRecs < parent.historyArray.length && !parent.historyArray[nbrRecs].fldHash["PRH-ANNUAL-SALARY"])
+		{
+			fldval = moveTrailingSign(fldval);
+			if (fldval == "")
+				parent.historyArray[nbrRecs].annualSalary = "0.00";
+			else if (fldval.indexOf(".") != -1)
+				parent.historyArray[nbrRecs].annualSalary = fldval;
+			else
+				parent.historyArray[nbrRecs].annualSalary = fldval.substring(0,fldval.length-2)+'.'+fldval.substring(fldval.length-2,fldval.length);
+			parent.historyArray[nbrRecs].fldHash["PRH-ANNUAL-SALARY"] = true;
+		}
+		else if (fldnbr.indexOf("PCT-CHANGE") != -1 && nbrRecs >= 0 && nbrRecs < parent.historyArray.length && !parent.historyArray[nbrRecs].fldHash["PCT-CHANGE"])
+		{
+			parent.historyArray[nbrRecs].percentChange = moveTrailingSign(fldval);
+			if (fldval == "")
+				parent.historyArray[nbrRecs].percentChange = "0.00";
+			parent.historyArray[nbrRecs].fldHash["PCT-CHANGE"] = true;
+		}
+		else if (fldnbr.indexOf("PRH-CURRENCY-CODE") != -1 && nbrRecs >= 0 && nbrRecs < parent.historyArray.length && !parent.historyArray[nbrRecs].fldHash["PRH-CURRENCY-CODE"])
+		{
+			parent.historyArray[nbrRecs].currency = fldval;
+			parent.historyArray[nbrRecs].fldHash["PRH-CURRENCY-CODE"] = true;
+		}
+	}
+}
+
+// Handle the AGS transaction return message.
+function DataReturned(fldnbr, msgnbr, msg)
+{
+	if (msgnbr != "000" && msgnbr != "011")
+		alert(msg);
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/payratelawheader.htm,v 1.1.2.8 2012/06/29 17:12:06 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

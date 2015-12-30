@@ -1,0 +1,193 @@
+<html>
+<head>
+<script>
+var gmsgnbr = '';
+var gmsg 	= '';
+var gfldnbr = '';
+var formCheck;
+var currentSeqNbr = '';
+var abort;
+
+function DirRptObj()
+{
+	this.employee 				= -1
+	this.full_name				= "Position not filled"
+	this.super_code				= ''
+	this.work_desc				= ''
+	this.direct_reports			= "N"
+	this.supv_job_desc			= ''
+	this.supv_pos_desc			= ''
+	this.first_name				= ''
+	this.middle_init			= ''
+	this.last_name				= ''
+	this.birthdate				= ''
+	this.date_hired				= ''
+	this.adj_hire_date			= ''
+	this.next_review			= ''
+	this.work_country			= ''
+	this.web_type				= ''
+}
+
+function V(fldnbr,fldval)
+{
+	if (formCheck == "HS08")
+	{
+		if (fldnbr == "PGO-SEQ-NBR1")
+		{
+			currentSeqNbr = fldval;
+		}
+	}
+	else
+	{
+		if (fldnbr == "FC")
+		{
+			fc = fldval
+			e = new Array()
+			l = 0
+			lastIndex = -1
+			supv_job_desc = ''
+			supv_pos_desc = ''
+			max_detail = 0
+			PT_FC = ''
+			PT_PTF_EMPLOYEE = ''
+			PT_HSU_CODE	= ''
+			PT_HSU_OP_CODE = ''
+			PTFIELDS = false
+		}
+		else
+		{
+			var i = fldnbr.search(/\d/)
+
+			// Check if this field value has a number; if so, it is a detail line record.
+			if (i != -1)
+			{
+				l = parseInt(Number(fldnbr.substring(i,fldnbr.length)),10) - 1
+				fldnbr = fldnbr.substring(0,i)
+
+				if (lastIndex != l)
+				{
+					e[l] = new DirRptObj()
+					e[l].supv_job_desc = supv_job_desc
+					e[l].supv_pos_desc = supv_pos_desc
+					lastIndex = l
+				}
+			}
+			else // This is a header field.
+			{
+				// Header fields for HS10.1.
+				switch (fldnbr)
+				{
+					case "MAX-DETAIL":
+						max_detail = fldval
+						break
+					case "S-JBC-DESC":
+				    	supv_job_desc = fldval
+						break
+					case "S-POS-DESC":
+				    	supv_pos_desc = fldval
+						break
+					case "PT-FC":
+				    	PT_FC = fldval
+				    	//PT 136767
+						//PTFIELDS = true
+						break
+					case "PT-PTF-EMPLOYEE":
+				    	PT_PTF_EMPLOYEE = fldval
+						if (fldval != "" && Number(fldval) != 0) PTFIELDS = true
+						break
+					case "PT-HSU-CODE":
+				    	PT_HSU_CODE = fldval
+						if (fldval != "") PTFIELDS = true
+						break
+					case "PT-HSU-OP-CODE":
+				    	PT_HSU_OP_CODE = fldval
+						if (fldval != "") PTFIELDS = true
+						break
+				}
+				// This field didn't have a detail line number, so don't continue checking for
+				// detail (report) fields that match this field description.
+				return
+			}
+
+			// Detail fields (reports).
+			switch (fldnbr)
+			{
+				case "PTF-EMPLOYEE":
+					e[l].employee = parseInt(Number(fldval),10)
+					break
+				case "PTF-FULL-NAME":
+					e[l].full_name = fldval
+					e[l].first_name = fldval.substring(0,fldval.indexOf(" "))
+					e[l].middle_init = fldval.substring(fldval.indexOf(".")-1,fldval.indexOf("."))
+					break
+				case "DIRECT-REPORTS":
+					e[l].direct_reports = fldval
+					break
+				case "HSU-CODE":
+					e[l].super_code = fldval
+					// PT 141473
+					if (fldval != "")
+						e[l].employee = fldval
+					break
+				case "WORK-DESC":
+				    e[l].work_desc = fldval
+					break
+				case "EMP-LAST-NAME":
+				    e[l].last_name = fldval
+					break
+				case "PEM-BIRTHDATE":
+				    e[l].birthdate = fldval
+					break
+				case "EMP-DATE-HIRED":
+				    e[l].date_hired = fldval
+					break
+				case "EMP-ADJ-HIRE-DATE":
+				    e[l].adj_hire_date = fldval
+					break
+				case "PEM-NEXT-REVIEW":
+					e[l].next_review = fldval
+					break
+				case "EMP-WORK-COUNTRY":
+				    e[l].work_country = fldval
+					break
+				case "JBC-WEB-TYPE":
+					e[l].web_type = fldval
+					break
+				default:
+					break
+			}
+		}
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr		= msgnbr
+	gmsg 		= msg
+	gfldnbr 	= fldnbr
+	ProcessFlag = true
+	abort       = false;
+
+	switch (msgnbr)
+	{
+		case "000":
+			if (msg.toUpperCase().indexOf("MORE RECORDS EXIST") != -1 && PTFIELDS)
+				pg = true;
+			else
+				pg = false;
+
+			if(formCheck == "PA26.3"){
+				parent.seaAlert(parent.getSeaPhrase("SUCCESSFUL_GOAL_SCORE", "ESS"));
+			}
+			break;
+		default:
+			if (formCheck != "HR13" && formCheck != "ES10")
+				parent.seaAlert(msg);
+			abort = true;
+	}
+}
+</script>
+</head>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/nerrmsg.htm,v 1.3.4.13 2009/03/19 22:06:51 brentd Exp $ -->

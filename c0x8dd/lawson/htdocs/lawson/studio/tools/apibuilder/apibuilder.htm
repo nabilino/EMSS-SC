@@ -1,0 +1,359 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/tools/apibuilder/apibuilder.htm,v 1.4.28.2 2012/08/08 12:48:55 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title>API Builder</title>
+	<script language="javascript" src="../../servenv.js"></script>
+	<script language="javascript" src="../../globals.js"></script>
+	<script language="javascript" src="apibuilder.js"></script>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"/>
+	<link id="StyleLink2" type="text/css" rel="stylesheet" href="apibuilder.css"/>
+</head>
+<body onload="apiInit()" onkeydown="apiDoKeyPress()" onunload="apiUnload()"
+	style="visibility:hidden;background-color:buttonface;">
+	
+	<!-- menu -->
+	<div style="visibility:visible" id="apiButtons" class="dsButtonBar">
+		<span id="agsTitle" class="apViewButton" onclick="apiRenderPDLs('ags')"
+			title="Retrieve Application Objects">Application Objects (AGS)</span>
+		<span id="dmeTitle" class="apViewButton" onclick="apiRenderPDLs('dme')"
+			title="Retrieve Data Queries">Data Queries (DME)</span>
+		<span id="idaTitle" class="apViewButton" onclick="apiRenderPDLs('ida')"
+			title="Drill-Around Programming Interfaces">Drill-Around (IDA)</span>
+		<span id="cancelTitle" class="apViewButton" onclick="apiCancel()"
+			title="Cancel">Cancel</span>
+	</div>
+	
+	<!-- route -->
+	<div id="ToolBar" class="apRoute"
+		style="height:30px;">
+		<div id="divRoute" onclick="apiClickBack()"></div>
+	</div>
+	
+	<!-- main scroller -->
+	<div id="scrollDiv" class="apTabArea"
+		style="background-color:threedface;width:expression(document.body.clientWidth);height:expression(document.body.clientHeight-this.offsetTop);cursor:default;overflow:auto;">
+
+		<div id="mainDiv" class="dsWorkspace"
+			style="background-color:threedface;display:visible;width:expression(document.body.clientWidth-15);height:expression(this.parentElement.offsetHeight-25);border:0px;">
+
+			<!-- general -->
+			<div id="generalInfo" style="display:block;visibility:visible;">
+				<!-- AGS/DME/IDA -->
+				<label id="pdlsLabel" for="pdls" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:120px;height:20px;left:10px;"
+					onselectstart="return false;">Product Lines</label>
+				<span id="pdls" class="apList"
+					style="display:none;visibility:hidden;overflow:auto;top:36px;height:300px;width:120px;left:10px;"
+					onselectstart="return false;"></span>
+				<label id="syssLabel" for="syss" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:215px;height:20px;left:160px;"
+					onselectstart="return false;">System Codes</label>
+				<span id="syss" class="apList"
+					style="display:none;visibility:hidden;overflow:auto;top:36px;height:300px;width:215px;left:160px;"
+					onselectstart="return false;"></span>
+
+				<!-- AGS/IDA -->
+				<label id="tokensLabel" for="tokens" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:315px;height:20px;left:385px;"
+					onselectstart="return false;">Forms</label>
+				<NOBR>
+					<span id="tokens" class="apList"
+						style="display:none;visibility:hidden;width:430px;height:300px;top:36px;left:385px;"
+						onselectstart="return false;"></span>
+				</NOBR>
+
+				<!-- DME -->
+				<label id="tablesLabel" for="tables" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:315px;height:20px;left:385px;"
+					onselectstart="return false;">Data Tables</label>
+				<span id="tables" class="apList"
+					style="display:none;visibility:hidden;top:36px;height:300px;width:430px;left:385px;"
+					onselectstart="return false;"></span>
+			</div>
+
+			<!-- detail -->
+			<div id="detailInfo" style="display:none;visibility:hidden;">
+				<!-- AGS -->
+				<label id="formPropsLabel" for="formProps" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:200px;height:20px;left:10px;"
+					onselectstart="return false;">Form Properties</label>
+				<span id="formPropsOptsSpan" class="apSectionLabel"
+					style="border: none;display:none;visibility:hidden;top:30px;width:200px;height:20px;left:10px;"
+					onselectstart="return false;">
+					<input id="cbAlpha" type="checkbox" onclick="apiToggleAlpha(this)"></input>
+					<label id="alphaLabel" for="cbAlpha"
+						onselectstart="return false;">Alphabetical</label>
+					<input id="cbHidden" type="checkbox" onclick="apiToggleHidden(this)" checked></input>
+					<label id="hiddenLabel" for="cbHidden"
+						onselectstart="return false;">Show Hidden</label>
+				</span>
+				<span id="formProps" class="apList"
+					style="display:none;visibility:hidden;left:10px;width:200px;top:56px;height:280px;"
+					onselectstart="return false;"></span>
+				<label id="methodsLabel" for="methods" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:160px;height:20px;left:220px;"
+					onselectstart="return false;">Methods</label>
+				<span id="methods" class="apList"
+					style="display:none;visibility:hidden;left:220px;width:160px;top:36px;height:300px;"
+					onselectstart="return false;"></span>
+				<label id="selElemLabel" for="selElem" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:310px;height:20px;left:390px;"
+					onselectstart="return false;">Selected Elements</label>
+				<span id="selElem" class="apList"
+					style="display:none;visibility:hidden;width:310px;left:390px;top:36px;height:300px;"></span>
+				
+				<!-- DME -->
+				<label id="tableFldsLabel" for="tableFlds" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:180px;height:20px;left:10px;" 
+					onselectstart="return false;">Table Elements</label>
+				<span id="tableFlds" class="apList"
+					style="display:none;visibility:hidden;left:10px;width:180px;top:36px;height:200px;"
+					onselectstart="return false;"></span>
+
+				<!-- DME index -->
+				<label id="indicesLabel" for="indices" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:120px;height:20px;left:200px;"
+					onselectstart="return false;">Indices</label>
+				<span id="indices" class="apList"
+					style="display:none;visibility:hidden;left:200px;width:120px;top:36px;height:200px;"
+					onselectstart="return false;"></span>
+				<label id="indexInfoLabel" for="indexInfo" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:200px;height:20px;left:330px;"
+					onselectstart="return false;">Index Elements</label>
+				<span id="indexInfo" class="apList"
+					style="display:none;visibility:hidden;left:330px;top:36px;height:200px;width:200px;"></span>
+
+				<!-- DME rel -->
+				<label id="relTablesLabel" for="relTables" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:200px;height:20px;left:540px;"
+					onselectstart="return false;">Related Tables</label>
+				<span id="relTables" class="apList"
+					style="display:none;visibility:hidden;width:200px;left:540px;top:36px;height:200px;"
+					onselectstart="return false;"></span>
+				<label id="relElementsLabel" for="relElements" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:160px;height:20px;left:750px;"
+					onselectstart="return false;">Related Elements</label>
+				<span id="relElements" class="apList"
+					style="display:none;visibility:hidden;width:160px;height:200px;left:750px;top:36px"
+					onselectstart="return false;"></span>
+
+				<!-- DME sel -->
+				<label id="selApiSpanLabel" for="selApiSpan" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:250px;width:200px;height:20px;left:10px;"
+					onselectstart="return false;">Select Criteria</label>
+				<span id="selApiSpan"
+					style="display:none;visibility:hidden;overflow:hidden;padding-left:10px;position:absolute;left:10px;width:900px;top:276px;height:160px;">
+					<table border="0" width="100%" valign="top">
+						<!-- criteria -->
+						<tr>
+							<td width="120" valign="middle">
+								<input id="btnCritAdd" type="button" class="dsDlgButton" onclick="critClickAdd()" 
+									style="position:relative;width:100px;" value="Add Criterion">
+								</input>
+								<input id="btnCritEdit" type="button" class="dsDlgButton" onclick="critClickEdit()"
+									style="position:relative;width:100px;" value="Edit Criterion">
+								</input>
+								<input id="btnCritDel" type="button" class="dsDlgButton" onclick="critClickDel()" 
+									style="position:relative;width:100px;" value="Delete Criterion">
+								</input>
+								<input id="btnCritDelAll" type="button" class="dsDlgButton" onclick="critClickDelAll()"
+									style="position:relative;width:100px;" value="Delete All">
+								</input>
+							</td>
+							<td valign="top">
+								<!--
+								<pre id="selCritListLegend" class="apListTextBar" onselectstart="return false;"
+									><span title="Conjunction">Conj</span
+									>   <span title="Field">Field               </span
+									>   <span title="Operand">Opr</span
+									>   <span title="Value Type">Value</span></pre>
+								-->
+								<select id="selCritList" class="dsListText" size="5"
+									style="font-family:courier new;width:800px;"
+									onclick="critSel()"
+									ondblclick="critDblClick(this)">
+								</select>
+							</td>
+						</tr>
+					</table>
+					<table border="0" width="100%" valign="top">
+						<!-- add or edit -->
+						<tr>
+							<td valign="top" align="center" nowrap>
+								<select id="selCritConj" class="apListText"
+									style="display:none;visibility:hidden;">
+								</select>
+							</td>
+							<td valign="top" align="center" nowrap>
+								<select id="selCritField" class="apListText"
+									style="display:none;visibility:hidden;">
+								</select>
+							</td>
+							<td valign="top" align="center" nowrap>
+								<select id="selCritOper" class="apListText"
+									style="display:none;visibility:hidden;">
+								</select>
+							</td>
+							<td valign="top" align="center" nowrap>
+								<select id="selCritType" class="apListText"
+									style="display:none;visibility:hidden;"
+									onchange="critSelType(this.options[this.selectedIndex].value)" >
+									<option value="Literal">Literal</option>
+									<option value="UserEnv">User Variable</option>
+								</select>
+							</td>
+							<td valign="top" align="center" width="190" nowrap>
+								<input type="text" id="txtCritValue" class="apTextBox"
+									style="display:none;visibility:hidden;width:174px;" size="15" >
+								</input>
+								<select id="selCritUserEnv" class="apListText"
+									style="display:none;visibility:hidden;">
+								</select>
+						    </td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbCritCase" type="checkbox" style="display:none;visibility:hidden;"></input>
+								<label id="cbCritCaseLabel" for="cbCritCase" class="dsLabel"
+									style="position:relative;display:none;visibility:hidden;"
+									onselectstart="return false;">Ignore Case</label>
+							</td>
+							<td valign="top" align="center">
+								<input id="btnCritUpdate" type="button" class="dsDlgButton" onclick="critEditUpdate()" 
+									style="position:relative;visibility:hidden;" value="Update">
+								</input>
+								<br/>
+								<input id="btnCritCancel" type="button" class="dsDlgButton" onclick="critClickCancel()"
+									style="position:relative;visibility:hidden;" value="Cancel">
+								</input>
+						    </td>
+						</tr>
+					</table>
+				</span>
+				
+				<!-- DME MAX -->
+				<label id="maxRecLabel" for="maxRec" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:430px;width:100px;height:20px;left:10px;"
+					onselectstart="return false;">Maximum Records</label>
+				<input id="maxRec" type="text" value="" class="dsTextBox"
+					style="display:none;visibility:hidden;left:140px;top:430px;"
+					size="4" maxlength="4" onkeyup="apiUpdateMax(this)"></input>
+
+				<!-- DME X PRMS -->
+				<span id="xprmSpan"
+					style="display:none;visibility:hidden;overflow:hidden;padding-left:10px;position:absolute;top:430px;left:200px;height:20px;">
+					<table border="0" cellpadding="0" cellspacing="0" valign="top">
+						<tr>
+							<td valign="top" align="center" nowrap>
+								<label for="xprmSpan" class="apSectionLabel"
+									style="position:relative;"
+									onselectstart="return false;">Return Options</label>
+							</td>
+							<td>&nbsp;</td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbXCols" type="checkbox"></input>
+								<label for="cbXCols" class="dsLabel"
+									style="position:relative;"
+									onselectstart="return false;">Columns</label>
+							</td>
+							<td>&nbsp;</td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbXKeys" type="checkbox"></input>
+								<label for="cbXKeys" class="dsLabel"
+									style="position:relative;"
+									onselectstart="return false;">Keys</label>
+							</td>
+							<td>&nbsp;</td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbXRels" type="checkbox"></input>
+								<label for="cbXRels" class="dsLabel"
+									style="position:relative;"
+									onselectstart="return false;">Related</label>
+							</td>
+							<td>&nbsp;</td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbXCount" type="checkbox"></input>
+								<label for="cbXCount" class="dsLabel"
+									style="position:relative;"
+									onselectstart="return false;">Count</label>
+							</td>
+							<td>&nbsp;</td>
+							<td valign="top" align="center" nowrap>
+								<input id="cbXIDA" type="checkbox"></input>
+								<label for="cbXIDA" class="dsLabel"
+									style="position:relative;"
+									onselectstart="return false;">IDA</label>
+							</td>
+							<td colspan="2">&nbsp;</td>
+						</tr>
+					</table>
+				</span>
+				
+				<!-- IDA -->
+				<label id="drillLabel" for="drill" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:300px;height:20px;left:10px;"
+					onselectstart="return false;">Drill-Around Paths (KNB)</label>
+				<span id="drill" class="apList"
+					style="display:none;visibility:hidden;left:10px;width:300px;top:36px;height:300px;"
+					onselectstart="return false;"></span>
+				<label id="reqDrillKeysLabel" for="reqDrillKeys" class="apSectionLabel"
+					style="display:none;visibility:hidden;top:10px;width:400px;height:20px;left:320px;"
+					onselectstart="return false;">Required Drill Keys</label>
+				<span id="reqDrillKeys" class="apList"
+					style="display:none;visibility:hidden;left:320px;width:400px;top:36px;height:300px;"></span>
+
+				<hr style="position:absolute;left:10px;top:460px;width:expression(mainDiv.clientWidth);">
+				
+				<!-- build api -->
+				<span id="buildQuerySpan" style="position:absolute;left:10px;width:110px;top:470px;">
+					<input id="btnBuildQuery" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Build Query" onclick="apiBuildQuery(false)"></input>
+					<input id="btnXmlGraphApi" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Build Graph Query" onclick="apiBuildQuery(false,'graph')"></input>
+					<input id="btnPortalApi" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Build Portal Query" onclick="apiBuildPortalQuery()"></input>
+					<input id="btnJavascriptApi" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Build JavaScript" onclick="apiBuildAPI()"></input>
+					<input id="btnTestApi" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Test Current Query" onclick="apiTestQuery()"></input>
+					<input id="btnOK" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="OK" onclick="apiBuildQuery(true)"></input>
+					<input id="btnCancel" class="dsButton"
+						style="display:block;width:110px;"
+						type="button" value="Cancel" onclick="apiCancel()"></input>
+				</span>
+				<textarea id="apiDiv" class="apList"
+					style="top:470px;left:130px;width:780px;height:140px;"
+					wrap="virtual"></textarea>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

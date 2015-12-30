@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<LAWXML>
+	<Translate language="eses" version="8.1">
+		<phrase id="MILITARY_SERVICE"><![CDATA[Servicio militar]]></phrase>
+		<phrase id="BRANCH"><![CDATA[Sucurs]]></phrase>
+		<phrase id="SPECIALTY"><![CDATA[Especialidad]]></phrase>
+		<phrase id="RANK"><![CDATA[Rang]]></phrase>
+		<phrase id="SERVICE_YEARS"><![CDATA[Años servic]]></phrase>
+		<phrase id="SERVICE_MONTHS"><![CDATA[Meses servic]]></phrase>
+		<phrase id="DISCHARGE_DATE"><![CDATA[Fecha de despido]]></phrase>
+		<phrase id="DISCHARGE_TYPE"><![CDATA[Tipo de despido]]></phrase>
+		<phrase id="NATIONAL_GUARD"><![CDATA[Guardia Nacional]]></phrase>
+		<phrase id="RESERVES"><![CDATA[Reservas]]></phrase>
+		<phrase id="DISHONORABLE"><![CDATA[Deshonroso]]></phrase>
+		<phrase id="HONORABLE"><![CDATA[Honroso]]></phrase>
+		<phrase id="LESS_HONORABLE"><![CDATA[Menos honroso]]></phrase>
+		<phrase id="MEDICAL"><![CDATA[Médico]]></phrase>
+		<phrase id="OTHER"><![CDATA[Otros]]></phrase>
+		<phrase id="DRAFT_STATUS"><![CDATA[Estd borrador]]></phrase>
+		<phrase id="RANK_ATTAINED"><![CDATA[Rango obtenido]]></phrase>
+		<phrase id="BRANCH_REQUIRED"><![CDATA[Se requiere sucursal.]]></phrase>
+		<phrase id="NO_MILITARY_RECORDS"><![CDATA[No tiene información sobre servicio militar que mostrar.]]></phrase>
+		<phrase id="CHANGE_MILITARY_RECORD"><![CDATA[Cambiar información militar]]></phrase>
+		<phrase id="AIR_FORCE"><![CDATA[Fuerza aérea]]></phrase>
+		<phrase id="ARMY"><![CDATA[Ejército]]></phrase>
+		<phrase id="COAST_GUARD"><![CDATA[Guardacostas]]></phrase>
+		<phrase id="MARINE_CORP"><![CDATA[Marina]]></phrase>
+		<phrase id="NAVY"><![CDATA[Armada]]></phrase>
+		<phrase id="OTHER"><![CDATA[Otros]]></phrase>
+		<phrase id="NO_BALANCE_DETAILS"><![CDATA[No existen detalles de transacción para este saldo.]]></phrase>
+		<phrase id="TRAN_TYPE_1"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_2"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_3"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_4"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_5"><![CDATA[Ajuste manual]]></phrase>
+		<phrase id="TRAN_TYPE_11"><![CDATA[Vendido mediante plan de beneficios]]></phrase>
+		<phrase id="TRAN_TYPE_12"><![CDATA[Comprado mediante plan de beneficios]]></phrase>
+		<phrase id="TRAN_TYPE_21"><![CDATA[Acumul]]></phrase>
+		<phrase id="TRAN_TYPE_22"><![CDATA[Asignación]]></phrase>
+		<phrase id="TRAN_TYPE_31"><![CDATA[Movido a saldo disponible]]></phrase>
+		<phrase id="TRAN_TYPE_32"><![CDATA[Movido a saldo disponible]]></phrase>
+		<phrase id="TRAN_TYPE_33"><![CDATA[Acumul]]></phrase>
+		<phrase id="TRAN_TYPE_34"><![CDATA[Asignación]]></phrase>
+		<phrase id="TRAN_TYPE_35"><![CDATA[Se ha establecido saldo de transferencia]]></phrase>
+		<phrase id="TRAN_TYPE_42"><![CDATA[Perdido por límite en saldo]]></phrase>
+		<phrase id="TRAN_TYPE_43"><![CDATA[Perdido por límite en saldo]]></phrase>
+		<phrase id="TRAN_TYPE_44"><![CDATA[Perdido por límite de transferencia]]></phrase>
+		<phrase id="TRAN_TYPE_45"><![CDATA[Perdido: periodo de transferencia vencido ]]></phrase>
+		<phrase id="TRAN_TYPE_46"><![CDATA[Perdido: periodo de transferencia vencido ]]></phrase>
+		<phrase id="TRAN_TYPE_47"><![CDATA[Restablecimiento de saldo de transferencia (no perdido)]]></phrase>
+		<phrase id="TRAN_TYPE_48"><![CDATA[Perdido por límite en saldo]]></phrase>
+		<phrase id="TRAN_TYPE_51"><![CDATA[Ajuste a asignación]]></phrase>
+		<phrase id="TRAN_TYPE_52"><![CDATA[Ajuste a asignación]]></phrase>
+		<phrase id="TRAN_TYPE_61"><![CDATA[Uso]]></phrase>
+		<phrase id="TRAN_TYPE_63"><![CDATA[Pago]]></phrase>
+		<phrase id="TRAN_TYPE_71"><![CDATA[Saldo eliminado]]></phrase>
+		<phrase id="TRAN_TYPE_72"><![CDATA[Saldo eliminado]]></phrase>
+		<phrase id="TRAN_TYPE_73"><![CDATA[Saldo eliminado]]></phrase>
+		<phrase id="TRAN_TYPE_74"><![CDATA[Saldo eliminado]]></phrase>
+		<phrase id="TRAN_TYPE_75"><![CDATA[Saldo eliminado]]></phrase>
+		<phrase id="TRAN_TYPE_81"><![CDATA[Transferencia desde otro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_82"><![CDATA[Transferencia desde otro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_83"><![CDATA[Transferencia desde otro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_84"><![CDATA[Transferencia desde otro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_85"><![CDATA[Transferencia desde otro saldo]]></phrase>
+		<phrase id="TRAN_TYPE_91"><![CDATA[Detalle consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_92"><![CDATA[Detalle consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_93"><![CDATA[Detalle consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_94"><![CDATA[Detalle consolidado]]></phrase>
+		<phrase id="TRAN_TYPE_95"><![CDATA[Detalle consolidado]]></phrase>		
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/eses/Attic/seamsgs.xml,v 1.1.2.1 2011/09/06 21:37:27 brentd Exp $ -->

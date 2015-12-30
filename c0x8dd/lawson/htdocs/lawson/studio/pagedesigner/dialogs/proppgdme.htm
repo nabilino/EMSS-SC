@@ -1,0 +1,328 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/proppgdme.htm,v 1.2.6.1.20.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Data Query Property Pages</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="proppgdme.js"></script>
+</head>
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGen" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="ppgSwitchTab(this)">General</span>
+		<span id="tabCols" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="ppgSwitchTab(this)">Fields</span>
+		<span id="tabIndex" class="dsTabButtonInactive" style="top:10;left:140;width:70px;" tabind="3" onclick="ppgSwitchTab(this)">Index</span>
+		<span id="tabCond" class="dsTabButtonInactive" style="top:10;left:210;width:70px;" tabind="4" onclick="ppgSwitchTab(this)">Conditions</span>
+		<span id="tabSelect" class="dsTabButtonInactive" style="top:10;left:280;width:70px;" tabind="5" onclick="ppgSwitchTab(this)">Criteria</span>
+	</div>
+	<!-- General tab pane -->
+	<div id="divGen" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+		<table>
+			<colgroup><col width="30%"></col><col width="70%"></col></colgroup>
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td><span id="lblAPI" class="dsLabel" style="position:relative;">API</span></td>
+				<td><nobr><input id="txtAPI" class="dsTextBox" style="position:relative;width:320;" onblur="ppgApiCheckOnBlur()"></input>
+					<input type="button" class="dsButton" id="btnQryAPI" onclick="ppgInvokeAPIBuilder()"
+					style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input></nobr></td>
+			</tr>
+			<tr>
+				<td><span id="lblOverRideDa" class="dsLabel" style="position:relative;">Use Webuser PDL</span></td>
+				<td><input type="checkbox" id="chkPdlOvrde" style="position:relative;" onclick="btnApply.disabled = false;"></input></td>
+			</tr>
+			<tr>
+				<td><span id="lblRecords" class="dsLabel" style="position:relative;">Max records</span></td>
+				<td><input id="txtRecords" class="dsTextBox" style="position:relative;width:40;" value="25" onblur="ppgTxtOnBlur(this)"></input></td>
+			</tr>
+			<tr>
+				<td><span id="lblPageSize" class="dsLabel" style="position:relative;">Page Size</span></td>
+				<td><input id="txtPageSize" class="dsTextBox" style="position:relative;width:40;" value="25" onblur="ppgPageSizeOnBlur()"></input></td>
+			</tr>
+			<tr>
+				<td><span id="lblDisplay" class="dsLabel" style="position:relative;" disabled>Display Title</span></td>
+				<td><select id="selDisplay" class="dsTextbox" style="position:relative;" disabled onchange="ppgOnChgDisplay()">
+					<option value="horizontal">Horizontal</option>
+					<option value="vertical">Vertical</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td><span id="lblRepresent" class="dsLabel" style="position:relative;">Representation</span></td>
+				<td><select id="selRepresent" class="dsTextbox" style="position:relative;width:125" onchange="ppgOnChgRepresentation()">
+					<option value="dme.xsl">Table</option>
+					<option value="xmlgraph_HBAR.xsl">Horizontal Bar Graph</option>
+					<option value="xmlgraph_VBAR.xsl">Vertical Bar Graph</option>
+					<option value="xmlgraph_PIE.xsl">Pie Chart</option>
+					<option value="xmlgraph_LINE.xsl">Line Graph</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td><span id="lblSort" class="dsLabel" style="position:relative;">Sort Records</span></td>
+				<td>
+					<input type="radio" id="rdAsc" name="rdSort"  style="position:relative;"  onclick="btnApply.disabled = false;"></input>
+					<label id="lblAsc" for="rdAsc" class="dsLabel" style="position:relative;">Ascending</label>
+					<input type="radio" id="rdDesc" name="rdSort"  style="position:relative;" onclick="btnApply.disabled = false;"></input>
+					<label id="lblDesc" for="rdDesc" class="dsLabel" style="position:relative;">Descending</label>
+					<input type="radio" id="rdNone" name="rdSort"  style="position:relative;" checked onclick="btnApply.disabled = false;"></input>
+					<label id="lblNone" for="rdNone" class="dsLabel" style="position:relative;">None</label>
+				</td>
+			</tr>
+			<tr>
+				<td><span id="lblLinkRecords" class="dsLabel" style="position:relative;">Link Records</span></td>
+				<td>
+					<input type="radio" id="rdDrill" name="rdFormDrill"  style="position:relative;" checked onclick="ppgChooseLink()"/>
+					<label id="lblDrill" for="rdDrill" class="dsLabel" style="position:relative;">Drill</label>&nbsp;&nbsp;&nbsp;
+					<input type="radio" id="rdForm" name="rdFormDrill"  style="position:relative;" onclick="ppgChooseLink()"/>
+					<label id="lblForm" for="rdForm" class="dsLabel" style="position:relative;">Form</label>&nbsp;&nbsp;&nbsp;
+					<span id="lblToken" class="dsLabel" style="position:relative;" disabled>Token</span>
+					<input id="txtToken" class="dsTextbox" style="position:relative;width:60" disabled onblur="ppgTxtOnBlur(this)"></input>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td align="center">
+					<span id="lblToolTip" class="dsLabel" style="position:relative;" disabled>Tooltip</span>
+					<input id="txtToolTip" class="dsTextbox" style="position:relative;width:130" disabled onblur="ppgTxtOnBlur(this)"></input>
+				</td>
+			</tr>
+		</table>
+	</div>
+
+	<!-- Columns tab pane -->
+	<div id="divCols" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+		<div id="divTabs2" style="position:relative;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+			<span id="tabHeaderInfo" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="ppgSwitchColTab('header')">Header</span>
+			<span id="tabBodyInfo" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="ppgSwitchColTab('body')">Body</span>
+		</div>
+
+		<div id="divHdrInfo" class="dsTabPaneActive" style="position:relative;top:7px;height:80%;width:100%;display:block">
+			<div style="position:relative;height:25%">
+				<table>
+					<tr>
+						<td><span id="lblHeaderProp" class="dsLabel" style="position:relative;">Header Style</span></td>
+						<td colspan="3">
+							<span id="lblFont" class="dsLabel" style="position:relative;">Font</span>
+							<select id="selFont" class="dsTextbox" style="position:relative;width:80;"  onchange="btnApply.disabled = false;">
+								<option value="arial">Arial</option>
+								<option value="book antiqua">Book Antiqua</option>
+								<option value="comic sans ms">Comic Sans MS</option>
+								<option value="courier new">Courier New</option>
+								<option value="helvetica">Helvetica</option>
+								<option value="lucida console">Lucida Console</option>
+								<option value="modern">Modern</option>
+								<option value="ms sans serif">MS Sans Serif</option>
+								<option value="news gothic mt">News Gothic MT</option>
+								<option value="serif">Serif</option>
+								<option value="sans serif">Sans Serif</option>
+								<option value="tahoma" selected>Tahoma</option>
+								<option value="times new roman">Times New Roman</option>
+								<option value="verdana">Verdana</option>
+								<option value="wide latin">Wide Latin</option>
+							</select>
+							<span id="lblFontSize" class="dsLabel" style="position:relative;">Size</span>
+							<select id="selFontSize" class="dsTextbox" style="position:relative;width:50;"  onchange="btnApply.disabled = false;">
+								<option value="8pt" selected="true">8 pt</option>
+								<option value="9pt">9 pt</option>
+								<option value="10pt">10 pt</option>
+								<option value="11pt">11 pt</option>
+								<option value="12pt">12 pt</option>
+								<option value="13pt">13 pt</option>
+								<option value="14pt">14 pt</option>
+								<option value="15pt">15 pt</option>
+								<option value="16pt">16 pt</option>
+								<option value="17pt">17 pt</option>
+								<option value="18pt">18 pt</option>
+								<option value="19pt">19 pt</option>
+								<option value="20pt">20 pt</option>
+								<option value="21pt">21 pt</option>
+								<option value="22pt">22 pt</option>
+							</select>
+							<span id="lblFontColor" class="dsLabel" style="position:relative;">Color</span>
+							<input id="txtFontColor" class="dsTextbox" style="position:relative;width:70;" value="000000" onblur="ppgTxtOnBlur(this)"></input>
+							<input type="button" class="dsButton" id="btnColor" onclick="ppgSelectColor()"
+							style="position:relative;height:18px;width:18px;background-image: url('../../images/3dots.gif');background-position: center;background-repeat: no-repeat;"></input>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2"><span id="lblRearrange" class="dsLabel" style="position:relative;">Click to Rearrange Rows</span></td>
+						<td colspan="2" align="center"><input id="btnUp" type="button" class="dsDlgButton" style="position:relative;width:50px" value="Up" onclick="ppgMoveRow('up')"></input>
+						<input id="btnDown" type="button" class="dsDlgButton" style="position:relative;width:50px" value="Down" onclick="ppgMoveRow('down')"></input></td>
+					</tr>
+				</table>
+			</div>
+
+			<div style="position:relative;height:15%;">
+				<table id="tbColsHeader" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:98%;table-layout:fixed;">
+				<colgroup><col width="18%"></col><col width="18%"></col><col width="18%"></col>
+				<col width="12%"></col><col width="18%"></col><col width="12%"></col></colgroup>
+					<tr><td colspan="7"><hr size="0" noshade></hr></td></tr>
+					<tr>
+						<td align="center"><span id="lblField" class="dsLabel" style="position:relative;text-decoration:underline;">Field</span></td>
+						<td align="center"><span id="lblCaption" class="dsLabel" style="position:relative;text-decoration:underline;">Caption</span></td>
+						<td align="center"><span id="lblAlign" class="dsLabel" style="position:relative;text-decoration:underline;">Align</span></td>
+						<td align="center"><span id="lblRtSort" class="dsLabel" style="position:relative;text-decoration:underline;">Sort</span></td>
+						<td align="center"><span id="lblTooltip" class="dsLabel" style="position:relative;text-decoration:underline;">Tooltip</span></td>
+						<td align="center"><span id="lblWrap" class="dsLabel" style="position:relative;text-decoration:underline;">Wrap</span></td>
+					</tr>
+				</table>
+			</div>
+			<div style="position:relative;height:55%;overflow:auto;">
+				<table id="tbCols0" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:98%;table-layout:fixed;">
+				<colgroup><col width="18%"></col><col width="18%"></col><col width="18%"></col>
+				<col width="12%"></col><col width="18%"></col><col width="12%"></col></colgroup>
+
+				</table>
+			</div>
+		</div>
+		<div id="divBodyInfo" class="dsTabPaneActive" style="position:relative;top:7px;height:80%;widht:100%;display:none">
+			<div style="position:relative;height:15%">
+				<table width="100%">
+					<tr>
+						<td align="center"><span id="lblAddtoRow" class="dsLabel" style="position:relative;">Add to row</span></td>
+						<td align="center" colspan="3">
+							<input type="radio" id="rdChk" name="rdAdd"  style="position:relative;" onclick="ppgOnClickAddtoRow()"></input>
+							<label id="lblChk" for="rdChk" class="dsLabel" style="position:relative;">CheckBox</label>
+							<input type="radio" id="rdBtn" name="rdAdd"  style="position:relative;" onclick="ppgOnClickAddtoRow()"></input>
+							<label id="lblBtn" for="rdBtn" class="dsLabel" style="position:relative;">Button</label>
+							<input type="radio" id="rdBoth" name="rdAdd"  style="position:relative;" onclick="ppgOnClickAddtoRow()"></input>
+							<label id="lblBoth" for="rdBoth" class="dsLabel" style="position:relative;">Both</label>
+							<input type="radio" id="rdNon" name="rdAdd"  style="position:relative;" onclick="ppgOnClickAddtoRow()" checked></input>
+							<label id="lblNon" for="rdNon" class="dsLabel" style="position:relative;">None</label>
+						</td>
+					</tr>
+					<tr>
+						<td>&nbsp;</td>
+						<td colspan="3">
+							<span id="lblBtnLabel" class="dsLabel" style="position:relative;" disabled>Button Title</span>
+							<input id="txtBtnLabel" class="dsTextbox" style="position:relative;width:70;" value="" disabled onblur="ppgTxtOnBlur(this)"></input>
+							<span id="lblBtnValue" class="dsLabel" style="position:relative;" disabled>Button Value</span>
+							<input id="txtBtnValue" class="dsTextbox" style="position:relative;width:70;" value="" disabled onblur="ppgTxtOnBlur(this)"></input>
+						</td>
+				</table>
+			</div>
+			<div style="position:relative;height:15%;">
+				<table id="tbColsHeader2" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:98%;table-layout:fixed;">
+				<colgroup><col width="16%"></col><col width="16%"></col><col width="14%"></col><col width="12%"></col>
+				<col width="16%"></col><col width="12%"></col><col width="12%"></col></colgroup>
+					<tr><td colspan="7"><hr size="0" noshade></hr></td></tr>
+					<tr>
+						<td align="center"><span id="lblField" class="dsLabel" style="position:relative;text-decoration:underline;">Field</span></td>
+						<td align="center"><span id="lblAlign" class="dsLabel" style="position:relative;text-decoration:underline;">Align</span></td>
+						<td align="center"><span id="lblSortOrder" class="dsLabel" style="position:relative;text-decoration:underline;">Sort Order</span></td>
+						<td align="center"><span id="lblColDrill" class="dsLabel" style="position:relative;text-decoration:underline;">Drill</span></td>
+						<td align="center"><span id="lblTooltip2" class="dsLabel" style="position:relative;text-decoration:underline;">Tooltip</span></td>
+						<td align="center"><span id="lblWrap2" class="dsLabel" style="position:relative;text-decoration:underline;">Wrap</span></td>
+						<td align="center"><span id="lblHideField" class="dsLabel" style="position:relative;text-decoration:underline;">Hide Field</span></td>
+					</tr>
+				</table>
+			</div>
+			<div style="position:relative;height:55%;overflow:auto;">
+				<table id="tbCols1" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:98%;table-layout:fixed;">
+				<colgroup><col width="16%"></col><col width="16%"></col><col width="14%"></col><col width="12%"></col>
+				<col width="16%"></col><col width="12%"></col><col width="12%"></col></colgroup>
+				</table>
+			</div>
+		</div>
+	</div>
+
+	<!-- Index tab pane -->
+	<div id="divIndex" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;overflow:auto;">
+		<br/>
+		<table CELLSPACING="3" CELLPADDING="3"  align="top" style="position:relative;width:60%">
+			<tr>
+				<td align="center"><span id="lblIndex" class="dsLabel" style="position:relative;">Index</span></td>
+				<td align="center"><input id="txtIndex" class="dsTextBox" style="position:relative;width:100;" disabled="true"/></td>
+			</tr>
+		</table>
+		<table id="tbKeys" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:98%">
+			<tr>
+				<td align="center"><span id="lblKey" class="dsLabel" style="position:relative;text-decoration:underline;">Key field</span></td>
+				<td align="center"><span id="lblValue" class="dsLabel" style="position:relative;text-decoration:underline;">Value</span></td>
+				<td align="center"><span id="lblRefresh" class="dsLabel" style="position:relative;text-decoration:underline;">Trigger Refresh</span></td>
+				<td align="center"><span id="lblIndLabel" class="dsLabel" style="position:relative;text-decoration:underline;">Label</span></td>
+				<td align="center"><span id="lblReadOnly" class="dsLabel" style="position:relative;text-decoration:underline;">ReadOnly</span></td>
+				<td align="center"><span id="lblHide" class="dsLabel" style="position:relative;text-decoration:underline;">Hide</span></td>
+
+			</tr>
+		</table>
+	</div>
+
+	<!-- Conditions tab pane -->
+	<div id="divCond" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+		<br/>
+		<div style="position:absoulute;height:5%;width:100%;">
+		<table id="tbCondHeader" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:90%;table-layout:fixed;">
+			<colgroup><col width="27%"></col><col width="15%"></col><col width="27%"></col>
+					<col width="15%"></col><col width="15%"></col></colgroup>
+			<tr>
+				<td align="center"><span id="lblCond" class="dsLabel" style="position:relative;text-decoration:underline;">Condition</span></td>
+				<td align="center"><span id="lblApply" class="dsLabel" style="position:relative;text-decoration:underline;">Apply</span></td>
+				<td align="center"><span id="lblLabel" class="dsLabel" style="position:relative;text-decoration:underline;">Caption</span></td>
+				<td align="center"><span id="lblInitSel" class="dsLabel" style="position:relative;text-decoration:underline;">Initial Query</span></td>
+				<td align="center"><span id="lblHide2" class="dsLabel" style="position:relative;text-decoration:underline;">Hide</span></td>
+			</tr>
+		</table>
+		</div>
+		<div style="position:absolute;height:80%;width:100%;overflow:auto;">
+		<table id="tbCond" CELLSPACING="1" CELLPADDING="1"  align="top" style="position:relative;width:90%;table-layout:fixed;">
+			<colgroup><col width="27%"></col><col width="15%"></col><col width="27%"></col>
+					<col width="15%"></col><col width="15%"></col></colgroup>
+		</table>
+		</div>
+	</div>
+
+	<!-- Criteria tab pane -->
+	<div id="divSelect" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+		<br/>
+		<br/>
+		<div style="position:relative;left:5%;">
+			<span id="lblCriteria" class="dsLabel" style="position:relative;">Criteria</span>
+			<input id="txtCriteria" class="dsTextBox" style="position:relative;width:400;"  onblur="ppgTxtOnBlur(this)"/>
+		</div>
+	</div>
+
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:40;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="ppgOK()"
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" disabled onclick="ppgUpdate()"
+				style="position:relative;width:70px;" value="Apply">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

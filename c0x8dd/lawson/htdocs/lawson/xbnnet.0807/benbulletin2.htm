@@ -1,0 +1,98 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	var html = '<div class="plaintablecell" style="padding:0px">'
+
+	html += '<br><table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	html += '<tr>'
+	html += '<td class="plaintablecellborder">'
+	if(parent.event=="annual")
+		html += getSeaPhrase("BULLETIN2_1","BEN")+'.'
+	else if(parent.event=="B")
+		html += getSeaPhrase("BULLETIN_6","BEN")
+	else if(parent.event=="M")
+		html += getSeaPhrase("BULLETIN_7","BEN")
+	else if(parent.event=="A")
+		html += getSeaPhrase("BULLETIN_8","BEN")
+	else if(parent.rule_type=="N")
+		html += getSeaPhrase("BULLETIN2_1","BEN")
+	else
+		html += getSeaPhrase("BULLETIN_9","BEN")
+	html += '</td>'
+	html += '</tr>'
+	html += '</table>'
+	html += '<br><table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" styler="list" style="width:100%;margin-left:auto;margin-right:auto">'
+	html += '<tr><th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN_TYPE","BEN")+'</th></tr>'
+	for (var i=1; i<parent.EligPlanGroups.length; i++)
+		html += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'+parent.EligPlanGroups[i][0]+'</td></tr>'
+	html += '</table><br>'
+	html += '<table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	html += '<tr><td class="textAlignRight">'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"), "continueClicked();return false", "margin-right:5px;margin-top:10px")
+	html += uiButton(getSeaPhrase("PREVIOUS","BEN"), "backClicked();return false", "margin-right:5px;margin-top:10px")
+	html += uiButton(getSeaPhrase("EXIT","BEN"), "parent.quitEnroll(self.location.href);return false","margin-right:5px;margin-top:10px")
+	html += '</td></tr>'
+	html += '</table>'
+
+	html += '</div>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("ENROLLMENT_ORDER","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.fitToScreen();
+}
+function backClicked()
+{
+	parent.document.getElementById("main").src=parent.LastDoc[parent.currentdoc];
+	parent.currentdoc--;
+}
+function continueClicked()
+{
+	parent.LastDoc[parent.LastDoc.length]=parent.baseurl+"benbulletin2.htm";
+	parent.currentdoc=parent.LastDoc.length-1;
+	parent.keepcheck1();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td style="vertical-align:top">
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/benbulletin2.htm,v 1.21.2.15 2012/06/29 17:11:58 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

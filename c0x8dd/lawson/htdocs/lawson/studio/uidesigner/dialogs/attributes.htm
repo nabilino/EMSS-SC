@@ -1,0 +1,61 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/attributes.htm,v 1.2.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Element Properties</title>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<script language="javascript" src="attributes.js"></script>
+</head>
+
+<body onload="ppgInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="ppgOnKeyDown()">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabProperties" class="dsTabButtonActive" style="top:10;left:0;width:80px;" tabind="0" onclick="ppgSwitchTab(this)">Properties</span>
+	</div>
+
+	<!-- Properties tab pane -->
+	<div id="divProperties" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<div class="dsTabPaneActive" style="top:5%;border:;height:95%;width:100%;overflow:auto;">
+	<table id="tblProperties" width="96%" cellspacing="1" style="margin-left:2%;">
+		<colgroup><col width="40%"/><col width="60%"/></colgroup>
+	</table>
+	</div>
+	</div>
+	
+	<!-- OK button -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="window.close()" 
+					style="position:relative;" value="OK">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

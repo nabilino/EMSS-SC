@@ -1,0 +1,114 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/action.htm,v 1.2.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="keyhandlers.js"></SCRIPT>
+<SCRIPT language="javascript" src="action.js"></SCRIPT>
+<TITLE>Action Properties</TITLE>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+		<phrase id="msgOkToDeleteWorkflow">OK to delete current workflow trigger settings?</phrase>
+		<phrase id="msgEnterRequred">Please enter required field value.</phrase>
+		<phrase id="msgIdAlreadyAssigned">This action id is already assigned.</phrase>
+		<phrase id="msgDifferentIdReq">Please provide a different id.</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="paInit()" onkeypress="paOnKeyPress()" style="background-color:buttonface;margin:10px;visibility:hidden">
+
+	<table border="0" cellspacing="4" style="left-margin:10;width:100%">
+	<tr>
+		<td align="right" width="35%">
+			<label id="lblActionId" for="txtActionId" class="dsLabel" style="position:relative;">Action Id:</label>
+			&nbsp;
+	    </td>
+	   	<td>
+			<input id="txtActionId" type="textbox" class="dsTextBox"
+			style="position:relative;width:140px;border-style:inset;border-width:2px;border-color:white;">
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label id="lblPhrase" for="txtPhrase" class="dsLabel" style="position:relative;">Phrase:</label>
+			&nbsp;
+	    </td>
+	   <td>
+			<input id="txtPhrase" class="dsTextBox" 
+				style="position:relative;width:140px;border-style:inset;border-width:2px;border-color:white;">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label id="lblActionValue" for="txtActionValue" class="dsLabel" style="position:relative;">Action Value:</label>
+			&nbsp;
+	    </td>
+	   <td>
+			<input id="txtActionValue" class="dsTextBox" 
+				style="position:relative;width:140px;border-style:inset;border-width:2px;border-color:white;">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label id="lblVisible" for="cbxVisible" class="dsLabel" style="margin-top:3px;">Visible Button:</label>
+			&nbsp;
+		</td>
+	   <td>
+			<input type="checkbox" id="cbxVisible" style="position:relative;height:16px;width:16px;"></input>
+		</td>
+	</tr>
+	<tr>
+		<td align="right">
+			<label id="lblWorkflowTrigger" for="txtWorkflowValue" class="dsLabel" style="position:relative;">Work Flow Trigger:</label>
+			&nbsp;
+	    </td>
+	   <td>
+			<input id="txtWorkflowValue" class="dsTextBox" disabled="true" 
+				style="position:relative;width:140px;border-style:inset;border-width:2px;border-color:white;">
+			</input>
+			<input type="button" id="btnWorkflow" class="dsDlgButton" onclick="paWorkflowOpen()"
+				style="position:relative;height:20px;width:20px;background-image: url('../../images/3dots.gif');background-position:center;background-repeat:no-repeat;">
+			</input>
+			<input type="button" id="btnClearWorkflow" value="Remove" class="dsDlgButton" onclick="paWorkflowClear()"
+				style="position:relative;height:20px;">
+			</input>
+		</td>
+	</tr>
+	<tr><td colspan="2"><hr style="margin-top:6px;"></td></tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="paOnOK()" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

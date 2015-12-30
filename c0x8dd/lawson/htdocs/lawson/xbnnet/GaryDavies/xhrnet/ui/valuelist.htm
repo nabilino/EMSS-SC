@@ -1,0 +1,176 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+<head>
+<title>Select</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var searchStr = (window.location.search) ? unescape(window.location.search) : "";
+
+function getVarFromString(varName, str)
+{
+	var url = str;
+	var ptr = url.indexOf(varName + "=");
+	var ptr2;
+	var val1 = "";
+
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1,url.length);
+		var ptr2;
+
+		if ((ptr2 = val1.indexOf("&")) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0,ptr2);
+		}
+	}
+	return val1;
+}
+
+function initValueList()
+{
+	var fieldNm = "";
+	
+	if (searchStr != "")
+	{
+		fieldNm = getVarFromString("fieldNm", searchStr);
+	}
+	
+	valueListOnLoad(fieldNm, document.getElementById('paneBody'));	
+}
+
+function stopWaitAlert()
+{
+	try
+	{
+		opener.stopProcessing();
+	}
+	catch(e) {}
+	try
+	{
+		parent.stopProcessing();
+	}
+	catch(e) {}	
+}
+
+function valueListOnLoad(fieldNm, recordElement, winRef, filterType)
+{
+	if (!filterType) {
+		filterType = "valuelist";
+	}
+	
+	var winElm;
+	
+	if (winRef) {
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? winRef.document.body : winRef;
+	} else if (opener) {
+		winRef = opener;
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? opener.document.body : opener.window;
+	} else {
+		winRef = parent;
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? parent.document.body : parent;	
+	}
+
+	if (winRef == opener) {
+		try {
+			if (opener.document.body.getAttribute("onunload")) {
+				winElm.onunload = function() {
+					opener.document.body.getAttribute("onunload");
+					window.close();
+				};
+			} else {
+				winElm.onunload = function() {
+					window.close();
+				};
+			}
+		} catch(e) {}
+	}
+
+	document.getElementById("paneBody").style.visibility = "hidden";
+
+	var dmeFilter = new DMEFilterHandler();
+	dmeFilter.setId(window.name);
+	dmeFilter.setFilterType(filterType);
+	dmeFilter.setLaunchedFrom(winRef);
+	dmeFilter.setWindow(window);
+	dmeFilter.setRecordElement(recordElement);
+	dmeFilter.setFieldNm(fieldNm);
+	
+	if (typeof(dmeFilter.getLaunchedFrom().drawValueListContent) != "undefined")
+	{
+		dmeFilter.setEnabled(true);
+		dmeFilter.getLaunchedFrom().drawValueListContent(dmeFilter);
+		dmeFilter.setStyled(true);
+		dmeFilter.getWindow().stylePage();
+		dmeFilter.getWindow().document.getElementById("paneBody").style.visibility = "visible";
+		dmeFilter.getWindow().document.body.style.visibility = "visible";			
+		return true;
+	}
+
+	return false;
+}
+
+function valueListFieldRecordSelected(recIndex, fieldNm)
+{
+	try
+	{
+		if (window.frameElement && window.frameElement.name == "filterselectiframe")
+		{
+			parent.valueListFieldRecordSelected(recIndex, fieldNm);
+			window.frameElement.style.visibility = "hidden";
+		}
+		else
+		{
+			opener.valueListFieldRecordSelected(recIndex, fieldNm);
+		}
+	}
+	catch(e)
+	{
+		opener.valueListFieldRecordSelected(recIndex, fieldNm);
+	}
+}
+</script>
+</head>
+<body class="filterPopup" style="visibility:hidden" onload="setLayerSizes();initValueList();" onunload="stopWaitAlert()" onresize="setLayerSizes()">
+
+<div id="paneBorder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td class="filterBody" style="height:100%;vertical-align:top" >
+			<div id="paneBody" class="panebody" style="background-color:transparent">
+				<!-- Record table HTML goes here.  For example: -->
+				<!--
+				<table class="filterTable" border="0" cellpadding="0" cellspacing="0" style="width:100%;padding-left:5px;padding-right:5px;border-bottom:0px">
+				<tr>
+					<th>Position</td>
+					<th>Process Level</td>
+					<th>Department</td>
+				</tr>
+				<tr onclick="opener.valueListFieldRecordSelected(0,'processlevel')" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">
+					<td>position #1</td>
+					<td>process level #1</td>
+					<td>department #1</td>
+				</tr>
+				<tr onclick="opener.valueListFieldRecordSelected(0,'processlevel')" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">
+					<td>position #2</td>
+					<td>process level #2</td>
+					<td>department #2</td>
+				</tr>
+				</table>
+				-->
+			</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/valuelist.htm,v 1.1.2.3.4.1 2011/09/08 18:35:04 brentd Exp $ -->

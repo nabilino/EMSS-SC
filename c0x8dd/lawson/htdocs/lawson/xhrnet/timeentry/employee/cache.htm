@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Time Entry</title>
+<script language="JavaScript">
+function findPortal(ref)
+{
+	if (!ref)
+		ref = self;
+	try
+	{
+		if (ref != ref.parent)
+		{
+			// does the parent have a lawsonPortal variable ?
+			if (typeof(ref.parent.lawsonPortal) != "undefined" && typeof(ref.parent.lawsonPortal) != "unknown")
+				return ref.parent;
+			else
+				return findPortal(ref.parent);
+		}
+	}
+	catch (e) {}
+	return null;
+}
+
+function cacheFiles()
+{
+	var tElm;
+	var sFiles = new Array(
+		"/lawson/webappjs/common.js",
+		"/lawson/webappjs/commonHTTP.js",
+		"/lawson/webappjs/data.js",
+		"/lawson/webappjs/transaction.js",
+		"/lawson/webappjs/user.js",
+		"/lawson/xhrnet/email.js",
+		"/lawson/xhrnet/esscommon80.js",
+		"/lawson/xhrnet/waitalert.js",
+		"/lawson/xhrnet/xml/xmldateroutines.js",
+		"/lawson/xhrnet/xml/xmlcommon.js",
+		"/lawson/xhrnet/timeentry/lib/timeentrylib.js",
+		"/lawson/xhrnet/ui/ui.js",
+		"/lawson/xhrnet/timeentry/Skins/Ocean/Template.js",
+		"/lawson/webappjs/javascript/objects/StylerBase.js?emss",
+		//"/lawson/webappjs/javascript/objects/emss/StylerEMSS.js",
+		"/lawson/webappjs/javascript/objects/Calendar.js",
+		"/lawson/webappjs/javascript/objects/Sizer.js",
+		"/lawson/webappjs/javascript/objects/ActivityDialog.js",
+		"/lawson/webappjs/javascript/objects/OpaqueCover.js",
+		"/lawson/webappjs/javascript/objects/Dialog.js",
+		"/lawson/webappjs/javascript/objects/StringBuffer.js",
+		"/lawson/webappjs/javascript/objects/Transaction.js",
+		"/lawson/webappjs/javascript/objects/ProcessFlow.js"
+	);
+	var cFiles = new Array(
+		"/lawson/xhrnet/ui/default.css"
+	);
+	var cAltFiles = new Array();
+	var iFiles = new Array(
+		"/lawson/xhrnet/ui/images/ico_time_entry.gif",
+		"/lawson/xhrnet/ui/images/ico_calendar.gif",
+		"/lawson/xhrnet/ui/images/ico_help_6699cc.gif",
+		"/lawson/xhrnet/ui/images/ico_help_6699cc-over.gif",
+		"/lawson/xhrnet/ui/images/ico_help_6699cc-down.gif",
+		"/lawson/xhrnet/ui/header.htm",
+		"/lawson/xhrnet/ui/headerpane.htm",
+		"/lawson/xhrnet/ui/plain.htm",
+		"/lawson/xhrnet/ui/windowplain.htm",
+		"/lawson/xhrnet/timeentry/employee/timeentrylaw.htm",
+		"/lawson/xhrnet/dot.htm",
+		"/lawson/xhrnet/xml/config/emss_config.xml",
+		"/lawson/xhrnet/xml/lang/enus/essmsgs.xml",
+		"/lawson/xhrnet/xml/lang/enus/temsgs.xml"
+	);
+	var len = sFiles.length;
+	for (var i=0; i<len; i++)
+	{
+		tElm = document.createElement("script");
+		tElm.src = sFiles[i];
+		document.body.appendChild(tElm);
+	}
+	len = cFiles.length;
+	for (var i=0; i<len; i++)
+	{
+    	tElm = document.createElement("link");
+    	tElm.setAttribute("rel", "stylesheet");
+    	tElm.setAttribute("type", "text/css");
+    	tElm.setAttribute("href", cFiles[i]);
+   		document.getElementsByTagName("head")[0].appendChild(tElm);
+	}
+	len = cAltFiles.length;
+	for (var i=0; i<len; i++)
+	{
+    	tElm = document.createElement("link");
+    	tElm.setAttribute("rel", "alternate stylesheet");
+    	tElm.setAttribute("type", "text/css");
+    	tElm.setAttribute("href", cAltFiles[i]);
+   		document.getElementsByTagName("head")[0].appendChild(tElm);
+	}
+	len = iFiles.length;
+	for (var i=0; i<len; i++)
+	{
+		tElm = new Image();
+		tElm.src = iFiles[i];
+	}
+}
+
+function init()
+{
+	var portalWnd = findPortal();
+	try
+	{
+		if (portalWnd != null && typeof(portalWnd.emssCache) == "object" && typeof(portalWnd.emssCache["timeentry"]) == "boolean")
+			return;
+	}
+	catch(e) {}
+	cacheFiles();
+	try
+	{
+		if (portalWnd != null)
+		{
+			portalWnd.emssCache = new Object();
+			portalWnd.emssCache["timeentry"] = true;
+		}
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body onload="init()">
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/employee/Attic/cache.htm,v 1.1.2.15 2014/02/19 23:04:11 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

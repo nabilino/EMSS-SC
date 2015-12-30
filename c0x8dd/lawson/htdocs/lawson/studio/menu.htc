@@ -1,0 +1,581 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/menu.htc,v 1.4.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<PUBLIC:COMPONENT tagname="MENU">
+<PUBLIC:ATTACH event="onclick" onevent="mnClick()" />
+<PUBLIC:ATTACH event="onmouseover" onevent="mnMouseOver()" />
+<PUBLIC:ATTACH event="onmouseout" onevent="mnMouseOut()" />
+<PUBLIC:METHOD name="arrowDown" />
+<PUBLIC:METHOD name="arrowItem" />
+<PUBLIC:METHOD name="arrowUp" />
+<PUBLIC:METHOD name="first" />
+<PUBLIC:METHOD name="hide" />
+<PUBLIC:METHOD name="getMenuBar" />
+<PUBLIC:METHOD name="getMenuMan" />
+<PUBLIC:METHOD name="getMenuItems" />
+<PUBLIC:METHOD name="getTopMenu" />
+<PUBLIC:METHOD name="getVisCount" />
+<PUBLIC:METHOD name="getVisBreakCount" />
+<PUBLIC:METHOD name="handleEvent" />
+<PUBLIC:METHOD name="hasDynlist" />
+<PUBLIC:METHOD name="last" />
+<PUBLIC:METHOD name="onKeyDown" />
+<PUBLIC:METHOD name="pop" />
+<PUBLIC:METHOD name="prepare" />
+<PUBLIC:METHOD name="showMouseOut" />
+<PUBLIC:METHOD name="showMouseOver" />
+<PUBLIC:METHOD name="unpop" />
+<PUBLIC:PROPERTY name="caption" put="mnPutCaption" get="mnGetCaption" />
+<PUBLIC:PROPERTY name="cell" get="mnGetCell" />
+<PUBLIC:PROPERTY name="childCount" get="mnGetChildCount" />
+<PUBLIC:PROPERTY name="dynlist" put="mnPutDynlist" get="mnGetDynlist" />
+<PUBLIC:PROPERTY name="ellipses" put="mnPutEllipses" get="mnGetEllipses" />
+<PUBLIC:PROPERTY name="enabled" put="mnPutEnabled" get="mnGetEnabled" />
+<PUBLIC:PROPERTY name="menuBar" put="mnPutMenuBar" get="mnGetMenuBar" />
+<PUBLIC:PROPERTY name="menuItems" get="mnGetMenuItems" />
+<PUBLIC:PROPERTY name="menuItemHTCs" get="mnGetMenuItemHTCs" put="mnPutMenuItemHTCs" />
+<PUBLIC:PROPERTY name="menuMan" put="mnPutMenuMan" get="mnGetMenuMan" />
+<PUBLIC:PROPERTY name="parentMenu" get="mnGetParentMenu" />
+<PUBLIC:PROPERTY name="parentMenus" get="mnGetParentMenus" />
+<PUBLIC:PROPERTY name="pos" get="mnGetPopPos" />
+<PUBLIC:PROPERTY name="popped" put="mnPutPopped" get="mnGetPopped" />
+<PUBLIC:PROPERTY name="title" put="mnPutTitle" get="mnGetTitle" />
+<PUBLIC:PROPERTY name="visible" put="mnPutVisible" get="mnGetVisible" />
+<PUBLIC:PROPERTY name="xml" put="mnPutXML" get="mnGetXML" />
+<PUBLIC:PROPERTY name="xmlid" get="mnGetXMLId" />
+
+<SCRIPT language="javascript" src="servenv.js"></SCRIPT>
+<SCRIPT LANGUAGE="javascript">
+// menu properties
+var oMenuBar=null;
+var oMenuItems=null; // array of XML nodes
+var oMenuItemHTCs=null; // array of HTC objects
+var oMenuMan=null;
+var oMenuPop=null;
+var oParents=null;
+var oPopped=null;
+var oXML=null;
+// menu functions
+function mnClick(evt)
+{
+	if (!evt)
+		evt=window.event;
+	if(enabled)
+	{
+		if (!oPopped)
+			oMenuBar.setActiveMenu(this);
+		else
+			this.unpop();
+	}
+	window.setEventCancel(evt);
+}
+function mnGetCaption()
+{
+	return window.menus.detCaption(oXML,oMenuMan);
+}
+function mnGetCell()
+{
+	return this;
+}
+function mnGetChildCount()
+{
+	return (oMenuItems?oMenuItems.length:0);
+}
+function mnGetDynlist()
+{
+	return window.menus.detDynlist(oXML);
+}
+function mnGetEllipses()
+{
+	return window.menus.detEllipses(oXML);
+}
+function mnGetEnabled()
+{
+	return window.menus.detEnabled(oXML);
+}
+function mnGetMenuBar()
+{
+	return oMenuBar;
+}
+// refresh if dynamic list
+function mnGetMenuItems()
+{
+	var ret;
+	if (this.hasDynlist())
+		ret=dynlist.childNodes;
+	else
+		ret=oMenuItems;
+	return ret;
+}
+function mnGetMenuItemHTCs()
+{
+	return oMenuItemHTCs;
+}
+function mnGetMenuMan()
+{
+	return oMenuMan;
+}
+function mnGetParentMenu()
+{
+	return null;
+}
+function mnGetParentMenus()
+{
+	if (!oParents)
+	{
+		// parents of menu, from bottom to top
+		oParents=new Array();
+		oParents.push(this);
+		var tempM=this;
+		while (tempM && tempM.menu)
+		{
+			oParents.push(tempM.menu);
+			tempM=tempM.menu;
+		}
+	}
+	return oParents;
+}
+function mnGetPopped()
+{
+	return oPopped;
+}
+function mnGetTitle()
+{
+	return window.menus.detTitle(oXML,oMenuMan);
+}
+function mnGetPopPos() {
+	return menus.DIR_SOUTH;
+}
+function mnGetVisible()
+{
+	return window.menus.detVisible(oXML);
+}
+function mnGetVisCount()
+{
+	var c=0;
+	var len=(oMenuItems?oMenuItems.length:0);
+	if (!len)
+		return 0;
+	for (var i=0;i<len;i++)
+	{	
+		if (window.menus.detVisible(oMenuItems[i]))
+			c++;
+	}
+	return c;
+}
+function mnGetVisBreakCount()
+{
+	var c=0;
+	var len=(oMenuItems?oMenuItems.length:0);
+	if (!len)
+		return 0;
+	for (var i=0;i<len;i++)
+	{	
+		if (window.menus.detVisible(oMenuItems[i]) && window.menus.isBreak(oMenuItems[i]))
+			c++;
+	}
+	return c;
+}
+function mnGetXML()
+{
+	return oXML;
+}
+function mnGetXMLId()
+{
+	return window.menus.detId(oXML);
+}
+function mnMouseOver(evt)
+{
+	if(!enabled)
+		return;
+				
+	if (oMenuBar)
+	{
+		var active = oMenuBar.hasActiveMenu;
+		var noPop = active && !oMenuBar.hasPoppedMenu;
+		if (active)
+			oMenuBar.setActiveMenu(this, noPop);
+	}
+}
+function mnMouseOut(evt)
+{
+	this.showMouseOut();
+}
+function mnPutCaption(c)
+{
+	oXML.setAttribute(window.menus.ATTR_CAPTION,c);
+}
+function mnPutDynlist(c)
+{
+	oXML.setAttribute(window.menus.ATTR_DYNLIST,c);
+}
+function mnPutEllipses(v)
+{
+	oXML.setAttribute(window.menus.ATTR_ELLIPSES,v);
+}
+function mnPutEnabled(v)
+{
+	oXML.setAttribute(window.menus.ATTR_ENABLED,v);
+}
+function mnPutId(v)
+{
+	oXML.setAttribute(window.menus.ATTR_ID,v);
+}
+function mnPutMenuBar(mb)
+{
+	oMenuBar=mb;
+}
+function mnPutMenuItemHTCs(mh)
+{
+	oMenuItemHTCs=mh;
+}
+function mnPutMenuMan(mm)
+{
+	oMenuMan=mm;
+}
+function mnPutId(v)
+{
+	oXML.setAttribute(window.menus.ATTR_ID,v);
+}
+function mnPutPopped(p)
+{
+	oPopped=p;
+}
+function mnPutTitle(v)
+{
+	oXML.setAttribute(window.menus.ATTR_TITLE,v);
+}
+function mnPutVisible(v)
+{
+	oXML.setAttribute(window.menus.ATTR_VISIBLE,v);
+}
+function mnPutXML(anXML)
+{
+	oXML=anXML;
+	var myId=oXML.getAttribute(window.menus.ATTR_ID);
+	if (!myId)
+		myId=document.uniqueID;
+	id=myId;
+	className=(enabled?"dsMenu":"dsMenuDisabled");
+	innerText=caption;
+	
+	// update menu items arrays
+	oMenuItems=null; // array of XML nodes
+	oMenuItemHTCs=null; // array of HTC objects
+	var len=((oXML && oXML.childNodes)?oXML.childNodes.length:0);
+	if (len)
+	{
+		var iXML;
+		for (var i=0;i<len;i++)
+		{
+			var iXML=oXML.childNodes[i];
+			if (iXML.tagName==window.menus.TAG_ITEM)
+			{
+				if (!oMenuItems)
+					oMenuItems=new Array();
+				oMenuItems.push(iXML);
+			}
+		}
+	}
+}
+function mnSetPopped(p)
+{	
+	oPopped=p;
+}
+//
+// methods
+//
+function arrowItem(m,incr)
+{
+	var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+	var index=-1;
+	for (var i=0;i<len && (index==-1);i++)
+		if (oMenuItemHTCs[i]==m)
+			index=i;
+	if (index!=-1)
+	{
+		// check to make sure the next item is not a break
+		var twice=false;
+		var menu;
+		while (!twice)
+		{
+			index+=incr;
+			
+			// bounds check
+			if (index<0)
+				index=(len-1);
+			if (index>(len-1))
+				index=0;
+			
+			menu=oMenuItemHTCs[index];
+			// if menu is unique and not a break, select it
+			if (menu!=m) 
+			{
+				if (!menu.isBreak())
+				{
+					(this.getMenuBar()).setActiveMenu(menu,true);
+					return;
+				}
+			}
+			else
+				twice=true; // stop iterating through, reached the start node
+		}
+	}
+}
+function arrowDown(m)
+{
+	if (m)
+		this.arrowItem(m,1);
+	else
+	{
+		this.pop();
+		this.first();
+	}
+}
+function arrowUp(m)
+{
+	if (m)
+		this.arrowItem(m,-1);
+	else
+	{
+		var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+		if (len)
+		{
+			this.pop();
+			(this.getMenuBar()).setActiveMenu(oMenuItemHTCs[len-1],true);
+		}
+	}
+}
+function first()
+{
+	var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+	if (len)
+		(this.getMenuBar()).setActiveMenu(oMenuItemHTCs[0],true);
+}
+function getMenuMan()
+{
+	return oMenuMan;
+}
+function getMenuBar()
+{
+	return oMenuBar;
+}
+function getTopMenu()
+{
+	return this;
+}
+// refresh if dynamic list
+function getMenuItems()
+{
+	var ret;
+	if (this.hasDynlist())
+		ret=dynlist.childNodes;
+	else
+		ret=oMenuItems;
+	return ret;
+}
+// same as mnGetVisCount
+function getVisCount()
+{
+	var c=0;
+	var len=(oMenuItems?oMenuItems.length:0);
+	if (!len)
+		return 0;
+	for (var i=0;i<len;i++)
+	{	
+		if (window.menus.detVisible(oMenuItems[i]))
+			c++;
+	}
+	return c;
+}
+function getVisBreakCount()
+{
+	var c=0;
+	var len=(oMenuItems?oMenuItems.length:0);
+	if (!len)
+		return 0;
+	for (var i=0;i<len;i++)
+	{	
+		if (window.menus.detVisible(oMenuItems[i]) && window.menus.isBreak(oMenuItems[i]))
+			c++;
+	}
+	return c;
+}
+// called from menubar.htc
+function handleEvent(evt)
+{
+	if (!evt)
+		return;
+	switch (evt.type)
+	{
+		case "click":
+			mnClick();
+			break;
+		case "mouseover":
+			mnMouseOver();
+			break;
+		case "mouseout":
+			mnMouseOut();
+			break;
+	}
+}
+function hasDynlist()
+{
+	return window.menus.hasDynlist(oXML);
+}
+function hide()
+{
+	if (oPopped && oMenuPop)
+		oMenuPop.hide();
+	// hide menu items that have possibly popped
+	var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+	if (len)
+	{
+		for (var i=0;i<len;i++)
+			oMenuItemHTCs[i].hide();
+	}
+	this.showMouseOut();
+}
+function onKeyDown(evt)
+{
+	var b=false;
+	if (!evt)
+		evt=window.event;
+	var mb=this.getMenuBar();
+	if (mb && (mb.isActiveMenuById(this)))
+	{
+		var keys=window.keys;
+		switch (evt.keyCode)
+		{
+			case keys.ENTER:
+				mb.setActiveMenu(this);
+				this.first();
+				b=true;
+				break;
+			case keys.ESCAPE:
+				this.unpop();
+				b=true;
+				break;
+			case keys.END:
+				mb.last();
+				b=true;
+				break;
+			case keys.HOME:
+				mb.first();
+				b=true;
+				break;
+			case keys.LEFT_ARROW:
+				mb.arrowLeft(this,!oPopped);
+				b=true;
+				break;
+			case keys.UP_ARROW:
+				this.pop();
+				this.last();
+				b=true;
+				break;
+			case keys.RIGHT_ARROW:
+				mb.arrowRight(this,!oPopped);
+				b=true;
+				break;
+			case keys.DOWN_ARROW:
+				this.pop();
+				this.first();
+				b=true;
+				break;
+			// in visual studio, pageup and page down ignored if active menu exists
+			case keys.PAGE_UP:
+			case keys.PAGE_DOWN:
+				b=true;
+				break;
+		}
+	}
+	if (!b && oMenuItems)
+	{
+		//oMenuItems
+		var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+		if (len)
+		{
+			for (var i=0;i<len && !b;i++)
+				b|=oMenuItemHTCs[i].onKeyDown(evt);
+		}
+	}
+	return b;
+}
+function last()
+{
+	var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+	if (len)
+		(this.getMenuBar()).setActiveMenu(oMenuItemHTCs[len-1],true);
+}
+function pop()
+{
+	// update childlist for childcount
+	oMenuItems=this.getMenuItems();
+	// return if no children
+	if (!childCount)
+		return;
+	// Create the menupop
+	if (!oMenuPop)
+		oMenuPop=new window.MenuPop(oMenuMan,this);
+	// force refresh of menu items if dynlist
+	if (this.hasDynlist())
+	{
+		if (oMenuPop)
+		{
+			oMenuPop.hide();
+			oMenuPop.span=null;
+		}
+		oMenuItemHTCs=null;
+	}
+	menus.perform(this.xmlid);
+	this.prepare();
+	// display it
+	oMenuPop.display(pos);
+}
+function prepare()
+{
+	var len=(oMenuItemHTCs?oMenuItemHTCs.length:0);
+	for(var i=0;i<len;i++)
+	{
+		oMenuItemHTCs[i].prepare();
+	}
+}
+function showMouseOut()
+{
+	if (!oPopped)
+		className="dsMenu";
+}
+function showMouseOver()
+{
+	className="dsMenuMouseDown";
+}
+function unpop()
+{
+	var p=this.popped;
+	var mb=this.getMenuBar();
+	mb.setActiveMenu(null);
+	if (p)
+		mb.setActiveMenu(this,true);
+}
+</SCRIPT>
+</PUBLIC:COMPONENT>

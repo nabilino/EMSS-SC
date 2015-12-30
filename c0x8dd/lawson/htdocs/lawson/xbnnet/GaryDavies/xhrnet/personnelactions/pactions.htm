@@ -1,0 +1,981 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Personnel Actions</title>
+<meta name="viewport" content="width=device-width" />
+<script type="text/javascript" src="/lawson/webappjs/data.js"></script>
+<script type="text/javascript" src="/lawson/webappjs/transaction.js"></script>
+<script type="text/javascript" src="/lawson/webappjs/common.js"></script>
+<script type="text/javascript" src="/lawson/webappjs/commonHTTP.js"></script>
+<script type="text/javascript" src="/lawson/webappjs/user.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/email.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/esscommon80.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/dr.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/empinfo.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/personnelactions/personnelactionsfiles/pactionslib.js"></script>
+<script type="text/javascript">
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var empIndex = "";
+var Rules = new Array();
+var appObj;
+var positionFldIndex = -1;
+var salaryClassFldIndex = -1;
+var payRateFldIndex = -1;
+var gradeFldIndex = -1;
+var stepFldIndex = -1;
+
+// DirectReports defined in dr.js
+if (fromTask)
+{
+	empIndex = getVarFromString("index",fromTask);
+}
+
+if (empIndex && NonSpace(empIndex)!=0) {
+	DirectReports = parent.emps;
+	for (var i=0; i<parent.emps.length; i++) {
+		DirectReports[i].Code = parent.emps[i].employee;
+		DirectReports[i].FullName = parent.emps[i].full_name;
+	}
+} else {
+	empIndex = -1;
+}
+
+function doAuthentication()
+{
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|sysenv=true|desiredEdit='EM'");
+}
+
+function AuthenticateFinished()
+{
+    stylePage();
+	// to initialize fmttoday
+	StoreDateRoutines();
+
+	if (fromTask) {
+		parent.showWaitAlert(getSeaPhrase("ACTION_LOADING","ESS"));
+	}
+
+	getLawsonApplicationVersion();
+}
+
+function getLawsonApplicationVersion()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       		setTimeout("getLawsonApplicationVersion()", 10);
+       		return;
+	}
+
+	initPersonnelActions();
+}
+
+function initPersonnelActions()
+{
+	if (empIndex == -1)
+		Call_HS10(authUser.company, authUser.employee, "PERSONNEL", false);
+	else
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+			paintEmployeeActionSelects();
+		else
+			getActions();
+	}
+}
+
+function sortByName(obj1, obj2)
+{
+	var name1 = obj1.LastName + ' ' + obj1.FullName;
+	var name2 = obj2.LastName + ' ' + obj2.FullName;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function Do_HS10_1_Call_PERSONNEL_Finished()
+{
+	if (DirectReports.length > 0) {
+		DirectReports.sort(sortByName);
+	}
+	else {
+		parent.seaAlert(getSeaPhrase("NO_DIRECT_REPORTS","ESS"));
+	}
+	if (emssObjInstance.emssObj.filterSelect)
+		paintEmployeeActionSelects();
+	else
+		getActions();
+}
+
+function getActions()
+{
+	Rules = new Array();
+	var obj	= new DMEObject(authUser.prodline, "PERSACTYPE");
+	obj.out = "JAVASCRIPT";
+	obj.field = "action-code;description;web-available;web-avail-supv;web-immediate;workflow-flag";
+
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+	{
+		obj.field += ";require-reason;dft-reason;action-reason.act-reason-cd";
+		obj.otmmax = "1";
+	}
+
+	obj.key = parseInt(authUser.company,10) + "";
+	obj.cond = "Web-Supv-Avail";
+	obj.max	= "600";
+	obj.debug = false;
+	obj.func = "getActionsFinished()";
+	DME(obj, "jsreturn");
+}
+
+function getActionsFinished()
+{
+	for (var n=0; n<self.jsreturn.NbrRecs; n++) {
+		var obj = self.jsreturn.record[n];
+		var len = Rules.length;
+		Rules[len] = new RulesObject(obj.description, obj.action_code, obj.web_available,
+			obj.web_avail_supv, obj.web_immediate, obj.workflow_flag);
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			if (obj.require_reason != "" && !isNaN(parseInt(obj.require_reason, 10)))
+			{
+				Rules[len].NbrRequiredReasons = obj.require_reason;
+			}
+			if (obj.dft_reason_1 != "")
+			{
+				Rules[len].DefaultReasonCode1 = obj.dft_reason_1;
+			}
+			if (obj.dft_reason_2 != "")
+			{
+				Rules[len].DefaultReasonCode2 = obj.dft_reason_2;
+			}
+			if (obj.action_reason_act_reason_cd != "")
+			{
+				Rules[len].ReasonCodesExist = true;
+			}
+		}
+	}
+	if (self.jsreturn.Next != "")
+		window.open(self.jsreturn.Next, "jsreturn");
+	else {
+		paintEmployeeActionSelects();
+	}
+}
+
+function startOver(elmObj)
+{
+	var obj = self.main.document.getElementById("fieldsTable");
+	if (obj != null && typeof(obj) == "object")
+	{
+		obj.innerHTML = "";
+		//self.main.document.getElementById("paneBody").removeChild(obj);
+	}
+
+	clearRequiredKeyFields();
+
+	// if we are refreshing due to the action code changing, fill default reason codes
+	if (elmObj && elmObj.id == "actionsSelect" && appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+	{
+		setDefaultReasonCodes();
+	}
+
+	self.main.document.getElementById("continueButton").style.visibility = "visible";
+	//self.document.getElementById("main").style.height = "564px";
+	self.main.setLayerSizes();
+	self.main.stylePage();
+}
+
+// Populate any default reason codes for the selected action.
+function setDefaultReasonCodes()
+{
+	var reason1Obj = self.main.document.getElementById("reasonSelect1");
+	var reason2Obj = self.main.document.getElementById("reasonSelect2");
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		_RULESINDEX = 0;
+
+		reason1Obj.value = "";
+		reason2Obj.value = "";
+
+		try
+		{
+			self.main.document.getElementById("xlt_reasonSelect1").innerHTML = "";
+		}
+		catch(e) {}
+		try
+		{
+			self.main.document.getElementById("xlt_reasonSelect2").innerHTML = "";
+		}
+		catch(e) {}
+	}
+	else
+	{
+		_RULESINDEX = self.main.document.getElementById("actionsSelect").selectedIndex - 1;
+
+		reasonCodes = new Array();
+
+		removeAllSelectItems(reason1Obj);
+		removeAllSelectItems(reason2Obj);
+	}
+
+
+	if (Rules.length == 0 || _RULESINDEX < 0)
+	{
+		return;
+	}
+
+	if (Rules[_RULESINDEX].NbrRequiredReasons > 0)
+	{
+		self.main.document.getElementById("reasonSelect1RequiredIcon").style.display = "";
+		if (Rules[_RULESINDEX].NbrRequiredReasons > 1)
+		{
+			self.main.document.getElementById("reasonSelect2RequiredIcon").style.display = "";
+		}
+		else
+		{
+			self.main.document.getElementById("reasonSelect2RequiredIcon").style.display = "none";
+		}
+	}
+	else
+	{
+		self.main.document.getElementById("reasonSelect1RequiredIcon").style.display = "none";
+		self.main.document.getElementById("reasonSelect2RequiredIcon").style.display = "none";
+	}
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		if (Rules[_RULESINDEX].DefaultReasonCode1 != null)
+		{
+			self.main.document.getElementById("reasonSelect1").value = Rules[_RULESINDEX].DefaultReasonCode1;
+		}
+	}
+	else
+	{
+		if (Rules[_RULESINDEX].DefaultReasonCode1 != null)
+		{
+			var dataArray = new Array();
+			dataArray[0] = new Object();
+			dataArray[0].name = Rules[_RULESINDEX].DefaultReasonCode1;
+			dataArray[0].code = Rules[_RULESINDEX].DefaultReasonCode1;
+			generateSelectOptions("reasonSelect1", dataArray, true);
+			var reason1s = self.main.document.getElementById("reasonSelect1");
+			self.main.styleElement(reason1s)
+
+		}
+	}
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		if (Rules[_RULESINDEX].DefaultReasonCode2 != null)
+		{
+			self.main.document.getElementById("reasonSelect2").value = Rules[_RULESINDEX].DefaultReasonCode2;
+		}
+	}
+	else
+	{
+		if (Rules[_RULESINDEX].DefaultReasonCode2 != null)
+		{
+			var dataArray = new Array();
+			dataArray[0] = new Object();
+			dataArray[0].name = Rules[_RULESINDEX].DefaultReasonCode2;
+			dataArray[0].code = Rules[_RULESINDEX].DefaultReasonCode2;
+			generateSelectOptions("reasonSelect2", dataArray, true);
+			var reason2s = self.main.document.getElementById("reasonSelect2");
+			self.main.styleElement(reason2s)
+
+		}
+	}
+}
+
+function generateReportsSelect()
+{
+	var html = '<select id="reportsSelect" class="inputbox" onchange="parent.startOver();return false">';
+	if (empIndex == -1)
+		html += '<option value="" selected="selected"></option>';
+	else
+		html += '<option value=""></option>';
+	for (var i=0; i<DirectReports.length; i++) {
+		html += '<option value="' + DirectReports[i].Code + '"';
+		if (empIndex == i)
+			html += ' selected="selected"';
+		html += '>' + DirectReports[i].FullName + '</option>';
+	}
+	html += '</select>';
+	return html;
+}
+
+function generateActionsSelect()
+{
+	var htmlStr;
+
+	if (emssObjInstance.emssObj.filterSelect) {
+		htmlStr = '<input type="text" id="actionsSelect" class="inputbox" style="width:150px;text-transform:uppercase" size="10" maxlength="10" onkeyup="parent.actionCodeModified(this);return false" onchange="parent.lookUpUserEnteredActionCode(this);parent.startOver();return false">';
+		htmlStr += '<a href="" onclick="parent.MakeCallToDME(\'actionsSelect\', 1, \'DME\', true);return false">';
+		htmlStr += '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">';
+		htmlStr += '</a>';
+	} else {
+		htmlStr = '<select id="actionsSelect" class="inputbox" onchange="parent.startOver(this);return false">';
+		htmlStr += '<option value="" selected="selected"></option>';
+		for (var i=0; i<Rules.length; i++) {
+			htmlStr += '<option value="' + Rules[i].Code + '">';
+			htmlStr += Rules[i].Description + '</option>';
+		}
+		htmlStr += '</select>';
+	}
+	return htmlStr;
+}
+
+function actionCodeModified(elmObj)
+{
+	if (Rules.length == 0 || Rules[0].ActionCode.toString().toUpperCase() != elmObj.value.toUpperCase())
+	{
+		Rules = new Array();
+		self.main.document.getElementById("xlt_actionsSelect").innerHTML = "";
+	}
+}
+
+function ReturnDate(date)
+{
+	 var effectiveDate = self.main.document.getElementById("effectiveDate");
+	 var oldDate = effectiveDate.value;
+	 effectiveDate.value = date;
+	 if (oldDate != date)
+	 	startOver();	
+}
+
+// If the user keys in an action code, look up the record from the PERSACTYPE file.
+function lookUpUserEnteredActionCode(elmObj, funcToCall)
+{
+	if (!elmObj || NonSpace(elmObj.value) == 0)
+	{
+		return false;
+	}
+
+	elmObj.value = elmObj.value.toUpperCase();
+
+	if (Rules.length == 0 || Rules[_RULESINDEX].ActionCode != elmObj.value)
+	{
+		var dmeObj	= new DMEObject(authUser.prodline, "persactype");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "patset1";
+		dmeObj.field = "action-code;description;web-available;web-avail-supv;web-immediate;workflow-flag";
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			dmeObj.field += ";require-reason;dft-reason;action-reason.act-reason-cd";
+			dmeObj.otmmax = "1";
+		}
+
+		dmeObj.key = parseInt(authUser.company,10) + "=" + elmObj.value;
+		dmeObj.cond = "web-supv-avail";
+		dmeObj.max	= "1";
+		dmeObj.debug = false;
+		if (funcToCall)
+		{
+			dmeObj.func = "storeUserEnteredActionCode('" + funcToCall + "')";
+		}
+		else
+		{
+			dmeObj.func = "storeUserEnteredActionCode()";
+		}
+		DME(dmeObj, "jsreturn");
+	}
+
+	return true;
+}
+
+function storeUserEnteredActionCode(funcToCall)
+{
+	if (self.jsreturn.NbrRecs > 0)
+	{
+		var selRec = self.jsreturn.record[0];
+
+		try
+		{
+			self.main.document.getElementById("xlt_actionsSelect").innerHTML = selRec.description;
+		}
+		catch(e)
+		{}
+
+		Rules = new Array();
+		Rules[0] = new RulesObject(selRec.description, selRec.action_code, selRec.web_available,
+				selRec.web_avail_supv, selRec.web_immediate, selRec.workflow_flag);
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			if (selRec.require_reason != "" && !isNaN(parseInt(selRec.require_reason, 10)))
+			{
+				Rules[0].NbrRequiredReasons = parseInt(selRec.require_reason, 10);
+			}
+			if (selRec.dft_reason_1 != "")
+			{
+				Rules[0].DefaultReasonCode1 = selRec.dft_reason_1;
+			}
+			if (selRec.dft_reason_2 != "")
+			{
+				Rules[0].DefaultReasonCode2 = selRec.dft_reason_2;
+			}
+			if (selRec.action_reason_act_reason_cd != "")
+			{
+				Rules[0].ReasonCodesExist = true;
+			}
+			setDefaultReasonCodes();
+			clearRequiredField(self.main.document.getElementById("actionsSelect"));
+		}
+	}
+	else
+	{
+		Rules = new Array();
+		Rules[0] = new RulesObject("", "INVALID_ACTION_CODE", "Y", "2", "N", "N");
+
+		self.main.document.getElementById("reasonSelect1RequiredIcon").style.display = "none";
+		self.main.document.getElementById("reasonSelect2RequiredIcon").style.display = "none";
+	}
+
+	if (funcToCall)
+	{
+		eval(funcToCall);
+	}
+}
+
+function generateReasonSelect(i)
+{
+	var htmlStr;
+
+	htmlStr = '<span id="reasonSelect' + i + 'Cell">';
+
+	if (emssObjInstance.emssObj.filterSelect) {
+		htmlStr += '<input type="text" id="reasonSelect'+i+'" class="inputbox" style="width:150px;text-transform:uppercase" size="10" maxlength="10" onkeyup="parent.main.document.getElementById(\'xlt_reasonSelect'+i+'\').innerHTML=\'\';">';
+		htmlStr += '<a href=""';
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			htmlStr += ' onclick="parent.reasonCodeSelected('+i+',true);return false"';
+		}
+		else
+		{
+			htmlStr += ' onclick="parent.MakeCallToDME(\'reasonSelect'+i+'\', 0, \'DME\', true);return false"';
+		}
+		htmlStr += '>';
+		htmlStr += '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">';
+		htmlStr += '</a>';
+	} else {
+		htmlStr += '<select id="reasonSelect'+i+'" class="inputbox" style="width:150px"';
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			DMEFunctions[0]	= "GetReasonCodes()";
+			htmlStr += ' onclick="parent.reasonCodeSelected('+i+');return false"';
+		}
+		else
+		{
+				htmlStr += ' onclick="parent.MakeCallToDME(\''+'reasonSelect'+i+'\', 0, \'DME\');return false"';
+		}
+
+		htmlStr += '>';
+		htmlStr += '<option value=""></option>';
+		htmlStr += '</select>';
+	}
+
+	htmlStr += '</span>';
+
+	return htmlStr;
+}
+
+// Make sure an action code is selected before a reason code, since reason codes will be looked up
+// for the selected action.  Valid for application release 9.0.1 or newer.
+function reasonCodeSelected(i, popUp)
+{
+	if (!validateActionCode())
+	{
+		return;
+	}
+	else
+	{
+		popUp = (popUp) ? true : false;
+		MakeCallToDME("reasonSelect" + i, 0, "DME", popUp);
+	}
+}
+
+function paintEmployeeActionSelects()
+{
+	self.main.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PERSONNEL_ACTION_CRITERIA","ESS");
+
+	var htmlStr = '<table width="95%" border="0" cellspacing="0" cellpadding="0">';
+	htmlStr += '<tr>';
+	htmlStr += '<td class="fieldlabelbold" style="text-align:left"><label for="reportsSelect">'+getSeaPhrase("SELECT_EMPLOYEE","ESS")+'</label></td>';
+	htmlStr += '<td class="fieldlabelbold" style="text-align:left"><label for="actionsSelect">'+getSeaPhrase("SELECT_PERSONNEL_ACTION","ESS")+'</label></td>';
+	htmlStr += '<td style="text-align:right;vertical-align:top;padding-right:5px;padding-top:5px"><span class="panefooter" style="position:relative;padding-right:5px;white-space:nowrap">'+uiRequiredIcon()+getSeaPhrase("REQUIRED","ESS")+'</span></td>';
+	htmlStr += '</tr>';
+
+	htmlStr += '<tr>';
+	htmlStr += '<td class="plaintablecell" nowrap><span id="reportsCell">'+generateReportsSelect()+'</span>'+uiRequiredIcon()+'</td>';
+	htmlStr += '<td class="plaintablecell" nowrap><span id="actionsCell">'+generateActionsSelect()+'</span>'+uiRequiredIcon();
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		htmlStr += '<span style="text-align:left;width:200px" class="fieldlabel" id="xlt_actionsSelect"></span>'
+	}
+	htmlStr += '</td>';
+	htmlStr += '<td>&nbsp;</td>';
+	htmlStr += '</tr>';
+
+	htmlStr += '<tr>';
+	htmlStr += '<td class="fieldlabelbold" style="padding-top:10px;text-align:left"><label for="effectiveDate">'+getSeaPhrase("SELECT_EFFECTIVE_DATE","ESS")+'</label></td>';
+	htmlStr += '<td class="fieldlabelbold" style="padding-top:10px;text-align:left"><label for="reasonSelect1"><label for="reasonSelect2">'+getSeaPhrase("SELECT_REASON","ESS")+'</label></label></td>';
+	htmlStr += '<td>&nbsp;</td>';
+	htmlStr += '</tr>';
+
+	htmlStr += '<tr>';
+	htmlStr += '<td id="effectiveDateCell" class="plaintablecell" style="vertical-align:top" nowrap>';
+	htmlStr += '<input class="inputbox" id="effectiveDate" type="text" size="12" maxlength="10" value="'+fmttoday+'" onchange="parent.startOver();return false;">';
+	htmlStr += '<a href="" onclick="parent.DateSelect(\'date\');return false">';
+    htmlStr += uiCalendarIcon()+'</a>'+uiDateFormatSpan3()+uiRequiredIcon();
+    htmlStr += '</td>';
+	htmlStr += '<td class="plaintablecell" style="vertical-align:top">';
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		htmlStr += '<table border="0" cellspacing="0" cellpadding="0">';
+		htmlStr += '<tr><td nowrap><span id="reasonSelect1Cell">'+generateReasonSelect(1)+'</span><span id="reasonSelect1RequiredIcon" style="display:none">'+uiRequiredIcon()+'</span></td><td><span id="reasonSelect2Cell">'+generateReasonSelect(2)+'</span><span id="reasonSelect2RequiredIcon" style="display:none">'+uiRequiredIcon()+'</span></td></tr>';
+		htmlStr += '<tr><td nowrap><span style="text-align:left;width:200px;padding-left:0px" class="fieldlabel" id="xlt_reasonSelect1"></span></td><td><span style="text-align:left;width:200px;padding-left:0px" class="fieldlabel" id="xlt_reasonSelect2"></span></td></tr>';
+		htmlStr += '</table>';
+	}
+	else
+	{
+		htmlStr += '<span id="reasonSelect1Cell" style="white-space:nowrap">'+generateReasonSelect(1)+'</span><span id="reasonSelect1RequiredIcon" style="display:none">'+uiRequiredIcon()+'</span>';
+		htmlStr += ' ';
+		htmlStr += '<span id="reasonSelect2Cell" style="white-space:nowrap">'+generateReasonSelect(2)+'</span><span id="reasonSelect2RequiredIcon" style="display:none">'+uiRequiredIcon()+'</span>';
+	}
+
+    htmlStr += '</td></tr>';
+    htmlStr += '<tr>';
+    htmlStr += '<td colspan="3" style="text-align:right" nowrap>';
+	htmlStr += '<span id="continueButton">';
+	if (empIndex != -1) {
+		htmlStr += uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.continueClicked();return false","margin-top:0px");
+		htmlStr += uiButton(getSeaPhrase("BACK","ESS"),"parent.parent.backToMain('personnelactions');return false","margin-top:0px;margin-right:5px;margin-left:5px;");
+	}
+	else {
+		htmlStr += uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.continueClicked();return false","margin-top:0px;margin-right:5px;margin-left:5px");
+	}
+	htmlStr += '</span>';
+	htmlStr += '</td>';
+	htmlStr += '</tr>';
+
+	htmlStr += '</table>';
+	htmlStr += '<div id="fieldsTable" style="position:relative;top:0px;left:0px;float:left;width:100%;height:auto;"></div>';
+
+	self.main.document.getElementById("paneBody").innerHTML = htmlStr;
+	self.main.stylePage();
+	self.document.getElementById("main").style.visibility = "visible";
+	if (fromTask) {
+		parent.removeWaitAlert();
+	}
+}
+
+var _DRINDEX = 0;
+var _RULESINDEX = 0;
+
+function continueClicked()
+{
+	if (self.main.document.getElementById("reportsSelect").selectedIndex <= 0) {
+		setRequiredField(self.main.document.getElementById("reportsCell"));
+		parent.seaAlert(getSeaPhrase("SELECT_EMPLOYEE","ESS"));
+		return;
+	} else
+		clearRequiredField(self.main.document.getElementById("reportsCell"));
+
+	if (emssObjInstance.emssObj.filterSelect) {
+		if (NonSpace(self.main.document.getElementById("actionsSelect").value) == 0) {
+			setRequiredField(self.main.document.getElementById("actionsSelect"));
+			parent.seaAlert(getSeaPhrase("SELECT_PERSONNEL_ACTION","ESS"));
+			return;
+		} else if (Rules.length == 0 && lookUpUserEnteredActionCode(self.main.document.getElementById("actionsSelect"), "continueClicked()")) {
+			// validate user entered action code
+			return;
+		} else if (Rules[_RULESINDEX].ActionCode == "INVALID_ACTION_CODE") {
+			setRequiredField(self.main.document.getElementById("actionsSelect"));
+			parent.seaAlert(getSeaPhrase("INVALID_PERSONNEL_ACTION","ESS"));
+			return;
+		} else
+			clearRequiredField(self.main.document.getElementById("actionsSelect"));
+	} else {
+		if (self.main.document.getElementById("actionsSelect").selectedIndex <= 0) {
+			setRequiredField(self.main.document.getElementById("actionsCell"));
+			parent.seaAlert(getSeaPhrase("SELECT_PERSONNEL_ACTION","ESS"));
+			return;
+		} else
+			clearRequiredField(self.main.document.getElementById("actionsCell"));
+	}
+
+	if (NonSpace(self.main.document.getElementById("effectiveDate").value) == 0) {
+		setRequiredField(self.main.document.getElementById("effectiveDate"));
+		parent.seaAlert(getSeaPhrase("MUST_ENTER_DATE","ESS"));
+		return;
+	} else if (!dateIsValid(self.main.document.getElementById("effectiveDate").value)) {
+		setRequiredField(self.main.document.getElementById("effectiveDate"));
+		return;
+	} else {
+		self.main.document.getElementById("effectiveDate").value = FormatDte4(formjsDate(dateIsValid(self.main.document.getElementById("effectiveDate").value)));
+		clearRequiredField(self.main.document.getElementById("effectiveDate"));
+	}
+
+	if (emssObjInstance.emssObj.filterSelect) {
+		clearRequiredField(self.main.document.getElementById("reasonSelect1"));
+		clearRequiredField(self.main.document.getElementById("reasonSelect2"));
+	} else {
+		clearRequiredField(self.main.document.getElementById("reasonSelect1Cell"));
+		clearRequiredField(self.main.document.getElementById("reasonSelect2Cell"));
+	}
+
+	self.main.document.getElementById("continueButton").style.visibility = "hidden";
+
+	_DRINDEX = self.main.document.getElementById("reportsSelect").selectedIndex - 1;
+	if (emssObjInstance.emssObj.filterSelect) {
+		_RULESINDEX = 0;
+	} else {
+		_RULESINDEX = self.main.document.getElementById("actionsSelect").selectedIndex - 1;
+	}
+	Rules[_RULESINDEX].EffectiveDate = self.main.document.getElementById("effectiveDate").value;
+
+	GetPersactypeForSecondWindow();
+	self.main.stylePage();
+}
+
+function validateEffectiveDate()
+{
+	if (NonSpace(self.main.document.getElementById("effectiveDate").value) == 0) {
+		setRequiredField(self.main.document.getElementById("effectiveDate"));
+		parent.seaAlert(getSeaPhrase("MUST_ENTER_DATE","ESS"));
+		return false;
+	} else if (!dateIsValid(self.main.document.getElementById("effectiveDate").value)) {
+		setRequiredField(self.main.document.getElementById("effectiveDate"));
+		return false;
+	} else {
+		self.main.document.getElementById("effectiveDate").value = FormatDte4(formjsDate(dateIsValid(self.main.document.getElementById("effectiveDate").value)));
+		clearRequiredField(self.main.document.getElementById("effectiveDate"));
+	}
+	return true;
+}
+
+function generateFieldSelect(selectID, fldNbr, where, changeText)
+{
+	var htmlStr = '';
+	if ((2000 <= fldNbr) && (fldNbr <= 2099)) {
+		// launch user fields as pop-ups, and allow user to enter value in text box
+		htmlStr = '<input type="text" id="'+selectID+'" class="inputbox" style="width:200px" value="';
+		if (typeof(changeText)!="undefined" && changeText!=null)
+			htmlStr += changeText;
+		htmlStr += '"><a href="" onclick="parent.MakeCallToDME(\''+selectID+'\', '+fldNbr+', \''+where+'\', true);return false">';
+		htmlStr += '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">';
+		htmlStr += '</a>';
+	} else if ((where == "DME") && (emssObjInstance.emssObj.filterSelect)) {
+		// launch user fields as pop-ups, and allow user to enter value in text box
+		if (fldNbr == 136) {
+			htmlStr += '<input type="hidden" id="'+selectID+'_indicator" class="inputbox">';
+			htmlStr += '<input type="hidden" id="'+selectID+'_effectdate" class="inputbox">';
+			htmlStr += '<input type="text" id="'+selectID+'" class="inputbox" style="width:200px" onkeyup="parent.main.document.getElementById(\''+selectID+'_indicator\').value=\'\';parent.main.document.getElementById(\''+selectID+'_effectdate\').value=\'\';parent.main.document.getElementById(\'xlt_'+selectID+'\').innerHTML=\'\';" value="';
+			if (typeof(changeText)!="undefined" && changeText!=null)
+				htmlStr += changeText;
+			htmlStr += '">';
+		} else {
+			htmlStr += '<input type="text" id="'+selectID+'" class="inputbox" style="width:200px" onkeyup="parent.main.document.getElementById(\'xlt_'+selectID+'\').innerHTML=\'\';" value="';
+			if (typeof(changeText)!="undefined" && changeText!=null)
+				htmlStr += changeText;
+			htmlStr += '">';
+		}
+		htmlStr += '<a href="" onclick="parent.MakeCallToDME(\''+selectID+'\', '+fldNbr+', \''+where+'\', true);return false">';
+		htmlStr += '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">';
+		htmlStr += '</a><span style="text-align:left;width:200px" class="fieldlabel" id="xlt_'+selectID+'"></span>';
+	} else {
+		htmlStr = '<select id="'+selectID+'" class="inputbox" style="width:250px"';
+		htmlStr += ' onclick="parent.MakeCallToDME(\''+selectID+'\', '+fldNbr+', \''+where+'\');return false"';
+		if (fldNbr == 64) {
+			htmlStr += ' onchange="parent.CalculatePayRatePercentage();return false"';
+		} else if (fldNbr == 136) {
+			htmlStr += ' onchange="parent.ScheduleChanged();return false"';
+		}
+		htmlStr += '>';
+		// treat an existing value on a pending action the same as a default value, so it will get removed when the user
+		// clicks on the dropdown to populate the complete list of field values.
+		if (typeof(changeText)!="undefined" && changeText!=null) {
+			htmlStr += '<option value="DEFAULT_VALUE"></option>';
+			htmlStr += '<option value="'+changeText+'" selected="">'+changeText+'</option>';
+		}
+		else {
+			htmlStr += '<option value=""></option>';
+		}
+		htmlStr += '</select>';
+	}
+	return htmlStr;
+}
+
+function PaintFieldsForAction()
+{
+	positionFldIndex = -1;
+	salaryClassFldIndex = -1;
+	payRateFldIndex = -1;
+	gradeFldIndex = -1;
+	stepFldIndex = -1;
+
+	var htmlStr = '<p class="fieldlabelbold" style="text-align:center">';
+	if (Rules[_RULESINDEX].WebImmediate == "Y") {
+		htmlStr += getSeaPhrase("ACTION_PEND_A","ESS");
+		htmlStr += '&nbsp;<input id="pendOrNot" type="checkbox">';
+	} else
+		htmlStr += getSeaPhrase("ACTION_PEND_B","ESS");
+	htmlStr += "</p>";
+
+	htmlStr += '<table class="plaintableborder" style="border-left:0px" align="center" cellpadding="0" cellspacing="0">';
+	htmlStr += '<tr>';
+	htmlStr += '<th class="plaintableheaderbordersidesbold" style="text-align:center">'+getSeaPhrase("FIELD","ESS")+'</th>';
+	htmlStr += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("CURRENT_VALUE","ESS")+'</th>';
+	htmlStr += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("CHANGE_TO","ESS")+'</th>';
+	htmlStr += '</tr>';
+
+	if (!Data.length)
+		htmlStr += '<tr><td class="fieldlabelbold" style="text-align:center" colspan="3">'+getSeaPhrase("NO_FIELDS","ESS")+'</td></tr>';
+	else {
+		for (var n=0; n<Data.length; n++) {
+			htmlStr += '<tr>';
+			if (n+1 == Data.length) {
+				htmlStr += '<td class="plaintableheaderbordersides"><label for="fieldSelect'+n+'">'+((Data[n].Field)?Data[n].Field:'&nbsp;')+'</label></td>';
+				htmlStr += '<td class="plaintablerowheaderborderbottomdisplay"><label for="fieldSelect'+n+'">'+((Data[n].CurrentValue)?Data[n].CurrentValue:'&nbsp;')+'</td>';
+			}
+			else {
+				if (Data[n].FldNbr == 62) {
+					htmlStr += '<td class="plaintableheaderbordersidesonly"><label for="percentage'+n+'">'+((Data[n].Field)?Data[n].Field:'&nbsp;')+'</label></td>';
+					htmlStr += '<td class="plaintablerowheaderdisplay">'+((Data[n].CurrentValue)?Data[n].CurrentValue:'&nbsp;')+'</td>';
+				}
+				else {
+					htmlStr += '<td class="plaintableheaderbordersidesonly"><label for="fieldSelect'+n+'">'+((Data[n].Field)?Data[n].Field:'&nbsp;')+'</label></td>';
+					htmlStr += '<td class="plaintablerowheaderdisplay">'+((Data[n].CurrentValue)?Data[n].CurrentValue:'&nbsp;')+'</td>';
+				}
+			}
+			htmlStr += '<td id="actionFldCell'+n+'" class="plaintablecell">';
+			if (Data[n].FldNbr == 62) {
+				payRateFldIndex = n;
+				var rateAmount = (Data[n].ChangeText) ? roundToDecimal(parseFloat(((Data[n].ChangeText/Data[n].CurrentValue)-1)*100),4) : '';
+				htmlStr += '<input class="inputbox" type="text" size="9" maxlength="9" id="percentage'+n+'" name="percentage'+n+'"';
+				htmlStr += ' onBlur="parent.Calculate('+n+',\'percent\')" value="'+rateAmount+'">';
+				htmlStr += '<span class="plaintablecell">% =</span>';
+				htmlStr += '<input class="inputbox" type="text" size="15" id="fieldSelect'+n+'" name="select'+n+'"';
+				htmlStr += ' onchange="parent.Calculate('+n+',\'amount\')" value="';
+				if (typeof(Data[n].ChangeText)!="undefined" && Data[n].ChangeText!=null && NonSpace(Data[n].ChangeText)>0) {
+					htmlStr += roundToDecimal(Data[n].ChangeText, 4);
+				}
+				htmlStr += '">';
+			} else {
+
+				if (Data[n].FldNbr == 64) {
+					salaryClassFldIndex = n;
+				}
+
+				if (Data[n].FldNbr == 126) {
+					positionFldIndex = n;
+				}
+
+				if (Data[n].FldNbr == 134) {
+					stepFldIndex = n;
+				}
+
+				if (Data[n].FldNbr == 135) {
+					gradeFldIndex = n;
+				}
+
+				if (Data[n].FldNbr == 140) {
+
+					// if we are running on top of 8.1.1 applications, perform a DME to get the veteran status select;
+					// otherwise use a hard-coded value list.
+					if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "8.1.1")
+					{
+						DMEFunctions[140] = "GetHrctrycode('VS')";
+					}
+					else
+					{
+						HardCodedLists[140] =  VeteranLiterals;
+					}
+				}
+
+				if (typeof(HardCodedLists[Data[n].FldNbr])!="undefined" && HardCodedLists[Data[n].FldNbr]!=null)
+					htmlStr += generateFieldSelect("fieldSelect"+n, Data[n].FldNbr, "HARDCODED", Data[n].ChangeText);
+				else if (typeof(DMEFunctions[Data[n].FldNbr])!="undefined" && DMEFunctions[Data[n].FldNbr]!=null)
+					htmlStr += generateFieldSelect("fieldSelect"+n, Data[n].FldNbr, "DME", Data[n].ChangeText);
+				else if (2000<=Data[n].FldNbr && Data[n].FldNbr<=2099)
+					htmlStr += generateFieldSelect("fieldSelect"+n, Data[n].FldNbr, Data[n].FldNbr.toString().substring(2), Data[n].ChangeText);
+				else {
+					htmlStr += '<input class="inputbox" type="text" size="30" maxlength="30" id="fieldSelect'+n+'" name="fieldSelect'+n+'"';
+					htmlStr += ' value="';
+					if (typeof(Data[n].ChangeText)!="undefined" && Data[n].ChangeText!=null)
+						htmlStr += Data[n].ChangeText;
+					htmlStr += '">';
+				}
+			}
+			htmlStr += '</td>';
+			htmlStr += '</tr>';
+		}
+		
+		var commentText = (Comments) ? Comments.Text : "";
+		htmlStr += '<tr>'
+		+ '<th class="fieldlabelboldlite" align="left">'+getSeaPhrase("COMMENTS","ESS") + '</th>'
+		+ '<td></td>'
+		+ '<td class="plaintablecell" nowrap=""><textarea type=text name="comments" id="comments" value="" rows="4" cols="31"'
+		+ ' class="inputbox"'
+		+ ' onfocus="this.select()">'+ commentText +'</textarea></td></tr>'
+	}
+	htmlStr += '<tr>';
+	htmlStr += '<td colspan="2">&nbsp;</td>';
+	htmlStr += '<td class="plaintablecell">';
+	htmlStr += uiButton(getSeaPhrase("UPDATE","ESS"),"parent.Update("+positionFldIndex+");return false");
+
+	if (positionFldIndex >= 0) {
+		htmlStr += uiButton(getSeaPhrase("FILL_DEFAULTS","ESS"),"parent.fillDefaults("+positionFldIndex+");return false");
+	}
+
+	htmlStr += uiButton(getSeaPhrase("CANCEL","ESS"),"parent.cancelClicked();return false");
+	htmlStr += '</td>';
+	htmlStr += '</tr>';
+	htmlStr += '</table>';
+
+    self.main.document.getElementById("fieldsTable").innerHTML = htmlStr;
+	self.main.stylePage();
+}
+
+function cancelClicked()
+{
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		Rules = new Array();
+		self.main.document.getElementById("actionsSelect").value = "";
+		try
+		{
+			self.main.document.getElementById("xlt_actionsSelect").innerHTML ="";
+		}
+		catch(e)
+		{}
+	}
+	else
+	{
+		self.main.document.getElementById("actionsSelect").selectedIndex = 0;
+		var actionS = self.main.document.getElementById("actionsSelect");
+		self.main.styleElement(actionS)
+	}
+	self.main.document.getElementById("effectiveDate").value = "";
+	self.main.document.getElementById("reasonSelect1").selectedIndex = 0;
+	self.main.document.getElementById("reasonSelect2").selectedIndex = 0;
+	var reason1s = self.main.document.getElementById("reasonSelect1");
+	self.main.styleElement(reason1s);
+	var reason2s = self.main.document.getElementById("reasonSelect2");
+	self.main.styleElement(reason2s);
+	startOver();
+}
+
+function RulesObject(Description, ActionCode, WebAvail, WebAvailSuper, WebImmediate, WorkFlowFlag)
+{
+	this.Description = Description;
+	this.ActionCode = ActionCode;
+	this.WebAvail = WebAvail;
+	this.WebAvailSuper = WebAvailSuper;
+	this.WebImmediate = WebImmediate;
+	this.WorkFlowFlag = WorkFlowFlag;
+	this.EffectiveDate = null;
+	this.Reason1 = null;
+	this.Reason2 = null;
+	this.ActionType = null;
+	this.Company = null;
+	this.Employee = null;
+	this.FicaNbr = null;
+	this.EmployeeName = null;
+	this.UpdateBenefit = null;
+	this.ReasonText = null;
+	this.EmailAddress = null;
+	this.DoEmail = 0;
+	this.AddressChange = false;
+	this.SuppAddrChange = false;
+	this.SchoolDist = "";
+	this.OldState = "";
+	this.NewState = "";
+	this.EmpTaxFilter = 0;
+	this.PrsEmpTaxAddr = 0;
+	this.PrsTaxFilter = 0;
+	this.DefaultReasonCode1 = null;
+	this.DefaultReasonCode2 = null;
+	this.ReasonCodesExist = false;
+	this.NbrRequiredReasons = 0;
+	this.CommentsFlag = null;
+	this.ActionNbr = "";
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("main");
+	var winHeight = 564;
+	var winWidth = 803;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? (winWidth - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (winWidth - 12) : (winWidth - 7));
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.main.document.getElementById("paneBodyBorder").style.width = fullContentWidth + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 65) + "px";
+		self.main.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="doAuthentication();fitToScreen()" onresize="fitToScreen()">
+	<iframe id="main" name="main" style="visibility:hidden;position:absolute;top:0px;left:0px;width:803px;height:564px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpanehelp.htm"></iframe>
+	<iframe name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm"></iframe>
+	<iframe name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/personnelactions/palawheader.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.09 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/personnelactions/pactions.htm,v 1.21.2.42.4.1 2012/05/02 20:32:15 brentd Exp $ -->
+

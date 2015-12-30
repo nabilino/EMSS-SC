@@ -1,0 +1,247 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+<head><title>Form Object Selection</title>
+<script src="/lawson/javascript/dme.js"></script>
+<script language=Javascript1.2 src="/lawson/javascript/loganenv.js"></script>
+<script>
+
+camefrom = parent
+helpWin = null
+
+mdiamond = new Image()
+mdiamond.src = "/lawson/forms/images/mdiamond.gif"
+bdiamond = new Image()
+bdiamond.src = "/lawson/forms/images/bdiamond.gif"
+var PRODOBJ=''
+var SYSOBJ=''
+var FILEOBJ=''
+
+function LoadProds()
+{
+	var object = new DMEObject("gen", "prodline")
+	object.out = "JAVASCRIPT"
+	object.field = "productline"
+	object.max = "300"
+	DME(object, "prodobjs")
+}
+
+function DspProdline()
+{
+	PRODOBJ = self.prodobjs
+
+	window.systems.document.open()
+	window.systems.document.write('<body bgcolor="#FFFFFF" background="/lawson/newjobdef/reports2.jpg">')
+	window.systems.document.close()
+
+	window.filelist.document.open()
+	window.filelist.document.clear()
+	window.filelist.document.close()
+
+	window.prodlines.document.clear()
+
+	var prodtxt = ''
+	prodtxt += '<body bgcolor="#FFFFFF" background="/lawson/newjobdef/reports2.jpg">'
+	prodtxt += '<form name=prodsel>'
+	prodtxt += '<table border=0 cellspacing=1 cellpadding=3 width=100%><tr><td align=left valign=top>'
+	prodtxt += '<select name=prodsel onChange=\"parent.LoadSystems(this)\">'
+	prodtxt += '<option>Select a Product'
+
+	for (var i = 0;i < PRODOBJ.record.length;i++)
+	{
+		for (j in PRODOBJ.record[i])
+		{
+//			if (PRODOBJ.record[i][j] == 'LOGAN'
+//			||	PRODOBJ.record[i][j] == 'GEN')
+//				continue;
+
+			if (PRODOBJ.record[i][j] == 'GEN')
+				continue;
+
+			prodtxt += '<option value=\"' + PRODOBJ.record[i][j] + '\">' + PRODOBJ.record[i][j]
+		}
+	}
+	prodtxt += '</select></table></body></html>'
+
+	window.prodlines.document.write(prodtxt)
+	window.prodlines.document.close()
+}
+
+var	GlbProd   = ''
+var	GlbSystem = ''
+var	GlbFile   = ''
+
+function LoadSystems(elm)
+{
+	if (elm.selectedIndex == 0)
+		return
+	var idx = elm.selectedIndex
+	var ProdLine = elm[idx].value
+	if (ProdLine == "NOFORM")
+	{
+		camefrom.setToken("LOGAN","","BLNK")
+		return
+	}
+	GlbProd = ProdLine
+
+	var object = new DMEObject("gen", "system")
+	object.out = "JAVASCRIPT"
+	object.field = "systemcode;sysname"
+	object.sortasc = "sysname"
+	object.key = ProdLine
+	object.max = "300"
+	DME(object, "sysobjs")
+}
+
+var oldimage=''
+function DspSystem()
+{
+	SYSOBJ = self.sysobjs
+
+	window.filelist.document.open()
+	window.filelist.document.clear()
+	window.filelist.document.close()
+
+	oldimage=''
+	window.systems.document.open()
+	window.systems.document.clear()
+
+	var systxt = ''
+	systxt += '<body bgcolor="#FFFFFF" background="/lawson/newjobdef/reports2.jpg">'
+	systxt += '<form name=syssel>'
+	systxt += '<table border=0 cellspacing=1 cellpadding=3 width=100%><tr><td align=left valign=top>'
+	systxt += '<select name=syssel onChange=\"parent.LoadFiles(this)\">'
+	systxt += '<option>Select a System'
+
+	var sc =""
+	var sn =""
+
+	for (var i = 0; i < SYSOBJ.NbrRecs; i++)
+	{
+	    sc = SYSOBJ.record[i].systemcode
+	    sn = SYSOBJ.record[i].sysname
+		systxt += '<option value=\"' + sc + '\">' + sn
+	}
+	systxt += '</select></table></body></html>'
+
+	window.systems.document.write(systxt)
+	window.systems.document.close()
+}
+
+var SysDesc = ''
+
+function LoadFiles(elm)
+{
+	var idx = elm.selectedIndex
+	if (idx == 0)
+		return
+	SysDesc = elm[idx].text
+	GlbSystem = elm[idx].value
+	var filecall = "/cgi-lawson/gettokens" + ((typeof CGIExt != "undefined") ? CGIExt : "")
+//				 + "?" + GlbProd + "&" + GlbSystem
+				 + "?" + GlbProd + "&" + GlbSystem + "&OUT=JAVASCRIPT&ALL"
+	self.fileobjs.location.replace(filecall)
+}
+
+function DspTokens()
+{
+	FILEOBJ = self.fileobjs
+	window.filelist.document.clear()
+
+	var filetxt = ''
+	filetxt += '<html><body link=black vlink=black alink=black bgcolor=white><center><b><font point-size=14 face=arial>' + SysDesc
+	filetxt += ' Application Objects</b><hr></font><table border=0><center>'
+	window.filelist.document.write(filetxt)
+
+	var ft = '<font point-size=12 face=arial><b>'
+	var j = 1
+	for (var i = 0;i < FILEOBJ.NbrTokens;i++)
+	{
+		if (FILEOBJ.token[i].type == "BATCH")
+		{
+			filetxt = (j == 1 ? '<tr>' : '')
+					+ '<td><a href=javascript:void(0) onClick="parent.showHelp(\''
+					+ GlbProd + '\',\'' + FILEOBJ.token[i].token + '\');return true">'
+					+ '<img border=0 src=' + mdiamond.src + ' alt=Help></a>'
+					+ '<td>' + ft
+					+ '<a href=javascript:void(0) onClick="parent.camefrom.setToken(\'' + GlbProd + '\',\''
+			    	+ GlbSystem + '\',\'' + FILEOBJ.token[i].token + '\',\'' + FILEOBJ.token[i].type
+			    	+ '\');return true">'
+					+ FILEOBJ.token[i].token
+					+ '<td>' + ft
+					+ '<a href=javascript:void(0) onClick="parent.camefrom.setToken(\'' + GlbProd + '\',\''
+			    	+ GlbSystem + '\',\'' + FILEOBJ.token[i].token + '\',\'' + FILEOBJ.token[i].type
+			    	+ '\');return true">'
+					+ FILEOBJ.token[i].title
+			window.filelist.document.write(filetxt)
+			++j
+			if (j == 3)
+				j = 1
+		}
+	}
+	filetxt = '</table></body></html>'
+
+	window.filelist.document.write(filetxt)
+	window.filelist.document.close()
+}
+
+function showHelp(pdl,tkn)
+{
+	var cgicall = "/cgi-lawson/objprop" + ((typeof CGIExt != "undefined") ? CGIExt : "")
+				+ '?' + pdl + '&' + tkn
+	var parms = "innerHeight=500,innerWidth=700,screenX=" + (self.screenX + 20)
+			  + ",screenY=" + (self.screenY + 20) + ",resizable,scrollbars"
+	helpWin = window.open(cgicall,"tknHelpWin",parms)
+	helpWin.focus()
+}
+
+function closeWindows()
+{
+	if (helpWin && !helpWin.closed)
+		helpWin.close()
+}
+
+var theblank = (window.location.protocol=='http:')?"about:blank":"/lawson/dot.htm" //dpb 07-25-01
+var fram = ''
+	fram +='<FRAMESET rows="40,*" border=0 onLoad=LoadProds() onUnload=closeWindows()>'
+	     + '<FRAMESET cols="30%,*" border=0>'
+	     + '<FRAME SRC="'+theblank+'" marginheight=0 marginwidth=0 scrolling=no name=prodlines>'
+	     + '<FRAME SRC="'+theblank+'"marginheight=0 marginwidth=0 scrolling=no name=systems>'
+	     + '</FRAMESET>'
+	     + '<FRAMESET rows="100%,*" frameborder=no border=0>'
+	     + '<FRAME SRC="'+theblank+'"  name=filelist scrolling=auto>'
+	     + '<FRAMESET cols="0,0,0" frameborder=no border=0>'
+	     + '<FRAME SRC="'+theblank+'" name=prodobjs>'
+	     + '<FRAME SRC="'+theblank+'" name=sysobjs>'
+	     + '<FRAME SRC="'+theblank+'" name=fileobjs>'
+	     + '</FRAMESET>'
+	     + '</FRAMESET>'
+	     + '</FRAMESET>'
+
+window.document.write(fram)
+window.document.close()
+
+</script>
+</head>
+
+<!--
+<FRAMESET rows="40,*" border=0 onLoad=LoadProds() onUnload=closeWindows()>
+	<FRAMESET cols="30%,*" border=0>
+		<FRAME SRC=about:blank marginheight=0 marginwidth=0 scrolling=no name=prodlines>
+		<FRAME SRC=about:blank marginheight=0 marginwidth=0 scrolling=no name=systems>
+	</FRAMESET>
+	<FRAMESET rows="100%,*" frameborder=no border=0>
+		<FRAME SRC=about:blank  name=filelist scrolling=auto>
+		<FRAMESET cols="0,0,0" frameborder=no border=0>
+			<FRAME SRC=about:blank name=prodobjs>
+			<FRAME SRC=about:blank name=sysobjs>
+			<FRAME SRC=about:blank name=fileobjs>
+		</FRAMESET>
+	</FRAMESET>
+</FRAMESET>
+-->
+

@@ -1,0 +1,382 @@
+<html>
+<head>
+<title>Training History</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var appObj;
+var Courses = new Array()
+var Proficiencies = new Array()
+var SortDirection = new Array()
+SortDirection["course_short_crs_desc"] = ">" // first sort will be by ascending order
+SortDirection["date_completed"] = ">" // first sort will be by ascending order
+var sortProperty;
+
+function GetWebuser()
+{
+	// Adjust the frame height for Netscape
+	authenticate("frameNm='jsreturn'|funcNm='GetPatrnhist()'|desiredEdit='EM'");
+}
+
+function GetPatrnhist()
+{
+	stylePage();
+	document.title = getSeaPhrase("TRAINING_HISTORY","ESS");
+	setTaskHeader("header",getSeaPhrase("TRAINING_HISTORY","ESS"),"Training");
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+    // if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+		setTimeout(function(){ GetPatrnhist(); }, 10);
+		return;
+	}
+
+	Courses = new Array();
+
+	var pDMEObj 			= new DMEObject(authUser.prodline, "patrnhist");
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.01")
+		{
+			pDMEObj.index       = "trhset4";
+		}
+		else
+		{
+			pDMEObj.index 		= "trhset1";
+			pDMEObj.sortdesc    = "date-completed";
+		}
+
+		pDMEObj.exclude 	= "drill;keys"
+		pDMEObj.out 		= "JAVASCRIPT";
+		pDMEObj.field 		= "course;date-completed;ceu-awarded;rating;course.short-crs-desc"
+		pDMEObj.key 		= parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10)
+		pDMEObj.max 		= "600"
+		pDMEObj.func 		= "CheckPatrnhist()"
+	DME(pDMEObj, "jsreturn");
+}
+
+function CheckPatrnhist()
+{
+	Courses = Courses.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next != "")
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	}
+	else
+	{
+		if (Courses.length == 0)
+		{
+			DspPatrnhist();
+		}
+		else
+		{
+			GetProficiencies();
+		}
+	}
+}
+
+function GetProficiencies()
+{
+	Proficiencies = new Array();
+
+	var pDMEObj 		= new DMEObject(authUser.prodline, "pcodes");
+		pDMEObj.index 	= "pcoset1"
+		pDMEObj.key 	= "PF"
+		pDMEObj.exclude = "drill"
+		pDMEObj.out 	= "JAVASCRIPT";
+		pDMEObj.field 	= "code;description"
+		pDMEObj.max 	= "600"
+		pDMEObj.func 	= "PairProficiencies()"
+		pDMEObj.debug 	= false
+	DME(pDMEObj, "jsreturn");
+}
+
+function PairProficiencies()
+{
+	Proficiencies = Proficiencies.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next != "")
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	}
+	else
+	{
+		for(var i=0; i<Courses.length; i++)
+		{
+			for(var j=0; j<Proficiencies.length; j++)
+			{
+				if(Courses[i].rating == Proficiencies[j].code)
+				{
+					Courses[i].description = Proficiencies[j].description
+					break;
+				}
+			}
+		}
+
+		DspPatrnhist();
+	}
+}
+
+function DoesItExist(value)
+{
+	return (typeof(value) == "undefined" ||  value == "undefined" || value == "" || value == "null") ? false : true;
+}
+
+function DspPatrnhist(onsort,property)
+{
+	var strBuffer = new Array();
+	var trainHistHtml = '<table id="histTbl" class="plaintableborder" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+	+ '<tr><th class="plaintableheaderborder" style="width:33%;text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">'
+	+ '<a class="columnsort" href="" onclick="parent.SortCourses(\'course_short_crs_desc\');return false"'
+	+ ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_COURSE","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("COURSE","ESS")+'</a></th>'
+	+ '<th class="plaintableheaderborder" style="width:17%;text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn">'
+	+ '<a class="columnsort" href="" onclick="parent.SortCourses(\'date_completed\');return false"'
+	+ ' onmouseover="window.status=\''+getSeaPhrase("SORT_BY_COMPLETED","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\'\';return true">'+getSeaPhrase("COMPLETED","ESS")+'</a></th>'
+	+ '<th class="plaintableheaderborder" style="width:15%;text-align:center">'+getSeaPhrase("CEU_CREDITS","ESS")+'</th>'
+	+ '<th class="plaintableheaderborder" style="width:33%;text-align:center">'+getSeaPhrase("QUAL_5","ESS")+'</th>'
+	+ '</tr>';
+
+	strBuffer[0] = trainHistHtml;
+
+	for (var i=0; i<Courses.length; i++)
+	{
+		trainHistHtml = '<tr>'
+		+ '<td class="plaintablecellborder" nowrap>'+((Courses[i].course_short_crs_desc)?Courses[i].course_short_crs_desc:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((formatDME(Courses[i].date_completed))?formatDME(Courses[i].date_completed):'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((Courses[i].ceu_awarded)?Courses[i].ceu_awarded:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((Courses[i].description)?Courses[i].description:'&nbsp;')+'</td>'
+		+ '</tr>';
+		strBuffer[i+1] = trainHistHtml;
+	}
+
+	strBuffer[strBuffer.length] = '</table>';
+
+	try {
+		self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("HISTORY","ESS");
+
+		if (Courses.length > 0) {
+			self.MAIN.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+		}
+		else {
+			self.MAIN.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft" style="padding-top:5px;padding-left:5px">'
+			+ getSeaPhrase("NO_TRAINING_HISTORY","ESS")
+			+ '</div>'
+
+		}
+	}
+	catch(e) {}
+
+	self.MAIN.stylePage();
+
+	if (onsort) {
+		var direction = (SortDirection[property] == "<") ? "ascending" : "descending";
+		self.MAIN.styleSortArrow("histTbl", property, direction);
+	}
+	else
+	{
+		self.MAIN.setLayerSizes(true);
+	}
+
+	document.getElementById("MAIN").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+function sortByAscProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (sortProperty == "date_completed")
+	{
+		name1 = formjsDate(formatDME(name1));
+		name2 = formjsDate(formatDME(name2));
+	}
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function sortByDescProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (sortProperty == "date_completed")
+	{
+		name1 = formjsDate(formatDME(name1));
+		name2 = formjsDate(formatDME(name2));
+	}
+	if (name1 > name2)
+		return -1;
+	else if (name1 < name2)
+		return 1;
+	else
+		return 0;
+}
+
+function SortCourses(property)
+{
+	var dir = SortDirection[property];
+	sortProperty = property;
+
+	switch (dir)
+	{
+		case ">": 	Courses.sort(sortByAscProperty); SortDirection[property] = "<"; break;
+		case "<":	Courses.sort(sortByDescProperty); SortDirection[property] = ">"; break;
+		default:	Courses.sort(sortByAscProperty); break;
+	}
+
+	// Set all other sort fields so that they will sort by default (ascending order first)
+	for (var prop in SortDirection)
+	{
+		if (prop != property)
+			SortDirection[prop] = ">";
+	}
+
+	DspPatrnhist(true, property);
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;
+		contentHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? winHeight - 65 : winHeight - 65;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth = winWidth - 23;
+		contentWidthBorder = winWidth - 2;
+		contentHeight = winHeight - 65;	
+		contentHeightBorder = winHeight - 5;
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 : winWidth - 12;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 42;	
+	}
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = (winHeight - 35) + "px";
+	
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.MAIN.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="GetWebuser()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" style="visibility:hidden;position:absolute;height:464px;width:625px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/patrnhist.htm,v 1.14.2.21 2012/06/29 17:12:05 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

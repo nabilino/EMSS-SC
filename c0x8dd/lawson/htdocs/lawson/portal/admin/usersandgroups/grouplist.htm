@@ -1,0 +1,509 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/usersandgroups/grouplist.htm,v 1.20.2.1.4.5.14.1.2.3 2012/08/08 12:37:23 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="usersandgroups.css" type="text/css" />
+<script language="javascript" src="../../servenv.js"></script>
+<script language="javascript" src="../admincommon.js"></script>
+<script>
+//-----------------------------------------------------------------------------
+// common layers
+var divGroups
+
+// search / navigation
+var grouplistPrev
+var grouplistNext
+var searchFor
+var txtSearch
+
+var edgeWidth = 6
+var isIE = opener.isIE
+var portalWnd = opener.portalWnd
+var portalObj = opener.portalObj;
+var subMsgs = opener.subMsgs
+
+//-----------------------------------------------------------------------------
+function initGroupList()
+{
+	window.document.title = subMsgs.getPhrase("LBL_ADD_USERGROUP") + " " + 
+		subMsgs.getPhrase("LBL_FOR") + " " + opener.activeUser
+
+	var usergroups=document.getElementById("usergroups")
+	opener.top.cmnSetElementText(usergroups,subMsgs.getPhrase("LBL_USERGROUPS"))
+
+	var spanprev=document.getElementById("spanprev")
+	spanprev.onclick = doPrevious
+	var prevPhrase = portalObj.getPhrase("LBL_PREVIOUS")
+	opener.top.cmnSetElementText(spanprev,prevPhrase)
+	spanprev.title = prevPhrase
+
+	var spannext=document.getElementById("spannext")
+	spannext.onclick = doNext
+	var nextPhrase = portalObj.getPhrase("LBL_NEXT")
+	opener.top.cmnSetElementText(spannext,nextPhrase)
+	spannext.title = nextPhrase
+
+	var spansearch=document.getElementById("spansearch")
+	spansearch.onclick = doSearch
+	opener.top.cmnSetElementText(spansearch,portalObj.getPhrase("LBL_FIND"))
+
+	var spanclose=document.getElementById("spanclose")
+	spanclose.onclick = doClose
+	opener.top.cmnSetElementText(spanclose,portalObj.getPhrase("LBL_CLOSE"))
+
+	var findPhrase = portalObj.getPhrase("LBL_FIND")
+	var lblSearch=document.getElementById("lblSearch")
+	opener.top.cmnSetElementText(lblSearch,findPhrase)
+
+	divGroups=document.getElementById("divGroups")
+	txtSearch=document.getElementById("txtSearch")
+	txtSearch.onkeypress=keyPress;
+
+	sizeFind()
+
+	loadGroups( 'initial' )
+	txtSearch.focus()
+}
+
+//-----------------------------------------------------------------------------
+// Calls function in the opener window that will perform the ags
+// call to update a group's status.  The opener window should know
+// the bookmark ID for which we are allowing/denying access by the group.
+function callOpenerAddGroup( webgroup )
+{
+	window.opener.addGroup( webgroup )
+}
+
+//-----------------------------------------------------------------------------
+// The variable loadedFrom can take one of 4 values:
+// initial -- on first load when window pops up
+// prev or next -- when user clicks next or prev links
+// search -- when user is doing a search.
+function loadGroups( loadedFrom )
+{
+	// dme call to get groups
+	var api = opener.top.DMEPath + "?"
+	if (loadedFrom == "initial")
+	{
+		api += 	"PROD=LOGAN&" +
+				"FILE=SIRDGRP&" +
+				"FIELD=GROUP;STATUS;DESCRIPTION;&" +
+				"MAX=20&" +
+				"INDEX=RDGSET2&" +
+				"KEY=1&" +
+				"OUT=XML";
+	}
+	else if (loadedFrom == "prev")
+	{
+		api += 	"PROD=LOGAN&" +
+				"FILE=SIRDGRP&" +
+				"FIELD=GROUP;STATUS;DESCRIPTION;&" +
+				"MAX=20&" +
+				"INDEX=RDGSET2&" +
+				"KEY=1&" +
+				"SORTASC=GROUP&" + grouplistPrev +
+				"OUT=XML";
+	}
+	else if (loadedFrom == "next")
+	{
+		api += 	"PROD=LOGAN&" +
+				"FILE=SIRDGRP&" +
+				"FIELD=GROUP;STATUS;DESCRIPTION;&" +
+				"MAX=20&" +
+				"INDEX=RDGSET2&" +
+				"KEY=1&" +
+				"SORTASC=GROUP&" + grouplistNext +
+				"OUT=XML";
+	}
+	else
+	{	// loadedFrom = "search"
+		if( !searchFor )
+		{
+			var msg=subMsgs.getPhrase("LBL_SEARCH_VALUE_MISSING");
+			portalWnd.cmnDlg.messageBox(msg,"ok","alert",window);
+		}
+		else
+		{
+			api += 	"PROD=LOGAN&" +
+					"FILE=SIRDGRP&" +
+					"FIELD=GROUP;STATUS;DESCRIPTION;&" +
+					"MAX=20&" +
+					"INDEX=RDGSET2&" +
+					"KEY=1&" +
+					//"BEGIN=1=" + searchFor + "&" +
+					"SELECT=GROUP^~" + escape(searchFor) + "&" +
+					"OUT=XML";
+		}
+	}
+	if ( api != "" )
+	{
+		var oGrpXml=portalWnd.httpRequest(api,null,"","text/xml",false);
+		if (portalWnd.oError.isErrorResponse(oGrpXml,true,true,false,"",window))
+		{
+			oGrpXml=null;
+			doClose();
+			return;
+		}
+		oGrpXml=portalWnd.oError.getDSObject();
+		
+		var arrMsgs=oGrpXml.document.getElementsByTagName(opener.TAG_DME_MESSAGE);
+		var lenMsgs=(arrMsgs?arrMsgs.length:0);
+		if (lenMsgs && (arrMsgs[0].getAttribute("status")=="1"))
+		{
+			var msg=portalObj.getPhrase("LBL_ERROR") + " - " + arrMsgs[0].firstChild.nodeValue;
+			portalWnd.cmnDlg.messageBox(msg,"ok","alert",window);
+			doClose();
+			return;
+		}
+
+		renderGroups(oGrpXml)
+		oGrpXml=null
+	}
+}
+
+//-----------------------------------------------------------------------------
+// render groups, similar to the xsl used in the old bookmarkgroup.xsl
+function renderGroups(oGrpXml)
+{
+	// save position calls
+	grouplistPrev = oGrpXml.document.getElementsByTagName("PREVCALL")
+	if(grouplistPrev && grouplistPrev.length)
+		grouplistPrev=grouplistPrev[0].firstChild.nodeValue
+	else
+		grouplistPrev=null
+
+	grouplistNext = oGrpXml.document.getElementsByTagName("NEXTCALL")
+	if(grouplistNext && grouplistNext.length)
+		grouplistNext=grouplistNext[0].firstChild.nodeValue
+	else
+		grouplistNext=null
+
+	// clear previous nodes
+	opener.abandonChildren(divGroups);
+
+	var arrCOLUMNS = oGrpXml.document.getElementsByTagName("COLUMN")
+	var arrRECORD = oGrpXml.document.getElementsByTagName("RECORD")
+	var len = arrRECORD.length
+
+	var divNode = document.createElement("div")
+	divNode.canHide = true
+
+	if (len==0)
+	{
+		var tableNode = document.createElement("table")
+		tableNode.style.textAlign = "center"
+
+		// header row
+		var rowNode = tableNode.insertRow(tableNode.rows.length)
+
+		// row 0, col 0 - group
+		var cellNode = rowNode.insertCell(rowNode.cells.length)
+		cellNode.className = "item"
+
+		var descriptionPhrase = subMsgs.getPhrase("LBL_NO_RECORDS_EXIST")
+		textNode = document.createTextNode(descriptionPhrase)
+		cellNode.appendChild(textNode)
+
+		divNode.appendChild(tableNode)
+
+	}
+	else
+	{ // len>0
+		var tableNode = document.createElement("table")
+		tableNode.className = "xTTableList"
+		tableNode.style.border = "0px"
+		tableNode.cellPadding = 1
+		tableNode.cellSpacing = 3
+		tableNode.style.width = "100%"
+
+		// header row
+		var rowNode = tableNode.insertRow(tableNode.rows.length)
+
+		// row 0, col 0 - group
+		var cellNode = rowNode.insertCell(rowNode.cells.length)
+		cellNode.className = "xTTableColumnHeader"
+		cellNode.style.width = "50%"
+		var groupPhrase = subMsgs.getPhrase("LBL_USERGROUP")
+		var textNode = document.createTextNode(groupPhrase)
+		cellNode.appendChild(textNode)
+
+		// row 0, col 1 - description
+		cellNode = rowNode.insertCell(rowNode.cells.length)
+		cellNode.className = "xTTableColumnHeader"
+		cellNode.style.width = "50%"
+		var descriptionPhrase = portalObj.getPhrase("LBL_DESCRIPTION")
+		textNode = document.createTextNode(descriptionPhrase)
+		cellNode.appendChild(textNode)
+
+		divNode.appendChild(tableNode)
+
+		var arrCOL
+		var className
+		var group
+		var status
+		var description
+		for (var i=0;i<len;i++) {
+
+			// get DME columns
+			if (isIE) {
+				arrCOL = arrRECORD[i].getElementsByTagName("COL")
+				group = arrCOL[0].firstChild.nodeValue
+				status = arrCOL[1].firstChild.nodeValue
+				description = arrCOL[2].firstChild.nodeValue
+			} else {
+				var arrCOL=opener.getNodeChildElementsByTagName(arrRECORD[i],"COL")
+				for (var k=0;k<arrCOL[0].childNodes.length;k++) {
+					if (arrCOL[0].childNodes[k].nodeType==4) {
+						group = arrCOL[0].childNodes[k].nodeValue
+						break
+					}
+				}
+				for (var k=0;k<arrCOL[1].childNodes.length;k++) {
+					if (arrCOL[1].childNodes[k].nodeType==4) {
+						status = arrCOL[1].childNodes[k].nodeValue
+						break
+					}
+				}
+				for (var k=0;k<arrCOL[2].childNodes.length;k++) {
+					if (arrCOL[2].childNodes[k].nodeType==4) {
+						description = arrCOL[2].childNodes[k].nodeValue
+						break
+					}
+				}
+			}
+
+			var spanNode = document.createElement("span")
+			spanNode.className = "xTListItem"
+			spanNode.style.border = "0px"
+			spanNode.style.width = "100%"
+			//spanNode.span = spanNode
+			spanNode.group = group
+			spanNode.tabIndex = 1
+
+			tableNode = document.createElement("table")
+			tableNode.style.border = "0px"
+			tableNode.style.width = "100%"
+
+			// row
+			rowNode = tableNode.insertRow(tableNode.rows.length)
+
+			className = (status=="1")?"item":"itemDim"
+
+			// row i, col 0 - group
+			cellNode = rowNode.insertCell(rowNode.cells.length)
+			cellNode.style.width = "50%"
+			cellNode.className = className
+			cellNode.span = spanNode
+			cellNode.onmouseover = spanOver
+			cellNode.onmouseout = spanOut
+			cellNode.onclick = spanClick
+			textNode = document.createTextNode(group)
+			cellNode.appendChild(textNode)
+			spanNode.cellNode = cellNode
+
+			// row i, col 1 - description
+			cellNode = rowNode.insertCell(rowNode.cells.length)
+			cellNode.style.width = "50%"
+			cellNode.className = className
+			cellNode.span = spanNode
+			cellNode.onmouseover = spanOver
+			cellNode.onmouseout = spanOut
+			cellNode.onclick = spanClick
+			textNode = document.createTextNode(description)
+			cellNode.appendChild(textNode)
+
+			spanNode.appendChild(tableNode)
+
+			divNode.appendChild(spanNode)
+
+		} // for
+	} // len>0
+	divGroups.appendChild(divNode)
+}
+
+//-----------------------------------------------------------------------------
+function doSearch()
+{
+	searchFor = txtSearch.value
+	if (searchFor)
+		loadGroups('search')
+	else
+		loadGroups('initial')
+}
+
+//-----------------------------------------------------------------------------
+function doPrevious()
+{
+	if (!grouplistPrev) {
+		var phrase = subMsgs.getPhrase("LBL_NO_PREV_GROUPS")
+		portalWnd.cmnDlg.messageBox(phrase,"ok","info",window);
+		return
+	}
+	loadGroups('prev')
+}
+
+//-----------------------------------------------------------------------------
+function doNext()
+{
+	if (!grouplistNext)
+	{
+		var phrase = subMsgs.getPhrase("LBL_NO_NEXT_GROUPS");
+		portalWnd.cmnDlg.messageBox(phrase,"ok","info",window);
+		return
+	}
+	loadGroups('next')
+}
+
+//-----------------------------------------------------------------------------
+function doClose()
+{
+	window.close()
+}
+
+//-----------------------------------------------------------------------------
+function spanOver(e)
+{
+	e=opener.top.getEventObject(e,window);
+	var t=opener.top.getEventElement(e);
+	if (t)
+		t.span.className = "xTListItemHover";
+}
+
+//-----------------------------------------------------------------------------
+function spanOut(e)
+{
+	e=opener.top.getEventObject(e,window);
+	var t=opener.top.getEventElement(e);
+	if (t)
+		t.span.className = "xTListItem";
+}
+
+//-----------------------------------------------------------------------------
+function spanClick(e)
+{
+	e=opener.top.getEventObject(e,window);
+	var t=opener.top.getEventElement(e);
+	if (t)
+	{
+		var group = t.span.group
+		group = opener.cleanApostrophes(group)
+		callOpenerAddGroup(group)
+	}
+}
+
+//-----------------------------------------------------------------------------
+function sizeFind()
+{
+	// copied from sizePortalStuff in v3.js
+	var scrWidth=(isIE
+		? document.body.offsetWidth
+		: window.innerWidth);
+	var scrHeight=(isIE
+		? document.body.offsetHeight
+		: window.innerHeight);
+
+	var divHeader = document.getElementById("divHeader")
+	var headerTop = parseInt(divHeader.style.top,10)
+	var headerHeight = parseInt(divHeader.style.height,10)
+
+	var divGroupTop = headerTop + headerHeight + edgeWidth
+	with (divGroups.style) {
+		left = "0px"
+		top = divGroupTop + "px"
+		width = scrWidth + "px"
+		height = (scrHeight - divGroupTop) + "px"
+		visibility = "visible"
+	}
+}
+
+//-----------------------------------------------------------------------------
+function grouplistKeyDown(evt)
+{	
+	evt = opener.top.getEventObject(evt,window);
+	if (!evt)
+		return false;
+
+	var evtCaught = false
+	var keyVal = (isIE) ? evt.keyCode : evt.charCode
+	if (keyVal == 0)	// netscape only
+		keyVal = evt.keyCode
+	var t = opener.top.getEventElement(evt,window);
+	if (t)
+	{
+		switch(keyVal)
+		{	case 13:	// enter
+				if (t && t.cellNode && typeof(t.cellNode.onclick)=="function") {
+					t.cellNode.click()
+					evtCaught = true
+				}
+				else if (t && typeof(t.onclick)=="function") {
+					t.click()
+					evtCaught = true
+				}
+				break
+		}
+	}
+	if (evtCaught)
+		opener.top.setEventCancel(evt)
+	return evtCaught
+}
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body tabIndex="-1" onload="initGroupList()" onkeydown="grouplistKeyDown(event)" onresize="sizeFind()">
+	<div id="divHeader" style="position:absolute;top:0px;left:0px;height:25px;width:100%;" class="xTFormTitleBar">
+		<table cellpadding="0" cellspacing="0" border="0" style="width:100%;height:25px;">
+			<tr style="vertical-align:center;">
+			<td class="xTRightHeader"><span id="usergroups">Groups</span></td>
+			<td align="right">
+				<table border="0" cellspacing="0" cellpadding="0" class="xTToolBarButton">
+				  <tr style="vertical-align:center;">
+					<td><button id="spanprev" class="xTToolBarButton">Previous</button></td>
+					<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+					<td><button id="spannext" class="xTToolBarButton">Next</button></td>
+					<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+					<td width="0">
+						<label for="txtSearch" id="lblSearch" class="xTLabel"
+							style="position:relative;visibility:hidden;display:none;">
+							Find:&nbsp;</label>
+					</td>
+					<td align="center">
+						<input type="text" class="xTSearchField" id="txtSearch"/>
+					</td>
+					<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+					<td><button id="spansearch" class="xTToolBarButton">Find</button></td>
+					<td width="2"><img id="spacer" src="../../images/spacer.gif" width="2" height="15"></td>
+					<td><button id="spanclose" class="xTToolBarButton">Close</button></td>
+				  </tr>
+				</table>
+			</td>
+			</tr>
+		</table>
+	</div>
+	<div id="divGroups" style="position:absolute;top:30px;left:0px;width:350px;height:425px;overflow:auto;visibility:hidden;" class="tip"></div>
+</body>
+</html>

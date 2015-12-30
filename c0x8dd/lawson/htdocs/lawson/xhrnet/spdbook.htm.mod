@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Benefit Plan Descriptions</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var manualDir = "/lawson/xhrnet/xml/manuals";
+function startPlanDescs()
+{
+	// Authenticate the user and retrieve the language preference.
+	authenticate("frameNm='jsreturn'|funcNm='displayPlanDescs()'|desiredEdit='EM'");
+}
+
+function displayPlanDescs()
+{
+	stylePage();
+<!-- CGL 10/06/2014 Clear default page title -->
+<!--	var title = getSeaPhrase("BENEFIT_PLAN_DESCS","ESS");-->
+	var title = ' ';
+<!-- /CGL -->
+	setWinTitle(title);
+	setTaskHeader("header",title,"Benefits");
+	// User's language preference in lowercase
+	var userLang = (authUser.language)?authUser.language.replace(" ","_").toLowerCase():"";
+	var userURL;
+	// If a handbook file exists for the user's language, load it; otherwise, load the default English version.
+	if (userLang != "" && fileExists(manualDir+"/benefit_plans_"+encodeURLPart(userLang)+".htm","text/html","text/plain"))
+		userURL = manualDir+"/benefit_plans_"+encodeURLPart(userLang)+".htm";
+	else
+		userURL = manualDir+"/benefit_plans.htm";
+	self.main.location.replace(userURL);
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = (winHeight - 32) + "px";
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();startPlanDescs()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/dot.htm" style="position:absolute;height:464px;left:0px;top:32px;width:803px" frameborder="no" marginwidth="0" marginheight="0" scrolling="auto"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/spdbook.htm,v 1.6.2.28 2014/02/12 23:38:22 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

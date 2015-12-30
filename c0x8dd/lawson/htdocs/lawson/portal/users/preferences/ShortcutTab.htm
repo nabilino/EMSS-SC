@@ -1,0 +1,88 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/preferences/ShortcutTab.htm,v 1.2.2.1.4.2.14.1.2.2 2012/08/08 12:37:27 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the shortcuts tab HTML -->
+<table border="0" width="95%" cellpadding="0" cellspacing="0" style="margin:10px;">
+	<tr>
+		<td colspan="2">&nbsp;</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblShrtList" for="selShrtList" class="xTLabel" 
+					style="position:relative;text-align:left;">Shortcut list:
+			</label>
+	    </td>
+	</tr>
+	<tr>
+	   <td width="300px;">
+			<select id="selShrtList" class="xTListText" size="10" onchange="window.tabMgr.tabs['tabShortcut'].onSelectionChange()" 
+				style="width:280px;height:expression(this.size*19);" >
+			</select>
+		</td>
+		<td valign="top" align="left">
+			<input id="btnShrtNew" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabShortcut'].doNew()" value="New">
+			</input><br>
+			<input id="btnShrtRename" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabShortcut'].doRename()" value="Rename">
+			</input><br>
+			<input id="btnShrtDelete" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabShortcut'].doDelete()" value="Delete">
+			</input><br>
+			<input id="btnShrtUp" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabShortcut'].moveUpDown('up')" value="Up">
+			</input><br>
+			<input id="btnShrtDown" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+				onclick="window.tabMgr.tabs['tabShortcut'].moveUpDown('down')" value="Down">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblShrtSelected" for="txtShrtText" class="xTLabel" 
+					style="position:relative;">Selected shortcut item:
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<!-- even though the cell is 2 columns wide, if I use a larger width
+			on this textbox, this first column is sized to the width of this (IE bug!) -->
+			<input type="text" id="txtShrtText" class="xTTextBox" style="position:relative;width:280;" value=""
+				onfocus="window.tabMgr.tabs['tabShortcut'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabShortcut'].onTextBlur(event,this)">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td align="left" colspan="2">
+			<input type="checkbox" id="cbxShrtNewWindow"
+				onclick="window.tabMgr.tabs['tabShortcut'].onClickCbx(event,this)">
+			</input>
+			<label id="lblShrtNewWindow" for="cbxShrtNewWindow" class="xTLabel" 
+					style="position:relative;">Open in new window
+			</label>
+		</td>
+	</tr>
+</table>

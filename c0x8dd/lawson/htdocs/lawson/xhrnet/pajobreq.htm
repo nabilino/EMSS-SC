@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Job Postings</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var emailWin;
+var emailList = new Array();
+var jobPostings = new Array();
+var sortProperty;
+var sortDirection = "<";
+
+function GetWebuser()
+{
+	authenticate("frameNm='FRAME1'|funcNm='StartJobPostings()'|desiredEdit='EM'");
+}
+
+function StartJobPostings()
+{
+	stylePage();
+	var title = getSeaPhrase("JOB_POSTINGS","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Employment");
+	StoreDateRoutines();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), GetPajobreq);
+}
+
+function GetPajobreq()
+{
+	jobPostings = new Array();
+	var dmeObj = new DMEObject(authUser.prodline, "pajobreq");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "pjrset1";
+	dmeObj.field = "requisition;description;remaining-open;department.name;location.description;"
+	+ "process-level.name;contact-last;contact-first;wk-phone-nbr;wk-phone-ext;wk-phone-cntry;"
+	+ "last-cmt-seq;date-needed;remaining-fte;app-status.description;process-level.name;"
+	+ "position.description;job-code.description;union-code.description;bargain-unit.description;"
+	+ "work-schedule.description;supervisor.description;shift;contact-nbr.email-address";
+	dmeObj.key = parseInt(authUser.company,10)+ "=";
+	if (emssObjInstance.emssObj.requirePostingDates)
+	{
+		if (iosHandler.getIOSVersionNumber() >= "08.01.00")
+			dmeObj.select = "(internal-stop>=" + ymdtoday + "|internal-stop=00000000)&(internal-start!=00000000&internal-start<=" + ymdtoday + ")";
+		else
+			dmeObj.select = "internal-stop>=" + ymdtoday + "|internal-stop=00000000&internal-start!=00000000&internal-start<=" + ymdtoday;
+	}
+	else	
+		dmeObj.cond = "cur-int-post";
+	dmeObj.max = "600";
+	dmeObj.func = "GetMoreRecords()";
+	DME(dmeObj, "FRAME1");
+}
+
+function GetMoreRecords()
+{
+	jobPostings = jobPostings.concat(self.FRAME1.record);
+	if (self.FRAME1.Next)
+		self.FRAME1.location.replace(self.FRAME1.Next);
+	else
+	{
+		SortPajobreq("description");
+		try
+		{
+			self.MAIN.setLayerSizes();
+			self.DETAIL.setLayerSizes();
+		}
+		catch(e) {}
+		fitToScreen();
+	}
+}
+
+function DspPajobreq(onsort, property)
+{
+	// Job Postings Main Frame
+	var jobPostHtml = '<form name="jobpostform">'
+	+ '<table id="jobPostingsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_49","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("JOB_POSTINGS","ESS")+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center;width:7%">'+getSeaPhrase("JOB_OPENINGS_0","ESS")+'</th>'
+	var toolTip = getSeaPhrase("JOB_OPENINGS_1","ESS");
+	jobPostHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center;width:31%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortJobReqs(\'description\');return false"'
+	+ ' title="'+toolTip+'">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("JOB_OPENINGS_10","ESS");
+	jobPostHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center;width:61%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortJobReqs(\'location_description\');return false"'
+	+ ' title="'+toolTip+'">'+getSeaPhrase("JOB_PROFILE_6","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th></tr>'
+	for (var i=0; i<jobPostings.length; i++)
+	{
+		var jobRec = jobPostings[i];
+		var jobLbl = jobRec.description+' - '+getSeaPhrase("JOB_OPENINGS_15","ESS");
+		var tip = jobRec.description+' - '+getSeaPhrase("VIEW_DTL_FOR_POS","SEA");
+		jobPostHtml += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'
+		+ '<input class="inputbox" type="checkbox" id="cbox'+i+'" name="cbox" title="'+jobLbl+'" aria-label="'+jobLbl+'">'
+		+ '<label class="offscreen" for="cbox'+i+'">'+jobLbl+'</label></td>'
+		+ '<td class="plaintablecellborder" nowrap><a href="javascript:parent.FillDetail('+i+');" title="'+tip+'">'+((jobRec.description)?jobRec.description:'&nbsp;')+'<span class="offscreen"> - '+getSeaPhrase("VIEW_DTL_FOR_POS","SEA")+'</span></a></td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((jobRec.location_description)?jobRec.location_description:'&nbsp;')+'</td></tr>'
+	}
+	jobPostHtml += '</table>'
+	if (jobPostings.length > 0)
+	{
+		jobPostHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+		+ '<tr><td style="padding-top:5px;padding-bottom:5px;white-space:nowrap">'
+		+ uiButton(getSeaPhrase("JOB_OPENINGS_17","ESS"),"parent.SubmitApplications();return false",false,"submit")
+		+ '</td></tr></table>'
+	}
+	jobPostHtml += '</form>';
+	self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CURRENT_OPENINGS","ESS");
+	if (jobPostings.length == 0)
+		self.MAIN.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft">'+getSeaPhrase("JOB_OPENINGS_16","ESS")+'</div>';
+	else
+		self.MAIN.document.getElementById("paneBody").innerHTML = jobPostHtml;
+	self.MAIN.stylePage();
+	if (onsort)
+		self.MAIN.styleSortArrow("jobPostingsTbl", property, (sortDirection == "<") ? "ascending" : "descending");
+	else
+		self.MAIN.setLayerSizes();
+	document.getElementById("MAIN").style.visibility = "visible";
+	// Job Postings Detail Frame
+	var jobDetailHtml = '<table id="jobPostingDtlTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_50","SEA",[""])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_32","SEA",[""])+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("REQUISITION_NUMBER","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlReqCode">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("DATE_NEEDED","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlDateNeeded">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_4","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlOpenings">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlFTE">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("EMPLOYEE_STATUS","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlEmployeeStatus">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_3","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlProcessLevel">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_4","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlDepartment">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_7","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlSupervisor">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlPosition">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_9","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlJob">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_10","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlUnion">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("BARGAINING_UNIT","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlBargainingUnit">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlWorkSchedule">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("SHIFT","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlShift">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_12","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlContact">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlPhoneNbr">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_14","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlExtension">&nbsp;</span></td></tr>'
+	+ '<tr><th scope="row" class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlPhoneCountryCode">&nbsp;</span></td></tr>'
+	+ '</table>'
+	try 
+	{
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = jobDetailHtml;
+	}
+	catch(e) {}
+	self.DETAIL.stylePage();
+	if (!onsort)
+		self.DETAIL.setLayerSizes();
+	document.getElementById("DETAIL").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();
+}
+
+function FillDetail(n)
+{
+	var nextFunc = function()
+	{
+		activateTableRow("jobPostingsTbl",n,self.MAIN);	
+		try 
+		{
+			var tmpObj = jobPostings[n];
+			var jobTbl = self.DETAIL.document.getElementById("jobPostingDtlTbl");
+			jobTbl.setAttribute("summary", getSeaPhrase("TSUM_50","SEA",[tmpObj.description]));
+			jobTbl.caption.innerHTML = getSeaPhrase("TCAP_32","SEA",[tmpObj.description]);		
+			self.DETAIL.document.getElementById("dtlReqCode").innerHTML = (tmpObj.requisition)?tmpObj.requisition:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlDateNeeded").innerHTML = (tmpObj.date_needed)?tmpObj.date_needed:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlOpenings").innerHTML = (tmpObj.remaining_open)?tmpObj.remaining_open:'0';
+			self.DETAIL.document.getElementById("dtlFTE").innerHTML = (tmpObj.remaining_fte)?tmpObj.remaining_fte:'0';
+			self.DETAIL.document.getElementById("dtlEmployeeStatus").innerHTML = (tmpObj.app_status_description)?tmpObj.app_status_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlProcessLevel").innerHTML = (RelFound(tmpObj.process_level_name))?RelFound(tmpObj.process_level_name):'&nbsp;';
+			self.DETAIL.document.getElementById("dtlDepartment").innerHTML = (RelFound(tmpObj.department_name))?RelFound(tmpObj.department_name):'&nbsp;';
+			self.DETAIL.document.getElementById("dtlSupervisor").innerHTML = (tmpObj.supervisor_description)?tmpObj.supervisor_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlPosition").innerHTML = (tmpObj.position_description)?tmpObj.position_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlJob").innerHTML = (tmpObj.job_code_description)?tmpObj.job_code_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlUnion").innerHTML = (tmpObj.union_code_description)?tmpObj.union_code_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlBargainingUnit").innerHTML = (tmpObj.bargain_unit_description)?tmpObj.bargain_unit_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlWorkSchedule").innerHTML = (tmpObj.work_schedule_description)?tmpObj.work_schedule_description:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlShift").innerHTML = (tmpObj.shift)?tmpObj.shift:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlContact").innerHTML = (tmpObj.contact_first || tmpObj.contact_last)?tmpObj.contact_first+' '+tmpObj.contact_last:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlPhoneNbr").innerHTML = (tmpObj.wk_phone_nbr)?tmpObj.wk_phone_nbr:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlExtension").innerHTML = (tmpObj.wk_phone_ext)?tmpObj.wk_phone_ext:'&nbsp;';
+			self.DETAIL.document.getElementById("dtlPhoneCountryCode").innerHTML = (tmpObj.wk_phone_cntry)?tmpObj.wk_phone_cntry:'&nbsp;';
+			removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.DETAIL.getWinTitle()]));
+		}
+		catch(e) {}
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function SubmitApplications()
+{
+	emailList = new Array();
+	var jobs_selected = false;
+	var jobForm = self.MAIN.document.jobpostform;
+	if (jobPostings.length == 1)
+	{
+		if (jobForm.cbox.checked)
+			jobs_selected = true;
+	}
+	else
+	{
+		for (var i=0; i<jobPostings.length; i++)
+		{
+			if (jobForm.cbox[i].checked)
+			{
+				jobs_selected = true;
+				break;
+			}
+		}
+	}
+	if (!jobs_selected)
+	{
+		seaAlert(getSeaPhrase("JOB_OPENINGS_18","ESS"), null, null, "error");
+		return;
+	}
+	showWaitAlert(getSeaPhrase("JOB_OPENINGS_19","ESS"), DoApplication);
+}
+
+function DoApplication()
+{
+	var jobs_selected = false;
+	var jobForm = self.MAIN.document.jobpostform;
+	if (jobPostings.length == 1)
+	{
+		if (jobForm.cbox.checked)
+		{
+			jobForm.cbox.checked = false;
+			styleElement(jobForm.cbox)
+			jobs_selected = true;
+			ApplyForJob(0);
+		}
+	}
+	else
+	{
+		for (var i=0; i<jobPostings.length; i++)
+		{
+			if (jobForm.cbox[i].checked)
+			{
+				jobForm.cbox[i].checked = false;
+				styleElement(jobForm.cbox[i])
+				jobs_selected = true;
+				ApplyForJob(i);
+				break;
+			}
+		}
+	}
+	if (!jobs_selected)
+		ShowConfirm();
+}
+
+function ApplyForJob(n)
+{
+	var jobRec = jobPostings[n];
+	var agsObj = new AGSObject(authUser.prodline, "PA43.1");
+	agsObj.event = "CHANGE";
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.debug = false;
+	agsObj.field = "FC=C"
+	+ "&PJR-COMPANY=" + parseInt(authUser.company,10)
+	+ "&PJR-REQUISITION=" + escape(parseInt(jobRec.requisition,10))
+	+ "&LINE-FC1=A"
+	+ "&PRA-EMP-APP1=0"
+	+ "&PRA-APPLICANT1=" + parseInt(authUser.employee,10)
+	+ "&PQL-APP-STATUS1=WA"
+	+ "&PQL-DATE1=" + ymdtoday
+	+ "&PRA-DATE-APPLIED1=" + ymdtoday
+	+ "&PRA-HIRE-SOURCE1=WEBAPP"
+	agsObj.func = "parent.VerifyApplication(" + n + ")";
+	updatetype = "PRA";
+	AGS(agsObj,"FRAME1");
+}
+
+function VerifyApplication(n)
+{
+	var msgNbr = parseInt(self.lawheader.gmsgnbr, 10);
+	var jobRec = jobPostings[n];
+	// if no error was encountered (or if an error is returned that the applicant has already been submitted, ignore the error)
+	// try to submit the next application
+	if (msgNbr == 0 || msgNbr == 106)
+	{
+		emailList[emailList.length] = jobRec;
+		// submit the next job application in the list
+		DoApplication();
+	}
+	else
+	{
+		var errorMsg = getSeaPhrase("JOB_SUBMISSION_ERROR", "ESS")+" "+jobRec.description;
+		switch (msgNbr)
+		{
+			case 108:
+			case 123:
+				errorMsg += "\n\n" + getSeaPhrase("WEB_APPLICANT_STATUS_ERROR", "ESS");
+				break;
+			case 107:
+			case 124:
+				errorMsg += "\n\n" + getSeaPhrase("WEB_HIRE_SOURCE_ERROR", "ESS");
+				break;
+			default:
+				break;
+		}
+		errorMsg += "\n\n(" + self.lawheader.gmsg + ")\n\n" + getSeaPhrase("CONTACT_HR", "ESS");
+		seaAlert(errorMsg, null, null, "error");
+		// when an error is encountered, abort the remaining job application submissions.
+		if (emailList.length > 0)
+			ShowConfirm();
+		else
+			removeWaitAlert();
+	}
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (sortDirection == "<") // ascending sort
+	{
+		if (name1 < name2)
+			return -1;
+		else if (name1 > name2)
+			return 1;
+		else
+			return 0;
+	}
+	else // descending sort
+	{
+		if (name1 > name2)
+			return -1;
+		else if (name1 < name2)
+			return 1;
+		else
+			return 0;
+	}
+}
+
+function sortJobReqs(property)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){SortPajobreq(property);});
+}
+
+function SortPajobreq(property)
+{
+	if (sortProperty != property)
+		sortDirection = "<";
+	else
+		sortDirection = (sortDirection == "<") ? ">" : "<";	
+	sortProperty = property;
+	jobPostings.sort(sortByProperty);
+	DspPajobreq(true, property);
+}
+
+function RelFound(str)
+{
+	if (str == "**")
+		return "";
+	else
+		return str;
+}
+
+function EmailContents(modalDialog)
+{
+	var emailHtml = '<div class="dialoglabel" style="width:100%">'+getSeaPhrase("JOB_OPENINGS_20","ESS")+'</div>'
+	+ '<div style="width:100%;text-align:center">';
+	if (!modalDialog)
+	{
+		emailHtml += '<form styler="hidden"><span styler="hidden">'
+		+ uiButton(getSeaPhrase("CLOSE","ESS"),"parent.document.getElementById(\'dialog\').style.visibility=\'hidden\';return false",false,"ok")
+		+ '</span></form>';
+	}
+	emailHtml += '</div><div style="padding-left:20px">';
+	for (var i=0; i<emailList.length; i++)
+		emailHtml += EmailString(emailList[i].description, emailList[i].contact_nbr_email_address);
+	emailHtml += '</div><p/>';
+	return emailHtml;
+}
+
+function EmailString(job, contact_nbr_email_address)
+{
+	var emailStr = "";
+	if (NonSpace(contact_nbr_email_address) == 0)
+		emailStr += '<br/>'+job;
+	else 
+	{
+		var toolTip = job+' - '+getSeaPhrase("SEND_JOB_EMAIL","SEA");
+		emailStr += '<br/><a href="mailto:'+contact_nbr_email_address+'?subject='+escape(job,1)+'" styler="hyperlink" title="'+toolTip+'">'+job+'<span class="offscreen"> - '+getSeaPhrase("SEND_JOB_EMAIL","SEA")+'</span></a>';
+	}
+	return emailStr;
+}
+
+function ShowConfirm()
+{
+	if (styler.showInfor3 || styler.showInfor || styler.showLDS)
+	{
+		removeWaitAlert();
+		seaAlert(EmailContents(true), null, null, "alert");
+	}	
+	else
+	{
+		self.dialog.document.getElementById("paneHeader").innerHTML = getSeaPhrase("NOTIFICATION","ESS");
+		self.dialog.document.getElementById("paneBody").innerHTML = EmailContents();
+		self.dialog.stylePage();
+		self.dialog.setLayerSizes(true);
+		self.dialog.document.getElementById("paneBorder").style.top = "0px";
+		self.dialog.document.getElementById("paneBorder").style.margin = "0px";
+		document.getElementById("dialog").style.visibility = "visible";
+		removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.dialog.getWinTitle()]));
+	}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var detailFrame = document.getElementById("DETAIL");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.60) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.40) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.60) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.40) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;				
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.60) - 10;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = parseInt(winWidth*.40) - 10;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = parseInt(winWidth*.60) + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	detailFrame.style.width = parseInt(winWidth*.40) + "px";
+	detailFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.DETAIL.onresize && self.DETAIL.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.DETAIL.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.DETAIL.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.DETAIL.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		mainFrame.style.left = "";
+		mainFrame.style.right = "0px";	
+		detailFrame.style.left = "0px";
+		document.getElementById("dialog").style.left = "";
+		document.getElementById("dialog").style.right= "5px";
+	}
+	else
+		detailFrame.style.left = parseInt(winWidth*.60,10) + "px";	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="GetWebuser()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;height:464px;width:469px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="dialog" name="dialog" title="Secondary Content" level="3" tabindex="0" style="visibility:hidden;position:absolute;height:225px;width:375px;left:5px;top:64px" src="/lawson/xhrnet/ui/headerpane.htm" allowtransparency="true" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" title="Secondary Content" level="3" tabindex="0" style="visibility:hidden;position:absolute;height:464px;width:334px;left:469px;top:32px" src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="FRAME1" name="FRAME1" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/esslawheader.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/pajobreq.htm,v 1.17.2.68 2014/02/13 22:48:37 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

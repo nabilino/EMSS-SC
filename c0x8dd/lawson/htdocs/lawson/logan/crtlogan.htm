@@ -1,0 +1,260 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+
+<script src="/lawson/javascript/loganenv.js"></script>
+<script src="/lawson/javascript/dme.js"></script>
+<script Language=JavaScript>
+
+function replaceSpaces(str)
+{
+	var nstr = ""
+
+	for (var i=0;i < str.length;i++)
+	{
+		if (str.charAt(i) == " ")
+			nstr += "+"
+		else
+			nstr += str.charAt(i)
+	}
+	return nstr
+}
+
+function RmLeadSpace(Str)
+{
+	var TmpStr = ''
+
+	for (i = 0; i < Str.length; i++)
+	{
+		if (Str.substring(i, i+1) != ' ')
+    		TmpStr += Str.substring(i, i+1)	  
+	}	
+	return TmpStr
+}
+
+var FILEOBJ=''
+var FILEFLDOBJ=''
+var DOCFLDOBJ=''
+
+function LoadProds()
+{
+	var prods = new DMEObject("gen","prodline")
+	prods.field = "productline"
+	prods.out = "JAVASCRIPT"
+	prods.max = "100"
+	DME(prods,"prodobjs")
+}
+
+function DspProdline()
+{
+	window.systems.document.open()
+	window.systems.document.clear()
+	window.systems.document.close()
+
+	window.filelist.document.open()
+	window.filelist.document.clear()
+	window.filelist.document.close()
+
+	window.prodlines.document.clear()
+
+	var prodtxt = ''
+	prodtxt += '<html><body background=/lawson/images/backgrou/back3.gif><form name=prodsel><center>'
+	prodtxt += '<font size=4 color=white>Select a product</font><br>'
+	prodtxt += '<select name=prodsel onChange=\"parent.LoadSystems(document.prodsel.prodsel[document.prodsel.prodsel.selectedIndex].value)\">'
+	prodtxt += '<option>Products'
+
+	for (var i = 0;i < self.prodobjs.NbrRecs;i++)
+	{
+		for (j in self.prodobjs.record[i])
+		{
+//			if (PRODOBJ.record[i][j] == 'LOGAN'
+//			||	PRODOBJ.record[i][j] == 'GEN')
+//				continue;
+			if (self.prodobjs.record[i][j] == 'GEN')
+				continue;
+
+			prodtxt += '<option value=\"' + self.prodobjs.record[i][j] + '\">' + self.prodobjs.record[i][j]
+		}
+	}
+	prodtxt += '</select></form></body></html>'
+
+	window.prodlines.document.write(prodtxt)
+	window.prodlines.document.close()
+}
+
+var	GlbProd   = ''
+var	GlbSystem = ''
+var	GlbFile   = ''
+
+function LoadSystems(ProdLine)
+{
+	GlbProd = ProdLine
+
+	var syscall = new DMEObject("gen","system")
+	syscall.out = "JAVASCRIPT"
+	syscall.field = "systemcode;sysname"
+	syscall.key = ProdLine
+	syscall.max = "100"
+	DME(syscall,"sysobjs")
+}
+
+var oldimage=''
+function DspSystem()
+{
+	window.filelist.document.open()
+	window.filelist.document.clear()
+	window.filelist.document.close()
+
+	oldimage=''
+	window.systems.document.open()
+	window.systems.document.clear()
+
+	var systxt = ''
+	systxt += '<html><body link=white vlink=black background=/lawson/images/backgrou/back3.gif><center>'
+	systxt += '<font size=4 color=white>Select a system</font><hr>'
+	systxt += '<table border=0>'
+
+	window.systems.document.write(systxt)
+
+	tarrow = new Image()
+	warrow = new Image()
+	tarrow.src="/lawson/logan/trans.gif"
+	warrow.src="/lawson/logan/whitearrow.gif"
+	var sc =""
+	var sn =""
+
+	for (var i = 0; i < self.sysobjs.NbrRecs; i++)
+	{
+
+	    sc = sysobjs.record[i].systemcode
+	    sn = sysobjs.record[i].sysname
+		systxt  = '<tr><td><img border=0 src="' + tarrow.src + '"  name="' + sc + '"><td><b>'
+		systxt += '<a onmouseOver=parent.systems.document.images["' + sc + '"].src='
+		systxt +=  "'" + warrow.src + "'"    
+		systxt += ' onmouseOut=parent.systems.document.images["' + sc + '"].src='
+		systxt += '"/lawson/logan/trans.gif" ' 
+		systxt += ' href=\"javascript:parent.LoadFiles(\'' + GlbProd + '\',\'' + sc + '\',\'' + sn + '\')\">'
+		systxt += sn
+		systxt += '<td><img border=0 src=/lawson/logan/trans.gif name="' + sc + 'r"><b>'
+		systxt += '</a></td></tr>'
+		window.systems.document.write(systxt)
+
+	}
+	systxt = '</table></body></html>'
+
+	window.systems.document.write(systxt)
+	window.systems.document.close()
+}
+
+var SysDesc = ''
+
+function LoadFiles(ProdLine,System,SysName)
+{
+	GlbSystem = System
+
+	if (oldimage !='')
+		window.systems.document.images[oldimage+"r"].src="/lawson/logan/trans.gif"
+	
+	window.systems.document.images[System+"r"].src="/lawson/logan/whitearrow.gif" 
+	oldimage=System
+	
+	SysDesc = SysName
+
+	var filecall = "/cgi-lawson/logfilelist"
+	if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+		filecall += CGIExt
+	filecall += "?" + ProdLine + "+" + System
+  	FILEOBJ=window.open(filecall,"fileobjs")
+}
+
+function LoadCustom(filename)
+{
+	var custselcall = "/cgi-lawson/custsel"
+	if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+		custselcall += CGIExt
+	custselcall += "?" + GlbProd + "+" + filename
+  	FILEOBJ=window.open(custselcall,"filelist")
+}
+
+function DspFiledef()
+{
+	window.filelist.document.clear()
+
+	var filetxt = ''
+	filetxt += '<html><body link=maroon vlink=black bgcolor=#ffffff><center><b><font size=4>' + SysDesc
+	filetxt += ' Folders</b></font><table border=0><center>'
+	window.filelist.document.write(filetxt)
+
+	for (var i = 0;i < FILEOBJ.NbrRecs;i++)
+	{
+		filetxt  = '<tr>'
+		filetxt += '<td><b><a href=/cgi-lawson/dbdoc'
+		if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+			filetxt += CGIExt
+		filetxt += '?-n+' + GlbProd + '+' + GlbSystem + '+' + FILEOBJ.record[i].filename + '>'
+		filetxt += '<img border=0 src=/lawson/images/cubes/mdiamond.gif></a></td>'
+//		filetxt += "<td><b><a onClick=\"top.showWaitAlert('Loading Fields - Please Wait')\" href=\"/cgi-lawson/loganfields?" + GlbProd + "+" + FILEOBJ.record[i].filename + "\">"
+		filetxt += "<td><b><a href=\"/cgi-lawson/loganfields"
+		if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+			filetxt += CGIExt
+		filetxt += "?" + GlbProd + "+" + FILEOBJ.record[i].filename + "\">"
+		filetxt += FILEOBJ.record[i].dspname + '</a></td>'
+		i++
+
+		if (i < FILEOBJ.NbrRecs)
+		{
+			filetxt += '<td><b><a href=/cgi-lawson/dbdoc'
+			if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+				filetxt += CGIExt
+			filetxt += '?-n+' + GlbProd + '+' + GlbSystem + '+' + FILEOBJ.record[i].filename + '>'
+			filetxt += '<img border=0 src=/lawson/images/cubes/mdiamond.gif></a></td>'
+			filetxt += '<td><b><a href=/cgi-lawson/loganfields'
+			if (typeof(CGIExt) != null && typeof(CGIExt) != 'undefined')
+				filetxt += CGIExt
+			filetxt += '?' + GlbProd + '+' + FILEOBJ.record[i].filename + '>'
+			filetxt += FILEOBJ.record[i].dspname + '</a></td>'
+		}
+		filetxt += '</tr>'
+		window.filelist.document.write(filetxt)
+	}
+	filetxt = '</table></body></html>'
+
+	window.filelist.document.write(filetxt)
+	window.filelist.document.close()
+}
+
+function DspFrames()
+{
+	document.write("<FRAMESET cols=\"18%,82%\" frameborder=no border=0 onLoad=LoadProds()>")
+	document.write("	<FRAMESET rows=\"80,*\" frameborder=no border=0>")
+   	document.write("		<FRAME SRC=about:blank scrolling=no   name=prodlines border=0>")
+    document.write("		<FRAME SRC=about:blank scrolling=auto name=systems   border=0>")
+	document.write("	</FRAMESET>")
+	document.write("	<FRAMESET rows=\"100%,*\" frameborder=no border=0>")
+    document.write("		<FRAME SRC=about:blank  name=filelist scrolling=auto border=0>")
+	document.write("		<FRAMESET cols=\"0,0,0\" frameborder=no border=0>")
+    document.write("			<FRAME SRC=maroon.htm name=prodobjs scrolling=no border=0>")
+    document.write("			<FRAME SRC=maroon.htm name=sysobjs  scrolling=no border=0>")
+    document.write("			<FRAME SRC=maroon.htm name=fileobjs scrolling=no border=0>")
+	document.write("		</FRAMESET>")
+	document.write("	</FRAMESET>")
+	document.write("</FRAMESET>")
+}
+
+DspFrames()
+
+</script>
+
+<body>
+</body>
+
+
+
+
+
+
+

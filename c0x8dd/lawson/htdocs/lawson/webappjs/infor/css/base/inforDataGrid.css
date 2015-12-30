@@ -1,0 +1,202 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforDataGrid.css,v 1.1.2.15.2.4 2014/02/18 16:42:35 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+caption.tableHeader
+{
+	color: #62a3cc;
+	font-size: 100%;
+	font-family: Arial;
+	font-weight: bold;
+	text-align: left;
+}
+table.inforDataGrid
+{
+	background-color: #f0f0f0;
+	border: 1px solid gray;
+}
+th.inforDataGridColumnHeader
+{
+    background-color: #c4c4c4;
+    background-image: none;
+    border-left: 1px solid #999999;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #666666;
+    border-top: 0px;
+    font-family: Arial;
+    font-size: 11px;
+    font-weight: normal;
+    height: 22px;
+    line-height: 22px;
+    margin: 0;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: relative;
+    cursor: default;
+    white-space: nowrap;
+}
+th.inforDataGridColumnHeaderOver
+{
+    background-color: #999999;
+    background-image: none;
+    border-left: 1px solid #999999;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #666666;
+    border-top: 0px;
+    font-family: Arial;
+    font-size: 11px;
+    font-weight: normal;
+    height: 22px;
+    line-height: 22px;
+    margin: 0;
+    overflow: hidden;
+    padding: 2px 4px;
+    position: relative;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGrid th span.inforDataGridColumnName
+{
+    color: #000000;
+    font-size: 11px;
+    font-family: Arial;
+    font-size: 11px;
+    font-weight: normal;
+    line-height: 22px;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGrid th span.inforDataGridColumnNameSorted
+{
+    color: #000000;
+    font-size: 11px;
+    font-family: Arial;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 22px;
+    cursor: default;
+    white-space: nowrap;
+}
+table.inforDataGrid th span.inforSortIndicatorAsc
+{
+	background: url("../../images/sort_indicators_sprite.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 7px;
+    margin-left: 4px;
+    width: 5px;
+}
+table.inforDataGrid th span.inforSortIndicatorDesc
+{
+	background: url("../../images/sort_indicators_sprite.png");
+    background-position: 0px -16px;
+    display: inline-block;
+    height: 7px;
+    margin-left: 4px;
+    width: 5px;
+}
+table.inforDataGrid td
+{
+	vertical-align: middle;
+	overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #b4b4b4;
+    color: #000000;
+    font-family: Arial;
+    font-size: 11px;
+    height: 23px;
+    padding-left: 4px !important;
+    padding-right: 4px;
+/*    line-height: 22px; */
+	white-space: nowrap;
+	cursor: default;
+}
+table.inforDataGrid td td
+{
+    border: none;
+}
+td.inforDataGridCellEditable
+{
+	background-color: #ffffff !important;
+	vertical-align: middle;
+	overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid #b4b4b4;
+    color: #000000;
+    font-family: Arial;
+    font-size: 11px;
+    height: 23px;
+    padding-left: 4px !important;
+    padding-right: 4px;
+    line-height: 22px;
+	white-space: nowrap;
+	cursor: default;
+}
+tr.inforDataGridRow
+{
+    background-color: transparent;
+}
+tr.inforDataGridRowOver
+{
+    background-color: #ebeff2 !important;
+}
+tr.inforDataGridRowOver td
+{
+    background-color: #ebeff2 !important;
+}
+/* drilldown */
+.inforDrillDown
+{
+    background-image: url("../../images/drilldown_sprite.png");
+    background-position: 0px 0px;
+    display: inline-block;
+    height: 14px;
+    margin-bottom: -4px;
+    margin-left: -1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    width: 14px;
+}
+.inforDrillDownOver
+{
+    background-image: url("../../images/drilldown_sprite.png");
+    background-position: -14px 0px;
+    display: inline-block;
+    height: 14px;
+    margin-bottom: -4px;
+    margin-left: -1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    width: 14px;
+}
+.inforDrillDownActive
+{
+    background-image: url("../../images/drilldown_sprite.png");
+    background-position: -28px 0px;
+    display: inline-block;
+    height: 14px;
+    margin-bottom: -4px;
+    margin-left: -1px;
+    margin-top: 3px;
+    margin-bottom: 2px;
+    width: 14px;
+}

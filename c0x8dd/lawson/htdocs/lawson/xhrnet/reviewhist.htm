@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Review History</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var reviewHist = new Array();
+var reviewSortProperty = "";
+var reviewSortDirection = "<";
+
+function GetWebuser()
+{
+	authenticate("frameNm='FRAME1'|funcNm='GetReview()'|desiredEdit='EM'");
+}
+
+function GetReview()
+{
+	var nextFunc = function()
+	{
+		stylePage();
+		var title = getSeaPhrase("REVIEW_HISTORY","ESS");
+		setWinTitle(title);
+		setTaskHeader("header",title,"Employment");
+		reviewHist = new Array();
+		reviewComments = new Array();
+		var dmeObj = new DMEObject(authUser.prodline, "review");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "revset3";
+		dmeObj.field = "sched-date;actual-date;last-name;label-name;rating.description;review-type.description;seq-nbr;employee";
+		dmeObj.key = parseInt(authUser.company,10)+"="+parseInt(authUser.employee,10);
+		dmeObj.max = "600";
+		dmeObj.func = "GetMoreRecords()";
+		DME(dmeObj, "FRAME1");
+	};
+	showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+}
+
+function GetMoreRecords()
+{
+	reviewHist = reviewHist.concat(self.FRAME1.record);
+	if (self.FRAME1.Next)
+		self.FRAME1.location.replace(self.FRAME1.Next);
+	else
+		SortReviewHist("sched_date","<");
+}
+
+function DspReviewHist(onsort, property)
+{
+	// Review History Main Frame
+	var toolTip = getSeaPhrase("SORT_BY_SCHEDULED_DATE","ESS");
+	var revHistHtml = '<table id="revHistTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_78","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("REVIEW_HISTORY","ESS")+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortHistory(\'sched_date\');return false" title="'+toolTip+'">'+getSeaPhrase("SCHEDULED_DATE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_ACTUAL_DATE","ESS");
+	revHistHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortHistory(\'actual_date\');return false" title="'+toolTip+'">'+getSeaPhrase("ACTUAL_DATE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_TYPE","ESS");
+	revHistHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortHistory(\'review_type_description\');return false" title="'+toolTip+'">'+getSeaPhrase("TYPE","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_REVIEWED_BY","ESS");
+	revHistHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortHistory(\'last_name\');return false" title="'+toolTip+'">'+getSeaPhrase("REVIEWED_BY","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th>'
+	toolTip = getSeaPhrase("SORT_BY_RATING","ESS");
+	revHistHtml += '<th scope="col" class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:;" onclick="parent.sortHistory(\'rating_description\');return false" title="'+toolTip+'">'+getSeaPhrase("QUAL_9","ESS")+'<span class="offscreen"> - '+getSeaPhrase("SORT_BY_X","SEA")+'</span></a></th></tr>'
+	for (var i=0; i<reviewHist.length; i++)
+	{
+		var tmpObj = reviewHist[i];
+		var tip = getSeaPhrase("VIEW_REVIEW_COMMENTS","SEA",[tmpObj.review_type_description,tmpObj.sched_date]);
+		revHistHtml += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'+((tmpObj.sched_date)?tmpObj.sched_date:'&nbsp;')+'</td>'
+		revHistHtml += '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((tmpObj.actual_date)?tmpObj.actual_date:'&nbsp;')+'</td>'
+		revHistHtml += '<td class="plaintablecellborder" nowrap><a href="javascript:parent.GetRevHistComments('+i+');" title="'+tip+'">'
+		revHistHtml += ((tmpObj.review_type_description)?tmpObj.review_type_description:'&nbsp;')+'<span class="offscreen"> - '+tip+'</span></a></td>'
+		revHistHtml += '<td class="plaintablecellborder" nowrap>'+((tmpObj.label_name)?tmpObj.label_name:'&nbsp;')+'</td>'
+		revHistHtml += '<td class="plaintablecellborder" nowrap>'+((tmpObj.rating_description)?tmpObj.rating_description:'&nbsp;')+'</td></tr>'
+	}
+	revHistHtml += '</table>'
+	self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REVIEWS","ESS");
+	if (reviewHist.length == 0)
+		self.MAIN.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft">'+getSeaPhrase("NOTHING_TO_DISPLAY","ESS")+'</div>';
+	else
+		self.MAIN.document.getElementById("paneBody").innerHTML = revHistHtml;
+	self.MAIN.stylePage();
+	if (onsort)
+		self.MAIN.styleSortArrow("revHistTbl", property, (reviewSortDirection=="<") ? "ascending" : "descending");
+	else
+		self.MAIN.setLayerSizes(true);
+	document.getElementById("MAIN").style.visibility = "visible";
+	// Review History Detail Frame
+	try 
+	{
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMMENTS","ESS");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = '&nbsp;';
+		self.DETAIL.stylePage();
+		self.DETAIL.setLayerSizes();
+	}
+	catch(e) {}
+	document.getElementById("DETAIL").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.DETAIL.getWinTitle()]));
+	fitToScreen();
+}
+
+function GetRevHistComments(n)
+{
+	var nextFunc = function()
+	{
+		activateTableRow("revHistTbl",n,self.MAIN);
+		if (typeof(reviewHist[n].review_comments) == "undefined")
+		{
+			reviewHist[n].review_comments = "";
+			var tmpObj = reviewHist[n];
+			var dmeObj = new DMEObject(authUser.prodline, "pacomments");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.field = "cmt-text";
+			dmeObj.key = parseInt(authUser.company,10)+"=0=RV="+parseInt(tmpObj.employee,10)+"="+escape(" ")+"="+escape(" ")+"="+parseInt(tmpObj.seq_nbr);
+			dmeObj.max = "600";
+			dmeObj.func = "GetMoreComments("+n+")";
+			DME(dmeObj, "FRAME1");
+		}
+		else
+			DspRevHistComments(n);
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function GetMoreComments(n)
+{
+	var cmtRecs = self.FRAME1.record;
+	for (var j=0; j<cmtRecs.length; j++)
+		reviewHist[n].review_comments += cmtRecs[j].cmt_text+' ';
+	if (self.FRAME1.Next)
+		self.FRAME1.location.replace(self.FRAME1.Next);
+	else
+		DspRevHistComments(n);
+}
+
+function DspRevHistComments(n)
+{
+	// Insert comment text into the review history comment window
+	try 
+	{
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMMENTS","ESS")+' - '+reviewHist[n].review_type_description;
+		if (reviewHist[n].review_comments)
+			self.DETAIL.document.getElementById("paneBody").innerHTML = '<div style="padding:5px">'+reviewHist[n].review_comments+'</div>';
+		else
+			self.DETAIL.document.getElementById("paneBody").innerHTML = '<div style="padding:5px">'+getSeaPhrase("NO_COMMENTS","ESS")+'</div>';
+		self.DETAIL.stylePage();
+		self.DETAIL.setLayerSizes();
+	}
+	catch(e) {}
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.DETAIL.getWinTitle()]));
+	fitToScreen();
+}
+
+function sortHistory(property, direction)
+{
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){SortReviewHist(property, direction);});
+}
+
+function SortReviewHist(property, direction)
+{
+	if (direction)
+		reviewSortDirection = direction;
+	else if (reviewSortProperty != property)
+		reviewSortDirection = "<";
+	else
+	{
+		if (reviewSortDirection)
+			reviewSortDirection = (reviewSortDirection=="<")?">":"<";
+		else
+			reviewSortDirection = (direction)?direction:"<";
+	}
+	reviewSortProperty = property;
+	reviewHist.sort(sortByProperty);
+	DspReviewHist(true,property);
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[reviewSortProperty];
+	var name2 = obj2[reviewSortProperty];
+	if (reviewSortProperty == "sched_date" || reviewSortProperty == "actual_date")
+	{
+		name1 = formjsDate(formatDME(name1));
+		name2 = formjsDate(formatDME(name2));
+	}
+	if (reviewSortDirection == "<") // ascending sort
+	{
+		if (name1 < name2)
+			return -1;
+		else if (name1 > name2)
+			return 1;
+		else
+			return 0;
+	}
+	else // descending sort
+	{
+		if (name1 > name2)
+			return -1;
+		else if (name1 < name2)
+			return 1;
+		else
+			return 0;
+	}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var detailFrame = document.getElementById("DETAIL");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentTopHeightBorder;
+	var contentTopHeight;
+	var contentBottomHeightBorder;
+	var contentBottomHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;	
+		contentTopHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winHeight*.50,10) - 65 : parseInt(winHeight*.50,10) - 65;
+		contentTopHeightBorder = contentTopHeight + 30;
+		contentBottomHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winHeight*.50,10) - 35 : parseInt(winHeight*.50,10) - 35;
+		contentBottomHeightBorder = contentBottomHeight + 30;		
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;	
+		contentTopHeight = parseInt(winHeight*.50,10) - 75;	
+		contentTopHeightBorder = contentTopHeight + 30;
+		contentBottomHeight = parseInt(winHeight*.50,10) - 45;	
+		contentBottomHeightBorder = contentBottomHeight + 30;	
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;	
+		contentTopHeight = parseInt(winHeight*.50,10) - 60;
+		contentTopHeightBorder = contentTopHeight + 24;
+		contentBottomHeight = parseInt(winHeight*.50,10) - 30;
+		contentBottomHeightBorder = contentBottomHeight + 24;			
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = parseInt(winHeight*.50,10) + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentTopHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentTopHeight + "px";
+	}
+	catch(e) {}
+	detailFrame.style.top = parseInt(winHeight*.50,10) + "px";
+	detailFrame.style.width = winWidth + "px";
+	detailFrame.style.height = parseInt(winHeight*.50,10) + "px";	
+	try
+	{
+		if (self.DETAIL.onresize && self.DETAIL.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.DETAIL.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.DETAIL.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.DETAIL.document.getElementById("paneBorder").style.height = contentBottomHeightBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.DETAIL.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.DETAIL.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="GetWebuser()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" src="/lawson/xhrnet/ui/header.htm" style="visibility:hidden;position:absolute;top:0px;left:0px;width:803px;height:32px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:304px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" title="Secondary Content" level="3" tabindex="0" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;top:336px;left:0px;width:803px;height:160px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="FRAME1" name="FRAME1" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/reviewhist.htm,v 1.11.2.45 2014/02/12 23:38:24 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

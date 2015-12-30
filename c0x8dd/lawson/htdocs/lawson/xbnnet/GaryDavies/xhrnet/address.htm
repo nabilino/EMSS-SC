@@ -1,0 +1,677 @@
+<html>
+<head><title>Address Change</title>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon.js"></script>
+<script src="/lawson/xhrnet/fica.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/xhrnet/depinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script>
+var UpdateFlag = false;
+var pgmname = "address";
+var Count = 0;
+var thisDep = new Object();
+var EmpInfo = new Object();
+var visibilityFlags = new Array();
+EmpInfo.employee_work_country = "";
+// Default all access to "Deny" except for Life Events Benefits Enrollment
+var autodeposit = false;
+var withholding = false;
+var dependents = false;
+var emergency = false;
+//PT 161694
+var UpdateHomeAddress = false;
+var ReloadDone = true;
+var updateAll = false;
+var AddType = "";
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+if (fromTask)
+{
+	AddType = getVarFromString("addresstype",fromTask);
+}
+
+function OpenMove()
+{
+	// Check if a parent or opener document has already done an authenticate,
+	// otherwise go get the webuser info.
+	if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+	{
+		authUser = parent.authUser;
+		if (typeof(parent.EmpInfo) != "undefined" && parent.EmpInfo != null)
+			EmpInfo = parent.EmpInfo;
+		try {
+			profileHandler.setLoganenvVars();
+		}
+		catch(e) {}
+	}
+	else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+	{
+		authUser = opener.authUser;
+		if (typeof(opener.EmpInfo) != "undefined" && opener.EmpInfo != null)
+			EmpInfo = opener.EmpInfo;
+		try {
+			profileHandler.setLoganenvVars();
+		}
+		catch(e) {}
+	}
+	else if (typeof(authUser) == "undefined" || authUser == null)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='GetEmdepend()'|officeObjects=true|desiredEdit='EM'");
+		return;
+	}
+	GetEmdepend()
+}
+
+function GetEmdepend()
+{
+    removeHelpIcon();
+	GetDepInfo(authUser.prodline,authUser.company,authUser.employee,"","MoveEvent()","Active");
+}
+
+function MoveEvent()
+{
+	if (DepInfo.length > 0) EmpInfo.employee_work_country = DepInfo[0].employee_work_country
+
+	if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var Bookmarks = authUser.OfficeObject;
+
+		//PT 160400
+		for (var i=0; i<authUser.NbrOfOfficeObj; i++)
+		{
+			var bkName = Bookmarks[i].name.toUpperCase(); // the Lawson-assigned task name
+			var bkLawName = (Bookmarks[i].lawnm) ? Bookmarks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+
+			//if IOS version < 802 then there Lawson name property woun't be available so need to check that case
+			if (bkLawName!=""){
+
+				if (bkLawName == "XMLHRAUTODEPOSIT1" || bkLawName == "XMLHRAUTODEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkLawName == "XMLHRWITHHOLDING1" || bkLawName == "XMLHRWITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if (bkLawName == "XMLHRDEPENDENTS1" || bkLawName == "XMLHRDEPENDENTS")
+				{
+					// grant access to dependents
+					dependents = true;
+				}
+				else if (bkLawName == "XMLHREMERGENCY1" || bkLawName == "XMLHREMERGENCY")
+				{
+					// grant access to emergency contacts
+					emergency = true;
+				}
+			}
+			else{
+
+				if (bkName == "DIRECT DEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkName == "TAX WITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+				else if (bkName == "DEPENDENTS")
+				{
+					// grant access to dependents
+					dependents = true;
+				}
+				else if (bkName == "EMERGENCY")
+				{
+					// grant access to emergency contacts
+					emergency = true;
+			 	}
+			}
+		}
+	}
+
+	VerifyAutoDeposit();
+}
+
+function VerifyAutoDeposit()
+{
+ 	// If there is an AUTODEPOSIT task set to "I" ("Include"), verify the employee's
+	// work country before displaying in the list of items the employee can update.
+    if (autodeposit)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) ||
+			(DepInfo.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+		{
+			autodeposit = (EmpInfo.employee_work_country!="US"&&EmpInfo.employee_work_country!="CA")?false:true;
+		}
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",
+				"employee.work-country;","CheckEmpWorkCountry(\"autodeposit\",true)");
+			return;
+		}
+	}
+
+	VerifyWithholding();
+}
+
+function VerifyWithholding()
+{
+	// If there is a WITHHOLDING task set to "I" ("Include"), verify the employee's
+	// work country before displaying in the list of items the employee can update.
+    if (withholding)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) ||
+			(DepInfo.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+		{
+			withholding = (EmpInfo.employee_work_country!="US")?false:true;
+		}
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",
+				"employee.work-country;","CheckEmpWorkCountry(\"withholding\",true)");
+			return;
+		}
+	}
+
+	DrawMoveScreen();
+}
+
+function CheckEmpWorkCountry(taskdesc, next)
+{
+	switch(taskdesc)
+	{
+		case "autodeposit":
+			autodeposit = (EmpInfo.employee_work_country!="US"&&EmpInfo.employee_work_country!="CA")?false:true;
+			if (next) VerifyWithholding();
+			break;
+		case "withholding":
+			withholding = (EmpInfo.employee_work_country!="US")?false:true;
+			if (next) DrawMoveScreen();
+			break;
+	}
+}
+
+function DrawMoveScreen()
+{
+	var MoveContent = '<table id="relatedLinksTbl" border="0" cellspacing="0" cellpadding="0" styler="list">'
+	+ '<tr><th>&nbsp;</th><th>&nbsp;</th></tr>'
+
+	if (dependents && DepInfo.length > 0)
+	{
+		MoveContent += '<tr><td align="right" valign="top">'
+		MoveContent += uiCheckmarkIcon("dependentaddress_checkmark","visibility:hidden")
+		MoveContent += '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.OpenDepend()>'
+		MoveContent += parent.getSeaPhrase("LIFE_EVENTS_4","ESS") + '</a></td>'
+	}
+
+	if (autodeposit)
+	{
+		MoveContent += '<tr><td align="right" valign="top">'
+		MoveContent += uiCheckmarkIcon("directdeposit_checkmark","visibility:hidden")
+		MoveContent += '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.Bank()>'
+		MoveContent += parent.getSeaPhrase("LIFE_EVENTS_1","ESS") + '</a></td>'
+	}
+
+	if (emergency)
+	{
+		MoveContent += '<tr><td align="right" valign="top">'
+		MoveContent += uiCheckmarkIcon("emergencycontacts_checkmark","visibility:hidden")
+		MoveContent += '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.Emergency()>'
+		MoveContent += parent.getSeaPhrase("LIFE_EVENTS_3","ESS") + '</a></td></tr>'
+	}
+
+	if (withholding)
+	{
+		MoveContent += '<tr><td align="right" valign="top">'
+		MoveContent += uiCheckmarkIcon("w4form_checkmark","visibility:hidden")
+		MoveContent += '</td><td class="fieldlabel" style="text-align:left"><a href=javascript:parent.OpenW4()>'
+		MoveContent += parent.getSeaPhrase("LIFE_EVENTS_2","ESS") + '</a></td>'
+	}
+
+	MoveContent += '<tr><td/><td align="left">'
+	//MoveContent += uiButton(parent.getSeaPhrase("CLOSE","ESS"),"parent.CloseHomeAddress();return false",false,"closebtn")
+	MoveContent += '</td></tr></table>'
+
+	self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("ADDL_CHANGES","ESS")
+	self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:20px;padding-right:20px;padding-top:20px;padding-bottom:20px">'
+	+'<div class="fieldlabelbold">'+parent.getSeaPhrase("HOME_ADDR_43","ESS")+'</div>'
+	+'<p/><div style="padding-left:20px">'+MoveContent+'</div>';
+
+	self.MAIN.setLayerSizes();
+	self.MAIN.stylePage();
+
+	// if this task has been launched as a related link, remove any processing message
+	if (typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+}
+
+function CloseHomeAddress()
+{
+	try {
+		parent.location.replace("/lawson/xhrnet/ui/logo.htm");
+	}
+	catch(e) {}
+}
+
+function setImageVisibility(imgID,visibleState)
+{
+	var imgs = window.MAIN.document.images;
+	var i=0;
+	var found = false;
+	while (i<imgs.length && !found)
+	{
+		if(imgs[i].id == imgID)
+		{
+			found = true;
+			imgs[i].style.visibility = visibleState;
+		}
+		i++;
+	}
+}
+
+function toggleCheckMarksVisibility(visibleState)
+{
+	var imgs = window.MAIN.document.images;
+	var i=0;
+	var j=0;
+
+	while (i<imgs.length)
+	{
+		if(imgs[i].id.indexOf("checkmark") != -1)
+		{
+			if(visibleState == "hidden")
+			{
+				//juanms: save the current visibility state of the image first, then hide it
+				visibilityFlags[j] = imgs[i].style.visibility;
+				imgs[i].style.visibility = "hidden";
+			}
+			else
+			{
+				//juanms: set the visibility state of the image according to it's previous visibility state
+				imgs[i].style.visibility = (visibilityFlags[j]) ? visibilityFlags[j] : "hidden";
+			}
+			j++;
+		}
+		i++;
+	}
+}
+
+function OpenDepend()
+{
+	//setImageVisibility("dependentaddress_checkmark","visible");
+	//PT 161694
+	UpdateFlag = false;
+	UpdateHomeAddress = false;
+	ReloadDone = false
+	ReloadEmdepend(false);
+}
+
+function confirmDependentUpdate()
+{
+	if (styler && styler.showLDS && typeof(window["DialogObject"]) == "function")
+	{
+	    window.DialogObject.prototype.getPhrase = function(phrase)
+        {
+			if (!userWnd && typeof(window["findAuthWnd"]) == "function")
+			{
+		    	userWnd = findAuthWnd(true);
+	        }
+
+	        if (userWnd && userWnd.getSeaPhrase)
+	        {
+		    	var retStr = userWnd.getSeaPhrase(phrase.toUpperCase(), "ESS");
+		    	return (retStr != "") ? retStr : phrase;
+			}
+			else
+			{
+			    return phrase;
+			}
+     	}
+
+      	var messageDialog = new window.DialogObject("/lawson/webappjs/", null, styler);
+		messageDialog.pinned = true;
+       	messageDialog.getPhrase = function(phrase)
+       	{
+			if (!userWnd && typeof(window["findAuthWnd"]) == "function")
+			{
+		    	userWnd = findAuthWnd(true);
+	        }
+
+	        if (userWnd && userWnd.getSeaPhrase)
+	        {
+		    	var retStr = userWnd.getSeaPhrase(phrase.toUpperCase(), "TE");
+		    	return (retStr != "") ? retStr : phrase;
+			}
+			else
+			{
+			    return phrase;
+			}
+      	}
+
+      	var msgReturn = messageDialog.messageBox(parent.getSeaPhrase("DEP_49","ESS"), "yesno", "question", window, false, "", fireFoxUpdateAllDeps);
+
+       	if (typeof(msgReturn) == "undefined")
+       	{
+        	return;
+       	}
+
+		UpdateAllDepsAction(msgReturn);
+	}
+	else
+	{
+		var dialogHtml = '<form><center>'
+		+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+		+ '<tr>'
+    	+ '<td class="fieldlabelbold" style="text-align:left">'+parent.getSeaPhrase("DEP_49","ESS")+'</td>'
+    	+ '</tr>'
+    	+ '</table>'
+    	+ '<br/><br/>'
+   		+ '<input type="radio" name="yesorno" value="Y" checked>'+parent.getSeaPhrase("YES","ESS")
+    	+ '<input type="radio" name="yesorno" value="N">'+parent.getSeaPhrase("NO","ESS")
+    	+ '<p align="center">'
+    	+ uiButton(parent.getSeaPhrase("CONTINUE","ESS"),"parent.SetDependent(this.form);return false")
+    	+ uiButton(parent.getSeaPhrase("CANCEL","ESS"),"parent.hideConfirmDialog();return false")
+    	+ '</p>'
+    	+ '</center></form>'
+
+		self.dialog.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("DEP_1","ESS")
+		self.dialog.document.getElementById("paneBody").innerHTML = '<div class="fieldlabel" style="text-align:left">'
+		+ dialogHtml+'</div>';
+		self.dialog.stylePage();
+		self.dialog.setLayerSizes(true);
+		self.dialog.document.getElementById("paneBorder").style.top = "0px";
+		self.dialog.document.getElementById("paneBorder").style.margin = "0px";
+		self.dialog.document.getElementById("paneBody").style.overflow = "hidden";
+		self.MAIN.document.getElementById("relatedLinksTbl").style.visibility = "hidden";
+		toggleCheckMarksVisibility("hidden");
+		document.getElementById("dialog").style.visibility = "visible";
+	}
+
+	// if this task has been launched as a related link, remove any processing message
+	if (typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+}
+
+function fireFoxUpdateAllDeps(msgWin)
+{
+    UpdateAllDepsAction(msgWin.returnValue);
+}
+
+function UpdateAllDepsAction(action)
+{
+	processDependentChoice(action.charAt(0).toUpperCase());
+}
+
+function showDependentsTask(refresh)
+{
+	if (refresh || parent.fullrelatedtask.location.href.indexOf("dependents.htm")==-1)
+   	{
+		if (typeof(parent.showWaitAlert) == "function")
+			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/dependents.htm?from=homeaddress");
+   	}
+   	parent.document.getElementById("left").style.visibility = "hidden";
+   	parent.document.getElementById("right").style.visibility = "hidden";
+   	parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+}
+
+function OpenW4()
+{
+   	if (parent.fullrelatedtask.location.href.indexOf("w4.htm")==-1)
+   	{
+   		parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/w4/w4.htm?from=homeaddress");
+   	}
+   	parent.document.getElementById("left").style.visibility = "hidden";
+   	parent.document.getElementById("right").style.visibility = "hidden";
+   	parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+}
+
+function Bank()
+{
+    if (parent.fullrelatedtask.location.href.indexOf("directdeposit.htm")==-1)
+   	{
+   		if (typeof(parent.showWaitAlert) == "function")
+			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/directdeposit/directdeposit.htm?from=homeaddress");
+   	}
+   	parent.document.getElementById("left").style.visibility = "hidden";
+   	parent.document.getElementById("right").style.visibility = "hidden";
+   	parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+}
+
+function Emergency()
+{
+   	if (parent.fullrelatedtask.location.href.indexOf("emergcnt.htm")==-1)
+   	{
+   		if (typeof(parent.showWaitAlert) == "function")
+			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   		parent.fullrelatedtask.location.replace("/lawson/xhrnet/emergcnt.htm?from=homeaddress");
+   	}
+   	parent.document.getElementById("left").style.visibility = "hidden";
+   	parent.document.getElementById("right").style.visibility = "hidden";
+   	parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   	parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+}
+
+function SetDependent(formObj)
+{
+	var flag = "N";
+
+	for (var i=0; i<formObj.yesorno.length; i++)
+	{
+		if (formObj.yesorno[i].checked)
+		{
+			flag = formObj.yesorno[i].value;
+			break;
+		}
+	}
+
+	hideConfirmDialog();
+    processDependentChoice(flag);
+}
+
+function processDependentChoice(flag)
+{
+	Count = 0;
+
+  	if (flag == "N")
+  	{
+  		//PT 161694
+  	  	if (DepInfo.length > 0)
+  	  	{
+  	    	UpdateHomeAddress = true;
+  	  		UpdateFlag = false;
+			if (typeof(parent.showWaitAlert) == "function")
+				parent.showWaitAlert(parent.getSeaPhrase("PROCESSING_WAIT","ESS"));
+      		UpdateDepend(true);
+      	}
+      	else
+      	{
+       		showDependentsTask(false);
+  		}
+  	}
+  	else
+  	{
+  		if (DepInfo.length > 0)
+	  	{
+			UpdateFlag = false;
+		  	UpdateHomeAddress = false;
+			if (typeof(parent.showWaitAlert) == "function")
+				parent.showWaitAlert(parent.getSeaPhrase("PROCESSING_WAIT","ESS"));
+      		UpdateDepend(true);
+  		}
+	  	else
+	  	{
+		 	parent.seaAlert(parent.getSeaPhrase("DEP_0","ESS"));
+		}
+	}
+}
+
+function hideConfirmDialog()
+{
+	self.dialog.document.forms[0].reset();
+   	self.MAIN.document.getElementById("relatedLinksTbl").style.visibility = "visible";
+   	toggleCheckMarksVisibility("visible");
+   	document.getElementById("dialog").style.visibility = "hidden";
+}
+
+function UpdateDepend(updateAll)
+{
+	updateAll = (updateAll)?true:false;
+   	thisDep = DepInfo[Count];
+
+	//PT 161694
+	if (UpdateHomeAddress && thisDep.emp_address == "H")
+    {
+    	var pObj       = new AGSObject(authUser.prodline, "HR13.1");
+		pObj.event     = "CHANGE"
+		pObj.rtn       = "MESSAGE"
+		pObj.longNames = true
+		pObj.tds       = false
+		pObj.field     = "FC=C"
+				   	   + "&EMD-COMPANY=" + parseInt(authUser.company,10)
+				       + "&EMD-EMPLOYEE=" + parseInt(authUser.employee,10)
+				       + "&EMD-SEQ-NBR=" + parseInt(thisDep.seq_nbr,10)
+				       + "&EMD-EMP-ADDRESS=N"
+				       + "&EMD-ADDR1=" + escape(EmpInfo.addr1,1)
+	    			   + "&EMD-ADDR2="   	   + escape(EmpInfo.addr2,1)
+							 + "&EMD-ADDR3="   	   + escape(EmpInfo.addr3,1)
+							 + "&EMD-ADDR4="   	   + escape(EmpInfo.addr4,1)
+						   + "&EMD-CITY="    	   + escape(EmpInfo.city,1)
+		           + "&EMD-STATE="   	   + escape(EmpInfo.state,1)
+		           + "&EMD-ZIP="     	   + escape(EmpInfo.zip,1)
+		           + "&EMD-COUNTRY-CODE=" + escape(EmpInfo.country_code,1)
+		if(thisDep.hm_phone_nbr == "")
+		{
+			pObj.field  =  pObj.field  + "&EMD-HM-PHONE-CNTRY=" + escape(EmpInfo.paemployee_hm_phone_cntry,1)
+			              + "&EMD-HM-PHONE-NBR=" + escape(EmpInfo.paemployee_hm_phone_nbr,1)
+  		}
+		pObj.field  =  pObj.field + "&PT-XMIT-NBR1=1"
+		pObj.func 	   = "parent.DspMsg("+updateAll+")"
+		if (!UpdateFlag)
+		{
+			if (typeof(parent.showWaitAlert) == "function")
+				parent.showWaitAlert(parent.getSeaPhrase("HOME_ADDR_42","ESS"));
+    		UpdateFlag = true;
+		}
+		Count++
+		AGS(pObj,"jsreturn");
+	}
+	else if (!UpdateHomeAddress && thisDep.emp_address != "H")
+	{
+		var pObj       = new AGSObject(authUser.prodline, "HR13.1")
+		pObj.event     = "CHANGE"
+		pObj.rtn       = "MESSAGE"
+		pObj.longNames = true
+		pObj.tds       = false
+		pObj.field     = "FC=C"
+				   	   + "&EMD-COMPANY=" + parseInt(authUser.company,10)
+				       + "&EMD-EMPLOYEE=" + parseInt(authUser.employee,10)
+				       + "&EMD-SEQ-NBR=" + parseInt(thisDep.seq_nbr,10)
+				       + "&EMD-EMP-ADDRESS=H"
+				       + "&EMD-FIRST-NAME=" + escape(thisDep.first_name,1)
+				       + "&EMD-LAST-NAME=" + escape(thisDep.last_name,1)
+				       + "&EMD-REL-CODE=" + escape(thisDep.rel_code,1)
+				       + "&EMD-PRIMARY-CARE=" + escape(thisDep.primary_care,1)
+				       + "&EMD-DEP-TYPE=" + escape(thisDep.dep_type,1)
+				       + "&EMD-SEX=" + escape(thisDep.sex,1)
+        		       + "&EMD-HM-PHONE-NBR=" + escape(thisDep.hm_phone_nbr,1)
+        		       + "&EMD-WK-PHONE-NBR=" + escape(thisDep.wk_phone_nbr,1)
+					   + "&PT-XMIT-NBR1=1"
+		pObj.func 	   = "parent.DspMsg("+updateAll+")"
+		if (!UpdateFlag)
+		{
+			if (typeof(parent.showWaitAlert) == "function")
+				parent.showWaitAlert(parent.getSeaPhrase("HOME_ADDR_42","ESS"));
+    		UpdateFlag = true;
+		}
+		Count++;
+		AGS(pObj,"jsreturn");
+	}
+	else
+	{
+		Count++;
+		DspMsg(updateAll);
+	}
+}
+
+function DspMsg(updateAll)
+{
+    if (Count < DepInfo.length)
+    {
+        UpdateDepend(updateAll);
+    }
+    else
+    {
+       	// if this task has been launched as a related link, remove any processing message
+		if (typeof(parent.removeWaitAlert) == "function")
+			parent.removeWaitAlert();
+      	if (!UpdateFlag)
+       	{
+        	parent.seaAlert(parent.getSeaPhrase("DEP_0","ESS"));
+        	setImageVisibility("dependentaddress_checkmark","visible");
+        	DspEmdepend();
+       	}
+    	else
+    	{
+       	 	ReloadEmdepend(false);
+		}
+    }
+}
+
+function ReloadEmdepend(nextFunc)
+{
+	nextFunc = (nextFunc)?String(nextFunc):"";
+	//PT 161694
+	GetDepInfo(authUser.prodline,authUser.company,authUser.employee,"","DspEmdepend("+nextFunc+")","Active");
+}
+
+function DspEmdepend(nextFunc)
+{
+    //PT 1616194
+  	if (nextFunc)
+  	{
+		eval(nextFunc);
+	}
+	else
+	{
+	 	if (UpdateFlag)
+    		parent.seaAlert(parent.getSeaPhrase("DEP_0","ESS"));
+	 	if (UpdateHomeAddress)
+	   		showDependentsTask(true);
+	 	if (!UpdateHomeAddress  && !ReloadDone)
+	 	{
+	   		ReloadDone = true;
+	   		if (AddType == "H")
+		  		confirmDependentUpdate();
+	   		else
+		  		showDependentsTask(true);
+	 	}
+	}
+}
+</script>
+</head>
+<body onload="OpenMove()">
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:0%;top:0px;width:100%;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="dialog" name="dialog" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:20px;top:75px;width:300px;height:250px;z-index:100;visibility:hidden" allowtransparency="true" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/address.htm,v 1.16.2.24 2011/07/01 21:27:03 brentd Exp $ -->

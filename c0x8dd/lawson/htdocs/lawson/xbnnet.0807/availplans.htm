@@ -1,0 +1,297 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var ch=""
+parent.choice=0
+parent.actiontaken=1
+if(parent.clearGroup)
+{
+	var temp=new Array()
+	var tempdepbens = new Array()
+	for(var j=0; j<parent.ElectedPlans.length; j++) 
+	{
+		if(parent.ElectedPlans[j][3]!=parent.EligPlanGroups[parent.CurrentPlanGroup][0]) 
+		{
+			temp[temp.length]=new Array()
+			temp[temp.length-1]=parent.ElectedPlans[j]
+			tempdepbens[tempdepbens.length]=new Array()
+			tempdepbens[tempdepbens.length-1]=parent.DependentBens[j]
+		}
+	}
+	parent.ElectedPlans=new Array()
+	parent.ElectedPlans=temp
+	parent.DependentBens=new Array()
+	parent.DependentBens=tempdepbens
+	parent.clearGroup=false
+}
+function imgSwitch(img,plan)
+{
+	parent.choice=plan
+    parent.CurrentEligPlan=plan
+}
+function back()
+{
+	parent.document.getElementById("main").src = parent.LastDoc[0]
+}
+// function to navigate to the election screen
+function ElectBen()
+{
+	if(self.document.listform.length>0) 
+	{
+		parent.choices = new Array()
+		parent.selectedPlan=-1		
+		if(ch!="") 
+		{
+			for(var i=0; i<self.document.listform.length; i++) 
+			{
+				if(self.document.listform.elements[i].checked==true) 
+				{
+					parent.choices[parent.choices.length]=self.document.listform.elements[i].name.substring(1,self.document.listform.elements[i].name.length)
+					if(parent.CurrentBens[parent.planname] && parent.EligPlans[parent.choices[parent.choices.length-1]][1]==parent.CurrentBens[parent.planname][1] &&
+					parent.EligPlans[parent.choices[parent.choices.length-1]][2]==parent.CurrentBens[parent.planname][2])
+						parent.selectedPlan=parent.choices[parent.choices.length-1]
+				}
+			}
+			parent.currentChoice=0
+		}
+		if((parent.msgNbr==1 || parent.msgNbr==99) && parent.selectedPlan==-1 && parent.CurrentBens[parent.planname] && parent.CurrentEligPlan!="" 
+		&& parent.CurrentBens[parent.planname][32] == parent.EligPlanGroups[parent.CurrentPlanGroup][0])		
+		{
+			for(var i=0; i<parent.EligPlans.length; i++) 
+			{
+				if(parent.CurrentBens[parent.planname][1] == parent.EligPlans[i][1] && parent.CurrentBens[parent.planname][2] == parent.EligPlans[i][2])
+				{
+					parent.CurrentBens[parent.planname][0]=new Array()
+					parent.CurrentBens[parent.planname][0][0]=1					
+					parent.CurrentBens[parent.planname][0][1]=parent.EligPlans[i][11]
+					parent.CurrentBens[parent.planname][0][2]=parent.EligPlans[i][13]
+					parent.CurrentBens[parent.planname][0][3]=parent.EligPlans[i][15]						
+				}
+			}			
+		}
+		if (parent.choice==0) 
+		{
+			if(ch=="")
+				parent.seaAlert(getSeaPhrase("ERROR_CHOOSE_PLAN_1","BEN"))
+			else 
+			{
+				if(parent.choices.length==0)
+					parent.seaAlert(getSeaPhrase("ERROR_CHOOSE_PLAN_2","BEN"))
+				else 
+				{
+					if(parent.choices.length>parseInt(ch,10)) 
+					{
+						var alertmsg = getSeaPhrase("ERROR_CHOOSE_PLAN_3","BEN")+" "+parseInt(ch,10)
+						if(parseInt(ch,10)==1)
+							alertmsg += " "+getSeaPhrase("ERROR_CHOOSE_PLAN_4","BEN")
+						else
+							alertmsg += " "+getSeaPhrase("ERROR_CHOOSE_PLAN_5","BEN")
+						parent.seaAlert(alertmsg)
+					} 
+					else 
+					{
+						parent.CurrentEligPlan=parent.choices[parent.currentChoice]
+						parent.LastDoc[parent.LastDoc.length]=parent.baseurl+"availplans.htm"
+						parent.currentdoc=parent.LastDoc.length-1
+						parent.document.getElementById("main").src = parent.baseurl+"elect_benefits.htm"
+					}
+				}
+			}
+		} 
+		else 
+		{
+			parent.LastDoc[parent.LastDoc.length]=parent.baseurl+"availplans.htm"
+			parent.currentdoc=parent.LastDoc.length-1
+			parent.document.getElementById("main").src = parent.baseurl+"elect_benefits.htm"
+		}
+	} 
+	else
+		parent.navigate1()
+}
+
+function startProgram()
+{
+	var header=""
+	var msg=""
+	var table1=""
+	var imgNbr=1
+	var dspbox=false
+	var plngroup=parent.EligPlanGroups[parent.CurrentPlanGroup][0]
+	if(parent.EligPlanGroups[parent.CurrentPlanGroup][1]!=null && parent.EligPlanGroups[parent.CurrentPlanGroup][1]!=1
+	&& parent.EligPlanGroups[parent.CurrentPlanGroup][1]!="") 
+	{
+		ch=parent.EligPlanGroups[parent.CurrentPlanGroup][1]
+	}	
+	table1 += '<br><table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	table1 += '<tr><td class="plaintablecell" valign="top">'
+	table1 += '<form name="listform">'
+	table1 += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list">'
+	table1 += '<tr>'
+	table1 += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>'
+	if(parent.rule_type=="N")
+		table1 += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("AVAILBEN_1","BEN")+'</th>'
+	table1 += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("SELECT","BEN")+'</th>'
+	table1 += '</tr>'
+	for (var i=1; i<parent.EligPlans.length; i++) 
+	{
+		dspbox = true
+		if(parent.EligPlans[i][8]==plngroup) 
+		{
+			if(parent.EligPlans[i][10]=="Y") 
+			{
+				var EOI=true
+				table1 += '<tr>'
+				table1 += '<td class="plaintablecellborder" nowrap>'
+				table1 += '<a href="" onclick="parent.openWinDesc2(\''+parent.EligPlans[i][1]+'\',\''+parent.EligPlans[i][2]+'\');return false">'
+				table1 += ((parent.EligPlans[i][4])?parent.EligPlans[i][4]:'&nbsp;')+'</a>'
+				if(parent.selectedPlanInGrp[i])	
+				{
+					if(!parent.cantEnroll[i]) 
+					{
+						if(ch!="" && ch>1)
+							ch--
+						table1+=' <span class="fieldlabelbold">&nbsp;'+getSeaPhrase("AVAILBEN_2","BEN")+'</span>'
+					} 
+					else if (parent.notAvailable[i])
+						table1+=' <span class="fieldlabelbold">&nbsp;'+getSeaPhrase("AVAILBEN_3","BEN")+'</span>'
+					else
+						table1+=' <span class="fieldlabelbold">&nbsp;'+getSeaPhrase("AVAILBEN_4","BEN")+'</span>'
+				}
+				table1+='</td>'
+				if(parent.rule_type=="N")
+					table1 += '<td class="plaintablecellborder">'+parent.FormatDte4(parent.EligPlans[i][5])+'</td>'
+				table1 += '<td class="plaintablecellborder" style="text-align:center" nowrap>&nbsp;'
+				if(ch=="") 
+				{
+					if(parent.EligPlans[i][17]==1) 
+					{
+						if(!parent.selectedPlanInGrp[i])
+							table1 += '<input class="inputbox" type=radio name=one onClick=imgSwitch('+imgNbr+','+i+')>'
+						else
+							dspbox = false
+					} 
+					else
+						EOI=false
+				} 
+				else 
+				{
+					if(parent.EligPlans[i][17]==1) 
+					{
+						if(!parent.selectedPlanInGrp[i])
+							table1 += '<input class="inputbox" type=checkbox name="C'+i+'">'
+						else
+							dspbox = false
+					} 
+					else
+						EOI=false
+				}
+				if(EOI==false) 
+				{
+					table1+='<br><span class="fieldlabelbold">'+getSeaPhrase("AVAILBEN_5","BEN")+'</span><br>'
+					table1+='<span class="fieldlabelbold">'+getSeaPhrase("ERROR_12","BEN")+'</span>'
+				}
+				table1 += '</td>'
+				if(dspbox)
+					imgNbr++
+				table1 += '</tr>'
+			}
+		}
+	}
+	table1 += '</table></form>'
+	table1 += '</td></tr></table>'
+	table1 += '<p class="textAlignRight">'
+	table1 += uiButton(getSeaPhrase("CONTINUE","BEN"), "ElectBen();return false", "margin-right:5px;margin-top:10px")
+	if(parent.LastDoc[0]==parent.baseurl+"disp_benefits.htm")
+		table1 += uiButton(getSeaPhrase("PREVIOUS","BEN"), "back();return false", "margin-right:5px;margin-top:10px")
+	table1 += uiButton(getSeaPhrase("EXIT","BEN"), "parent.quitEnroll(self.location.href);return false", "margin-right:5px;margin-top:10px")
+	table1 += uiButton(getSeaPhrase("ELECTIONS","BEN"), "parent.printScr('newwindow');return false", "margin-right:5px;margin-top:10px")
+	table1 += '</p>'
+	msg += '<br><table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	msg += '<tr><td class="plaintablecell">'	
+	if(ch==null || parseInt(ch,10)==1 || ch=="") 
+	{
+		msg += getSeaPhrase("AVAILBEN_9","BEN")
+	} 
+	else 
+	{
+		if(parseInt(ch,10)>imgNbr-1)
+			ch=imgNbr-1
+		msg += getSeaPhrase("AVAILBEN_10","BEN")+' '+getSeaPhrase("AVAILBEN_11","BEN")+' '+parseInt(ch,10)+' '
+		if(parseInt(ch,10)==1)
+			msg += getSeaPhrase("ERROR_CHOOSE_PLAN_4","BEN")
+		else
+			msg += getSeaPhrase("ERROR_CHOOSE_PLAN_5","BEN")
+	}
+	msg += '</td>'	
+	// **********************************************************************************************************
+	// Example Enwisen Integration.
+	//
+	// If Enwisen is enabled in the config file for the employee's company and the "Medical Cost Estimator"
+	// and "Learn About: Medical Programs" pages have been defined for this plan group in the
+	// config file, show the links.
+	//
+	// **********************************************************************************************************
+	if (isEnwisenEnabled())
+	{
+		msg += '<td class="plaintablecell"><ul>';
+		var planGroup = parent.EligPlanGroups[parent.CurrentPlanGroup][0];
+		// <page> nodes are defined with id="PlanGroup=ID"
+		if (getEnwisenLink("id=" + planGroup + "=MEDICAL_COST_ESTIMATOR") != null)
+			msg += '<li style="padding:2px">' + getEnwisenLink("id=" + planGroup + "=MEDICAL_COST_ESTIMATOR","Medical Cost Estimator");
+		if (getEnwisenLink("id=" + planGroup + "=YOUR_NEEDS_MEDICAL") != null)
+			msg += '<li style="padding:2px">' + getEnwisenLink("id=" + planGroup + "=YOUR_NEEDS_MEDICAL","Learn About: Medical Programs");
+		msg += '</ul></td>';
+	}
+	msg += '</tr></table>'	
+	document.getElementById("paneBody").innerHTML = '<div style="padding:0px">'
+	+ msg
+	+ table1
+	+ '</div>'
+	document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+plngroup+'</span>';
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.35 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/availplans.htm,v 1.20.2.24.2.1 2013/01/14 17:26:45 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

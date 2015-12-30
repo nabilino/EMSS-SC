@@ -1,0 +1,55 @@
+<HTML>
+<HEAD>
+<TITLE>Direct Deposit</TITLE>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<SCRIPT>
+var gmsgnbr, gmsg, gfldnbr;
+var tkn = null;
+
+function V(fldnbr,fldval)
+{
+	if ((parent.MailEvent != "Add") || (parent.MailQueue.length > 1))
+		return;
+	if (fldnbr == "_TKN")
+		tkn = fldval;	
+	else if ((tkn == "PR12.1") && (fldnbr == "EAD-ACH-DIST-NBR"))
+	{
+		var distNbr = Number(fldval);
+		if (!isNaN(distNbr) && distNbr > 0)
+			parent.MailQueue[0].ach_dist_nbr = distNbr;
+	}	
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr	= msgnbr;
+	gmsg = msg;
+	gfldnbr = fldnbr;
+}
+</SCRIPT>
+</HEAD>
+</HTML>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/directdeposit/ddheader.htm,v 1.3.6.4 2012/07/16 15:08:19 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

@@ -1,0 +1,47 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script>
+function startProgram()
+{
+	var html = '<div class="plaintablecell" style="padding:10px">';
+    var headertext = '<table border="0" width="100%"><tr><td width="60%"><font style="font-size:smaller" color="#0066cc"><b>Flexible Spending Plan Coverage</b></font></td><td width="20%" align="right" valign="middle"><a href=javascript:self.close()><font color="#0066cc"><b>Close</b></font></a>&nbsp;</td><td width="20%" align="right" valign="middle"><a href=javascript:self.print()><font color="#0066cc"><b>Print</b></font></a>&nbsp;</td></tr></table>'
+	html += '<p>'
+	html += 'St. Luke\'s offers Flexible Spending Healthcare and Dependent Care Plan coverage for employees.<p>'
+	html += '<p>'
+	html += 'Please view the <a href="rsrsm1.pdf" target="_new">Flex Spending Account Medical plan description</a><p>'
+	html += 'Flexible Spending is an annual benefit election. If you participated in Plan Year 2011/2012 and you wish to continue, you must elect again for Plan Year 2012/2013.<p>'
+	html += 'This is a “<b>Use it or Lose it</b>” plan. At the end of the Plan Year, if there is any money left in your FSA that you are not able to claim for services completed within the Plan Year, you will forfeit any amount remaining in your account. You have 90 days after the end of the plan year to submit claims, provided the dates of service for those claims fall within the plan year.<p>'
+	html += 'Each account is completely separate: For example, you cannot use funds from the Dependent Care FSA to pay for your children\’s medical expenses.<p>'
+	html += 'Elections are irrevocable unless you submit the appropriate paperwork to Benefits Services within 30 days of a qualified change in status. Please note: The change you make to your FSA election must be consistent with the qualifying event. For example, if your qualifying event is the birth of a new baby, you can only increase (not decrease) the amount of your FSA election.<p>'
+	html += 'If you currently have direct deposit with your FSA, you do not need to resubmit the direct deposit information.  If you would like to have direct deposit for your FSA reimbursements, you must complete a <A HREF="/lawson/xbnnet/plandescriptions/DirectDeposit.pdf" TARGET="_blank">Direct Deposit form</A>, attach a voided check and send it to Benefits Services.  If you do not want direct deposit, you will receive paper checks for your reimbursement.<p>'
+	html += '</div>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = headertext
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201005) 09.00.01.03.00 Mon Apr 19 10:15:09 CDT 2010 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/benbulletin.htm,v 1.22.2.4 2009/03/04 17:39:46 brentd Exp $ -->

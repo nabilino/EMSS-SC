@@ -1,0 +1,71 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforFieldSet.css,v 1.1.2.8.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+.inforFieldSet
+{
+  width : inherit;
+  margin : 0px !important;
+  padding : 0px !important;
+  border : 1px solid #b4b4b4 !important;
+}
+.inforFieldSetLabel
+{
+  font-family : Arial;
+  font-size : 12px;
+  font-weight : bold;
+  color : #ffffff;
+  white-space : nowrap;
+  text-align : left;
+  line-height : 22px;
+  text-indent : 0px;
+  border-right : 1px solid #2c78ba;
+  border-top : 1px solid #2c78ba;
+  border-bottom : 1px solid #2c78ba;
+  background : #2c78ba url("../../images/fieldset_center.png") repeat-x;
+  height : 20px;
+  width : inherit;
+  display : block;
+  vertical-align : middle;
+  padding : 0px 10px 0px 10px;
+  margin-top : -1px;
+  /* add a little extra padidng to fix a mozilla issue.*/
+  -moz-padding-end : 40px;
+}
+/*correct padding if we are on a tab panel.*/
+.inforTabContentActive  > .inforFieldSet
+{
+  margin : 4px -10px 0px -10px !important;
+  border-right : 0px solid #b4b4b4 !important;
+}
+.inforTabContent  > .inforFieldSet
+{
+  margin : 4px -10px 0px -10px !important;
+  border-right : 0px solid #b4b4b4 !important;
+}
+.inforFieldSet div.inforFieldSetContent
+{
+  /* use 0px margin for SEAs */
+  margin : 0px !important;
+  font-family : Arial;
+  font-size : 11px;
+}

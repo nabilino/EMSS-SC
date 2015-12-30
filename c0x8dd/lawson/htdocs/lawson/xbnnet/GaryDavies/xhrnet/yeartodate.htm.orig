@@ -1,0 +1,525 @@
+<html>
+<head>
+<title>Year to Date</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/yeartodate.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+//////////////////////////////////////////////////////////////////////////////////////////
+// Authenticate call
+//
+
+var detailHtml;
+var selectedYear;
+//NOTE: The FUTUREPAYMTS setting has been moved to the xhrnet/xml/config/emss_config.xml file.
+var thisYr = ymdtoday.substring(0,4)
+
+function StartPayChecksProgram()
+{
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticationComplete()'|desiredEdit='EM'");
+}
+
+function AuthenticationComplete()
+{
+    stylePage();
+	// Set the task title.
+	setTaskHeader("header",getSeaPhrase("YEAR_TO_DATE","ESS"),"Pay");
+	document.title = getSeaPhrase("YEAR_TO_DATE","ESS");
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	GetQuartwage("PaintPayCheckHistory()");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Paint front page containing the years user can drill down
+//
+
+function PaintPayCheckHistory()
+{
+	var strHtml = "";
+
+	if (PayChecks.Year.length == 0) {
+		strHtml += '<div class="fieldlabelbold" style="text-align:left;padding-top:5px;padding-left:5px">';
+		strHtml += getSeaPhrase("NO_YTD_INFO","ESS");
+		strHtml += '</div>';
+	}
+	else {
+		strHtml += '<body>';
+		strHtml += '<div style="padding-top:3px">';
+    	strHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%">';
+		strHtml += '<tr>';
+		strHtml += '<td class="fieldlabelbold" style="width:50%">';
+		strHtml += getSeaPhrase("SELECT_A_YEAR","ESS");
+		strHtml += '</td>';
+		strHtml += '<td class="plaintablecell" style="width:50%" nowrap>';
+		strHtml += '<select class="inputbox" id="year" name="year" ';
+		strHtml += 'onmouseover="window.status=\''+getSeaPhrase("VIEW_PAYMENTS","ESS").replace(/\'/g,"\\'")+'\';return true" ';
+		strHtml += 'onmouseout="window.status=\'\';return true" ';
+		strHtml += 'onchange="parent.GetYTDForYear(this)">';
+		strHtml += '<option value="">';
+
+		for (var i=0;i<PayChecks.Year.length;i++)
+		{
+			// This will filter out the payroll year if the current year is lesser than the payroll year.
+			//<= is used so that the current year is not missed out which will happen if < or > is used.
+			if (emssObjInstance.emssObj.futurePayments || (Number(PayChecks.Year[i].Year) <= Number(thisYr)))
+			{
+				strHtml += '<option value="'+PayChecks.Year[i].Year+'">'
+				strHtml += PayChecks.Year[i].Year
+			}
+		}
+
+		strHtml += '</select>';
+		strHtml += '</td>';
+		strHtml += '</table>';
+		strHtml += '</div>';
+		strHtml += '</body>';
+	}
+
+	try {
+		self.yearselect.document.getElementById("paneHeader").innerHTML = getSeaPhrase("YEARS","ESS");
+		self.yearselect.document.getElementById("paneBody").innerHTML = strHtml;
+	}
+	catch(e) {}
+
+	self.yearselect.setLayerSizes();
+	self.yearselect.stylePage();
+	document.getElementById("yearselect").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function GetYTDForYear(selObj)
+{
+	selectedYear = "";
+	selectedYear = selObj.options[selObj.selectedIndex].value;
+	if (selectedYear != "") {
+		if (PayChecks.YearDetail[selectedYear]) {
+			PaintPaymentDetail(Number(selectedYear));
+		}
+		else {
+			// if future payments should be displayed or we are viewing payments for a prior year, pull the records from the QUART files;
+			// otherwise pull them from PAYMASTER and PAYDEDUCTN
+			var thisYear = authUser.date.substring(0,4);
+			if (emssObjInstance.emssObj.futurePayments || Number(selectedYear) < Number(thisYear)) {
+				GetQuartDed(Number(selectedYear),"PaintPaymentDetail("+Number(selectedYear)+")");
+			}
+			else {
+				GetYTDPaymentsForYear(Number(selectedYear),"PaintPaymentDetail("+Number(selectedYear)+")");
+			}	
+		}
+	}
+	else {
+		ClearYTDHistory();
+	}
+}
+
+function ClearYTDHistory()
+{
+	HidePaymentLink();
+	document.getElementById("ytddetail").style.visibility = "hidden";
+	document.getElementById("paycheck").style.visibility = "hidden";
+	self.paycheck.location.replace("/lawson/xhrnet/dot.htm");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Paint drill information
+//
+
+function PaintPaymentDetail(year)
+{
+	detailHtml = "";
+	PayChecks.TotalWagesEarned(year);
+	PayChecks.TotalDeductionsEarned(year);
+	var pYearObj = PayChecks.FindYear(year);
+	var tblHtml = "";
+	var printButtonHtml = "";
+
+//////////////
+//	WAGES	//
+//////////////
+
+	for (var i=0; i<pYearObj.Country.length; i++)
+	{
+		for(var j=0; j<pYearObj.Country[i].Currency.length; j++)
+		{
+			// Tables by country and currency: pYearObj.Country[i].Code+' - '+pYearObj.Country[i].Currency[j].Description
+			tblHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+			+ '<tr>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:47%">'
+			+ getSeaPhrase("PAY_TYPE","ESS")+'</th>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:26%">'
+			+ getSeaPhrase("HOURS","ESS")+'</th>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:27%">'
+			+ getSeaPhrase("WAGES","ESS")+'</th>'
+			+ '</tr>'
+
+			var pWageObj = pYearObj.Country[i].Currency[j].Wages;
+			for (var k=0; k<pWageObj.PaySumGrp.length; k++)
+			{
+ 				if(pWageObj.PaySumGrp[k].TotalHours || pWageObj.PaySumGrp[k].TotalWages)
+				{
+					tblHtml += '<tr>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:47%" nowrap>'
+					+ ((pWageObj.PaySumGrp[k].Description)?pWageObj.PaySumGrp[k].Description:'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+					+ ((roundToPennies(pWageObj.PaySumGrp[k].TotalHours))?roundToPennies(pWageObj.PaySumGrp[k].TotalHours):'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>'
+					+ ((roundToPennies(pWageObj.PaySumGrp[k].TotalWages))?roundToPennies(pWageObj.PaySumGrp[k].TotalWages):'&nbsp;')+'</td>'
+		  			+ '</tr>'
+				}
+			}
+
+			tblHtml += '<tr>'
+			+ '<td class="plaintablecellboldborder" style="text-align:right;width:47%" nowrap>'
+			+ getSeaPhrase("TOTAL","ESS")+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+			+ ((roundToPennies(pWageObj.TotalHours))?roundToPennies(pWageObj.TotalHours):'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>'
+			+ ((roundToPennies(pWageObj.TotalWages))?roundToPennies(pWageObj.TotalWages):'&nbsp;')+'</td>'
+			+ '</tr>'
+			+ '</table>'
+
+			var titleStr = getSeaPhrase("WAGES","ESS")
+			+ ' - '+pYearObj.Country[i].Currency[j].Description+', '+pYearObj.Country[i].Code;
+
+			detailHtml += uiTable(titleStr,tblHtml);
+
+			if (pYearObj.Country[i].Code == "CA") {
+				detailHtml += CAPayCheckFormat(pYearObj, i, j);
+			}
+			else {
+				detailHtml += USPayCheckFormat(pYearObj, i, j);
+			}
+		}
+	}
+
+	// hide the paycheck listing, if it is visible
+	document.getElementById("paycheck").style.visibility = "hidden";
+	self.paycheck.location.replace("/lawson/xhrnet/dot.htm");
+
+	document.getElementById("ytddetail").style.visibility = "visible";
+
+	// write table HTML to the detail frame
+	if (detailHtml != "") {
+		try {
+
+			   if(window.print)
+			    {
+			    	printButtonHtml += '<br><div style="position:absolute;right:30px">';
+			    	printButtonHtml += uiButton(getSeaPhrase("PRINT","ESS"),"parent.printForm();return false",false,"printbtn");
+			    	printButtonHtml += '</div><br>&nbsp;';
+				}
+
+			//self.ytddetail.document.getElementById("paneBorder").style.border = "0px";
+			self.ytddetail.document.getElementById("paneBody").innerHTML = detailHtml + printButtonHtml;
+		}
+		catch(e) {}
+
+		self.ytddetail.stylePage();
+		self.ytddetail.setLayerSizes(true);
+
+		document.getElementById("ytddetail").style.visibility = "visible";
+	}
+
+	// display a link to the paycheck task for the selected year
+	if (self.yearselect.document.getElementById("year").selectedIndex > 0) {
+		document.getElementById("paymentlink").innerHTML = '<a href="" onclick="GetPaymentsForYear();return false">'
+		+ getSeaPhrase("PAYMENT_DETAILS","ESS")
+		+ '</a>';
+		ShowPaymentLink();
+    }
+    else {
+    	HidePaymentLink();
+    }
+
+    removeWaitAlert();
+}
+
+function GetPaymentsForYear()
+{
+	var selObj = self.yearselect.document.getElementById("year");
+	var selectedYear = Number(selObj.options[selObj.selectedIndex].value);
+
+	showWaitAlert(getSeaPhrase("RETRIEVE_PAYMENT_INFO","ESS"));
+	self.paycheck.location.replace("/lawson/xhrnet/paytyear.htm?year="+selectedYear+"&from=yeartodate");
+	document.getElementById("yearselect").style.zIndex = "2";
+	document.getElementById("ytddetail").style.zIndex = "2";
+	document.getElementById("paycheck").style.zIndex = "1";
+	HidePaymentLink();
+	//document.getElementById("paycheck").style.visibility = "visible";
+}
+
+function HideYTDDetail()
+{
+	document.getElementById("ytddetail").style.visibility = "hidden";
+	document.getElementById("paymentlink").innerHTML = '<a href="" onclick="BackToYearToDate();return false">'
+	+ getSeaPhrase("BACK_TO_YTD","ESS")
+	+ '</a>';
+}
+
+function ShowPaymentLink()
+{
+	document.getElementById("paymentlayer").style.visibility = "visible";
+}
+
+function HidePaymentLink()
+{
+	document.getElementById("paymentlayer").style.visibility = "hidden";
+}
+
+function BackToYearToDate()
+{
+	var selObj = self.yearselect.document.getElementById("year");
+	GetYTDForYear(selObj);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// United states and default view
+//
+
+function USPayCheckFormat(pYearObj, i, j)
+{
+	var Index = 1;
+	var tblStr = "";
+	var rtnStr = "";
+
+//////////////////////////////////////
+//	TAXES & DEDUCTIONS - US FORMAT	//
+/////////////////////////////////////
+
+	while (Index < 7)
+	{
+		if (DoesSectionContainValues(Index, pYearObj.Country[i].Currency[j].Ded.DeductionGroups))
+		{
+			tblStr = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+			+ '<tr>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:47%">'
+			+ getSeaPhrase("DEDUCTION","ESS")+'</th>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:26%">'
+			+ getSeaPhrase("AMOUNT","ESS")+'</th>'
+
+			if (Index == 1 || Index == 5) {
+				tblStr += '<th class="plaintableheaderborder" style="text-align:center;width:27%">'
+				+ getSeaPhrase("TAXABLE_WAGES","ESS")+'</th>';
+			}
+			else {
+				tblStr += '<th class="plaintableheaderborder" style="text-align:center;width:27%">&nbsp;</th>';
+			}
+
+			tblStr += '</tr>';
+
+			var TotalAmount = 0;
+			var pDedObj = pYearObj.Country[i].Currency[j].Ded;
+
+			for (var k=0; k<pDedObj.DeductionGroups.length; k++)
+			{
+				if ((pDedObj.DeductionGroups[k].Section == 1
+				|| pDedObj.DeductionGroups[k].Section == 5)
+				&& (pDedObj.DeductionGroups[k].Section == Index))
+				{
+					tblStr += '<tr>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:47%" nowrap>'
+					+ ((pDedObj.DeductionGroups[k].Description)?pDedObj.DeductionGroups[k].Description:'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalAmount))?roundToPennies(pDedObj.DeductionGroups[k].TotalAmount):'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalWages))?roundToPennies(pDedObj.DeductionGroups[k].TotalWages):'&nbsp;')+'</td>'
+					+ '</tr>';
+
+					TotalAmount += (roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount)))?Number(roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount))):Number(0);
+				}
+				else if ((pDedObj.DeductionGroups[k].Section == 2
+				|| pDedObj.DeductionGroups[k].Section == 3
+				|| pDedObj.DeductionGroups[k].Section == 4
+				|| pDedObj.DeductionGroups[k].Section == 6)
+				&& (pDedObj.DeductionGroups[k].Section == Index))
+				{
+					tblStr += '<tr>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:47%" nowrap>'
+					+ ((pDedObj.DeductionGroups[k].Description)?pDedObj.DeductionGroups[k].Description:'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalAmount))?roundToPennies(pDedObj.DeductionGroups[k].TotalAmount):'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>&nbsp;</td>'
+					+ '</tr>';
+
+					TotalAmount += (roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount)))?Number(roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount))):Number(0);
+				}
+			}
+
+			// Totals table row
+			tblStr += '<tr>'
+			+ '<td class="plaintablecellboldborder" style="text-align:right;width:47%" nowrap>'
+			+ getSeaPhrase("TOTAL","ESS")+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+			+ ((roundToPennies(TotalAmount))?roundToPennies(TotalAmount):'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>&nbsp;</td>'
+			+ '</tr>'
+			+ '</table>';
+
+			switch(Index)
+			{
+				case 1:	rtnStr += uiTable(getSeaPhrase("TAXES","ESS"),tblStr); break;
+				case 2:	rtnStr += uiTable(getSeaPhrase("PRE_TAX_DEDUCTIONS","ESS"),tblStr);	break;
+				case 3:	rtnStr += uiTable(getSeaPhrase("AFTER_TAX_DEDUCTIONS","ESS"),tblStr); break;
+				case 4:	rtnStr += uiTable(getSeaPhrase("ADD_TO_NET_PAY","ESS"),tblStr); break;
+				case 5:	rtnStr += uiTable(getSeaPhrase("COMPANY_TAXES","ESS"),tblStr); break;
+				case 6:	rtnStr += uiTable(getSeaPhrase("COMPANY_DEDUCTIONS","ESS"),tblStr); break;
+				default: break;
+			}
+		}
+		Index++;
+	}
+	return rtnStr;
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////
+// Canadian view
+//
+
+function CAPayCheckFormat(pYearObj, i, j)
+{
+	var Index = 1;
+	var tblStr = "";
+	var rtnStr = "";
+
+//////////////////////////////////////
+//	TAXES & DEDUCTIONS - CA FORMAT	//
+/////////////////////////////////////
+
+	while (Index < 7)
+	{
+		if(DoesSectionContainValues(Index, pYearObj.Country[i].Currency[j].Ded.DeductionGroups))
+		{
+			tblStr = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+			+ '<tr>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:47%">'
+			+ getSeaPhrase("DEDUCTION","ESS")+'</th>'
+			+ '<th class="plaintableheaderborder" style="text-align:center;width:26%">'
+			+ getSeaPhrase("AMOUNT","ESS")+'</th>'
+
+			if (Index == 1 || Index == 4) {
+				tblStr += '<th class="plaintableheaderborder" style="text-align:center;width:27%">'
+				+ getSeaPhrase("TAXABLE_WAGES","ESS")+'</th>';
+			}
+			else {
+				tblStr += '<th class="plaintableheaderborder" style="text-align:center;width:27%">&nbsp;</th>';
+			}
+
+			tblStr += '</tr>';
+
+			var TotalAmount = 0;
+			var pDedObj = pYearObj.Country[i].Currency[j].Ded;
+
+			for (var k=0; k<pDedObj.DeductionGroups.length; k++)
+			{
+				if ((pDedObj.DeductionGroups[k].Section == 1
+				|| pDedObj.DeductionGroups[k].Section == 4)
+				&& (pDedObj.DeductionGroups[k].Section == Index))
+				{
+					tblStr += '<tr>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:47%" nowrap>'
+					+ ((pDedObj.DeductionGroups[k].Description)?pDedObj.DeductionGroups[k].Description:'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalAmount))?roundToPennies(pDedObj.DeductionGroups[k].TotalAmount):'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalWages))?roundToPennies(pDedObj.DeductionGroups[k].TotalWages):'&nbsp;')+'</td>'
+					+ '</tr>';
+
+					TotalAmount += (roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount)))?Number(roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount))):Number(0);
+				}
+				else if((pDedObj.DeductionGroups[k].Section == 2
+				|| pDedObj.DeductionGroups[k].Section == 3)
+				&& (pDedObj.DeductionGroups[k].Section == Index))
+				{
+					tblStr += '<tr>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:47%" nowrap>'
+					+ ((pDedObj.DeductionGroups[k].Description)?pDedObj.DeductionGroups[k].Description:'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+					+ ((roundToPennies(pDedObj.DeductionGroups[k].TotalAmount))?roundToPennies(pDedObj.DeductionGroups[k].TotalAmount):'&nbsp;')+'</td>'
+					+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>&nbsp;</td>'
+					+ '</tr>';
+
+					TotalAmount += (roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount)))?Number(roundToPennies(Number(pDedObj.DeductionGroups[k].TotalAmount))):Number(0);
+				}
+			}
+
+			// Totals table row
+			tblStr += '<tr>'
+			+ '<td class="plaintablecellboldborder" style="text-align:right;width:47%" nowrap>'
+			+ getSeaPhrase("TOTAL","ESS")+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:26%" nowrap>'
+			+ ((roundToPennies(TotalAmount))?roundToPennies(TotalAmount):'&nbsp;')+'</td>'
+			+ '<td class="plaintablecellborder" style="text-align:right;width:27%" nowrap>&nbsp;</td>'
+			+ '</tr>'
+			+ '</table>';
+
+			switch(Index)
+			{
+				case 1:	rtnStr += uiTable(getSeaPhrase("DEDUCTIONS","ESS"),tblStr); break;
+				case 2:	rtnStr += uiTable(getSeaPhrase("TAXABLE_BENEFITS","ESS"),tblStr);	break;
+				case 3:	rtnStr += uiTable(getSeaPhrase("ADD_TO_NET_PAY","ESS"),tblStr); break;
+				case 4:	rtnStr += uiTable(getSeaPhrase("COMPANY_TAXES","ESS"),tblStr); break;
+				case 5:	rtnStr += uiTable(getSeaPhrase("COMPANY_DEDUCTIONS","ESS"),tblStr); break;
+				default: break;
+			}
+		}
+		Index++;
+	}
+	return rtnStr;
+}
+
+function printForm()
+{
+	var empName = (PayChecks && PayChecks.EmployeeName) ? PayChecks.EmployeeName : authUser.name; 
+	var headerHtml = '<table>'	
+		+ '<tr>'
+		+ '<td class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">' + getSeaPhrase("EMPLOYEE_NAME","ESS") + ':</span></td>'
+		+ '<td class="plaintablecell">' + empName + '</td>'
+		+ '</tr>'	
+		+ '<tr>'
+		+ '<td class="plaintablecell"><span class="dialoglabel" style="padding:0px;margin:0px">' + getSeaPhrase("EMPLOYEE_NUMBER","ESS") + ':</span></td>'
+		+ '<td class="plaintablecell">' + authUser.employee + '</td>'
+		+ '</tr>'					
+		+ '</table><div style="height:20px">&nbsp;</div>';
+		
+    self.printframe.document.title = getSeaPhrase("YEAR_TO_DATE","ESS") + " - " + selectedYear;
+	self.printframe.document.body.innerHTML = headerHtml + detailHtml;
+	self.printframe.stylePage();
+	self.printframe.focus();
+	self.printframe.print();
+}
+</script>
+</head>
+<body onload="StartPayChecksProgram()">
+	<div id="paymentlayer" class="plaintableheadertallwhite" style="visibility:hidden;position:absolute;text-align:center;height:22px;left:336px;width:418px;top:26px;z-index:2">
+	<table border="0" cellspacing="0" cellpadding="0" width="100%">
+	<tr>
+	<td id="paymentlink" class="plaintableheadertallwhite" style="text-align:center;vertical-align:bottom">&nbsp;</td>
+	</tr>
+	</table>
+	</div>
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="yearselect" name="yearselect" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;width:336px;top:32px;height:120px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="ytddetail" name="ytddetail" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;position:absolute;left:336px;width:418px;top:48px;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="paycheck" name="paycheck" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;position:absolute;left:0px;width:803px;top:32px;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="printframe" name="printframe" src="/lawson/xhrnet/ui/pane.htm" style="visibility:visible;height:1px;width:100%" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/yeartodate.htm,v 1.4.2.21 2011/05/27 16:54:45 brentd Exp $ -->

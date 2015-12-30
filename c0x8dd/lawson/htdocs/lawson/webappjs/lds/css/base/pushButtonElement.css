@@ -1,0 +1,226 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/pushButtonElement.css,v 1.2.2.4.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Push buttons --- */
+button.pushButtonStyler
+{
+  border : 0px;
+  background : transparent;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;  
+  margin : 0px;
+  padding : 0px;
+  min-width : 45px;
+  text-align : center;
+  width : auto;
+  height : 23px;
+}
+button.pushButtonStyler img
+{
+  width : 100%;
+  height : 23px;
+  display : block;
+}
+.pushButtonLeftSideStyler
+{
+  background : transparent url("../../images/05_pushbutton_p_rest_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;
+}
+.pushButtonRightSideStyler
+{
+  background : transparent url("../../images/05_pushbutton_p_rest_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;
+}
+.pushButtonLeftSideStylerHover
+{
+  background : transparent url("../../images/05_pushbutton_p_over_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.pushButtonRightSideStylerHover
+{
+  background : transparent url("../../images/05_pushbutton_p_over_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;
+}
+.pushButtonLeftSideStylerActive
+{
+  background : transparent url("../../images/05_pushbutton_p_actv_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.pushButtonRightSideStylerActive
+{
+  background : transparent url("../../images/05_pushbutton_p_actv_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;  
+}
+.pushButtonLeftSideStylerPress
+{
+  background : transparent url("../../images/05_pushbutton_p_press_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.pushButtonRightSideStylerPress
+{
+  background : transparent url("../../images/05_pushbutton_p_press_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;  
+}
+.pushButtonSecondaryLeftSideStyler
+{
+  background : transparent url("../../images/05_pushbutton_s_rest_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.pushButtonSecondaryRightSideStyler
+{
+  background : transparent url("../../images/05_pushbutton_s_rest_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;  
+}
+.pushButtonSecondaryLeftSideStylerHover
+{
+  background : transparent url("../../images/05_pushbutton_s_over_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.pushButtonSecondaryRightSideStylerHover
+{
+  background : transparent url("../../images/05_pushbutton_s_over_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;  
+}
+.pushButtonSecondaryLeftSideStylerActive
+{
+  background : transparent url("../../images/05_pushbutton_s_actv_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.pushButtonSecondaryRightSideStylerActive
+{
+  background : transparent url("../../images/05_pushbutton_s_actv_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;   
+}
+.pushButtonSecondaryLeftSideStylerPress
+{
+  background : transparent url("../../images/05_pushbutton_s_press_left.png") no-repeat top left;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.pushButtonSecondaryRightSideStylerPress
+{
+  background : transparent url("../../images/05_pushbutton_s_press_right.png") no-repeat top right;
+  height : 23px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 4px;
+  padding-right : 4px;
+  overflow : hidden;  
+}
+.pushButtonContentStyler
+{
+  white-space : nowrap;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  text-align : center;
+  vertical-align : middle;
+  line-height : 23px;
+  height : 23px;
+  width : 100%;
+  margin : 0px;
+  padding : 0px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  position : relative;
+  left : 0px;
+  top : -23px;
+  float : left;
+}

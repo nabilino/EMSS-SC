@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Value Selection</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var searchStr = (window.location.search) ? unescape(window.location.search) : "";
+
+function getVarFromString(varName, str)
+{
+	var url = unescape(str);
+	var ptr = url.indexOf(varName + "=");
+	var ptr2;
+	var val1 = "";
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1,url.length);
+		var ptr2;
+		if ((ptr2 = val1.indexOf("&")) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0,ptr2);
+		}
+	}
+	return val1;
+}
+
+function initValueList()
+{
+	var fieldNm = "";
+	if (searchStr != "")
+		fieldNm = getVarFromString("fieldNm", searchStr);
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+			document.getElementById("paneHeaderRow").style.display = "";
+	}
+	catch(e) {}
+	translateValueListLabels();
+	valueListOnLoad(fieldNm, document.getElementById('paneBody'));
+	try { window.focus(); } catch(e) {}
+	fitToScreen();
+}
+
+function translateValueListLabels()
+{
+	var phraseWin = findPhraseWnd(true);
+	var filterForm = document.forms["filterForm"];
+	var closeBtn = filterForm.elements["closeBtn"];
+	try
+	{
+		closeBtn.innerText = phraseWin.getSeaPhrase("CLOSE", "ESS");
+		closeBtn.setAttribute("title", phraseWin.getSeaPhrase("CLOSE","ESS"));
+		closeBtn.setAttribute("aria-label", phraseWin.getSeaPhrase("CLOSE","ESS"));
+		document.getElementById("lblBeginDlg").innerHTML = phraseWin.getSeaPhrase("BEGIN_DLG","ESS");
+		document.getElementById("lblEndDlg").innerHTML = phraseWin.getSeaPhrase("END_DLG","ESS");		
+	}
+	catch(e) {}
+}
+
+function doUnload()
+{
+	try { opener.stopProcessing(""); } catch(e) {}
+	try { parent.stopProcessing(""); } catch(e) {}
+	try
+	{
+		var filterForm = document.forms["filterForm"];
+		var fieldNm = (searchStr != "") ? getVarFromString("fieldNm", searchStr) : null;
+		if (fieldNm != null)
+		{	
+			var dmeFilter = dmeFilterFieldHash.get(fieldNm);
+			if (typeof(dmeFilter.getLaunchedFrom().getDmeFieldElement) != "undefined")
+			{		
+				var fldObj = dmeFilter.getLaunchedFrom().getDmeFieldElement(dmeFilter.getFieldNm());
+				dmeFilter.getLaunchedFrom().focusElement(fldObj[1]);
+			}
+		}
+	}
+	catch(e) {}	
+}
+
+function valueListOnLoad(fieldNm, recordElement, winRef, filterType)
+{
+	if (!filterType)
+		filterType = "valuelist";
+	var winElm;
+	if (winRef)
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? winRef.document.body : winRef;
+	else if (opener) 
+	{
+		winRef = opener;
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? opener.document.body : opener.window;
+	} 
+	else 
+	{
+		winRef = parent;
+		winElm = (navigator.appName.indexOf("Microsoft") >= 0) ? parent.document.body : parent;	
+	}
+	if (winRef == opener) 
+	{
+		try 
+		{
+			if (opener.document.body.getAttribute("onunload")) 
+			{
+				winElm.onunload = function() 
+				{
+					opener.document.body.getAttribute("onunload");
+					window.close();
+				};
+			} 
+			else
+				winElm.onunload = function() { window.close(); };
+		} 
+		catch(e) {}
+	}
+	document.getElementById("paneBody").style.visibility = "hidden";
+	var dmeFilter = new DMEFilterHandler();
+	dmeFilter.setId(window.name);
+	dmeFilter.setFilterType(filterType);
+	dmeFilter.setLaunchedFrom(winRef);
+	dmeFilter.setWindow(window);
+	dmeFilter.setRecordElement(recordElement);
+	dmeFilter.setFieldNm(fieldNm);
+	var render = (typeof(dmeFilter.getLaunchedFrom().drawValueListContent) != "undefined");
+	if (render)
+	{
+		dmeFilter.setEnabled(true);
+		dmeFilter.getLaunchedFrom().drawValueListContent(dmeFilter);
+		dmeFilter.setStyled(true);
+		dmeFilter.getWindow().stylePage();
+		dmeFilter.getWindow().document.getElementById("paneBody").style.visibility = "visible";
+		dmeFilter.getWindow().fitToScreen();
+		dmeFilter.getWindow().document.body.style.visibility = "visible";
+	}
+	dmeFilter.setWindowTitle();
+	dmeFilterFieldHash.put(dmeFilter);
+	if (typeof(winRef["getValueListFieldElement"]) != "undefined")
+	{
+		if (typeof(winRef["styler"]) == "undefined" || winRef.styler == null)
+			winRef.stylerWnd = findStyler(true);
+		if (winRef.stylerWnd && typeof(winRef.stylerWnd["StylerEMSS"]) == "function")
+			winRef.styler = new winRef.stylerWnd.StylerEMSS();
+		else
+			winRef.styler = winRef.stylerWnd.styler;
+		var fldObj = winRef.getValueListFieldElement(fieldNm);
+		if (typeof(winRef.stylerWnd.StylerEMSS["selectControlOnLoad"]) != "undefined")
+		{
+			var fldWin = fldObj[0];
+			var inputFld = fldObj[1];
+			winRef.stylerWnd.StylerEMSS.selectControlOnLoad(fldWin, inputFld);
+		}
+		winRef.styler.listRowOnClick = function(wnd, theElement, grid, row)
+		{
+			var recIdx = row.recordId;
+			dmeFilter.getWindow().valueListFieldRecordSelected(recIdx, fieldNm);
+			winRef.styler.listRowOnClick = function(){};
+		};			
+	}
+	if (typeof(winRef["stopProcessing"]) != "function")
+		winRef.stopProcessing = window.stopProcessing;
+	var msg = getSeaPhrase("CNT_UPD_WND","SEA",[dmeFilter.getWindow().getWinTitle()]);
+	try
+	{
+		if (dmeFilter.getWindow().frameElement)
+			msg = getSeaPhrase("CNT_UPD_FRM","SEA",[dmeFilter.getWindow().getWinTitle()]);
+	}
+	catch(e) {}		
+	winRef.stopProcessing(msg);	
+	return render;
+}
+
+function doClose()
+{
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+		{	
+			window.frameElement.style.display = "none";
+			doUnload();
+		}
+		else
+			window.close();
+	}
+	catch(e) {}
+}
+
+function valueListFieldRecordSelected(e, recIndex, fieldNm)
+{
+	var evt = e || window.event;
+	if (evt)
+	{	
+		var srcNode = (evt.srcElement) ? evt.srcElement : ((evt.target) ? evt.target : null);
+		if (srcNode && srcNode.nodeName.toLowerCase() == "a")
+		{
+			if (evt.stopPropagation)
+				evt.stopPropagation();
+			else
+				evt.cancelBubble = true;
+		}
+	}	
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+		{
+			parent.valueListFieldRecordSelected(recIndex, fieldNm);
+			window.frameElement.style.visibility = "hidden";
+		}
+		else
+			opener.valueListFieldRecordSelected(recIndex, fieldNm);
+	}
+	catch(e)
+	{
+		opener.valueListFieldRecordSelected(recIndex, fieldNm);
+	}
+}
+
+window.onkeydown = function(evt)
+{
+	evt = evt || window.event;
+	var keyCode = evt.keyCode || evt.which;
+	var key = String.fromCharCode(keyCode);
+    if (evt)
+    {
+ 		// Close on esc  	
+    	if (keyCode == 27)
+    		doClose();
+    	else if (keyCode == 9) // Keep focus in control
+    	{
+    		var first = null;
+    		var last = null;
+    		var len = document.forms.length;
+    		var elms, len2;
+    		for (var i=0; i<len; i++)
+    		{	
+    			elms = document.forms[i].elements;
+        		len2 = elms.length;
+        		for (var j=0; j<len2; j++)
+        		{
+        			if (elms[j].getAttribute("type") != "hidden" && elms[j].style.display != "none" && elms[j].style.visibility != "hidden" && !elms[j].disabled)
+        			{
+        				first = elms[j];
+        				break;
+        			}	
+        		}  
+        		if (first != null)
+        			break;
+    		}	
+    		for (var i=len-1; i>=0; i++)
+    		{	
+    			elms = document.forms[i].elements;
+        		len2 = elms.length;
+        		for (var j=len2-1; j>=0; j--)
+        		{
+        			if (elms[j].getAttribute("type") != "hidden" && elms[j].style.display != "none" && elms[j].style.visibility != "hidden" && !elms[j].disabled)
+        			{	
+        				last = elms[j];
+        				break;
+        			}	
+        		}
+        		if (last != null)
+        			break;
+    		}
+			if (evt.target.nodeName == "HTML") 
+			{
+				// Tabbed in from the address bar to the page
+				focusElement(first);
+				return false;
+			}
+			if (evt.target === last && !evt.shiftKey) 
+			{
+				focusElement(first);
+				return false;
+			} 
+			else if (evt.target === first && evt.shiftKey) 
+			{
+				focusElement(last);
+				return false;
+			}    		
+    	}	
+    }
+    return true;
+}
+
+function fitToScreen()
+{
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	contentWidth = winWidth;
+	contentWidthBorder = winWidth;
+	contentHeight = winHeight - 2;
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+			contentHeight = winHeight - 30;
+	}
+	catch(e) {}
+	contentHeightBorder = winHeight;
+	setLayerSizes = function() {};
+	try
+	{
+		document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		document.getElementById("paneBody").style.width = contentWidth + "px";
+		document.getElementById("paneBody").style.height = contentHeight + "px";
+		document.getElementById("paneBody").style.overflowY = "auto";
+		document.getElementById("paneBody").style.overflowX = "hidden";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body class="filterPopup" style="overflow:hidden;width:100%;height:100%;visibility:hidden" onload="initValueList();" onunload="doUnload()" onresize="fitToScreen()">
+<span id="lblBeginDlg" class="offscreen">Beginning of dialog content</span>
+<div id="paneBorder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr id="paneHeaderRow" style="display:none"><td style="height:16px;padding-bottom:2px;padding-right:0px">
+		<div id="paneHeader" style="padding-top:2px;padding-bottom:2px;padding-left:0px;padding-right:0px;width:100%">
+		<form onsubmit="return false;" name="filterForm" id="filterForm">
+			<div class="floatRight">
+				<button class="filterSearchButton" style="margin-left:2px;margin-right:2px" type="button" role="button" title="Close" aria-label="Close" name="closeBtn" id="closeBtn" onclick="doClose();">Close</button>
+			</div>
+		</form> 
+		</div>
+	</td></tr>
+	<tr><td class="filterBody" style="height:100%;vertical-align:top" >
+		<div id="paneBody" class="panebody" style="background-color:transparent" tabindex="0">
+			<!-- Record table HTML goes here. Set dynamically by drawDmeFieldFilterContent() in your app. -->
+		</div>
+	</td></tr>
+	</table>
+</div>
+<span id="lblEndDlg" class="offscreen">End of dialog content</span>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/valuelist.htm,v 1.1.2.37 2014/02/25 22:49:11 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

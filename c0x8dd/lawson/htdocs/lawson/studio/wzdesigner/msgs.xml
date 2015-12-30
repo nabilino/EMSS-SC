@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/wzdesigner/msgs.xml,v 1.6.34.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<TRANSLATE>
+	<PHRASE id="lblBranch">Branch</PHRASE>
+	<PHRASE id="lblDesign">Design</PHRASE>
+	<PHRASE id="lblEndWz">End Wizard</PHRASE>
+	<PHRASE id="lblFieldName">Field</PHRASE>
+	<PHRASE id="lblFC">Action</PHRASE>
+	<PHRASE id="lblId">Id</PHRASE>
+	<PHRASE id="lblName">Name</PHRASE>
+	<PHRASE id="lblSource">Source</PHRASE>
+	<PHRASE id="lblStartWz">Start Wizard</PHRASE>
+	<PHRASE id="lblStep">Step</PHRASE>	
+	<PHRASE id="lblTestCnd">Condition</PHRASE>
+	<PHRASE id="lblTitle">Title</PHRASE>
+	<PHRASE id="lblType">Type</PHRASE>
+	<PHRASE id="lblwzdesigner">Wizard Designer</PHRASE>
+	<PHRASE id="lblWzCtl">Wizard</PHRASE>
+	<PHRASE id="lblWzToolBox">Wizard ToolBox</PHRASE>
+
+	<PHRASE id="LBL_ABOUTWZDESIGNER">About Wizard Designer</PHRASE>
+	<PHRASE id="LBL_COLLAPSE_ALL">Collapse All</PHRASE>
+	<PHRASE id="LBL_DESIGN">Design</PHRASE>
+	<PHRASE id="LBL_EXPAND_ALL">Expand All</PHRASE>
+	<PHRASE id="LBL_REFRESH">Refresh</PHRASE>
+	<PHRASE id="LBL_RELOAD">Reload Document</PHRASE>
+	<PHRASE id="LBL_SHIFT_DOWN">Shift Downwards</PHRASE>
+	<PHRASE id="LBL_SHIFT_UP">Shift Upwards</PHRASE>
+
+	<PHRASE id="TITLE_ABOUTDESIGNER">Read the about page for this designer.</PHRASE>
+	<PHRASE id="TITLE_COLLAPSE_ALL">Collapses the entire document tree.</PHRASE>
+	<PHRASE id="TITLE_DESIGN">View design mode for the current document.</PHRASE>
+	<PHRASE id="TITLE_EXPAND_ALL">Expands the entire document tree.</PHRASE>
+	<PHRASE id="TITLE_REFRESH">Reload the source/script editor contents.</PHRASE>
+	<PHRASE id="TITLE_RELOAD">Reload the wizard source contents.</PHRASE>
+	<PHRASE id="TITLE_SHIFT_DOWN">Shift the selection downwards.</PHRASE>
+	<PHRASE id="TITLE_SHIFT_UP">Shift the selection upwards.</PHRASE>
+
+	<PHRASE id="MSG_DOC_IS_MODIFIED">Document has been modified.</PHRASE>
+	<PHRASE id="MSG_INVALID_BRANCH_LOCATION">You can not add a branch at this location</PHRASE>
+	<PHRASE id="MSG_INVALID_STEP_LOCATION">You can not add a step at this location</PHRASE>
+	<PHRASE id="MSG_INVALID_STEP_PROPERTY">You can not change this property for this step.</PHRASE>
+	<PHRASE id="MSG_INVALID_XML_FORMAT">The XML document supplied has an invalid format.%n%Partial contents:</PHRASE>
+	<PHRASE id="MSG_LOADING_FORM">Loading Form</PHRASE>
+	<PHRASE id="MSG_NONSTANDARDFILELOCATION">The file location you have specified is different from the standard location.  In order to access it from a form in the Lawson Portal, you need to save it to this location:</PHRASE>
+	<PHRASE id="MSG_OK_TO_CONTINUE">OK to continue?</PHRASE>
+
+	<PHRASE id="ERR_FORM_RET">Error attempting to retrieve form information.</PHRASE>
+	<PHRASE id="ERR_WIZ_FILENAME">Proper wizard filename is (token).xml.</PHRASE>
+	<PHRASE id="ERR_HELP_RET">Error attempting to retrieve help information.</PHRASE>
+	<PHRASE id="ERR_INVALID_FORM_XML">Invalid form XML.</PHRASE>
+	<PHRASE id="ERR_XPRESS">Error returned by Xpress servlet.</PHRASE>
+</TRANSLATE>

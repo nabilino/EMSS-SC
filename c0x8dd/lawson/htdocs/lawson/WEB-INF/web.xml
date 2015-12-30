@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+                         "http://java.sun.com/dtd/web-app_2_3.dtd">
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/WEB-INF/Attic/web.xml,v 1.1.2.3.4.1.14.1 2005/10/31 23:36:48 andyk Exp $ -->
+<web-app>
+  <display-name>Lawson Portal</display-name>
+  <description>Lawson Portal for Technology Release 9.0</description>
+
+<!-- WebLogic Load Balancing starts here...
+
+  To load balance between WebLogic servers,
+  (a) uncomment the all of the lines between the following <servlet>
+      tag and the line "WebLogic Load Balancing ends here",
+  (b) change the <init-param><param-value> for HttpClusterServlet
+      to include the host:port of all the app servers in the cluster
+      and make sure the host name is the fully qualified machine name,
+  (c) deploy the portal to the weblogic web server instance,
+  (d) make sure the following portal directories/files
+      are shared between the webserver and app server machines
+        - content/
+      - msgs/
+      - roles/
+        - users/*.xml
+  (e) modify the "ioswebrootdir" parameter in $LAWDIR/system/iosconfig.xml
+      to point to the location used in (d),
+  (f) make sure the appservers referenced in (b) are started,
+  (g) start the weblogic web server instance.
+
+  <servlet>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <servlet-class>
+      weblogic.servlet.proxy.HttpClusterServlet
+    </servlet-class>
+    <init-param>
+      <param-name>WebLogicCluster</param-name>
+      <param-value>
+         appserver1:7011|appserver2:7021
+      </param-value>
+    </init-param>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/servlet/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/Router/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/lawson/admin/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/WhoAreYouAuthen/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/DirectoryAuthen/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/sso/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/ssoconfig/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/scwebapp/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/bpm/*</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>HttpClusterServlet</servlet-name>
+    <url-pattern>/cgi-lawson/*</url-pattern>
+  </servlet-mapping>
+  
+...WebLogic Load Balancing ends here. -->
+
+</web-app>

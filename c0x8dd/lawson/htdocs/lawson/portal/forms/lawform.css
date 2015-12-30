@@ -1,0 +1,460 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/lawform.css,v 1.24.2.7.4.8.14.2.6.2 2012/08/08 12:37:26 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+
+BODY
+{
+	background-color: white;
+	color: black;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	overflow:auto;
+}
+.detailArea
+{
+ 	position: absolute;
+	border-bottom: 1px solid #999999;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+}
+.detailAreaHeader
+{
+	background-color: #87AD83;
+	color: #FFFFFF;
+	padding-bottom: 5px;
+	padding-top: 5px;
+ 	position: absolute;
+}
+.detailAreaBody
+{
+	overflow:hidden;
+ 	position: absolute;
+}
+.detailHdrLabel
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	color: #FFFFFF;
+	position: absolute;
+	text-align: right;
+	font-weight:bold;
+}
+.detailRowActive
+{
+	background-color: #B4CBB1;
+	width: 100%;
+	position: absolute;
+}
+.detailRowEven
+{
+	background-color: #E2ECE1;
+	width: 100%;
+	position: absolute;
+}
+.detailRowOdd
+{
+	background-color: #F3F2EB; 
+	width: 100%;
+	position: absolute;
+}
+.flowChartButton
+{
+	background-color:#6699CC;
+	border-bottom: 1px solid black;
+	border-left: 1px solid  #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid  #90afc0;
+	color: white;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+	padding-bottom: 2px;
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+.flowChartButtonHighlight
+{
+	background-color: #D4DFF0;
+	border-bottom: 1px solid black;
+	border-left: 1px solid #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid #90afc0;
+	color: black;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+	padding-bottom: 2px;
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+.flowChartButtonFocus
+{
+	background-color: lightgrey;
+	border-bottom: 1px solid black;
+	border-left: 1px solid #D4DFF0;
+	border-right: 1px solid black;
+	border-top:1px solid #D4DFF0;
+	color: black;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+	padding-bottom: 2px;
+	position: absolute;
+	text-align: center;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+.label
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	color: #333333;
+	position: absolute;
+	text-align: right;
+	z-index: 1;
+	font-weight:bold;
+}
+.rectDraw
+{
+	border: #006699 1px solid;
+	display: inline;
+	overflow: hidden;
+	position: absolute;
+	margin-top:0px;
+
+}
+.lineDraw
+{
+	border-top: #006699 1px solid;
+	border-right: #006699 1px solid;
+	display: inline;
+	overflow: hidden;
+	position: absolute;
+	margin-top:0px;
+}
+.lineHorizDraw
+{
+	border-top: #006699 1px solid;
+	display: inline;
+	overflow: hidden;
+	position: absolute;
+	margin-top:0px;
+}
+.lineVertDraw
+{
+	border-right: #006699 1px solid;
+	display: inline;
+	overflow: hidden;
+	position: absolute;
+	margin-top:0px;
+}
+.mainStyle
+{
+	top: 0px;
+	left: 0px;
+	position: absolute;
+}
+.output
+{
+	color: #003399;
+	position: absolute;
+	text-align: left;
+}
+.rectLabel
+{
+	background-color: white;
+	color: #333333;
+	font-weight: bold;
+	padding-right: 5px;
+	padding-left: 5px;
+	margin-left: 12px;
+	z-index: 1;
+}
+.rectLabelDtl
+{
+	background-color: #87AD83;
+	color: #FFFFFF;
+	font-weight: bold;
+	padding-top: 1px;
+	padding-right: 5px;
+	padding-left: 5px;
+	margin-left: 20px;
+	z-index: 1;
+}
+.rectLabelTab
+{
+	background-color: #D4DFF0;
+	color:#333333;
+	font-weight: bold;
+	padding-top: 1px;
+	padding-right: 5px;
+	padding-left: 5px;
+	margin-left: 20px;
+	z-index: 1;
+}
+.rectLabelTabSub
+{
+	background-color: #E2ECE1;
+	color:#333333;
+	font-weight: bold;
+	padding-top: 1px;
+	padding-right: 5px;
+	padding-left: 5px;
+	margin-left: 20px;
+	z-index: 1;
+}
+.rectLines
+{
+	border-top: #333333 1px solid;
+	display: inline;
+	overflow: hidden;
+	position: absolute;
+	margin-top:0px;
+}
+.lineHoriz
+{
+    position: absolute;
+    border-top: #333333 1px solid;
+	left:0;
+	top:50%;
+	height:0;
+	width:100%;
+}
+.lineVert
+{
+    position: absolute;
+    border-right: #333333 1px solid;
+	left:50%;
+	top:0;
+	height:100%;
+	width:0;
+}
+.scrollDiv
+{
+	left: 0px;
+	overflow: auto;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: white;
+	scrollbar-arrow-color: white;
+}
+.scrollGroup
+{
+}
+.selectButton
+{
+	position: absolute;
+	margin-left: 0px;
+	overflow: hidden;
+	cursor: pointer;
+	cursor: hand;
+	height: 18px;
+	width: 12px;
+	z-index: 2;
+}
+.tabArea
+{
+	position: absolute;
+	left: 1%;
+	width: 98%;
+	z-index: 99;
+}
+.tabButtonActive
+{
+	background-color: #D4DFF0;
+	color: buttontext;
+	font-weight:bold;
+	padding-top:3px;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	position: absolute;
+	text-align: center;
+	cursor: default;
+	overflow:hidden;
+	z-index: 2;
+}
+.tabButtonActiveSub
+{
+	background-color: #E2ECE1;
+	color: buttontext;
+	font-weight:bold;
+	padding-top:3px;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	position: absolute;
+	text-align: center;
+	cursor: default;
+	overflow:hidden;
+	z-index: 2;
+}
+.tabButtonDisabled
+{
+	background-color:#6699CC;
+	color: lightgrey;
+	font-weight: normal;
+	padding-top:3px;
+	border-left: 1px solid white;
+	border-right: 1px solid white;
+	border-top: 1px solid white;
+	position: absolute;
+	text-align: center;
+	z-index: 0;
+}
+.tabButtonInactive
+{
+	background-color: #EEF4FC;
+	color: #555555;
+	font-weight: bold;
+	padding-top:3px;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	position: absolute;
+	text-align: center;
+	cursor: default;
+	z-index: 0;
+}
+.tabPaneActive
+{
+	position: absolute;
+	background-color: #D4DFF0;
+	color: buttontext;
+ 	padding: 2px;
+	border-bottom: 1px solid #999999;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	overflow: hidden;
+	display:block;
+	z-index: 1;
+}
+.tabPaneActiveSub
+{
+	position: absolute;
+	background-color: #E2ECE1;
+	color: buttontext;
+ 	padding: 2px;
+	border-bottom: 1px solid #999999;
+	border-left: 1px solid #999999;
+	border-right: 1px solid #999999;
+	border-top: 1px solid #999999;
+	overflow: hidden;
+	display:block;
+	z-index: 1;
+}
+.tabPaneInactive
+{
+	display:none;
+}
+.textBox
+{
+	background-color: white;
+	height:18px;
+	font-size: 8pt;
+	font-family: Tahoma, Arial, sans-serif;
+	position: absolute;
+}
+.textBoxHighLight
+{
+	height:18px;
+	background-color:lightgrey;
+	color: black;
+	font-size: 8pt;
+	font-family: Tahoma, Arial, sans-serif;
+	position: absolute;
+}
+.toolbar
+{
+	background-color:transparent;
+	overflow: hidden;
+}
+.xTUtilContainer
+{
+	background-color:#6699CC;
+	text-align: center;
+}
+.xTToolBarButton
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+	background-color:#6699CC;
+	color: white;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid #90afc0;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	top: 0px;
+}
+.xTToolBarButtonHighlight
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	font-weight:bold;
+	background-color: #D4DFF0;
+	color: black;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #D4DFF0;
+	border-right: 1px solid black;
+	border-top:1px solid #D4DFF0;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	top: 0px;
+}
+.xTToolBarButtonDisabled
+{
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 11px;
+	font-weight:normal;
+	background-color:#E4E9F0;
+	color: white;
+	padding: 1px;     
+	border-bottom: 1px solid black;
+	border-left: 1px solid #90afc0;
+	border-right: 1px solid black;
+	border-top:1px solid #90afc0;
+	text-align: center;
+	margin: 1px;
+	margin-top: 2px;
+	height: 20px;
+	top: 0px;
+}

@@ -1,0 +1,875 @@
+<html>
+<head>
+<title>Ethnicity</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var EmpInfo = new Object();
+var SpecialEthnicityData;
+var EthnicityData;
+var CurrentRaces;
+var twoQuestionFormat = false;
+var appObj;
+
+function OpenEthnicity()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitEthnicity()'|desiredEdit='EM'");
+}
+
+function InitEthnicity()
+{
+	stylePage();
+	document.title = getSeaPhrase("ETHNICITY","ESS");
+	setTaskHeader("header",getSeaPhrase("ETHNICITY","ESS"),"Personal");
+	StoreDateRoutines();
+	GetEmployee();
+}
+
+function GetEmployee()
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+
+	var dmeObj = new DMEObject(authUser.prodline, "paemployee");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.field = "employee.work-country;eeo-class;ethnicity.description";
+	dmeObj.key = parseInt(authUser.company,10) + "=" + parseInt(authUser.employee,10);
+	dmeObj.func = "StoreEmployee()";
+	dmeObj.otmmax = "1";
+	dmeObj.max = "1";
+  	DME(dmeObj,"jsreturn");
+}
+
+function GetLawsonApplicationVersion()
+{
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the app version will complete before the IOS version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       		setTimeout("GetLawsonApplicationVersion()", 10);
+       		return;
+	}
+
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.02.00")
+	{
+		GetSpecialEthnicityData();
+	}
+	else
+	{
+		GetEthnicityData();
+	}
+}
+
+function StoreEmployee()
+{
+	EmpInfo = self.jsreturn.record[0];
+	if (!twoQuestionFormat && EmpInfo.employee_work_country == "US")
+	{
+		GetLawsonApplicationVersion();
+	}
+	else
+	{
+		GetEthnicityData();
+	}	
+}
+
+function GetSpecialEthnicityData()
+{
+	SpecialEthnicityData = new Array();
+	var dmeObj = new DMEObject(authUser.prodline,"hrctrycode");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "ctcset3";
+		dmeObj.field = "hrctry-code;description;us-et-behavior";
+		dmeObj.key = EmpInfo.employee_work_country + "=ET=A=H;M;U";
+		dmeObj.max = "3";
+		dmeObj.func = "StoreSpecialEthnicityData()";
+	DME(dmeObj,"jsreturn");	
+}
+
+function StoreSpecialEthnicityData()
+{
+	var ethnicityRecs = self.jsreturn.record;
+	var nbrRecs = ethnicityRecs.length;
+	
+	for (var i=0; i<nbrRecs; i++)
+	{
+		SpecialEthnicityData[ethnicityRecs[i].us_et_behavior] = ethnicityRecs[i];		
+	}
+	
+	if (SpecialEthnicityData["H"] && SpecialEthnicityData["M"] && SpecialEthnicityData["U"])
+	{
+		twoQuestionFormat = true;
+	}
+	
+	GetEthnicityData();	
+}
+
+function GetEthnicityData()
+{
+	EthnicityData = new Array();
+
+	if (!emssObjInstance.emssObj.filterSelect || twoQuestionFormat)
+	{
+		var dmeObj = new DMEObject(authUser.prodline,"hrctrycode");
+			dmeObj.out = "JAVASCRIPT";
+			dmeObj.index = "ctcset1";
+			dmeObj.field = "hrctry-code;description";
+			dmeObj.key = "ET";
+			if (EmpInfo.employee_work_country)
+				dmeObj.key += "=" + EmpInfo.employee_work_country;
+			dmeObj.cond = "active";
+			if (twoQuestionFormat)
+				dmeObj.select = "us-et-behavior=spaces";
+			dmeObj.max = "600";
+			dmeObj.func = "StoreEthnicityData()";
+		DME(dmeObj,"jsreturn");
+	}
+	else
+		DrawEthnicityScreen();
+}
+
+function StoreEthnicityData()
+{
+	EthnicityData = EthnicityData.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	EthnicityData = EthnicityData.sort(sortByDescription);
+	DrawEthnicityScreen();
+}
+
+function DrawEthnicitySelect(selectedvalue)
+{
+	var codeselect = new Array();
+	codeselect[0] = "<option value=' '>";
+
+	for (var i=0; i<EthnicityData.length; i++)
+	{
+		codeselect[i+1] = "";
+		codeselect[i+1] += "<option value='" + EthnicityData[i].hrctry_code + "'";
+		if (EthnicityData[i].hrctry_code == selectedvalue)
+		    codeselect[i+1] += " selected";
+		codeselect[i+1] += ">" + EthnicityData[i].description;
+	}
+
+	return codeselect.join("");
+}
+
+function DrawEthnicityScreen()
+{
+	var ethnicityCode = EmpInfo.eeo_class;
+
+	var sb = new Array();
+
+	if (twoQuestionFormat)
+	{
+		sb[sb.length] = '<div style="width:auto;text-align:center"><form name="ethnicityform">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto">'
+		+ '<tr><td colspan="2" class="plaintablecell" style="padding-top:5px;padding-bottom:5px">'+getSeaPhrase("VOLUNTARY_INFO_2","ESS")+'</td></tr>'
+		+ '<tr><td class="plaintablecell" style="padding-top:5px;padding-bottom:5px">'+getSeaPhrase("HISPANIC_OR_LATINO","ESS")+'</td>'
+		+ '<td class="plaintablecelldisplay" nowrap="nowrap">'	
+		+ '<input class="inputbox" type="radio" name="latino" value="Y"/>'+getSeaPhrase("YES","ESS")
+		+ '<input class="inputbox" type="radio" name="latino" value="N"/>'+getSeaPhrase("NO","ESS")
+		+ '</td></tr>'
+		+ '<tr><td colspan="2" class="plaintablecell" style="padding-top:5px;padding-bottom:5px">'+getSeaPhrase("OTHER_RACES","ESS")+'</td></tr>'
+		
+		for (var i=0; i<EthnicityData.length; i+=2)
+		{
+			sb[sb.length] = '<tr><td class="plaintablecell" nowrap="nowrap">'	
+			+ '<input class="inputbox" type="checkbox" name="race" value="'+EthnicityData[i].hrctry_code+'"/><span class="fieldlabel">'+EthnicityData[i].description+'</span></td>'
+			+ '<td class="plaintablecell" nowrap="nowrap">'
+			if ((i+1) < EthnicityData.length)
+			{
+				sb[sb.length-1] += '<input class="inputbox" type="checkbox" name="race" value="'+EthnicityData[i+1].hrctry_code+'"/><span class="fieldlabel">'+EthnicityData[i+1].description+'</span>'
+			}
+			else
+			{
+				sb[sb.length-1] += '&nbsp;'				
+			}
+			sb[sb.length-1] += '</td></tr>'
+		} 
+		
+		sb[sb.length] = '<tr><td colspan="2" class="plaintablecell" style="padding-top:5px;padding-bottom:5px">'
+		+ uiButton(getSeaPhrase("WITHHOLD_RESPONSE","ESS"),"parent.ProcessRace(true);return false","margin-top:10px")
+		+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessRace(false);return false","margin-top:10px;margin-left:5px")
+		+ '</td></tr>'
+		+ '</table>'
+		+ '</form></div>';	
+	}
+	else
+	{
+		sb[sb.length] = '<form name="ethnicityform">'
+		+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%">'
+		+ '<tr><td class="plaintablerowheaderborderbottom" style="padding-top:5px">'+getSeaPhrase("ETHNICITY","ESS")+'</td>'
+		+ '<td class="plaintablecell" style="padding-top:5px" nowrap>';
+	
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			sb[sb.length] = '<input type="text" name="ethnicity" id="ethnicity" class="inputbox" size="4" maxlength="4" '
+			+ 'value="' + ethnicityCode + '" onkeyup="parent.MAIN.document.getElementById(\'xlt_ethnicity\').innerHTML=\'\';"/>'
+			+ '<a href="" onclick="parent.openDmeFieldFilter(\'ethnicity\');return false">'
+			+ '<img src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" style="margin-bottom:-3px" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'">'
+			+ '</a>'
+			+ '<span class="fieldlabelleft" style="width:200px" id="xlt_ethnicity">' + EmpInfo.ethnicity_description + '</span>';
+		}
+		else
+		{
+			sb[sb.length] = '<select name="ethnicity">'
+			+ DrawEthnicitySelect(ethnicityCode)
+			+ '</select>';
+		}
+	
+		sb[sb.length] = '</td></tr>'
+		+ '<tr><td>&nbsp;</td><td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessEthnicity();return false","margin-top:10px")
+		+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.CancelEthnicity();return false","margin-top:10px;margin-left:5px")
+		+ '</td></tr>'
+		+ '</table>'
+		+ '</form>';
+	}
+
+	try
+	{
+		self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAILS","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = sb.join("");
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		document.getElementById("MAIN").style.visibility = "visible";
+		if (!twoQuestionFormat)
+			self.MAIN.document.forms["ethnicityform"].elements["ethnicity"].focus();	
+	}
+	catch(e) {}
+	if (twoQuestionFormat)
+		GetCurrentRaces();
+	else	
+		removeWaitAlert();
+	fitToScreen();
+}
+
+function isRaceSelected()
+{
+	var formObj = self.MAIN.document.forms["ethnicityform"];
+	var latinoElm = formObj.elements["latino"];
+	// treat a hispanic or latino value of 'No' as unselected 
+	var raceSelected = latinoElm[0].checked;
+
+	// is an individual race selected?
+	if (!raceSelected && EthnicityData.length > 0)
+	{
+		var races = self.MAIN.document.forms["ethnicityform"].elements["race"];
+		if (EthnicityData.length == 1)
+		{
+			raceSelected = races.checked;
+		}
+		else
+		{
+			for (var i=0; i<races.length; i++)
+			{
+				if (races[i].checked)
+				{
+					raceSelected = true;
+					break;
+				}
+			}		
+		}
+	}
+	
+	return raceSelected;
+}
+
+function GetCurrentRaces()
+{
+	CurrentRaces = new Array();
+	var dmeObj = new DMEObject(authUser.prodline,"paeeeorace");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "eerset1";
+		dmeObj.field = "race;ethnicity.description";
+		dmeObj.key = parseInt(authUser.company) + "=" + parseInt(authUser.employee);
+		dmeObj.select = "ethnicity.active-flag=A";
+		dmeObj.max = "600";
+		dmeObj.func = "SelectCurrentRaces()";
+	DME(dmeObj,"jsreturn");	
+}
+
+function SelectCurrentRaces()
+{
+	var raceRecs = self.jsreturn.record;
+	var nbrRecs = raceRecs.length;
+	for (var i=0; i<nbrRecs; i++)
+	{
+		CurrentRaces[raceRecs[i].race] = raceRecs[i];
+	}
+
+	if (self.jsreturn.Next)
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+	
+	var nbrCurrentRaces = 0;
+	for (var race in CurrentRaces)
+	{
+		nbrCurrentRaces++;
+	}
+	
+	// if employee has hispanic race, select 'Yes'; if employee has races but not hispanic, select 'No'
+	// if employee has no races on HR28 (unknown), leave question one unselected
+	var formObj = self.MAIN.document.forms["ethnicityform"];
+	if (CurrentRaces[SpecialEthnicityData["H"].hrctry_code])
+	{
+		formObj.elements["latino"][0].checked = true;
+	}
+	else if (nbrCurrentRaces > 0)
+	{
+		formObj.elements["latino"][1].checked = true;
+	}
+	
+	if (EthnicityData.length > 0)
+	{
+		var races = formObj.elements["race"];
+		if (EthnicityData.length == 1)
+		{
+			if (CurrentRaces[races.value])
+			{
+				races.checked = true;
+			}
+		}
+		else
+		{
+			for (var i=0; i<races.length; i++)
+			{
+				if (CurrentRaces[races[i].value])
+				{
+					races[i].checked = true;
+				}
+			}		
+		}		
+	}
+
+	self.MAIN.stylePage();
+	removeWaitAlert();
+}
+
+function ProcessRace(withhold)
+{
+	withhold = withhold || false;
+	
+	if (withhold)
+	{
+		var formObj = self.MAIN.document.forms["ethnicityform"];
+		formObj.reset();
+		self.MAIN.stylePage();	
+	}
+	else
+	{
+		if (!isRaceSelected())
+		{
+			seaAlert(getSeaPhrase("NO_RACES_SELECTED","ESS"));
+			return;
+		}	
+	}
+	
+	CallHR28(withhold, 0);	
+}
+
+function CallHR28(withhold, raceCtr)
+{
+	// make sure the race counter is a number
+	if ((typeof(raceCtr) == "undefined") || (raceCtr == null) || isNaN(parseInt(raceCtr,10)))
+		raceCtr = 0;	
+		
+	// on a withhold, set counter to number of races so we only make one call	
+	if (withhold)
+		raceCtr = EthnicityData.length;	
+		
+	// the survey date is updated no matter what selections the employee has made
+	var formObj = self.MAIN.document.forms["ethnicityform"];
+	
+	var agsObj 			= new AGSObject(authUser.prodline, "HR28.1");
+	agsObj.event		= "CHANGE";
+	agsObj.rtn 			= "MESSAGE";
+	agsObj.longNames	= "ALL";
+	agsObj.tds 			= false;
+	agsObj.debug 		= false;
+	agsObj.field 		= "FC=C"
+	      				+ "&PEM-COMPANY=" + parseInt(authUser.company,10)
+		  				+ "&PEM-EMPLOYEE=" + parseInt(authUser.employee,10)
+		  				+ "&PEM-SURVEY-DATE=" + escape(authUser.date)
+		  				+ "&EER-USER-ID=W" + parseInt(authUser.employee,10)	  				
+	
+	var lineNbr = 0;
+	var origRaceCtr = raceCtr;
+
+	// update just the survey date and user id on a withhold
+	// on an update, only update the hispanic special code on the first call
+	if (!withhold && (raceCtr == 0))
+	{
+		var latinoElm = formObj.elements["latino"];
+		// employee answered yes to hispanic or latino and does not have that race on file - add it
+		if (latinoElm[0].checked && !CurrentRaces[SpecialEthnicityData["H"].hrctry_code])
+		{
+			lineNbr++;
+			agsObj.field += "&LINE-FC"+lineNbr+"=A" 
+			+ "&EER-RACE"+lineNbr+"=" + escape(SpecialEthnicityData["H"].hrctry_code,1);	
+		}
+		// employee answered no to hispanic or latino and has that race on file - delete it
+		else if (latinoElm[1].checked && CurrentRaces[SpecialEthnicityData["H"].hrctry_code])
+		{
+			lineNbr++;
+			agsObj.field += "&LINE-FC"+lineNbr+"=D" 
+			+ "&EER-RACE"+lineNbr+"=" + escape(SpecialEthnicityData["H"].hrctry_code,1);	
+		}		
+	}
+	
+	// if this is an update, determine what races need to be added or deleted on HR28
+	// if employee has a race on file and has chosen it, leave it as is
+	if (!withhold && (EthnicityData.length > 0))
+	{
+		var races = formObj.elements["race"];
+		if (EthnicityData.length == 1)
+		{
+			if (races.checked)
+			{
+				if (!CurrentRaces[races.value])
+				{
+					lineNbr++;
+					agsObj.field += "&LINE-FC"+lineNbr+"=A"
+					+ "&EER-RACE"+lineNbr+"=" + escape(races.value,1);
+				}
+			}
+			else
+			{
+				if (CurrentRaces[races.value])
+				{
+					lineNbr++;
+					agsObj.field += "&LINE-FC"+lineNbr+"=D"
+					+ "&EER-RACE"+lineNbr+"=" + escape(races.value,1);
+				}
+			}
+			raceCtr = EthnicityData.length;			
+		}
+		else
+		{
+			var moreRacesToProcess = false;
+			for (var i=raceCtr; i<races.length; i++)
+			{
+				if (races[i].checked)
+				{
+					if (!CurrentRaces[races[i].value])
+					{
+						lineNbr++;
+						agsObj.field += "&LINE-FC"+lineNbr+"=A"
+						+ "&EER-RACE"+lineNbr+"=" + escape(races[i].value,1);					
+					}
+				}
+				else
+				{
+					if (CurrentRaces[races[i].value])
+					{
+						lineNbr++;
+						agsObj.field += "&LINE-FC"+lineNbr+"=D"
+						+ "&EER-RACE"+lineNbr+"=" + escape(races[i].value,1);
+					}
+				}
+				// HR28 can only accept up to 14 records per call
+				if (lineNbr >= 14 && ((i+1) < races.length))
+				{
+					moreRacesToProcess = true;
+					raceCtr = i + 1;
+					break;
+				}
+			}	
+			if (!moreRacesToProcess)
+				raceCtr = EthnicityData.length;
+		}	
+	}			
+	
+	// on a withhold, always update just the survey date and user id
+	// on an update, if we processed races but no changes are needed on HR28
+	// and we have already updated once, skip this update
+	if (!withhold && (lineNbr == 0) && (origRaceCtr > 0))
+	{
+		DisplayHR28Message(raceCtr);		
+	}
+	else
+	{	  					  				
+		agsObj.func = "parent.DisplayHR28Message("+parseInt(raceCtr,10)+")";
+		showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+		AGS(agsObj,"jsreturn");
+	}
+}
+
+function DisplayHR28Message(raceCtr)
+{
+	var msg = self.lawheader.gmsg;
+	var msgnbr = parseInt(self.lawheader.gmsgnbr,10);
+
+	if (msgnbr != 0)
+	{
+		removeWaitAlert();
+		seaAlert(msg);
+	}
+	else
+	{
+		if (raceCtr < EthnicityData.length)
+		{
+			CallHR28(false, raceCtr);
+		}
+		else
+		{
+			removeWaitAlert();
+			msg = getSeaPhrase("CHANGE_COMPLETE_NO_CONTINUE","ESS");
+			seaAlert(msg);
+			GetEmployee();	
+		}
+	}
+}
+
+function CancelEthnicity()
+{
+	self.location = "/lawson/xhrnet/ui/logo.htm";
+}
+
+function ProcessEthnicity()
+{
+	var formObj = self.MAIN.document.forms["ethnicityform"];
+
+	for (var i=0; i<formObj.elements.length; i++)
+	{
+		if (NonSpace(formObj.elements[i].value) == 0)
+		{
+			formObj.elements[i].value = " ";
+		}	
+	}
+
+	var agsObj 			= new AGSObject(authUser.prodline, "HR11.1");
+	agsObj.event		= "CHANGE";
+	agsObj.rtn 			= "MESSAGE";
+	agsObj.longNames	= "ALL";
+	agsObj.tds 			= false;
+	agsObj.field 		= "FC=C"
+		  				+ "&EFFECT-DATE=" + formjsDate(fmttoday)
+	      				+ "&EMP-COMPANY=" + parseInt(authUser.company,10)
+		  				+ "&EMP-EMPLOYEE=" + parseInt(authUser.employee,10)
+		  				+ "&PEM-EEO-CLASS=" + escape(formObj.elements["ethnicity"].value,1)
+		  				+ "&XMIT-HREMP-BLOCK=1000000000"
+		  				+ "&XMIT-REQDED=1";
+	agsObj.func = "parent.DisplayHR11Message()";
+	agsObj.debug = false;
+	showWaitAlert(getSeaPhrase("HOME_ADDR_42","ESS"));
+
+	for (var i=0; i<formObj.elements.length; i++)
+	{
+		if (NonSpace(formObj.elements[i].value) == 0)
+		{
+			formObj.elements[i].value = "";
+		}	
+	}
+
+	AGS(agsObj,"jsreturn");
+}
+
+function DisplayHR11Message()
+{
+	removeWaitAlert();
+	var msg = self.lawheader.gmsg;
+	var msgnbr = parseInt(self.lawheader.gmsgnbr,10);
+
+	if (msgnbr != 0)
+	{
+		if (msgnbr == 50 || msgnbr == 141)
+		{
+			msg = getSeaPhrase("REQUIRE_ADDITIONAL_INFO_CONTACT_HR","ESS");
+		}
+		seaAlert(msg);
+	}
+	else
+	{
+		msg = getSeaPhrase("CHANGE_COMPLETE_NO_CONTINUE","ESS");
+		seaAlert(msg);
+		GetEmployee();
+	}
+}
+
+function sortByDescription(obj1, obj2)
+{
+	if (obj1.description < obj2.description)
+		return -1;
+	else if (obj1.description > obj2.description)
+		return 1;
+	else
+		return 0;
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			var keyStr = "ET";
+			if (EmpInfo && EmpInfo.employee_work_country)
+				keyStr += "=" + EmpInfo.employee_work_country;
+			dmeFilter.addFilterField("hrctry-code", 4, getSeaPhrase("ETHNICITY","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"hrctrycode",
+				"ctcset1",
+				"hrctry-code;description",
+				keyStr,
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+		var keyStr = "ET";
+		if (EmpInfo && EmpInfo.employee_work_country)
+			keyStr += "=" + EmpInfo.employee_work_country;
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"hrctrycode",
+			"ctcset1",
+			"hrctry-code;description",
+			keyStr,
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	var formDescElm;
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			formElm.value = selRec.hrctry_code;
+			try { self.MAIN.document.getElementById("xlt_"+fieldNm.toLowerCase()).innerHTML = selRec.description; } catch(e) {}
+			break;
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	}
+	catch(e)
+	{}
+	formElm.focus();
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var formElm = self.MAIN.document.getElementById(fieldNm.toLowerCase());
+	var fld = [self.MAIN, formElm];
+	return fld;
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "ethnicity": // ethnicity
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px"  styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("ETHNICITY","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.hrctry_code) ? tmpObj.hrctry_code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		if (typeof(parent.removeWaitAlert) != "undefined")
+			parent.removeWaitAlert();
+		removeWaitAlert();
+	} catch(e) {}
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;		
+
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth =  winWidth - 23;
+		contentWidthBorder =  winWidth - 2;		
+		contentHeight = winHeight - 60;	
+		contentHeightBorder = winHeight - 30;		
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 :winWidth - 12;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 41;		
+	}
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.MAIN.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenEthnicity()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;height:300px;left:0px;top:32px;width:500px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" src="/lawson/xhrnet/errmsg.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/ethnicity.htm,v 1.1.2.17 2012/06/29 17:11:59 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

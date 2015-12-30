@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>Privacy Act and Paperwork Reduction Act Notice</title>
+<meta name="viewport" content="width=device-width" />
+<script>
+
+function writeContents()
+{
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'
+	+ 'Privacy Act and Paperwork Reduction Act Notice'
+	+ '</div>'
+
+	var html = '<table border="0" cellspacing="0" cellpadding="0" width="100%">'+
+	'<tr><td class="plaintablecell" style="padding-top:10px">We ask for the information on this form to carry out the Internal Revenue laws of the '+
+	'United States. The Internal Revenue Code requires this information under sections 3402(f)(2)(A) '+
+	'and 6109 and their regulations. Failure to provide a properly completed form will result '+
+	'in your being treated as a single person who claims no withholding allowances; providing '+
+	'fraudulent information may also subject you to penalties. Routine uses of this information '+
+	'include giving it to the Department of Justice for civil and criminal litigation, to cities, '+
+	'states, and the District of Columbia for use in administering their tax laws, and using it in '+
+	'the National Directory of New Hires. We may also disclose this information to other countries '+
+	'under a tax treaty, to federal and state agencies to enforce federal nontax criminal laws, or to '+
+	'federal law enforcement and intelligence agencies to combat terrorism. '+
+	'</td>'+
+	'<tr><td class="plaintablecell" style="padding-top:10px">You are not required to provide the information requested on a form that is subject to the '+
+	'Paperwork Reduction Act unless the form displays a valid OMB control number. Books or records '+
+	'relating to a form or its instructions must be retained as long as their contents may become '+
+	'material in the administration of any Internal Revenue law. Generally, tax returns and return '+
+	'information are confidential, as required by Code section 6103.'+
+	'</td>'+
+	'<tr><td class="plaintablecell" style="padding-top:10px">The time needed to complete this form will vary depending on individual circumstances. The '+
+	'estimated average time is: Recordkeeping, 45 min.; Learning about the law or the form, '+
+	'12 min.; Preparing the form, 58 min. If you have comments concerning the accuracy of these '+
+	'time estimates or suggestions for making this form simpler, we would be happy to hear from you. '+
+	'You can write to: Internal Revenue Service, Tax Products Coordinating Committee, SE:W:CAR:MP:T:T:SP, 1111 Constitution '+
+	'Ave. NW, IR-6406, Washington, DC 20224. <b> DO NOT </b> send Form W-4 to this address. Instead, give it to your employer.'+
+	'</td>'+
+	'<tr><td class="plaintablecell" style="padding-top:10px">'+
+	'<a href="" onclick="window.open(\'http://www.ssa.gov\');return false">Social Security Administration</a>'+
+	'</td>'+
+	'</tr>'+
+	'</table>'
+	self.main.document.getElementById("paneBody").innerHTML = html;
+	self.main.stylePage();
+}
+
+</script>
+</head>
+
+<frameset rows="100%" frameborder="no" border="0" onLoad="writeContents()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" id="main" marginwidth="0" marginheight="0" scrolling="auto">
+</frameset>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/w4/privacy.htm,v 1.5.2.4 2011/05/04 21:10:15 brentd Exp $ -->
+

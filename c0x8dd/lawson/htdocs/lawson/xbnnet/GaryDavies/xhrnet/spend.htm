@@ -1,0 +1,466 @@
+<html>
+<head>
+<title>Spending Accounts</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script language="javascript1.2" src="/lawson/webappjs/common.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/commonHTTP.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/data.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/esscommon80.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/user.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/waitalert.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var RSBens = new Array();
+var AnnualRSBens = new Array();
+var TmpRSBens = new Array();
+var appObj;
+
+function GetRSBenefits()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       	setTimeout("GetRSBenefits()", 10);
+       	return;
+	}
+
+	stylePage();
+	document.title = getSeaPhrase("SPENDING_ACCOUNTS","BEN");
+	setTaskHeader("header",getSeaPhrase("SPENDING_ACCOUNTS","BEN"),"Benefits");
+	showWaitAlert(getSeaPhrase("PROCESSING","BEN"));
+
+	var dmeObj = new DMEObject(authUser.prodline, "benefit");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "benset4";
+	dmeObj.field = "flex-plan;plan-option;plan-code;start-date;stop-date;"
+	+ "annual-amt;bond-ded-amt;flex-plan.entry-mmdd;plan.desc";
+
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.0")
+	{
+		dmeObj.field += ";emp-ytd-cont";
+	}
+	else
+	{
+		dmeObj.field += ";ytd-cont"
+	}
+
+	dmeObj.key = parseInt(authUser.company,10)+"="+ parseFloat(authUser.employee)+"="+"RS";
+	dmeObj.max = "600";
+	dmeObj.cond = "non-waive";
+	DME(dmeObj, "jsreturn");
+}
+
+function DspBenefit()
+{
+	RSBens = RSBens.concat(self.jsreturn.record);
+
+	if (self.jsreturn.Next) {
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+
+	AnnualRSBens = new Array();
+
+	// Spending Accounts Main Frame
+	var rsBenHtml = '<table id="fsaTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list">\n'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th>\n'
+	+ '</tr>\n'
+
+	for (var i=0; i<RSBens.length; i++)
+	{
+		// PT 99589
+		if (NonSpace(RSBens[i].flex_plan_entry_mmdd)==0 || parseFloat(RSBens[i].flex_plan_entry_mmdd)==0) {
+			// no flex plan is attached with this benefit
+			// we will be using benefit's original start date and stop date
+			RSBens[i].flex_start_date = parseFloat(formjsDate(formatDME(RSBens[i].start_date)));
+			if (NonSpace(RSBens[i].stop_date) == 0) {
+				RSBens[i].flex_stop_date = "00000000";
+			} else {
+				RSBens[i].flex_stop_date = parseFloat(formjsDate(formatDME(RSBens[i].stop_date)));
+			}
+		} else {
+			var tmpDate = parseFloat(setPlanStart(formjsDate(formatDME(RSBens[i].start_date)), RSBens[i].flex_plan_entry_mmdd));
+			RSBens[i].flex_start_date = tmpDate;
+			RSBens[i].flex_stop_date = parseFloat(setPlanStop(String(tmpDate)));
+		}
+
+		if (i>0 && RSBens[i].plan_code == RSBens[i-1].plan_code
+		&& parseFloat(formjsDate(formatDME(RSBens[i].start_date))) < parseFloat(RSBens[i-1].flex_stop_date))
+		{
+		}
+		else
+		{
+			AnnualRSBens[AnnualRSBens.length] = RSBens[i];
+		}
+	}
+
+	// sort by descending start date so they display in ascending start date order in the reverse loop below
+	AnnualRSBens.sort(sortByDesc);
+
+	for (var i=AnnualRSBens.length-1,j=0; i>=0; i--,j++)
+	{
+		//if (j%2 == 0)
+			rsBenHtml += '<tr>\n'
+		//else
+		//	rsBenHtml += '<tr class="tablerowhighlight">\n'
+
+		rsBenHtml += '<td class="plaintablecellborder" style="text-align:left" nowrap>'
+		+ '<a href="javascript:parent.FillDetail('+i+','+j+')"'
+		+ ' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		+ ' onmouseout="window.status=\' \';return true">'
+		+ ((AnnualRSBens[i].plan_desc)?AnnualRSBens[i].plan_desc:'&nbsp;')+'</a></td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((AnnualRSBens[i].flex_start_date)?FormatDte4(String(AnnualRSBens[i].flex_start_date)):'&nbsp;')+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((AnnualRSBens[i].flex_stop_date)?FormatDte4(String(AnnualRSBens[i].flex_stop_date)):'&nbsp;')+'</td>\n'
+		+ '</tr>\n'
+	}
+
+	rsBenHtml += '<tr>\n'
+	+ '</table>'
+
+	try {
+		self.LEFT.document.getElementById("paneHeader").innerHTML = getSeaPhrase("FSA_BENEFITS","BEN");
+
+		if (RSBens.length == 0) {
+			self.LEFT.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left">'+getSeaPhrase("NO_FLEX_SPND_ACNT_BEN","BEN")+'</div>';
+		}
+		else {
+			self.LEFT.document.getElementById("paneBody").innerHTML = rsBenHtml;
+		}
+	}
+	catch(e) {}
+
+	self.LEFT.stylePage();
+	self.LEFT.setLayerSizes(true);
+	document.getElementById("LEFT").style.visibility = "visible";
+
+	// Spending Accounts Summary Frame
+	var SummaryHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%;height:100%">'
+	+ '<tr>\n'
+	+ '<td class="plaintablerowheaderlite" style="text-align:right">'+getSeaPhrase("TOTL_ANUL_CNTRIBUTION","BEN")+'</td>\n'
+	+ '<td class="plaintablecellborderdisplay" style="text-align:right" nowrap><span id="dtlAnnualCont">&nbsp;</span></td>\n'
+	+ '</tr>\n'
+	+ '<tr>\n'
+	+ '<th class="plaintablerowheaderlite" style="text-align:right">'+getSeaPhrase("TOTL_YTD_CNTRIBUTION","BEN")+'</th>\n'
+	+ '<td class="plaintablecellborderdisplay" style="text-align:right" nowrap><span id="dtlYTDCont">&nbsp;</span></td>\n'
+	+ '</tr>\n'
+	+ '<tr>\n'
+	+ '<th class="plaintablerowheaderlite" style="text-align:right">'+getSeaPhrase("TOTL_REIMBRSMNT","BEN")+'</th>\n'
+	+ '<td class="plaintablecellborderdisplay" style="text-align:right" nowrap><span id="dtlReimbursements">&nbsp;</span></td>\n'
+	+ '</tr>\n'
+	+ '<tr>\n'
+	+ '<th class="plaintablerowheaderlite" style="text-align:right">'+getSeaPhrase("REMANING_BALANC","BEN")+'</th>\n'
+	+ '<td class="plaintablecellborderdisplay" style="text-align:right" nowrap><span id="dtlRemaining">&nbsp;</span></td>\n'
+	+ '</tr>\n'
+	+ '</table>'
+
+	try {
+		self.SUMMARY.document.getElementById("paneHeader").innerHTML = getSeaPhrase("SUMMARY","BEN");
+		self.SUMMARY.document.getElementById("paneBody").innerHTML = SummaryHtml;
+	}
+	catch(e) {}
+	self.SUMMARY.stylePage();
+	self.SUMMARY.setLayerSizes();
+	document.getElementById("SUMMARY").style.visibility = "visible";
+
+	// Spending Accounts Detail Frame
+	var DetailHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list">'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PAY_PERIOD_AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("ANNUAL_AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("YEAR_TO_DATE","BEN")+'</th>\n'
+	+ '</tr>\n'
+	+ '</table>'
+
+	try {
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","BEN");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = DetailHtml;
+	}
+	catch(e) {}
+
+	self.DETAIL.stylePage();
+	self.DETAIL.setLayerSizes();
+	document.getElementById("DETAIL").style.visibility = "visible";
+
+	// Spending Accounts Reimbursements Frame
+	var TransactionsHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list">'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("CHECK_NBR","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DESCRIPTION","BEN")+'</th>\n'
+	+ '</tr>\n'
+	+ '</table>'
+
+	try {
+		self.TRANSACTIONS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REIMBURSEMENTS","BEN");
+		self.TRANSACTIONS.document.getElementById("paneBody").innerHTML = TransactionsHtml;
+	}
+	catch(e) {}
+
+	self.TRANSACTIONS.stylePage();
+	self.TRANSACTIONS.setLayerSizes();
+	document.getElementById("TRANSACTIONS").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+// Descending description sort
+function sortByDesc(obj1, obj2)
+{
+	var desc1 = obj1.plan_desc;
+	var desc2 = obj2.plan_desc;
+	if (desc1 > desc2)
+		return -1;
+	else if (desc1 < desc2)
+		return 1;
+	else
+		return 0;
+}
+
+function setPlanStart(startdt,mmdd)
+{
+	var yyyy = '';
+	yyyy = parseFloat(startdt.substring(0,4));
+	Smmdd = parseFloat(startdt.substring(4,startdt.length));
+
+	if (Smmdd < parseFloat(mmdd))
+	{
+		yyyy--;
+	}
+
+	mmdd = String(parseFloat(mmdd));
+
+	if (mmdd.length == 3)
+	{
+		mmdd = "0" + mmdd
+	}
+
+	startdt = String(yyyy) + mmdd;
+
+	return startdt
+}
+
+function setPlanStop(startdt)
+{
+	var yr = parseFloat(startdt.substring(0,4));
+	yr++;
+
+	return PreviousDate(String(yr) + startdt.substring(4,8));
+}
+
+function FillDetail(recIndex,rowNbr)
+{
+	activateTableRow("fsaTbl",rowNbr,self.LEFT);
+	TmpRSBens = new Array();
+
+	for (var x=0;x<RSBens.length;x++)
+	{
+		if (RSBens[x].flex_start_date == AnnualRSBens[recIndex].flex_start_date
+		&& RSBens[x].plan_code == AnnualRSBens[recIndex].plan_code)
+		{
+			TmpRSBens[TmpRSBens.length] = RSBens[x];
+		}
+	}
+
+	var dmeObj = new DMEObject(authUser.prodline, "restrans");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "rtrset2";
+	dmeObj.field = "date;start-date;check-nbr;trans-amt;desc";
+	dmeObj.key = parseInt(authUser.company,10)+"="+parseFloat(authUser.employee)+"="
+	+ AnnualRSBens[recIndex].plan_code+"="+AnnualRSBens[recIndex].flex_start_date+"->"+AnnualRSBens[recIndex].flex_stop_date;
+	dmeObj.sortdesc = "date";
+	dmeObj.max = "600";
+	dmeObj.func="DspRestrans("+recIndex+")"
+	DME(dmeObj, "jsreturn");
+}
+
+function DspRestrans(n)
+{
+	var RSTrans = self.jsreturn.record;
+	var TotalReimbursements = 0;
+	var TotalAnnualCont = 0;
+	var TotalYTDCont = 0;
+	var RemainingBalance = 0;
+
+	// Detail
+	var DetailHtml = '<body>\n'
+	+ '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list">'
+	+ '<tr>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PAY_PERIOD_AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("ANNUAL_AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("YEAR_TO_DATE","BEN")+'</th>\n'
+	+ '</tr>\n'
+
+	for (var i=0; i<TmpRSBens.length; i++)
+	{
+		//if (i%2 == 0)
+			DetailHtml += '<tr>\n'
+		//else
+		//	DetailHtml += '<tr class="tablerowhighligh">\n'
+
+		DetailHtml += '<td class="plaintablecellborder" style="text-align:center" nowrap>' + ((formatDME(TmpRSBens[i].start_date))?formatDME(TmpRSBens[i].start_date):'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>' + ((formatDME(TmpRSBens[i].stop_date))?formatDME(TmpRSBens[i].stop_date):'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((TmpRSBens[i].bond_ded_amt)?TmpRSBens[i].bond_ded_amt:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((TmpRSBens[i].annual_amt)?TmpRSBens[i].annual_amt:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>'
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.0")
+		{
+			DetailHtml += ((TmpRSBens[i].emp_ytd_cont)?TmpRSBens[i].emp_ytd_cont:'&nbsp;')
+			TotalYTDCont += parseFloat(TmpRSBens[i].emp_ytd_cont)
+		}
+		else
+		{
+			DetailHtml += ((TmpRSBens[i].ytd_cont)?TmpRSBens[i].ytd_cont:'&nbsp;')
+			TotalYTDCont += parseFloat(TmpRSBens[i].ytd_cont)
+		}
+
+		DetailHtml += '</td>\n'
+		+ '</tr>\n'
+
+		TotalAnnualCont += parseFloat(TmpRSBens[i].annual_amt)
+	}
+
+	TotalAnnualCont = roundToDecimal(TotalAnnualCont,2);
+	TotalYTDCont = roundToDecimal(TotalYTDCont,2);
+
+	if (TmpRSBens.length > 1)
+	{
+		DetailHtml += '<tr><td class="plaintablecellborder">&nbsp;</td>\n<td class="plaintablecellborder">&nbsp;</td>\n<th class="plaintableheaderborderlite" style="text-align:right">'+getSeaPhrase("TOTAL","BEN")+'</th>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((TotalAnnualCont)?TotalAnnualCont:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((TotalYTDCont)?TotalYTDCont:'&nbsp;') + '</td>\n'
+		+ '</tr>\n'
+	}
+
+	DetailHtml += '</table>\n'
+	+ '</body>'
+
+	try {
+		self.DETAIL.document.getElementById("paneBody").innerHTML = DetailHtml;
+	}
+	catch(e) {}
+
+	self.DETAIL.stylePage();
+	// Reimbursements
+	var TransactionsHtml = '<body>\n'
+	+ '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list">'
+	+ '<tr>\n'
+	+ '<thclass="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DATE","BEN")+'</th>\n'
+	+ '<thclass="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("CHECK_NBR","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("AMOUNT","BEN")+'</th>\n'
+	+ '<th class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DESCRIPTION","BEN")+'</th>\n'
+	+ '</tr>\n'
+
+	var minusSign = "";
+	var tranAmt = "";
+
+	for (var i=0; i<RSTrans.length; i++)
+	{
+		tranAmt = RSTrans[i].trans_amt;
+		minusSign = tranAmt.indexOf("-");
+		if (minusSign != -1)
+		{
+			tranAmt = parseFloat(tranAmt)*(-1);
+		}
+
+		TotalReimbursements += parseFloat(tranAmt);
+
+		//if (i%2 == 0)
+			TransactionsHtml += '<tr>\n'
+		//else
+		//	TransactionsHtml += '<tr class="tablerowhighlight">\n'
+
+		TransactionsHtml += '<td class="plaintablecellborder" style="text-align:center" nowrap>' + ((formatDME(RSTrans[i].date))?formatDME(RSTrans[i].date):'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((RSTrans[i].check_nbr)?RSTrans[i].check_nbr:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((tranAmt)?tranAmt:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((RSTrans[i].desc)?RSTrans[i].desc:'&nbsp;') + '</td>\n'
+		+ '</tr>\n'
+	}
+
+	TotalReimbursements = roundToDecimal(TotalReimbursements,2);
+
+	if (RSTrans.length > 1)
+	{
+		TransactionsHtml += '<tr><td class="plaintablecellborder">&nbsp;</td>\n<td class="plaintableheaderborderlite" style="text-align:right">'+getSeaPhrase("TOTAL","BEN")+'</td>\n'
+		+ '<td class="plaintablecellborder" style="text-align:right" nowrap>' + ((TotalReimbursements)?TotalReimbursements:'&nbsp;') + '</td>\n'
+		+ '<td class="plaintablecellborder">&nbsp;</td>\n'
+		+ '</tr>\n'
+	}
+
+	TransactionsHtml += '</table>\n'
+	+ '</body>'
+
+	if (RSTrans.length == 0)
+	{
+		TransactionsHtml = '<div class="fieldlabelbold" style="text-align:left">'+getSeaPhrase("NO_FLEX_SPND_ACNT_REIMBRSMNT_FOR_THIS_PLAN","BEN")+'</div>'
+	}
+
+	try {
+		self.TRANSACTIONS.document.getElementById("paneBody").innerHTML = TransactionsHtml;
+	}
+	catch(e) {}
+
+	self.TRANSACTIONS.stylePage();
+
+	// Summary
+	RemainingBalance = roundToDecimal(TotalYTDCont-TotalReimbursements,2);
+
+	try {
+		var tmpObj = AnnualRSBens[n];
+
+		//if (tmpObj.plan_desc) {
+		//	self.SUMMARY.document.getElementById("paneHeader").innerHTML = getSeaPhrase("SUMMARY","BEN")
+		//	+ ' - ' + tmpObj.plan_desc;
+		//}
+		//else {
+			self.SUMMARY.document.getElementById("paneHeader").innerHTML = getSeaPhrase("SUMMARY","BEN");
+		//}
+
+		self.SUMMARY.document.getElementById("dtlAnnualCont").innerHTML = (TotalAnnualCont)?TotalAnnualCont:'&nbsp;';
+		self.SUMMARY.document.getElementById("dtlYTDCont").innerHTML = (TotalYTDCont)?TotalYTDCont:'&nbsp;';
+		self.SUMMARY.document.getElementById("dtlReimbursements").innerHTML = (TotalReimbursements)?TotalReimbursements:'&nbsp;';
+		self.SUMMARY.document.getElementById("dtlRemaining").innerHTML = (RemainingBalance)?RemainingBalance:'&nbsp;';
+		self.SUMMARY.stylePage();
+	}
+	catch(e) {}
+}
+
+function OpenSpendingAccounts()
+{
+	authenticate("frameNm='jsreturn'|funcNm='GetRSBenefits()'|desiredEdit='EM'");
+}
+</script>
+</head>
+<body onload="OpenSpendingAccounts()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="LEFT" name="LEFT" class="fullcontentframe" style="visibility:hidden;position:absolute;left:0px;width:385px;height:320px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="SUMMARY" name="SUMMARY" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:112px;top:32px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:180px;top:144px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="TRANSACTIONS" name="TRANSACTIONS" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:235px;top:324px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" class="fullcontentframe" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/spend.htm,v 1.14.2.13 2011/05/04 21:10:10 brentd Exp $ -->

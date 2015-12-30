@@ -1,0 +1,150 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/propslist.htm,v 1.3.6.1.22.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Listbox Properties</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></script>
+<script language="javascript" src="propslist.js"></script>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgDefaultsApplied">Options have been defaulted from data source. Click Apply to save.</phrase>
+		<phrase id="msgSelectedOption">You have asked to delete option </phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="lstInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="lstOnKeyDown()">
+
+<!-- only method available for dynamic window title -->
+<script language="javascript">
+// moved here from onload handler
+
+	if (wndArguments == null || typeof(wndArguments) == "undefined")
+	{
+		// can't use messageBox here: it will also fail
+		alert(msgDOMAIN);
+		window.close();
+	}
+	else
+	{
+		// save dialog arguments
+		studioWnd = wndArguments[0]
+		propBag = wndArguments[1]
+		sourceWnd = wndArguments[2]
+		oOrigDef = sourceWnd.myDoc.origDoc
+
+		// make a local copy of the UI xml
+		oFormDef=studioWnd.xmlFactory.createInstance("DOM");
+		oFormDef.async=false;
+		oFormDef.loadXML(sourceWnd.myDoc.xmlDoc.xml)
+
+		mFormElem=wndArguments[3]
+		origId=mFormElem.getAttribute("id")
+		ctlNode=oFormDef.selectSingleNode("/form//fld[@id='"+origId+"']")
+
+		if (ctlNode.getAttribute("seltype")=="radio")
+			window.document.title="Radio Button Properties"
+	}
+</script>
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGeneral" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="lstSwitchTab(this)">General</span>
+	</div>
+
+	<!-- General tab pane -->
+	<div id="divGeneral" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" align="left" style="height:20px;">
+				<label id="lblListId" for="txtListId" class="dsLabel" style="position:relative;">
+					List Id:
+				</label>&nbsp;
+				<label id="txtListId" class="dsLabel" style="position:relative;text-align:left;">
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="color:black;height:1px;"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblOptions" class="dsLabel" style="position:relative;text-align:left;">Options:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selOptions" class="dsListText" size="8" style="width:300px;height:expression(this.size*17);" 
+						ondblclick="lstOptionProperty('existing')" onchange="lstOnOptionChange()">
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnOptionProps" type="button" class="dsDlgButton" style="width:70px;" onclick="lstOptionProperty('existing')" value="Properties"></input>
+				<input id="btnNewOption" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="lstOptionProperty('new')" value="New"></input>
+				<input id="btnDeleteOption" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="lstDeleteOption()" value="Delete"></input>
+				<input id="btnUpOption" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="lstMoveOption('up')" value="Up"></input>
+				<input id="btnDownOption" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="lstMoveOption('dn')" value="Down"></input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblOutputField" class="dsLabel" for="txtOutputField" style="position:relative;text-align:left;">Phrase display field:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td valign="top" align="left">
+				<label id="txtOutputField" type="text" class="dsLabel" style="width:300px;border:1px solid gray;text-align:left;height:18px;padding-left:2px;" /> 
+			</td>
+			<td valign="top" align="left">
+				<input id="btnOutputFieldBrowse" type="button" class="dsDlgButton" style="width:70px;" onclick="lstOutputBrowse()" value="Select..."></input>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="lstOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="lstUpdate()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="lstReturn()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,184 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/activityDialog.css,v 1.4.2.5.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Activity dialog --- */
+.dialogStyler
+{
+  background-color : transparent;
+  color : #004e96;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 14px;
+  font-weight : normal;
+  height : auto;
+  width : 435px;
+  padding : 0px;
+  margin : 0px;
+  position : absolute;
+  top : 30%;
+  left : 30%;
+  overflow : visible;
+  z-index : 1000;
+}
+.dialogContentStyler
+{
+  background-color : #ffffff;
+  border-left : 1px solid #707070;
+  border-right : 1px solid #707070;
+  border-bottom : 1px solid #707070;
+  color : #004e96;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 14px;
+  font-weight : normal;
+  height : auto;
+  width : auto;
+  padding : 30px 20px 20px 30px;
+  margin : 0px;
+  position : relative;
+  top : -28px;
+  left : 0px;
+}
+.dialogTextStyler
+{
+  background-color : transparent;
+  color : #004e96;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 14px;
+  font-weight : normal;
+  height : auto;
+  width : auto;
+  padding : 0px;
+  margin : 0px;
+  text-align : left;
+}
+.dialogSecondaryTextStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : auto;
+  width : auto;
+  padding : 0px;
+  margin : 0px;
+  text-align : left;	
+}
+.dialogTitleBarStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : relative;
+  top : 0px;
+  left : 0px;
+}
+.dialogTitleBarPanelStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : relative;
+  top : -26px;
+  left : 0px;
+}
+.dialogTitleBarRuleStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 2px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : relative;
+  top : -28px;
+  left : 0px;
+}
+.dialogTitleBarRuleIconStyler
+{
+  width : 100%;
+  height : 2px;
+}
+.dialogTitleBarIconStyler
+{
+  width : 100%;
+  height : 26px;
+}
+.dialogActivityIconStyler
+{
+  background : transparent url("../../images/activity-indicator_blue_transbg.gif") no-repeat center 20px;
+  width : 100%;
+  height : 67px;
+}
+.dialogButtonPanelStyler
+{
+  background : #f1f4f8 url("../../images/dialog_rule_horz.png") no-repeat top center;
+  margin : 0px;
+  padding : 15px 5px 10px 5px;
+  width : 100%;
+}
+.modalDialogTitleBarPanelStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : relative;
+  top : -54px;
+  left : 0px;
+}
+.modalDialogContentStyler
+{
+  background-color : #ffffff;
+  border : 0px;
+  color : #004e96;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 14px;
+  font-weight : normal;
+  height : auto;
+  width : auto;
+  padding : 15px 0px 5px 0px;
+  margin : 0px;
+  position : relative;
+  top : -54px;
+  left : 0px;
+}

@@ -1,0 +1,413 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<HTML>
+<HEAD>
+
+<TITLE>Report Writer</TITLE>
+
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+
+<script src="/lawson/javascript/loganenv.js"></script>
+<script src="/lawson/javascript/waitalert.js"></script>
+<script src="/lawson/javascript/dme.js"></script>
+<script src="/lawson/javascript/ags.js"></script>
+
+<script language="javascript">
+
+var prmPassed=''
+var	prmPassed=unescape(window.location.hash)
+var	prmPassed=prmPassed.substring(1)
+var	arrayPassed = prmPassed.split("|")
+var	prmRequest=arrayPassed[0]
+var	prmRow=arrayPassed[1]
+var	prmCol=arrayPassed[2]
+
+function GetWebuser()
+{
+	clearTimeout(LoadTimer)
+
+	var logancall = new DMEObject("logan","webuser")
+	logancall.out="JAVASCRIPT"
+	logancall.field="web-user;company;employee;prodline;login"
+	logancall.key="WEBUSER"
+	DME(logancall,"WEBUSER")
+}
+
+function DspWebuser()
+{
+	if (self.WEBUSER.NbrRecs == 0)
+	{
+		alert("Web User record does not exist")
+		return
+	}
+
+	obj = self.WEBUSER.record[0]
+	company = parseInt(obj.company)
+	employee = parseInt(obj.employee)
+	portuser = self.WEBUSER.record[0].web_user
+	svLogin = obj.login
+
+	if (obj.prodline != "")
+		prodline = obj.prodline
+	else
+		prodline = DefaultProductLine
+
+	DrillWin(prmRequest,prmRow,prmCol)
+}
+
+function JumpHere(workfilename,reccount,requestname,linenbr,colposition,numdec,ptpage,seqnumber,jumpto)
+{
+
+    window.lawheader.document.close()
+
+    if (jumpto == "Jump")
+    {
+       ptpage =  parseInt(drillWin.document.jumpForm.jumpText.value)
+
+       if (ptpage > maxpage)
+          ptpage = maxpage
+    }
+
+    if (jumpto == "Prev")
+    {
+       ptpage =  ptpage - 1
+    }
+
+	var object = new AGSObject(prodline,"RW80.1")
+	object.event = "ADD"
+	object.rtn = "DATA"
+	object.longNames=true
+	object.tds=false
+	object.vfmt=true
+	object.field="FC=Inquire"
+   			+ "&WORKFILE-NAME=" + workfilename
+      		+ "&REC-COUNT=" + reccount
+			+ "&RPT-REQUEST-NAME=" + requestname
+			+ "&RPT-LINE-NBR=" + linenbr
+			+ "&RPT-COL-POSITION=" + colposition
+			+ "&COMPANY-ND=" + numdec
+			+ "&PT-PAGE=" + ptpage
+			+ "&RWK-SEQ-NUMBER1=" + seqnumber
+	object.func = "parent.DisplayDrill()";
+//	object.debug=true
+	AGS(object,"jsreturn");
+}
+
+function Gltrans(tranRec)
+{
+
+	var strPassString = ''
+	var minussign = 0
+	var AcctUnitNoSpace = ''
+	var SpaceStart = 0
+	var YearLit = ''
+	var FrPeriodLit = ''
+	var ThPeriodLit = ''
+	var CompanyLit = ''
+	var AccountLit = ''
+	var AcctUnitLit = ''
+	var SubacctUnitLit = ''
+	var AmountLit = ''
+
+    YearLit = "DTL-FISCAL-YEAR" + tranRec
+    FrPeriodLit = "DTL-FR-ACCT-PERIOD" + tranRec
+    ThPeriodLit = "DTL-TH-ACCT-PERIOD" + tranRec
+    CompanyLit = "DTL-COMPANY" + tranRec
+    AccountLit = "DTL-ACCOUNT" + tranRec
+    AcctUnitLit = "DTL-ACCT-UNIT" + tranRec
+	SubacctLit = "ACCOUNT" + tranRec
+	DescLit = "DESCRIPTION" + tranRec
+	AmountLit = "AMOUNT" + tranRec
+
+    SpaceStart = lawheader.ScreenField[AcctUnitLit].indexOf(" ")
+
+    if (SpaceStart > 0)
+    {
+		AcctUnitNoSpace = lawheader.ScreenField[AcctUnitLit].substring(0,SpaceStart)
+    }
+    else
+    {
+		AcctUnitNoSpace = lawheader.ScreenField[AcctUnitLit]
+    }
+
+	Gltrans_prodline = prodline
+    Gltrans_Company = lawheader.ScreenField[CompanyLit]
+    Gltrans_Account = lawheader.ScreenField[AccountLit]
+    Gltrans_Sub_Account = lawheader.ScreenField[SubacctLit].substring(23,27)
+    Gltrans_Acct_Unit = AcctUnitNoSpace
+    Gltrans_Fiscal_Year = lawheader.ScreenField[YearLit]
+    Gltrans_Fr_Period = lawheader.ScreenField[FrPeriodLit]
+    Gltrans_Th_Period = lawheader.ScreenField[ThPeriodLit]
+	Gltrans_Desc = lawheader.ScreenField[DescLit]
+	Gltrans_Amt = lawheader.ScreenField[AmountLit]
+
+	minusSign = Gltrans_Amt.indexOf("-")
+    if (minusSign > 0)
+    {
+		Gltrans_Amt = Gltrans_Amt.substring(0,minusSign)
+        Gltrans_Amt = "-" + Gltrans_Amt
+    }
+
+     Gltrans_drill = tranRec
+
+	 strPassString  = Gltrans_prodline
+	 				+ "|" + Gltrans_Company
+					+ "|" + Gltrans_Account
+					+ "|" + Gltrans_Sub_Account
+					+ "|" + Gltrans_Acct_Unit
+					+ "|" + Gltrans_Fiscal_Year
+					+ "|" + Gltrans_Fr_Period
+					+ "|" + Gltrans_Th_Period
+					+ "|" + Gltrans_Desc
+					+ "|" + Gltrans_Amt
+
+	 strPassString = escape(strPassString)
+
+     wndGLTRANS=window.open('/lawson/jobdef/rwdrill/rw100gltrans.htm#'+strPassString,"wndGLTRANS",'width=775,height=400,directories=no,toolbar=no,menubar=yes,status=yes,resizable=yes')
+     wndGLTRANS.focus()
+}
+
+function DisplayDrill()
+{
+
+	var drilldetail = ''
+	var blankstop1 = 0
+	var blankstop2 = 0
+	var curpage = 0
+	var nextpage = 0
+	var totpage = 0
+	var curlines = 0
+	var minusSign = 0
+	var Record_value = 0
+	var AmountLit = ''
+	var YearLit = ''
+	var CompanyLit = ''
+	var AccountLit = ''
+	var DescLit = ''
+
+   Gltrans_drill = 0
+   if (lawheader.RecordsFound == false)
+   {
+      drillstring = '<HTML><HEAD><META HTTP-EQUIV="Pragma" CONTENT="No-Cache"><TITLE>Report Writer Drill Down</TITLE></HEAD>'
+
+                  + '<BODY bgcolor=#ffffff><center><strong><br>No Detail records found</body></html>'
+
+//	  drillWin = window.open('','drillwindow','scrollbars=yes,statusbar=yes,resizable=yes,menubar=yes,height=125,width=380')
+	  drillWin.document.write(drillstring)
+	  drillWin.document.close()
+	  drillWin.focus()
+      return
+   }
+   else
+   {
+	  lawheader.RecordsFound = false
+   }
+
+   drillstring = '<html><TITLE>Report Writer Drill Down</TITLE><body bgcolor=#ffffff>'
+	           + '<center><b>Detail </b>'
+	           + '<form name=drillForm><center><table width=85% border=0>'
+               + '<tr><td></td><th align=left colspan="3">' + lawheader.ScreenField["CURR-PAGE-MSG"] + '</th>'
+			   + '</tr>'
+               + '<tr><td></td> </tr>'
+	           + '<tr><td></td><th>Year</th><th>Company</th><th colspan=2 align=center>Account</th>'
+               + '<th align=left>Description</th><th align=right>Amount</th>'
+
+   if ((lawheader.ScreenField["REC-COUNT"] % 10) == 0)
+   {
+      totpage = lawheader.ScreenField["REC-COUNT"] / 10
+   }
+   else
+   {
+      totpage = Math.round(lawheader.ScreenField["REC-COUNT"] / 10)
+
+      if (totpage < (lawheader.ScreenField["REC-COUNT"] / 10))
+      {
+         totpage++
+      }
+   }
+
+
+   curpage = (((lawheader.ScreenField["RWK-SEQ-NUMBER1"] * 1) + 9) / 10)
+   maxpage = totpage
+
+   if (totpage > curpage)
+   {
+      curlines = 10
+   }
+   else
+   {
+      curlines = lawheader.ScreenField["REC-COUNT"] % 10
+      if (curlines == 0)
+      {
+         curlines = 10
+      }
+   }
+
+   for (i=1;i<curlines+1;i++)
+   {
+      AmountLit = "AMOUNT" + i
+      minusSign = lawheader.ScreenField[AmountLit].indexOf("-")
+
+	  Record_value = lawheader.ScreenField[AmountLit]
+
+	  if (minusSign > 0)
+      {
+	      Record_value = Record_value.substring(0,minusSign)
+          Record_value = "-" + Record_value
+      }
+      else
+      {
+          Record_value = lawheader.ScreenField[AmountLit]
+      }
+
+	  if (lawheader.ScreenField["COMPANY-ND"] == 'undefined')
+	  	  lawheader.ScreenField["COMPANY-ND"] = 2
+
+
+      YearLit = "FISCAL-YEAR" + i
+      CompanyLit = "COMPANY" + i
+      AccountLit = "ACCOUNT" + i
+      DescLit = "DESCRIPTION" + i
+
+      drillstring += '<tr>'
+	  				+ '<td></td>'
+					+ '<td align=center>' + lawheader.ScreenField[YearLit] + '</td>'
+                    + '<td align=center>' + lawheader.ScreenField[CompanyLit] + '</td>'
+//                    + '<td align=right><a href=javascript:window.opener.Gltrans("' + i + '")>' + lawheader.ScreenField[AccountLit].substring(0,15) + '</a></td>'
+//                    + '<td align=left><a href=javascript:window.opener.Gltrans("' + i + '")>' + lawheader.ScreenField[AccountLit].substring(16,27) + '</a></td>'
+                    + '<td align=right><a href=javascript:parent.Gltrans("' + i + '")>' + lawheader.ScreenField[AccountLit].substring(0,15) + '</a></td>'
+                    + '<td align=left><a href=javascript:parent.Gltrans("' + i + '")>' + lawheader.ScreenField[AccountLit].substring(16,27) + '</a></td>'
+                    + '<td align=left>' + lawheader.ScreenField[DescLit] + '</td>'
+                    + '<td align=right>' + Record_value + '</td></tr>'
+   }
+
+
+   blankstop1 = lawheader.ScreenField["WORKFILE-NAME"].indexOf(" ")
+   blankstop2 = lawheader.ScreenField["RPT-REQUEST-NAME"].indexOf(" ")
+
+   if (blankstop1 < 0)
+       blankstop1 = 99
+
+   if (blankstop2 < 0)
+       blankstop2 = 99
+
+   if (totpage > 1)
+   {
+     drillstring += '</table></form>'
+                 + '<form name=jumpForm onSubmit=\"return false\"><table border=1>'
+                 + '<tr>'
+
+     if (curpage == 1)
+     {
+        drillstring += '<td><img border=0 src=/lawson/jobdef/rwdrill/images/blarrow.gif></td>'
+     }
+     else
+     {
+        drillstring += '<td><a href=javascript:window.parent.JumpHere("' + lawheader.ScreenField["WORKFILE-NAME"].substring(0,blankstop1) + '"'
+	                 + ',"' + lawheader.ScreenField["REC-COUNT"] + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-REQUEST-NAME"].substring(0,blankstop2) + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-LINE-NBR"] + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-COL-POSITION"] + '"'
+	                 + ',"' + lawheader.ScreenField["COMPANY-ND"] + '"'
+	                 + ',"' + curpage + '"'
+	                 + ',"' + lawheader.ScreenField["RWK-SEQ-NUMBER1"] + '"'
+	                 + ',"Prev"'
+	                 + ')> <img border=0 src=/lawson/jobdef/rwdrill/images/maroonlt.gif></a> </td>'
+     }
+
+    if (curpage == totpage)
+    {
+        drillstring += '<td><img border=0 src=/lawson/jobdef/rwdrill/images/blarrow.gif></td>'
+    }
+    else
+    {
+        drillstring += '<td><a href=javascript:window.parent.JumpHere("' + lawheader.ScreenField["WORKFILE-NAME"].substring(0,blankstop1) + '"'
+	                 + ',"' + lawheader.ScreenField["REC-COUNT"] + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-REQUEST-NAME"].substring(0,blankstop2) + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-LINE-NBR"] + '"'
+	                 + ',"' + lawheader.ScreenField["RPT-COL-POSITION"] + '"'
+	                 + ',"' + lawheader.ScreenField["COMPANY-ND"] + '"'
+	                 + ',"' + lawheader.ScreenField["PT-PAGE"] + '"'
+	                 + ',"' + lawheader.ScreenField["RWK-SEQ-NUMBER1"] + '"'
+	                 + ',"Next"'
+	                 + ')> <img border=0 src=/lawson/jobdef/rwdrill/images/maroonrt.gif></a> </td>'
+    }
+
+    drillstring += '<td><input type=text name=jumpText size=5 maxlength=5 ></td>'
+                 + '<td><a href=javascript:window.parent.JumpHere("' + lawheader.ScreenField["WORKFILE-NAME"].substring(0,blankstop1) + '"'
+                 + ',"' + lawheader.ScreenField["REC-COUNT"] + '"'
+                 + ',"' + lawheader.ScreenField["RPT-REQUEST-NAME"].substring(0,blankstop2) + '"'
+                 + ',"' + lawheader.ScreenField["RPT-LINE-NBR"] + '"'
+                 + ',"' + lawheader.ScreenField["RPT-COL-POSITION"] + '"'
+                 + ',"' + lawheader.ScreenField["COMPANY-ND"] + '"'
+                 + ',"' + curpage + '"'
+                 + ',"' + lawheader.ScreenField["RWK-SEQ-NUMBER1"] + '"'
+                 + ',"Jump"'
+                 + ')> <img border=0 src=/lawson/jobdef/rwdrill/images/goto.gif></a> </td><tr>'
+
+   }
+
+   drillstring += '</table></form></body></html>'
+
+//   drillWin = window.open('','drillwindow','scrollbars=yes,status=yes,resizable=yes,menubar=yes,height=425,width=550')
+   drillWin.document.write(drillstring)
+   drillWin.document.close()
+   drillWin.focus()
+
+}
+
+function DrillWin(requestname,linenbr,colpos)
+{
+	var object = new AGSObject(prodline,"RW80.1")
+	object.event = "ADD"
+	object.rtn = "DATA"
+	object.longNames=true
+	object.tds=false
+	object.vfmt=true
+	object.field="FC=Inquire"
+			+ "&RPT-REQUEST-NAME=" + requestname
+			+ "&RPT-LINE-NBR=" + linenbr
+			+ "&RPT-COL-POSITION=" + colpos
+	object.func = "parent.DisplayDrill()";
+//	object.debug=true
+	AGS(object,"jsreturn");
+}
+
+function LoadCatcher()
+{
+	clearTimeout(LoadTimer);
+	GetWebuser()
+}
+
+LoadTimer = setTimeout("LoadCatcher()",3000)
+
+var theblank = (window.location.protocol=='http:')?"about:blank":"/lawson/dot.htm" //dpb 07-25-01
+var fram = ''
+	fram +='<FRAMESET ROWS="100%,*,*,*" FRAMEBORDER=no border=0 bordercolor=black onLoad="LoadCatcher()">'
+	     + '<FRAME SRC=/lawson/jobdef/rwdrill/dotwhite.htm	name=drillWin marginwidth=0 marginheight=0>'
+	     + '<FRAME SRC=/lawson/jobdef/rwdrill/rwretmsg.htm	name=lawheader>'
+	     + '<FRAME SRC="'+theblank+'"		            	name=jsreturn>'
+	     + '<FRAME SRC="'+theblank+'"						name=WEBUSER>'
+	     + '</FRAMESET>'
+
+window.document.write(fram)
+window.document.close()
+
+</script>
+
+</HEAD>
+<!--
+<FRAMESET ROWS="100%,*,*,*" FRAMEBORDER=no border=0 bordercolor=black onLoad="LoadCatcher()">
+   	<FRAME SRC=/lawson/jobdef/rwdrill/dotwhite.htm	name=drillWin marginwidth=0 marginheight=0>
+   	<FRAME SRC=/lawson/jobdef/rwdrill/rwretmsg.htm	name=lawheader>
+   	<FRAME SRC="about:blank"		            	name=jsreturn>
+   	<FRAME SRC="about:blank"						name=WEBUSER>
+</FRAMESET>
+-->
+
+</HTML>

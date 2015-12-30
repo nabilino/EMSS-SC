@@ -1,0 +1,289 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="frfr" version="10.0">
+		<phrase id="CLK_PAGE_UP"><![CDATA[Cliquez ici pour accéder à la page précédente]]></phrase>
+		<phrase id="CLK_PAGE_DOWN"><![CDATA[Cliquez ici pour accéder à la page suivante]]></phrase>
+		<phrase id="PRINT_TE_CARD"><![CDATA[Imprimer la carte de pointage]]></phrase>
+		<phrase id="START_DATE"><![CDATA[Date début]]></phrase>
+		<phrase id="DATE"><![CDATA[Date]]></phrase>
+		<phrase id="DISP_CALENDAR"><![CDATA[Afficher calendrier]]></phrase>
+		<phrase id="END_DATE"><![CDATA[Date de fin]]></phrase>
+		<phrase id="INVALID_ACQUIRED_DAT"><![CDATA[Date d'acquisition non valide]]></phrase>
+		<phrase id="ACQUIRED_DAT_REQUIRED"><![CDATA[La date d'acquisition est un champ obligatoire.]]></phrase>
+		<phrase id="INVALID_LAST_DAT"><![CDATA[Date de la dernière utilisation non valide]]></phrase>
+		<phrase id="LAST_DAT_REQUIRED"><![CDATA[La dernière utilisation est un champ obligatoire.]]></phrase>
+		<phrase id="START_MUST_BEFORE_END"><![CDATA[La date de début doit être antérieure à la date de fin.]]></phrase>
+		<phrase id="RETRIEVE_REC_IN_PERIOD"><![CDATA[Récupération des enregistrements pour la période donnée...]]></phrase>
+		<phrase id="NO_REC_DISP"><![CDATA[Aucun enregistrement à afficher.]]></phrase>
+		<phrase id="LOADING_TE"><![CDATA[Chargement de la saisie horaire...]]></phrase>
+		<phrase id="TIME_ENTRY"><![CDATA[Saisie horaire]]></phrase>
+		<phrase id="SENDING_EMAIL"><![CDATA[Envoi du message électronique...]]></phrase>
+		<phrase id="SENDING_EMPLOYEE_NOTICE"><![CDATA[Envoi de l'avis à l'employé...]]></phrase>
+		<phrase id="SENDING_SUPERVISOR_APPROVAL"><![CDATA[Envoi de l'avis de validation au responsable...]]></phrase>
+		<phrase id="TIME_CARD_RETURNED_PERIOD"><![CDATA[ vient de renvoyer votre carte de pointage pour évaluation pour la période de ]]></phrase>
+		<phrase id="TIME_CARD_CHANGED_PERIOD"><![CDATA[ vient de modifier votre carte de pointage pour la période de ]]></phrase>
+		<phrase id="TIME_CARD_SUBMITTED_PERIOD"><![CDATA[ vient d'envoyer une carte de pointage pour validation pour la période de ]]></phrase>
+		<phrase id="TO"><![CDATA[ À ]]></phrase>
+		<phrase id="DOT"><![CDATA[.]]></phrase>
+		<phrase id="EMPLOYEE_EMAIL_NOT_AVAILABLE"><![CDATA[Impossible d'envoyer le message électronique. L'employé ne possède pas d'adresse électronique.]]></phrase>
+		<phrase id="EMAIL_SENT"><![CDATA[Message électronique envoyé]]></phrase>
+		<phrase id="TIME_CARD_RETURNED"><![CDATA[ vient de renvoyer votre carte de pointage pour évaluation.]]></phrase>
+		<phrase id="TIME_CARD_CHANGED"><![CDATA[ vient de modifier votre carte de pointage.]]></phrase>
+		<phrase id="TIME_CARD_SUBMITTED"><![CDATA[ vient de soumettre une carte de pointage pour validation.]]></phrase>
+		<phrase id="LOADING_PRE_PERIOD"><![CDATA[Chargement de la période précédente...]]></phrase>
+		<phrase id="LOADING_NEXT_PERIOD"><![CDATA[Chargement de la période suivante...]]></phrase>
+		<phrase id="PAY_PERIOD_LOADED"><![CDATA[Période de rémunération déjà chargée.]]></phrase>
+		<phrase id="UPDATING_EXCEPTION_TE"><![CDATA[Mise à jour de la saisie horaire d'exception...]]></phrase>
+		<phrase id="PREPARE_PRINT_SCREEN"><![CDATA[Préparation de l'écran pour impression.]]></phrase>
+		<phrase id="PAY_PLAN"><![CDATA[Plan paie]]></phrase>
+		<phrase id="OPEN_LEAVE_BALANCE_WIN"><![CDATA[Soldes de congés]]></phrase>
+		<phrase id="TO_PRE_PERIOD"><![CDATA[Déplacer vers la période précédente]]></phrase>
+		<phrase id="TO_NEXT_PERIOD"><![CDATA[Déplacer vers la période suivante]]></phrase>
+		<phrase id="OPEN_CALENDAR"><![CDATA[Ouvrir le calendrier]]></phrase>
+		<phrase id="INVALID_PERIOD"><![CDATA[Cette période n'est pas comprise dans la période d'admissibilité. Vous ne pouvez saisir aucune donnée pour cette période.]]></phrase>
+		<phrase id="TE_LOCKED"><![CDATA[La saisie horaire a été verrouillée. Vous ne pourrez pas saisir de données.]]></phrase>
+		<phrase id="OLD_PERIOD"><![CDATA[Cette période est marquée comme historique. Vous ne pouvez pas saisir de données pour cette période.]]></phrase>
+		<phrase id="UPDATE_CARD"><![CDATA[Mettre à jour la carte]]></phrase>
+		<phrase id="CLOSE_TE"><![CDATA[Fermer la saisie horaire]]></phrase>
+		<phrase id="CONTINUE_SUBMITTED_AS_APPROVED"><![CDATA[Toutes les cartes de pointage soumises seront marquées comme validées. Souhaitez-vous poursuivre ?]]></phrase>
+		<phrase id="SAVE_CHANGE"><![CDATA[Sauvegarder les modifications]]></phrase>
+		<phrase id="NOT_SAVE_CHANGE"><![CDATA[Ne pas enregistrer les modifications]]></phrase>
+		<phrase id="DO_NOTHING"><![CDATA[Ne rien faire]]></phrase>
+		<phrase id="TE_ERROR"><![CDATA[ERREUR : Erreur interne de la saisie horaire. Contactez votre service des ressources humaines. Description : ]]></phrase>
+		<phrase id="USE_EXCEPTION_TE"><![CDATA[Veuillez utiliser la saisie horaire d'exception pour modifier cette période.]]></phrase>
+		<phrase id="USE_REGULAR_TE"><![CDATA[Veuillez utiliser la saisie horaire standard pour modifier cette période.]]></phrase>
+		<phrase id="CONTACT_PAYROLL_FOR_HELP"><![CDATA[Contactez votre service paie pour obtenir de l'aide.]]></phrase>
+		<phrase id="PAY_PLAN_DATE_NOT_SETUP"><![CDATA[Les dates du système de rémunération n'ont pas été configurées ]]></phrase>
+		<phrase id="EMPLOYEE_DATES_NOT_SETUP"><![CDATA[Les dates d'un ou plusieurs employés n'ont pas été configurées pour la période donnée.]]></phrase>
+		<phrase id="ERROR"><![CDATA[ERREU]]></phrase>
+		<phrase id="NEED_HIGH_RESOLUTION"><![CDATA[Cette version de la saisie horaire a été optimisée pour une résolution supérieure. Veuillez régler la résolution de votre moniteur sur 800 x 600 ou une résolution supérieure.]]></phrase>
+		<phrase id="OPEN_TIPS_WIN"><![CDATA[Ouvrir la fenêtre de conseils]]></phrase>
+		<phrase id="OPEN_COMMENTS"><![CDATA[Ouvrir les commentaires pour ]]></phrase>
+		<phrase id="EMPLOYEE"><![CDATA[Employé :]]></phrase>
+		<phrase id="EXCEPTION"><![CDATA[Exception]]></phrase>
+		<phrase id="NORMAL"><![CDATA[Normal]]></phrase>
+		<phrase id="TO_PRE_DAY"><![CDATA[Déplacer vers le jour précédent]]></phrase>
+		<phrase id="TO_NEXT_DAY"><![CDATA[Déplacer vers le jour suivant]]></phrase>
+		<phrase id="CARD_NOT_ENTERED"><![CDATA[La carte de pointage n'a pas été saisie.]]></phrase>
+		<phrase id="CARD_ENTERED_NOT_SUBMITTED"><![CDATA[La carte de pointage a été saisie mais n'a pas été soumise.]]></phrase>
+		<phrase id="CARD_SUBMITTED"><![CDATA[La carte de pointage a été soumise.]]></phrase>
+		<phrase id="CARD_APPROVED"><![CDATA[La carte de pointage a été validée.]]></phrase>
+		<phrase id="CARD_ON_HOLD"><![CDATA[La carte de pointage a été suspendue.]]></phrase>
+		<phrase id="CARD_REJECTED"><![CDATA[La carte de pointage a été rejetée.]]></phrase>
+		<phrase id="CARD_APPROVED_NO_MORE"><![CDATA[La carte de pointage a été validée. Vous ne pouvez pas saisir de données pour cette période.]]></phrase>
+		<phrase id="CARD_ON_HOLD_NO_MORE"><![CDATA[La carte de pointage a été suspendue. Vous ne pouvez saisir aucune donnée pour cette période.]]></phrase>
+		<phrase id="CARD_RETURNED_NEED_CHANGE"><![CDATA[La carte de pointage a été renvoyée pour évaluation. Veuillez apporter les modifications nécessaires et la soumettre à nouveau.]]></phrase>
+		<phrase id="ENTER_TIME_CLICK_MULTIENTRIES"><![CDATA[Veuillez saisir vos horaires ci-dessous. Pour noter plusieurs entrées pour un seul jour, déplacez vers Quotidien en cliquant ]]></phrase>
+		<phrase id="ENTER_EXCEPTION_TIME"><![CDATA[Veuillez saisir votre horaire d'exception ci-dessous.]]></phrase>
+		<phrase id="ENTER_TIME"><![CDATA[Veuillez saisir vos horaires ci-dessous.]]></phrase>
+		<phrase id="REPORTS"><![CDATA[Etats]]></phrase>
+		<phrase id="TOTAL_HOURS"><![CDATA[Total des heures]]></phrase>
+		<phrase id="SUBMIT_CARD_FOR_APPROVE"><![CDATA[Soumettre pour validation]]></phrase>
+		<phrase id="DEL_DATED_INFO"><![CDATA[Supprimer pour une date sélectionnée]]></phrase>
+		<phrase id="PRINT_CURRENT_CARD"><![CDATA[Imprimer la carte]]></phrase>
+		<phrase id="COPY_DAY"><![CDATA[Copier]]></phrase>
+		<phrase id="PASTE_DAY"><![CDATA[Coller]]></phrase>
+		<phrase id="RETURN_PERIOD_VIEW"><![CDATA[Retourner à la vue de période]]></phrase>
+		<phrase id="RETURN_LIST"><![CDATA[Retourner à la liste]]></phrase>
+		<phrase id="STATUS"><![CDATA[Statut]]></phrase>
+		<phrase id="SUBMITTED"><![CDATA[Soumis]]></phrase>
+		<phrase id="APPROVED"><![CDATA[Approuvé]]></phrase>
+		<phrase id="ON_HOLD"><![CDATA[Suspendu]]></phrase>
+		<phrase id="REJECTED"><![CDATA[Rejeté]]></phrase>
+		<phrase id="HISTORICAL"><![CDATA[Historique :]]></phrase>
+		<phrase id="NOT_ENTERED"><![CDATA[Non saisi(e)]]></phrase>
+		<phrase id="HELD"><![CDATA[Bloqué]]></phrase>
+		<phrase id="NONE"><![CDATA[Aucun(e)]]></phrase>
+		<phrase id="HOLD"><![CDATA[Mettre en attente]]></phrase>
+		<phrase id="SPLIT"><![CDATA[Part]]></phrase>
+		<phrase id="OPEN_SELECT_WIN"><![CDATA[Ouvrir la fenêtre de sélection]]></phrase>
+		<phrase id="TO_PAINT_SCREEN"><![CDATA[Pour colorer l'écran : ]]></phrase>
+		<phrase id="OPEN_DAILY_WIN"><![CDATA[Ouvrir la fenêtre quotidienne pour ]]></phrase>
+		<phrase id="CARD_FOR"><![CDATA[La carte de pointage pour ]]></phrase>
+		<phrase id="BEEN_UPDATED"><![CDATA[ a été mise à jour.]]></phrase>
+		<phrase id="SUBMITTED_CARD_FOR"><![CDATA[La carte de pointage soumise pour ]]></phrase>
+		<phrase id="SUBMITTED_FOR_APPROVAL"><![CDATA[ a été soumise pour validation.]]></phrase>
+		<phrase id="USE_DAILY_TE_CHANGE_MULTIENTRIED"><![CDATA[Pour modifier plusieurs entrées pour le même jour, vous devez utiliser la saisie horaire quotidienne.]]></phrase>
+		<phrase id="VIEWS_OFF"><![CDATA[Les vues ont été désactivées.]]></phrase>
+		<phrase id="VIEWS_ON"><![CDATA[Les vues ont été activées.]]></phrase>
+		<phrase id="NO_MORE_THAN_24_HOURS"><![CDATA[Les jours ne peuvent pas comprendre plus de 24 heures.]]></phrase>
+		<phrase id="VALUE_BE_NUMERIC"><![CDATA[La valeur doit être numérique.]]></phrase>
+		<phrase id="VALUE_BE_POSITIVE"><![CDATA[Cette valeur doit être un nombre positif.]]></phrase>
+		<phrase id="UPDATING_PERIOD_TE"><![CDATA[Mise à jour de la saisie horaire pour l'exercice...]]></phrase>
+		<phrase id="ENTER_TIME_TO_UPDATE"><![CDATA[Veuillez saisir les horaires à mettre à jour.]]></phrase>
+		<phrase id="RESUBMIT_CARD?"><![CDATA[Voulez-vous soumettre à nouveau votre carte de pointage ?]]></phrase>
+		<phrase id="CLEAR_CARD?_OK_FOR_NON_EXCEPTION"><![CDATA[Voulez-vous effacer cette carte de pointage ? Si vous ne saisissez pas d'exception, cliquez sur OK.]]></phrase>
+		<phrase id="ABOUT_TO_DEL"><![CDATA[Vous êtes sur le point de supprimer ]]></phrase>
+		<phrase id="DEL_REC_CORRECT?"><![CDATA[ les enregistrements du système. Est-ce correct ?]]></phrase>
+		<phrase id="ABOUT_TO_DEL_LINE"><![CDATA[Vous êtes sur le point de supprimer la ligne ]]></phrase>
+		<phrase id="DEL_FROM_SYS_CORRECT?"><![CDATA[ du système. Est-ce correct ?]]></phrase>
+		<phrase id="EMPLOYEE_NO"><![CDATA[Numéro de l'employé : ]]></phrase>
+		<phrase id="SUPERVISOR"><![CDATA[Supviseur : ]]></phrase>
+		<phrase id="DEPARTMENT"><![CDATA[Service :]]></phrase>
+		<phrase id="CARD_FOR"><![CDATA[Carte de pointage pour :]]></phrase>
+		<phrase id="EMPLOYEE_ONLY"><![CDATA[Employé]]></phrase>
+		<phrase id="SUPERVISOR_ONLY"><![CDATA[Responsable]]></phrase>
+		<phrase id="SUPERVISOR_NAM_PRINT"><![CDATA[Nom du responsable (à imprimer)]]></phrase>
+		<phrase id="SUPERVISOR_PHONE_NO"><![CDATA[N° de téléphone du responsable]]></phrase>
+		<phrase id="NO_DATES_FOR_PAY_PLAN_CONTACT_HR"><![CDATA[Aucune date n'est associée au système de rémunération de cet employé. Contactez votre service des ressources humaines pour plus d'informations.]]></phrase>
+		<phrase id="CANNT_COMPLETE_REQUEST"><![CDATA[Impossible de répondre à la demande.]]></phrase>
+		<phrase id="COMMENTS_LOADED_FOR_DAY"><![CDATA[Les commentaires ont été chargés pour le jour sélectionné.]]></phrase>
+		<phrase id="MOVING_TO_NEW_DATE"><![CDATA[Déplacer vers une nouvelle date...]]></phrase>
+		<phrase id="COMMENTS"><![CDATA[Commentaires]]></phrase>
+		<phrase id="UPDATE"><![CDATA[Mettre à jour]]></phrase>
+		<phrase id="DELETE"><![CDATA[Supprimer]]></phrase>
+		<phrase id="CLEAR"><![CDATA[Effacer]]></phrase>
+		<phrase id="DONE"><![CDATA[Fait]]></phrase>
+		<phrase id="DELETE_COMMENTS?"><![CDATA[Vous êtes sur le point de supprimer ce commentaire. Voulez-vous vraiment le supprimer ?]]></phrase>
+		<phrase id="LOADING_PRE_DAY"><![CDATA[Chargement du jour précédent...]]></phrase>
+		<phrase id="LOADING_NEXT_DAY"><![CDATA[Chargement du jour suivant...]]></phrase>
+		<phrase id="DATE_LOADED"><![CDATA[Date déjà chargée.]]></phrase>
+		<phrase id="LOADING_PRE_VIEW"><![CDATA[Chargement de la vue de période...]]></phrase>
+		<phrase id="UPDATING_DAILY_TE"><![CDATA[Mise à jour de la saisie horaire quotidienne...]]></phrase>
+		<phrase id="COPY_FORM_TO_PASTE"><![CDATA[Veuillez copier un formulaire à coller.]]></phrase>
+		<phrase id="WAIT_LOADING_SELECT_WIN"><![CDATA[Veuillez patienter pendant le chargement de la fenêtre de sélection.]]></phrase>
+		<phrase id="CANNT_OPEN_SELECT_BOX_NO_DATA"><![CDATA[Impossible d'ouvrir la zone de sélection (aucune donnée).]]></phrase>
+		<phrase id="CANNT_OPEN_SELECT_BOX_RESET_BROWSER"><![CDATA[Impossible d'ouvrir la zone de sélection (réinitialisez votre navigateur).]]></phrase>
+		<phrase id="CANNT_OPEN_WIN_RESTART_BROWSER"><![CDATA[Impossible d'ouvrir la fenêtre. Veuillez redémarrer votre navigateur.]]></phrase>
+		<phrase id="DEL_ACTIVITY"><![CDATA[Supprimer cette activité]]></phrase>
+		<phrase id="MORE"><![CDATA[Autre]]></phrase>
+		<phrase id="NO_POSTING_LEVEL_ACTIVITIES"><![CDATA[Aucune activité niveau comptabilisation.]]></phrase>
+		<phrase id="LOADING_DAILY_TE"><![CDATA[Chargement de la saisie horaire quotidienne...]]></phrase>
+		<phrase id="MANAGER_APPROVAL"><![CDATA[Validation du manager]]></phrase>
+		<phrase id="ENTER_EMAIL_ADDR"><![CDATA[Veuillez saisir une adresse électronique ci-dessous]]></phrase>
+		<phrase id="SUBJECT_TE"><![CDATA[Objet : Saisie horaire]]></phrase>
+		<phrase id="LOADING_MANAGER_APPROVAL"><![CDATA[Chargement de la validation du manager...]]></phrase>
+		<phrase id="QUIT_MANAGER_APPROVAL"><![CDATA[Fermer la validation du manager]]></phrase>
+		<phrase id="LOADING_SUMMARY_APPROVAL"><![CDATA[Chargement de la validation du récapitulatif...]]></phrase>
+		<phrase id="STATUS_UPDATED"><![CDATA[Les statuts ont été mis à jour.]]></phrase>
+		<phrase id="COMMENTS_LOWER"><![CDATA[Commentaires]]></phrase>
+		<phrase id="EMAIL"><![CDATA[Message électronique]]></phrase>
+		<phrase id="NAME"><![CDATA[Nom]]></phrase>
+		<phrase id="TIMECARD_TYPE"><![CDATA[Tp carte point]]></phrase>
+		<phrase id="SUBMITTED_HOURS"><![CDATA[Heures soumises]]></phrase>
+		<phrase id="DETAIL"><![CDATA[Détail]]></phrase>
+		<phrase id="STATUS_ONLY"><![CDATA[Statut]]></phrase>
+		<phrase id="SEND_EMAIL_TO"><![CDATA[Envoyer le message électronique à ]]></phrase>
+		<phrase id="SEND_EMAIL"><![CDATA[Envoyer un message électronique]]></phrase>
+		<phrase id="NOT_ENTERED_CARD"><![CDATA[ n'a pas saisi de carte de pointage.]]></phrase>
+		<phrase id="NOT_SUBMITTED_CARD"><![CDATA[ n'a pas soumis de carte de pointage pour validation.]]></phrase>
+		<phrase id="SUBMITTED_CARD"><![CDATA[ a soumis une carte de pointage pour validation.]]></phrase>
+		<phrase id="HISTORICAL_ONLY"><![CDATA[Historique]]></phrase>
+		<phrase id="LOADING_NEW_PERIOD"><![CDATA[Chargement d'une nouvelle période...]]></phrase>
+		<phrase id="UPDATING_SUMMARY"><![CDATA[Mise à jour du récapitulatif...]]></phrase>
+		<phrase id="CARD_RETURNED_FOR_REVIEW"><![CDATA[ a renvoyé votre carte de pointage pour évaluation.]]></phrase>
+		<phrase id="CARD_JUST_APPROVED"><![CDATA[ vient de valider votre carte de pointage.]]></phrase>
+		<phrase id="SENDING_EMPLOYEE_EMAIL_NOTICE"><![CDATA[Envoi de l'avis par message électronique à l'employé...]]></phrase>
+		<phrase id="GATHERING_DATA"><![CDATA[Collecte des données. Veuillez patienter...]]></phrase>
+		<phrase id="TE_REPORT_DETAIL"><![CDATA[Détail du rapport de saisie horaire]]></phrase>
+		<phrase id="EMPLOYEE_NAME"><![CDATA[Nom de salarié]]></phrase>
+		<phrase id="N_A"><![CDATA[S/O]]></phrase>
+		<phrase id="OK_TO_SUMMARIZE_REPORT"><![CDATA[Le rapport suivant sera résumé sans les enregistrements ne contenant aucune donnée. Appuyez sur OK pour continuer.]]></phrase>
+		<phrase id="WAIT_FOR_SORTING"><![CDATA[Tri. Veuillez patienter...]]></phrase>
+		<phrase id="TE_REPORT_MISSED_CARD"><![CDATA[Rapport de saisie horaire – [cartes de pointage manquantes]]]></phrase>
+		<phrase id="NO_EMPLOYEE_HAVING_MISSING_CARD"><![CDATA[Il ne manque aucune carte de pointage de vos employés pour la période saisie.]]></phrase>
+		<phrase id="PRESS_SEND_TO_NOTIFY_EMPLOYEE_MISSING"><![CDATA[Pour notifier aux employés répertoriés ci-dessous que leur carte de pointage est manquante, cliquez sur Envoyer un message électronique.]]></phrase>
+		<phrase id="PAY_PERIOD_START_DATE"><![CDATA[Date de début de la période de rémunération]]></phrase>
+		<phrase id="CARD_STATUS"><![CDATA[Statut de la carte de pointage]]></phrase>
+		<phrase id="NO_EMAIL_ADDRESS"><![CDATA[Aucune adresse électronique]]></phrase>
+		<phrase id="NOT_DEFINED"><![CDATA[Non défini(e)]]></phrase>
+		<phrase id="NOT_SUBMITTED"><![CDATA[Non soumis]]></phrase>
+		<phrase id="RETURNED"><![CDATA[Retourné]]></phrase>
+		<phrase id="CARD_BEGINING_NOT_SUBMITTED"><![CDATA[Vous n'avez pas soumis votre carte de pointage pour la période commençant ]]></phrase>
+		<phrase id="SUBMIT_ASAP"><![CDATA[. Veuillez la soumettre dès que possible.]]></phrase>
+		<phrase id="CARD_BEGINING_PERIOD"><![CDATA[Votre carte de pointage pour la période commençant ]]></phrase>
+		<phrase id="RETURNED_FOR_REVIEW_RESUBMIT_ASAP"><![CDATA[ a été renvoyée pour évaluation. Veuillez la soumettre à nouveau dès que possible.]]></phrase>
+		<phrase id="TE_REPORTING"><![CDATA[Report saisie horaire]]></phrase>
+		<phrase id="STATUS_M1"><![CDATA[-1 : Non saisi]]></phrase>
+		<phrase id="STATUS_0"><![CDATA[0 - Donnée saisie mais non soumise]]></phrase>
+		<phrase id="STATUS_1"><![CDATA[1 - Soumis]]></phrase>
+		<phrase id="STATUS_2"><![CDATA[2 - Validé]]></phrase>
+		<phrase id="STATUS_3"><![CDATA[3 - Suspendu]]></phrase>
+		<phrase id="STATUS_4"><![CDATA[4 - Rejeté]]></phrase>
+		<phrase id="STATUS_5"><![CDATA[5 - Saisi, historique]]></phrase>
+		<phrase id="STATUS_6"><![CDATA[6 - Soumis, historique]]></phrase>
+		<phrase id="STATUS_7"><![CDATA[7 - Validé, historique]]></phrase>
+		<phrase id="STATUS_8"><![CDATA[8 - Suspendu, historique]]></phrase>
+		<phrase id="STATUS_9"><![CDATA[9 - Rejeté, historique]]></phrase>
+		<phrase id="MISSING_CARD"><![CDATA[Carte de pointage manquante]]></phrase>
+		<phrase id="PAY_PERIOD_SUMMARY"><![CDATA[Récapitulatif de la période de rémunération]]></phrase>
+		<phrase id="SELECT_REPORT_TYPE"><![CDATA[Sélectionnez un type d'état.]]></phrase>
+		<phrase id="NO_DIRECT_REPORT_CONTACT_HR"><![CDATA[Vous n'avez aucun employé subordonné. Contactez votre service des ressources humaines.]]></phrase>
+		<phrase id="ALL_DIRECT_REPORTS"><![CDATA[Toutes les ressources reportant directement]]></phrase>
+		<phrase id="ENCLOSED_OR"><![CDATA[(ou)]]></phrase>
+		<phrase id="ENTER_PAY_PERIOD_DATES"><![CDATA[Saisissez les dates de début et de fin de la période de rémunération.]]></phrase>
+		<phrase id="ENTER_TO_FROM_DATES"><![CDATA[Saisissez les dates de début et de fin.]]></phrase>
+		<phrase id="ALL"><![CDATA[Tout]]></phrase>
+		<phrase id="SHOW_BLANK_REC"><![CDATA[Afficher les enregistrements vides]]></phrase>
+		<phrase id="HISTORICAL_1"><![CDATA[Saisi (historique)]]></phrase>
+		<phrase id="HISTORICAL_2"><![CDATA[Soumis (historique)]]></phrase>
+		<phrase id="HISTORICAL_3"><![CDATA[Validé (historique)]]></phrase>
+		<phrase id="HISTORICAL_4"><![CDATA[Suspendu (historique)]]></phrase>
+		<phrase id="HISTORICAL_5"><![CDATA[Rejeté (historique)]]></phrase>
+		<phrase id="TE_REPORT_SUMMARY"><![CDATA[Récapitulatif du rapport de saisie horaire]]></phrase>
+		<phrase id="PAY_PERIOD"><![CDATA[Période de rémunération]]></phrase>
+		<phrase id="HOURS"><![CDATA[Heures]]></phrase>
+		<phrase id="TIPS"><![CDATA[Astu]]></phrase>
+		<phrase id="DID_U_KNOW"><![CDATA[Le saviez-vous ?]]></phrase>
+		<phrase id="WHERE_TO_CHANGE_TIPS"><![CDATA[Vous pouvez personnaliser le texte d'aide en modifiant le fichier tips.htm à l'emplacement /lawson/xhrnet/timeentry/tips/tips.htm.]]></phrase>
+		<phrase id="SAVE_CHANGES"><![CDATA[Souhaitez-vous enregistrer vos modifications ?]]></phrase>
+		<phrase id="SAVE"><![CDATA[Enregistrer]]></phrase>
+		<phrase id="NO"><![CDATA[N°]]></phrase>
+		<phrase id="CANCEL"><![CDATA[Annuler]]></phrase>
+		<phrase id="ENTER_DATES_FOR_PRINT_CARD"><![CDATA[Pour imprimer les informations de votre carte de pointage, saisissez les dates de début et de fin.]]></phrase>
+		<phrase id="CONTINUE"><![CDATA[Continuer]]></phrase>
+		<phrase id="PRINT"><![CDATA[Imprimer]]></phrase>
+		<phrase id="QUIT"><![CDATA[Quitter]]></phrase>
+		<phrase id="WHICH_REPORT_TYPE"><![CDATA[Quel type de rapport souhaitez-vous créer ?]]></phrase>
+		<phrase id="WHICH_EMPLOYEE_TO_INCLUDE"><![CDATA[Quels employés souhaitez-vous inclure dans votre rapport ?]]></phrase>
+		<phrase id="BACK"><![CDATA[Précédent]]></phrase>
+		<phrase id="SELECT_STATUS_TO_INCLUDE"><![CDATA[Sélectionnez les statuts à ajouter dans ce rapport.]]></phrase>
+		<phrase id="ENTER_PERIOD_START_RANGE"><![CDATA[Saisissez une date de début pour la période de rémunération :]]></phrase>
+		<phrase id="PERIODS_START_DATE_FALLS_FOLLOWING"><![CDATA[(périodes dont les dates de début sont comprises entre les dates suivantes)]]></phrase>
+		<phrase id="SELECT_GROUP_REVIEW_CARDS"><![CDATA[Sélectionnez le groupe d'employés dont vous souhaitez évaluer les cartes de pointage.]]></phrase>
+		<phrase id="SELECT_EMPLOYEE_REVIEW_CARDS"><![CDATA[Sélectionnez le nom de l'employé dont vous souhaitez évaluer les cartes de pointage.]]></phrase>
+		<phrase id="CLEAR_FORM"><![CDATA[Effacer tout]]></phrase>
+		<phrase id="APPROVE_ALL_SUBMITTED"><![CDATA[Valider tous les éléments soumis]]></phrase>
+		<phrase id="LOADING_REPORTING"><![CDATA[Chargement du rapport de la saisie horaire...]]></phrase>
+		<phrase id="ATTENDANCE_CODE"><![CDATA[Code présence]]></phrase>
+		<phrase id="PAY_CODE"><![CDATA[Code de rémunération]]></phrase>
+		<phrase id="ACTIVITY_GROUP"><![CDATA[Groupe d'activités]]></phrase>
+		<phrase id="ACTIVITY"><![CDATA[Activité]]></phrase>
+		<phrase id="UPDATE_COMMENTS"><![CDATA[Veuillez saisir les commentaires à mettre à jour.]]></phrase>
+		<phrase id="SPLIT_NOTIFY"><![CDATA[Pour noter plusieurs entrées dans un seul jour, déplacez vers Quotidien en cliquant sur le graphique du lien Fractionner.]]></phrase>
+		<phrase id="TIME_CARD_APPROVED_PERIOD"><![CDATA[ vient de valider votre carte de pointage pour la période de ]]></phrase>
+		<phrase id="GO_TO_SUMMARY_APPROVAL"><![CDATA[Accéder à la validation du récapitulatif]]></phrase>
+		<phrase id="NO_PAY_PERIODS_FOUND"><![CDATA[Aucune période de rémunération n'a été trouvée pour les employés sélectionnés dans la période saisie.]]></phrase>
+		<phrase id="OCCURRENCE"><![CDATA[Événement]]></phrase>
+		<phrase id="SUMMARY_APPROVAL"><![CDATA[Validation du récapitulatif]]></phrase>
+		<phrase id="PERIOD_APPROVAL"><![CDATA[Validation de la période]]></phrase>
+		<phrase id="DAILY_APPROVAL"><![CDATA[Validation quotidienne]]></phrase>
+		<phrase id="EXCEPTION_ENTRY"><![CDATA[Saisie d'exception]]></phrase>
+		<phrase id="PERIOD_ENTRY"><![CDATA[Saisie de la période]]></phrase>
+		<phrase id="DAILY_ENTRY"><![CDATA[Saisie quotidienne]]></phrase>	
+		<phrase id="SUBJECT"><![CDATA[Objet :]]></phrase>	
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/frfr/temsgs.xml,v 1.3.2.7.2.1 2012/09/04 21:26:07 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

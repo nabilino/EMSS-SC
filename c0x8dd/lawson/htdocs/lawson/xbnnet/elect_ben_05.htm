@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Enroll in Benefit Plan</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	setWinTitle(getSeaPhrase("ENROLL_PLAN","BEN"));
+	REC_TYPE=5
+	var tmp=true
+	//FUTURE CHANGE limit of another plan uncomment next line
+	//tmp=parent.parent.determineCoverage(5)
+	var head=""
+	var bod=""
+	var flexflag=0
+	var empflag=0
+	var compflag=0
+	var head=""
+	var bod=""
+	if (tmp)
+	{
+		var haveData=false;
+		var oldCov=parent.parent.SelectedPlan[14]
+		if (tmp!=true)
+			parent.parent.SelectedPlan[14]=tmp
+		var html = '<div class="plaintablecell" style="padding:0px">'
+		html += parent.header(parent.planMessages(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16]));		
+		html += '<table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" role="presentation">'
+		html += '<tr><td class="plaintablecell" valign="top">'
+		head += '<table class="plaintableborder" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_15","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'">'
+		head += '<caption class="offscreen">'+getSeaPhrase("TCAP_11","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'</caption>'
+		head += '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("PER_OF_SAL","BEN")+'</th>'
+		head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("COV_MONTH_SAL","BEN")+'</th>'
+		bod += '<tr><td class="plaintablecellborderright" nowrap>'+parent.parent.formatCont(parent.parent.SelectedPlan[12])+getSeaPhrase("PER","BEN")+'</td>'
+		bod += '<td class="plaintablecellborderright">'+parent.parent.formatCont(parseFloat(parent.parent.SelectedPlan[14])/12)+'</td>'
+		var flex=(parseFloat(parent.parent.SelectedPlan[20]))
+		var emp=(parseFloat(parent.parent.SelectedPlan[18]))
+		var comp=(parseFloat(parent.parent.SelectedPlan[24]))
+		if (parseFloat(flex)!=0 && !isNaN(parseFloat(flex)))
+		{
+			haveData=true
+			var cost=(parseFloat(flex)/parseFloat(oldCov))*parseFloat(parent.parent.SelectedPlan[14])
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+			bod+='<td class="plaintablecellborderright" nowrap>'+parent.parent.formatCont(cost)
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'	
+		}
+		if (parseFloat(emp)!=0 && !isNaN(parseFloat(emp)))
+		{
+			haveData=true
+			var cost=(parseFloat(emp)/parseFloat(oldCov))*parseFloat(parent.parent.SelectedPlan[14])
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("YOUR_COST","BEN")+'</th>'
+			bod+='<td class="plaintablecellborderright" nowrap>'+parent.parent.formatCont(cost)
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'	
+		}
+		if (parseFloat(comp)!=0 && !isNaN(parseFloat(comp)))
+		{
+			haveData=true
+			var cost=(parseFloat(comp)/parseFloat(oldCov))*parseFloat(parent.parent.SelectedPlan[14])
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("CO_COST","BEN")+'</th>'
+			bod+='<td class="plaintablecellborderright" nowrap>'+parent.parent.formatCont(cost)
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'
+		}
+		if (haveData) 
+		{
+			html += head+'</tr>'
+			html += bod+'</tr>'
+			html += '</table>'
+		}
+		html += '</td></tr></table>'
+		html += parent.footer(parent.parent.SelectedPlan[15],parent.parent.SelectedPlan[16])
+		html += '</div>'
+		document.getElementById("paneBody").innerHTML = html;
+		document.getElementById("paneHeader").innerHTML = getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8];
+	}
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_05.htm,v 1.12.2.32 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

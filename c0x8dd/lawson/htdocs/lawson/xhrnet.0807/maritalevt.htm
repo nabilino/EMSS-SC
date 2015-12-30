@@ -1,0 +1,483 @@
+<html>
+<head>
+<title>Marital Status</title>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/hrctrycodeselect.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var MaritalForm = new Object();
+var EmpInfo = new Object();
+var LNAMEPREFIX = false;
+var taskNm = " ";
+var prm = 3;
+
+if (fromTask)
+{
+	switch(getVarFromString("from",fromTask))
+	{
+		case "divorce":		prm = 1; taskNm = "DIVORCE"; break;
+		case "legalsep":	prm = 2; taskNm = "LEGAL SEP"; break;
+		case "marriage":	prm = 3; taskNm = "MARRIAGE"; break;
+	}
+}
+
+function MaritalEvent()
+{
+	authUser = null;
+	try
+	{
+		// Check if a parent or opener document has already done an authenticate,
+		// otherwise go get the webuser info.
+		if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+		{
+			authUser = parent.authUser;
+		}
+		else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+		{
+			authUser = opener.authUser;
+		}
+	}
+	catch(e)
+	{
+		authUser = null;
+	}
+	if (!authUser)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='GetEmployee()'|officeObjects=true|desiredEdit='EM'");
+		return;
+	}
+	GetEmployee();
+}
+
+function GetEmployee()
+{
+	document.title = parent.getSeaPhrase("MARITAL_STATUS","ESS");
+	var fields = "first-name;last-name;middle-name;name-prefix;last-name-pre;"
+			   + "name-suffix;work-country";
+	GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"employee",
+				fields,"GetEmpNameInfo()");
+}
+
+function GetEmpNameInfo()
+{
+	EmpInfo = self.jsreturn.record[0];
+	LNAMEPREFIX = (NonSpace(EmpInfo.last_name_pre)||EmpInfo.work_country=="DE"||EmpInfo.work_country=="NL")?true:false;
+	GetHrCtryCodeSelect(authUser.prodline,"PR;SU","DrawMaritalEvent()");
+}
+
+function DrawMaritalEvent()
+{
+	var MaritalContent = '<form name="maritalform">'
+	+ '<table border="0" cellspacing="0" cellpadding="0">'
+	+ '<tr><td class="fieldlabelboldleft" style="padding-top:10px">'
+
+	if (prm == 1) MaritalContent += parent.getSeaPhrase("ENTER_DIVORCE_DATE","ESS")
+	else if (prm == 2) MaritalContent += parent.getSeaPhrase("ENTER_SEPARATION_DATE","ESS")
+	else if (prm == 3) MaritalContent += parent.getSeaPhrase("ENTER_MARRIAGE_DATE","ESS")
+	else MaritalContent += parent.getSeaPhrase("ENTER_DATE","ESS")
+
+	MaritalContent += '<td class="plaintablecell" nowrap><input class="inputbox" type=text name="dateneeded" value="" size=10 maxlength=10 onfocus=this.select()>'
+	+ '<a href=javascript:parent.DateSelect("dateneeded")'
+	+ ' onmouseover="window.status=\''+parent.getSeaPhrase("DISPLAY_CAL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+    + ' onmouseout="window.status=\' \';return true">'
+    + uiCalendarIcon()+'</a>'+uiRequiredIcon()+'</td></tr>\n'
+    + '<tr><td>&nbsp;</td><td valign="top" nowrap>'+uiDateFormat()+'</td><td>&nbsp;</td></tr>'
+    + '</table><p/>'
+    + '<table border="0" cellspacing="0" cellpadding="0">'
+    + '<tr><td colspan="3" class="fieldlabel" style="text-align:center">'+parent.getSeaPhrase("NEW_NAME","ESS")
+    + '<br/><p/></td></tr>'
+	+ '<tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("NAME_TITLE","ESS")+'</td>'
+    + '<td class="plaintablecell"><select class="inputbox" name="nametitle">' + DrawHrCtryCodeSelect("PR",EmpInfo.name_prefix) + '</select></td><td>&nbsp;</td></tr>'
+    + '<tr/><tr/><tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("DEP_34","ESS")+'</td>'
+    + '<td class="plaintablecell"><input class="inputbox" type=text name="firstname" value="' + EmpInfo.first_name
+	+ '" size=15 maxlength=15 onfocus="this.select()"></td><td>&nbsp;</td></tr>'
+    + '<tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("MIDDLE_NAME","ESS")+'</td>'
+    + '<td class="plaintablecell"><input class="inputbox" type=text name="middlename" value="' + EmpInfo.middle_name
+	+ '" size=15 maxlength=15 onfocus="this.select()"></td><td>&nbsp;</td></tr>'
+
+	if (LNAMEPREFIX)
+	{
+		MaritalContent += '<tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("DEP_37","ESS")
+    	+ '<td class="plaintablecell"><input class="inputbox" type=text name="lastnameprefix" value="' + EmpInfo.last_name_pre
+		+ '" size=30 maxlength=30 onfocus="this.select()"></td></tr>'
+    }
+
+	MaritalContent += '<tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("DEP_38","ESS")
+	+ '<td class="plaintablecell"><input class="inputbox" type=text name="lastname" value="' + EmpInfo.last_name
+	+ '" size=30 maxlength=30 onfocus="this.select()"></td></tr>'
+	+ '<tr/><tr/><tr><td class="fieldlabelboldleft">'+parent.getSeaPhrase("DEP_39","ESS")+'</td>'
+    + '<td class="plaintablecell"><select class="inputbox" name="namesuffix">' + DrawHrCtryCodeSelect("SU",EmpInfo.name_suffix) + '</select></td></tr>'
+
+	+ '<tr><td/><td class="plaintablecell">'
+	+ uiButton(parent.getSeaPhrase("UPDATE","ESS"),"parent.ProcessEmployee();return false","margin-top:10px")
+	+ '</td></tr>'
+	+ '</table>'
+ 	+ '</form>'
+	+ uiRequiredFooter()
+
+	try {
+		self.MAIN.document.getElementById("paneHelpIcon").alt = parent.getSeaPhrase("HELP","ESS");
+		self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("MARRIAGE_CHANGE","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:10px">'+MaritalContent+'</div>'
+
+		self.MAIN.stylePage();
+		self.MAIN.setLayerSizes();
+		fitToScreen();
+		document.getElementById("MAIN").style.visibility = "visible";
+		self.MAIN.document.maritalform.dateneeded.focus();
+	}
+	catch(e) {}
+}
+
+function ProcessEmployee()
+{
+	var obj = self.MAIN.document.maritalform;
+
+  	clearRequiredField(obj.dateneeded);
+  	clearRequiredField(obj.firstname);
+  	clearRequiredField(obj.lastname);
+
+  	if (NonSpace(obj.dateneeded.value) == 0)
+  	{
+  		setRequiredField(obj.dateneeded);
+     	parent.seaAlert(parent.getSeaPhrase("HOME_ADDR_8","ESS"));
+     	obj.dateneeded.focus();
+     	obj.dateneeded.select();
+     	return;
+  	}
+  	else if (ValidDate(obj.dateneeded) == false)
+  	{
+  		setRequiredField(obj.dateneeded);
+  		return;
+	}
+	else if (formjsDate(obj.dateneeded.value) > ymdtoday)
+	{
+		setRequiredField(obj.dateneeded);
+		parent.seaAlert(parent.getSeaPhrase("FUTUREDATE","ESS"));
+		obj.dateneeded.focus();
+		obj.dateneeded.select();
+		return;
+	}
+
+  	if (NonSpace(obj.firstname.value) == 0)
+  	{
+		setRequiredField(obj.firstname);
+     	parent.seaAlert(parent.getSeaPhrase("FIRST_NAME","ESS"));
+	 	obj.firstname.focus();
+	 	obj.firstname.select();
+	 	return;
+  	}
+
+  	if (NonSpace(obj.lastname.value) == 0)
+  	{
+  		setRequiredField(obj.lastname);
+     	parent.seaAlert(parent.getSeaPhrase("LAST_NAME","ESS"));
+	 	obj.lastname.focus();
+	 	obj.lastname.select();
+	 	return;
+  	}
+
+  	if (NonSpace(obj.middlename.value) == 0)
+     		obj.middlename.value = " ";
+	if (LNAMEPREFIX && NonSpace(obj.lastnameprefix.value) == 0)
+			obj.lastnameprefix.value = " ";
+
+  	if (NonSpace(EmpInfo.middle_name) == 0) EmpInfo.middle_name = " ";
+	if (NonSpace(EmpInfo.name_prefix) == 0) EmpInfo.name_prefix = " ";
+	if (NonSpace(EmpInfo.name_suffix) == 0) EmpInfo.name_suffix = " ";
+	if (NonSpace(EmpInfo.last_name_pre) == 0) EmpInfo.last_name_pre = " ";
+
+	MaritalForm = obj;
+	MaritalForm.nametitlevalue = obj.nametitle.options[obj.nametitle.selectedIndex].value;
+	MaritalForm.namesuffixvalue = obj.namesuffix.options[obj.namesuffix.selectedIndex].value;
+	if (NonSpace(MaritalForm.nametitlevalue) == 0) MaritalForm.nametitlevalue = " ";
+	if (NonSpace(MaritalForm.namesuffixvalue) == 0) MaritalForm.namesuffixvalue = " ";
+
+	parent.showWaitAlert(parent.getSeaPhrase("HOME_ADDR_42","ESS"));
+
+	var object = new DMEObject(authUser.prodline, "FAMSTSHIST");
+   	object.out   = "JAVASCRIPT";
+  	object.index = "FSHSET1";
+   	object.field = "family-status;effect-date";
+   	object.key   = parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10)
+				 + "=" + escape(taskNm,1) + "=" + escape(formjsDate(MaritalForm.dateneeded.value),1);
+   	object.func  = "CheckFamilyStatusEvent()";
+   	object.max  = "1";
+	DME(object, "jsreturn");
+}
+
+function CheckFamilyStatusEvent()
+{	
+	if (self.jsreturn.NbrRecs == 0)
+		ProcessHR11();
+	else
+	{
+		parent.removeWaitAlert();
+		parent.seaAlert(parent.getSeaPhrase("LIFE_EVENT_EXISTS","ESS"));
+	}
+}
+
+function CreateFamilyStatusEvent()
+{
+  	var pObj 		= new AGSObject(authUser.prodline, "ES10.1");
+    pObj.event		= "ADD";
+   	pObj.rtn		= "MESSAGE";
+   	pObj.longNames	= true;
+   	pObj.tds		= false;
+   	pObj.field 		= "FC=A"
+   	    			+ "&FSH-COMPANY=" + escape(parseInt(authUser.company,10))
+   					+ "&FSH-EMPLOYEE=" + escape(parseInt(authUser.employee,10))
+   					+ "&FSH-FAMILY-STATUS=" + escape(taskNm,1)
+   					+ "&FSH-EFFECT-DATE=" + escape(formjsDate(MaritalForm.dateneeded.value),1)
+   	pObj.func 		= "parent.DspMsgES10()";
+	pObj.debug		= false;
+  	AGS(pObj, "jsreturn");
+}
+
+function ProcessHR11()
+{
+   var pObj = new AGSObject(authUser.prodline, "HR11.1");
+   pObj.event = "CHANGE";
+   pObj.rtn	= "MESSAGE";
+   pObj.longNames = true;
+   pObj.tds	= false;
+   pObj.func = "parent.DspMsgHR11()";
+   pObj.field = "FC=C"
+	      	  + "&EFFECT-DATE=" + formjsDate(MaritalForm.dateneeded.value)
+		  	  + "&EMP-COMPANY=" + escape(parseInt(authUser.company,10))
+		  	  + "&EMP-EMPLOYEE=" + escape(parseInt(authUser.employee,10))
+		  	  + "&PEM-TRUE-MAR-STAT=" + escape(taskNm.charAt(0),1)
+   			  + "&XMIT-HREMP-BLOCK=1000000000"
+		  	  + "&XMIT-REQDED=1"
+   if (taskNm == "MARRIAGE")
+   {
+		pObj.field	+= "&PEM-MAIDEN-FST-NM=" + escape(EmpInfo.first_name,1)
+		  			+ "&PEM-MAIDEN-MI=" + escape(EmpInfo.middle_name.charAt(0),1)
+					+ "&PEM-MAIDEN-LST-NM=" + escape(EmpInfo.last_name,1)
+	}
+	else
+	{
+		if (MaritalForm.firstname.value != EmpInfo.first_name
+   		|| MaritalForm.middlename.value != EmpInfo.middle_name
+   		|| MaritalForm.lastname.value != EmpInfo.last_name){
+			pObj.field	+= "&PEM-FORMER-FST-NM=" + escape(EmpInfo.first_name,1)
+		  				+ "&PEM-FORMER-MI=" + escape(EmpInfo.middle_name.charAt(0),1)
+						+ "&PEM-FORMER-LST-NM=" + escape(EmpInfo.last_name,1)
+		}
+	}
+   	if (MaritalForm.firstname.value != EmpInfo.first_name
+   	|| MaritalForm.middlename.value != EmpInfo.middle_name
+   	|| MaritalForm.lastname.value != EmpInfo.last_name
+   	|| MaritalForm.nametitlevalue != EmpInfo.name_prefix
+   	|| MaritalForm.namesuffixvalue != EmpInfo.name_suffix
+   	|| (LNAMEPREFIX && MaritalForm.lastnameprefix.value != EmpInfo.last_name_pre))
+   	{
+		pObj.field 		+= "&EMP-NAME-PREFIX=" + escape(MaritalForm.nametitlevalue,1)
+		  				+ "&EMP-FIRST-NAME=" + escape(MaritalForm.firstname.value,1)
+		  				+ "&EMP-MIDDLE-NAME=" + escape(MaritalForm.middlename.value,1)
+		if (LNAMEPREFIX)
+			pObj.field  += "&EMP-LAST-NAME-PRE=" + escape(MaritalForm.lastnameprefix.value,1)
+		pObj.field  	+= "&EMP-LAST-NAME=" + escape(MaritalForm.lastname.value,1)
+		  				+ "&EMP-NAME-SUFFIX=" + escape(MaritalForm.namesuffixvalue,1)
+   	}
+
+   	pObj.debug = false;
+   	AGS(pObj, "jsreturn");
+}
+
+function DspMsgES10()
+{
+	var msgNbr = parseInt(self.lawheader.gmsgnbr,10);
+  	if (msgNbr == 0)
+   	{
+      	if(prm == 1) {
+			parent.left.location.replace("/lawson/xhrnet/divorce1.htm?date="+escape(formjsDate(MaritalForm.dateneeded.value),1));
+		} else if(prm == 2) {
+			parent.left.location.replace("/lawson/xhrnet/lglsep1.htm?date="+escape(formjsDate(MaritalForm.dateneeded.value),1));
+		} else if(prm == 3) {
+		   	parent.left.location.replace("/lawson/xhrnet/marriage1.htm?date="+escape(formjsDate(MaritalForm.dateneeded.value),1));
+		} else {
+		   	parent.removeWaitAlert();
+		}
+		parent.document.getElementById("right").style.visibility = "hidden";
+		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+		parent.document.getElementById("fullrelatedtask").style.visibility = "hidden";
+   		parent.document.getElementById("left").style.visibility = "visible";
+   		parent.seaAlert(parent.getSeaPhrase("SUCCESSFUL_MARITAL_CHANGE","ESS"));
+   	}
+   	else
+   	{
+   		parent.removeWaitAlert();
+   		if (msgNbr == 103)
+   		{
+   			parent.seaAlert(parent.getSeaPhrase("LIFE_EVENT_EXISTS","ESS"));
+   		}
+   		else if (msgNbr == 106)
+   		{
+   			parent.seaAlert(parent.getSeaPhrase("FUTUREDATE","ESS"));
+   		}
+   		else
+   		{
+   			parent.seaAlert(self.lawheader.gmsg);
+		}
+	}
+}
+
+function DspMsgHR11()
+{
+   	if (parseInt(self.lawheader.gmsgnbr,10) == 0)
+   	{
+   		CreateFamilyStatusEvent();
+    }
+    else
+    {
+    	parent.removeWaitAlert();
+    	parent.seaAlert(self.lawheader.gmsg);
+	}
+}
+
+function OpenHelpDialog()
+{
+	if (isEnwisenEnabled() && (taskNm == "DIVORCE" || taskNm == "LEGAL SEP" || taskNm == "MARRIAGE"))
+	{
+		if (taskNm == "LEGAL SEP")
+			openEnwisenWindow("id=LEGAL_SEPARATION");
+		else
+			openEnwisenWindow("id=" + taskNm);
+	}
+	else
+		openHelpDialogWindow("/lawson/xhrnet/maritalstatustip.htm");
+}
+
+function ReturnDate(date)
+{
+   self.MAIN.document.forms[0].elements[date_fld_name].value = date;
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;		
+
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth =  winWidth - 23;
+		contentWidthBorder =  winWidth - 2;		
+		contentHeight = winHeight - 60;	
+		contentHeightBorder = winHeight - 30;		
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 :winWidth - 12;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 41;		
+	}
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.MAIN.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();MaritalEvent()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="left:0%;width:100%;height:555px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/maritalevt.htm,v 1.18.2.27 2012/06/29 17:12:06 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

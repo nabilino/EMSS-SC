@@ -1,0 +1,57 @@
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/enwisenPost.htm,v 1.1.2.4 2008/11/07 02:41:40 brentd Exp $ -->
+<!--
+	Proprietary Program Material
+	This material is proprietary to Lawson Software, and is not to be
+	reproduced or disclosed except in accordance with software contract
+	provisions, or upon written authorization from Lawson Software.
+
+	Copyright (c) 2005-2006 by Lawson Software. All Rights Reserved.
+	Saint Paul, Minnesota
+-->
+
+<HTML>
+<HEAD>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="enwisen.css"/>
+	<script src="enwisenPost.js"></script>
+	<script src="/lawson/webappjs/common.js"></script>
+	<script src="/lawson/webappjs/commonHTTP.js"></script>
+	<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+	<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+	<script src="/lawson/webappjs/javascript/objects/UserManager.js"></script>
+	<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+	<!--script src="/sso/sso.js"></script-->
+	<script language="JavaScript" runat="server">
+		function getUnixTime(sDate)
+		{
+			if (sDate)
+			{
+				return new Date(sDate).valueOf();
+			}
+		}
+		var serverDate = new Date();
+		serverDate = (getUnixTime(serverDate.toUTCString())/1000).toString();
+	</script>
+</HEAD>
+
+<BODY onload="form_init()">
+	<div id="divMessage" style="position:absolute;top:65px;left:25px;">
+		<img type="button" class="selectButton" src="/lawson/xhrnet/ui/images/ico_arrow_spin3_sm_gray.gif"/>
+		<label id="lblMessage" class="xTLabel" style="font-size:10pt;">Performing login to remote service</label>
+	</div>
+	<div id="loginFormDiv" style="visibility:hidden;display:none;">
+		<FORM action="" id="loginForm" name="loginForm" method="POST">
+		<TABLE cellpadding="3" cellspacing="1">
+		<TR>
+			<TD class="FormHeading">Master account information</TD>
+		</TR>
+		<TR>
+		    	<TD><INPUT id="XMLData" name="XMLData" value=""/></TD>
+		</TR>
+		<TR>
+    			<TD><INPUT name="Submit" type="submit" value="Submit Query"></TD>
+		</TR>
+		</TABLE>
+		</FORM>
+	</div>
+</BODY>
+</HTML>

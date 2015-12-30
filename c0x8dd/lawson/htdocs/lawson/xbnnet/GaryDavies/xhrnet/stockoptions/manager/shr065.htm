@@ -1,0 +1,458 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.2 Final//EN">
+<HTML>
+<HEAD>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires"  CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<TITLE>Stock Options</TITLE>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<SCRIPT SRC="/lawson/webappjs/commonHTTP.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/esscommon80.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/stockoptions/lib/getattach.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/stockoptions/lib/shr064.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/waitalert.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmldateroutines.js"></SCRIPT>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/ui/ui.js"></SCRIPT>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+
+<!-- Load any additional libraries here... -->
+
+<SCRIPT LANGUAGE="JavaScript">
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize Function.
+//
+function Initialize()
+{
+	clearTimeout(Timer);
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialization Complete Function.
+//
+function AuthenticateFinished()
+{
+	// Add any additional initialization routines or assignments here, including global variables.
+	//  Note: remove the "Investment Information" string found in the MainTabs array below
+	//	if it is not desired as an option on the main Grant Options tabbed window.
+	//
+	stylePage();
+
+	document.title = getSeaPhrase("STOCK_OPTIONS","ESS");
+
+	// Set the task title.
+	setTaskHeader("header",getSeaPhrase("STOCK_OPTIONS","ESS"),"Stock");
+
+	optionTabs = new uiTabSet("optionTabs",new Array(getSeaPhrase("STOCK_OPTION_GRANTS","ESS"),getSeaPhrase("SHARES_TO_EXPIRE","ESS"),getSeaPhrase("INVESTMENT_INFORMATION","ESS")));
+
+	StoreDateRoutines();
+
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	GetDirectReports("I");
+}
+
+function PaintEmployeeSelectBox(EEs, tabNbr)
+{
+	var returnVal = '<div id="GrantSelect" name="GrantSelect" style="padding-left:10px;padding-top:10px;overflow:hidden;">'
+	returnVal += '<table border="0" cellpadding="0" cellspacing="0">'
+	returnVal += '<tr><td class="plaintablecell"><span style="white-space:nowrap">'
+	returnVal += '<select class="inputbox" onchange="parent.EmployeeSelected(this);return false" id="ee'+Number(tabNbr)+'" name="ee'+Number(tabNbr)+'">'
+	returnVal += PaintEmployeeSelect(EEs,HS10.SelectedEE);
+	returnVal += '</select></span></td></tr></table></div>'
+	return returnVal;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top left tabbed window - Stock Option Grants.
+//
+function PaintTopLeftWindow(onsort, sortField)
+{
+	if (optionTabs.rendered)
+	{
+		RePaintTopLeftWindow(onsort, sortField);
+		return;
+	}
+
+	var EEs = HS10.Records;
+
+	optionTabs.draw = true;
+	optionTabs.frame = self.topleft;
+	optionTabs.isDetail = false;
+	optionTabs.tabHtml = new Array();
+
+	// first tab
+	optionTabs.tabHtml[0] = "";
+
+	if (HS10.SelectedIndex <= 0)
+	{
+		optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+		optionTabs.tabHtml[0] += '<table border="0" cellpadding="0" cellspacing="0" width="95%">';
+		optionTabs.tabHtml[0] += '<tr>';
+		optionTabs.tabHtml[0] += '<td class="fieldlabelbold" style="text-align:left;padding-top:10px;padding-left:10px">'+getSeaPhrase("SELECT_DIRECT_REPORT_GRANTS","ESS");
+		optionTabs.tabHtml[0] += '</td></tr></table>';
+	}
+	else
+	{
+		optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS")+" - "+EEs[HS10.SelectedIndex-1].FullName;
+		optionTabs.tabHtml[0] += PaintStockOptionGrantTable(0, true);
+	}
+
+	optionTabs.tabHtml[0] += PaintEmployeeSelectBox(EEs, 0);
+
+	// second tab
+	optionTabs.tabHtml[1] = "";
+
+	if (HS10.SelectedIndex <= 0)
+	{
+		optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+		optionTabs.tabHtml[1] += '<table border="0" cellspacing="0" cellpadding="0" width="95%">';
+		optionTabs.tabHtml[1] += '<tr>';
+		optionTabs.tabHtml[1] += '<td class="fieldlabelbold" style="text-align:left;padding-top:10px;padding-left:10px">'+getSeaPhrase("SELECT_DIRECT_REPORT_EXP_SHARES","ESS");
+		optionTabs.tabHtml[1] += '</td></tr></table>';
+	}
+	else
+	{
+		optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS")+" - "+EEs[HS10.SelectedIndex-1].FullName+":";
+		optionTabs.tabHtml[1] += PaintStockOptionGrantTable(1, true);
+	}
+	optionTabs.tabHtml[1] += PaintEmployeeSelectBox(EEs, 1);
+
+	// third tab
+	optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+	optionTabs.tabHtml[2] = window.investinfo.document.body.innerHTML;
+
+	optionTabs.create();
+
+	// Firefox needs this or the tabs get clipped at the top
+	optionTabs.frame.document.getElementById("paneBodyBorder").style.paddingTop = "2px";
+
+	document.getElementById("topleft").style.visibility = "visible";
+	if (onsort) {
+		hideDetailFrames();
+	}
+	removeWaitAlert();
+}
+
+function RePaintTopLeftWindow(onsort, sortField, tabNbr)
+{
+	var EEs = HS10.Records;
+	tabNbr = (typeof(tabNbr) != "undefined") ? tabNbr : optionTabs.activetab;
+	switch (String(tabNbr)) {
+
+		// first tab
+		case "0":
+
+		if (HS10.SelectedIndex <= 0)
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			var strHtml = '<table border="0" cellpadding="0" cellspacing="0" width="95%">';
+			strHtml += '<tr>';
+			strHtml += '<td class="fieldlabelbold" style="text-align:left;padding-top:10px;padding-left:10px">'+getSeaPhrase("SELECT_DIRECT_REPORT_GRANTS","ESS");
+			strHtml += '</td></tr></table>';
+			optionTabs.setTabHtml(0,strHtml+PaintEmployeeSelectBox(EEs, 0));
+		}
+		else
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS")+" - "+EEs[HS10.SelectedIndex-1].FullName;
+			optionTabs.setTabHtml(0,PaintStockOptionGrantTable(0, true)+PaintEmployeeSelectBox(EEs, 0));
+		}
+		optionTabs.setActiveTab(0);
+		break;
+
+		// second tab
+		case "1":
+
+		if (HS10.SelectedIndex <= 0)
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			var strHtml = '<table border="0" cellspacing="0" cellpadding="0" width="95%">';
+			strHtml += '<tr>';
+			strHtml += '<td class="fieldlabelbold" style="text-align:left;padding-top:10px;padding-left:10px">'+getSeaPhrase("SELECT_DIRECT_REPORT_EXP_SHARES","ESS");
+			strHtml += '</td></tr></table>';
+			optionTabs.setTabHtml(1,strHtml+PaintEmployeeSelectBox(EEs, 1));
+		}
+		else
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS")+" - "+EEs[HS10.SelectedIndex-1].FullName+":";
+			optionTabs.setTabHtml(1,PaintStockOptionGrantTable(1, true)+PaintEmployeeSelectBox(EEs, 1));
+		}
+		optionTabs.setActiveTab(1);
+		break;
+
+		// third tab
+		case "2":
+
+		optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+		optionTabs.setTabHtml(2,window.investinfo.document.body.innerHTML);
+		optionTabs.setActiveTab(2);
+		break;
+
+		default:
+		break;
+	}
+
+	try
+	{
+		optionTabs.frame.styleSortArrow("optionTbl" + String(Number(optionTabs.activetab)), sortField);
+	}
+	catch(e)
+	{}
+	document.getElementById("topleft").style.visibility = "visible";
+	if (onsort)
+	{
+		hideDetailFrames();
+	}
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the bottom left window - Vesting Detail.
+// Override this function, if desired.
+//
+// function PaintBottomLeftWindow() { }
+//
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top right window - Option Detail.
+// Override this function, if desired.
+//
+// function PaintTopRightWindow(index) { }
+//
+
+function GetDirectReports(fc)
+{
+	if (fc != escape("+",1))
+		HS10 = new HS10Object();
+
+	window.lawheader.nbr = 0;
+	window.lawheader.token = "HS10.1";
+
+  	var pAGSObj = new AGSObject(authUser.prodline, "HS10.1");
+    pAGSObj.event = "ADD";
+    pAGSObj.rtn	= "DATA";
+	pAGSObj.longNames = true;
+	pAGSObj.tds	= false;
+    pAGSObj.field = "FC=I";
+	pAGSObj.field += "&HSU-COMPANY=" + escape(parseInt(authUser.company,10));
+	pAGSObj.field += "&HSU-EMPLOYEE=" + escape(parseInt(authUser.employee,10));
+
+	if (NonSpace(HS10.NextFC) > 0)
+	{
+		pAGSObj.field		+= "&PT-FC=" + escape(HS10.NextFC);
+	}
+
+	if (isNaN(parseInt(HS10.NextEmployee,10)) == false)
+	{
+		pAGSObj.field 		+=  "&PT-PTF-EMPLOYEE=" + escape(parseInt(HS10.NextEmployee,10));
+	}
+
+	if (NonSpace(HS10.NextSupvCode) > 0)
+	{
+		pAGSObj.field +=  "&PT-PTF-HSU-CODE=" + escape(HS10.NextSupvCode,1);
+	}
+
+	if (NonSpace(HS10.NextSupvOpCode) > 0)
+	{
+		pAGSObj.field +=  "&PT-PTF-HSU-OP-CODE=" + escape(HS10.NextSupvOpCode,1);
+	}
+
+	pAGSObj.func		= "parent.GetDirectReports_Done()";
+	pAGSObj.debug	= false;
+  	AGS(pAGSObj, "jsreturn");
+}
+
+function GetDirectReports_Done()
+{
+	if (window.lawheader.gmsgnbr == "000")
+	{
+		if (window.lawheader.gmsg.toUpperCase().indexOf("MORE RECORDS EXIST") != -1)
+		{
+			GetDirectReports(escape("+",1));
+		}
+		else
+		{
+			HS10.RetrievedEEs = true;
+			PaintTopLeftWindow();
+		}
+	}
+	else
+	{
+		seaAlert(window.lawheader.gmsg);
+		switch(window.lawheader.gmsgnbr)
+		{
+			default: break;
+		}
+	}
+}
+
+function SetActiveReport(tabNbr)
+{
+	if (HS10.SelectedIndex >= 0)
+	{
+		with (eval(TopLeft.getFrameNm()))
+		{
+			var EEs = getElementById("ee" + Number(tabNbr));
+			if (typeof(EEs) != "undefined" && EEs != null)
+			{
+				EEs.selectedIndex = HS10.SelectedIndex;
+				TopLeft.getFrameNm().styleElement(EEs);
+			}
+		}
+	}
+}
+
+function EmployeeSelected(SelectBox)
+{
+	HS10.SelectedEE = SelectBox.options[SelectBox.selectedIndex].value;
+	HS10.SelectedIndex = SelectBox.selectedIndex;
+
+	// Make sure all tabs are in synch with the same direct report.
+	with (optionTabs.frame.document)
+	{
+		HS10.SelectContent = SelectBox.innerHTML;
+		var ReportSelects = getElementsByTagName("select");
+		for (var i=0; i<ReportSelects.length; i++)
+		{
+			ReportSelects[i].selectedIndex = SelectBox.selectedIndex;
+			optionTabs.frame.styleElement(ReportSelects[i]);
+		}
+	}
+	hideDetailFrames();
+
+	// If the user has selected an employee, get the web available stock options to display; otherwise display a message.
+	if (HS10.SelectedIndex <= 0)
+	{
+		PaintTopLeftWindow();
+	}
+	else
+	{
+		var msgText = "";
+		// Display a message informing the user that their request is being processed.
+		if (optionTabs.activetab == 1)
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS")+" - "
+				+ HS10.Records[HS10.SelectedIndex-1].FullName + ":";
+			msgText = getSeaPhrase("RETRIEVE_EXPIRE_SHARES","ESS");
+		}
+		else
+		{
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS")+" - " + HS10.Records[HS10.SelectedIndex-1].FullName;
+			msgText = getSeaPhrase("RETRIEVE_STOCK_GRANT","ESS");
+		}
+
+		showWaitAlert(msgText);
+		GetStockOptionGrants("I", HS10.SelectedEE, true);
+	}
+}
+
+function PaintEmployeeSelect(Records, Employee, Index)
+{
+	Employee = (typeof(Employee) != "undefined" && !isNaN(parseFloat(Employee)))?Employee:-1;
+	Index = (typeof(Index) != "undefined" && !isNaN(parseFloat(Index)))?Index:-1;
+
+	var eeselect = new Array();
+	eeselect[0] = "<option value='-1'>"+getSeaPhrase("SELECT_DIRECT_REPORT","ESS");
+
+	for (var i=0; i<Records.length; i++)
+	{
+		eeselect[i+1] = "";
+		if (typeof(type) == "undefined" || type == null || records[i].type == type)
+		{
+        	eeselect[i+1] += "<option value='" + Records[i].Employee + "'";
+
+			if ((Employee != -1 && Records[i].Employee == Employee)
+			|| (Index != -1 && Index == (i+1)))
+			{
+		    		eeselect[i+1] += " selected";
+			}
+			eeselect[i+1] += ">" + Records[i].FullName;
+		}
+	}
+
+	return eeselect.join("");
+}
+
+function optionTabs_OnClick(tab)
+{
+	var tabProps = tab.id.split("_");
+	var tabId = tabProps[0];
+	var tabType = tabProps[1];
+	var tabNbr = tabProps[2];
+
+	removeWaitAlert();
+
+	// remove any detail windows, if the user has selected a different tab
+	if (tabNbr != optionTabs.activetab) {
+		hideDetailFrames();
+	}
+
+	// clear the last selected table row, irrespective of the active tab
+	for (var i=0; i<optionTabs.tabs.length; i++) {
+		if (i != tabNbr) {
+			deactivateTableRows("optionTbl"+tabNbr,optionTabs.frame);
+		}
+	}
+
+	switch (tabNbr) {
+		case "0":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			break;
+		case "1":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			break;
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			break;
+		case "3":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+			break;
+		default:
+			break;
+	}
+
+	if (tabNbr != optionTabs.activetab) {
+		RePaintTopLeftWindow(null, null, tabNbr);
+		return false;
+	}
+
+	return true;
+}
+
+var Timer = setTimeout("Initialize()",3000);	// Sets a timer to call the initialize function if
+												// the frameset fails to call it.
+
+</SCRIPT>
+</HEAD>
+
+<!-- Define your frameset here -->
+
+<body onload="Initialize()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topleft" name="topleft" src="/lawson/xhrnet/ui/innertabpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:600px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topright" name="topright" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:600px;width:191px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft" name="bottomleft" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:600px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn2" name="jsreturn2" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="investinfo" name="investinfo" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/investinfo.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/shr064_law.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/stockoptions/manager/shr065.htm,v 1.11.2.17 2011/05/04 21:10:23 brentd Exp $ -->

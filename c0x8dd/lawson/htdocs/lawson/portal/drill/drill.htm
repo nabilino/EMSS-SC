@@ -1,0 +1,149 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/drill/drill.htm,v 1.26.2.11.4.3.8.1.2.6.2.1 2013/10/07 01:37:20 jquito Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.627 2013-10-08 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+	<title>Drill Select</title>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="drill.css" />
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css" />
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../dropdown.css" />
+	<script language="javascript" src="../servenv.js"></script>
+	<script src="drill.js" language="javascript"></script>
+	<script src="../dropdown.js" language="javascript"></script>
+</head>
+
+<body id="drill" class="DrillBody" language="javascript" topmargin="0" scroll="no" tabIndex="-1" 
+		onload="drlInit()" onkeydown="drlDoKeyDown(event)" onhelp="drlOnHelp(event)"
+		onresize="drlResize(event)" oncontextmenu="drlContextMenu(event,false)" onunload="drlUnload()">
+	<img src="../images/folderopen.gif" style="display:none">
+	<img src="../images/folder.gif" style="display:none">
+	<img src="../images/foldersecure.gif" style="display:none">
+	<img src="../images/document.gif" style="display:none">
+	<img src="../images/minus.gif" style="display:none">
+	<img src="../images/plus.gif" style="display:none">
+	<img src="../images/blank.gif" style="display:none">
+
+	<div id="drlToolBar" class="DrillInvisible" onselectstart="return false;">&nbsp;</div>
+	<div id="drlTitleBar" class="DrillInvisible">
+		<nobr>
+			<span id="drlTitle" class="DrillInvisible" onselectstart="return false;">&nbsp;</span>&nbsp;
+			<button id="drlViewSelect" class="DrillInvisible" onclick="drlClickView(this);">&nbsp;</button>
+		</nobr>
+			<input id="drlTitleBarBtn" type="button" class="DrillInvisible" tabIndex="1" value="" title="" 
+			   disabled hidefocus ononselectstart="return false;" style="position:absolute; right:3px;"
+ 			   onblur="drlButtonBlur(this)" onfocus="drlButtonFocus(this)" onmouseover="drlButtonMouseOver(this)" onmouseout="drlButtonMouseOut(this)"
+ 			   onclick="drlDoDrillAroundSelect()">
+	</div>
+	<div id="drlWindow" class="DrillInvisible">
+		<div id="drlTree" class="DrillInvisible" tabIndex="-1" hidefocus onclick="drlSetFocusBorder(true)" onfocus="drlSetFocusBorder(true)" onselectstart="return false;"></div>
+		<div id="drlSplitBar" class="DrillInvisible" tabIndex="-1" hidefocus onmousedown="dragStart(event)" onselectstart="return false;"></div>
+		<div id="drlListView" class="DrillInvisible" tabIndex="-1" hidefocus onclick="drlSetFocusBorder(false)">
+			<div id="drlHeader" class="DrillInvisible" tabIndex="-1" hidefocus onclick="drlSetFocusBorder(false)"></div>
+			<div id="drlList" class="DrillInvisible" tabIndex="-1" hidefocus onclick="drlSetFocusBorder(false)" onscroll="mapScroll()"></div>
+			<div id="drlFooter" class="DrillInvisible" tabIndex="-1" hidefocus onclick="drlSetFocusBorder(false)">
+				<table border="0" width="100%" align="center" cellpadding="0" cellspacing="0">
+					<tbody>
+						<tr>
+							<td width="30%" align="left">
+								<nobr id="drlRecordsSelect">
+									<div style="margin-left:2px;margin-top:2px;">
+										<span id="drlRecordsLabel1">View </span>
+										<select id="drlSelectRecords" class="DrillLabelSmall" tabIndex="2" onchange="drlDoChangeRecords(this)"></select>
+										<span id="drlRecordsLabel2"> Records</span>
+									</div>
+								</nobr>
+							</td>
+							<td width="20%" align="center">
+								<nobr><input id="drlBtnprev" type="button" class="anchorActive" style="position:relative;" tabIndex="1" value=""
+									title="" disabled hidefocus onblur="drlButtonBlur(this)" onfocus="drlButtonFocus(this)" 
+									onmouseover="drlButtonMouseOver(this)" onmouseout="drlButtonMouseOut(this)" onclick="drlPrevious()"></nobr>
+							</td>
+							<td width="20%" align="center">
+								<nobr><input id="drlBtnnext" type="button" class="anchorActive" style="position:relative;" tabIndex="1" value=""
+									title="" disabled hidefocus onblur="drlButtonBlur(this)" onfocus="drlButtonFocus(this)" 
+									onmouseover="drlButtonMouseOver(this)" onmouseout="drlButtonMouseOut(this)" onclick="drlNext()"></nobr>
+							</td>
+							<td width="30%" align="right">
+								<nobr id="drlRecordsCount">
+									<div id="drlCount" class="DrillLabelSmall" style="margin-right:2px;margin-top:4px;">&nbsp;</div>
+								</nobr>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</div>
+		<div id="drlAttachView" class="DrillInvisible" tabIndex="-1" hidefocus>
+			<table id="drlAttachTable" border="0" cellspacing="0" cellpadding="2" height="100%" width="98%" align="center">
+				<tbody>
+					<tr>
+						<td height="40px" width="98%">
+							<label for="txtAttachTitle" id="lblTitle" class="xTLabelForm" onselectstart="return false;">Title</label>
+							<br><input id="txtAttachTitle" type="text" class="DrillTextBox" size="60" maxlength="50" onfocus="drlAttachFocus(event,this)" onblur="drlAttachBlur(event,this,false)"/>
+						</td>
+					</tr>
+					<tr id="drlCommentLabelRow" class="DrillInvisible">
+			   			<td id="drlCommentLabel" valign="bottom"><label for="txtCmtAttach" id="lblCmtText" class="xTLabelForm" onselectstart="return false;">Text</label></td>
+					</tr>
+					<tr id="drlCommentRow" class="DrillInvisible" style="height:80%;">
+						<td><textarea id="txtCmtAttach" name="txtCmtAttachText" class="DrillTextArea" onfocus="drlAttachFocus(event,this)" onblur="drlAttachBlur(event,this,false)"
+							onselect="drlStoreCaret(event,this)" onclick="drlStoreCaret(event,this)" onkeyup="drlStoreCaret(event,this)"></textarea>
+						</td>
+					</tr>
+				
+					<tr id="drlUrlLabelRow" class="DrillInvisible">
+						<td id="drlUrlLabel" valign="bottom"><label for="txtUrlAttach" id="lblUrlText" class="xTLabelForm" onselectstart="return false;">URL</label></td>
+					</tr>
+					<tr id="drlUrlRow" class="DrillInvisible" style="height:35%">
+						<td><textarea id="txtUrlAttach" name="txtUrlAttatchText" class="DrillTextArea" onfocus="drlAttachFocus(event,this)" onblur="drlAttachBlur(event,this,false)"
+							onselect="drlStoreCaret(event,this)" onclick="drlStoreCaret(event,this)" onkeyup="drlStoreCaret(event,this)"></textarea>
+						</td>
+					</tr>
+				
+					<tr>
+						<td id="drlAttachBtns" class="DrillInvisible" align="center">
+							<input id="cmdAddChg" type="button" class="DrillButton" onclick="drlClickAttachAddChg()" onfocus="drlAttachFocus(event,this)" onblur="drlAttachBlur(event,this,false)" onselectstart="return false;" value="Change"/>
+							<input id="cmdDelete" type="button" class="DrillButton" onclick="drlClickAttachDelete()" onfocus="drlAttachFocus(event,this)" onblur="drlAttachBlur(event,this,false)" onselectstart="return false;" value="Delete"/>						
+							<input id="cmdOpen" type="button" class="DrillButton" onclick="drlClickAttachOpen()" onblur="drlAttachBlur(event,this,false)" onselectstart="return false;" value="Open"/>						
+						</td>
+						
+					</tr>
+					<tr>
+						<td class="DrillLabelSmall">
+							<br><nobr id="drlCreated">&nbsp;</nobr>
+							<br><nobr id="drlModified">&nbsp;</nobr>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<iframe style="display:block;visibility:visible;" id="mailFrm" title="Email" src="../blank.htm" height="0px" width="0px" border="0" frameBorder="0" tabIndex="-1" hidefocus></iframe>
+		</div>
+	</div>
+	<div id="drlMsgOuter" class="DrillInvisible">
+		<div class="DrillMsgSplitBar"></div>
+		<div id="drlMsg" class="DrillMsg">
+			<span><nobr id="drlMsgbar">&nbsp;</nobr></span>
+		</div>
+	</div>
+</body>
+</html>

@@ -1,0 +1,674 @@
+<html>
+<head><title>Job Postings</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var emailWin;
+var emailList = new Array();
+var jobPostings = new Array();
+var sortProperty;
+
+function GetWebuser()
+{
+	authenticate("frameNm='FRAME1'|funcNm='StartJobPostings()'|desiredEdit='EM'");
+}
+
+function StartJobPostings()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	document.title = getSeaPhrase("JOB_POSTINGS","ESS");
+
+	setTaskHeader("header",getSeaPhrase("JOB_POSTINGS","ESS"),"Employment");
+	StoreDateRoutines();
+	GetPajobreq();
+}
+
+function GetPajobreq()
+{
+	jobPostings = new Array();
+
+	var dmeObj = new DMEObject(authUser.prodline, "pajobreq");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "pjrset1";
+
+	dmeObj.field = "requisition;description;remaining-open;department.name;location.description;"
+	+ "process-level.name;contact-last;contact-first;wk-phone-nbr;wk-phone-ext;wk-phone-cntry;"
+	+ "last-cmt-seq;date-needed;remaining-fte;app-status.description;process-level.name;"
+	+ "position.description;job-code.description;union-code.description;bargain-unit.description;"
+	+ "work-schedule.description;supervisor.description;shift;contact-nbr.email-address";
+
+	dmeObj.key = parseInt(authUser.company,10)+ "=";
+	if (emssObjInstance.emssObj.requirePostingDates)
+	{
+		if (iosHandler.getIOSVersionNumber() >= "08.01.00")
+			dmeObj.select = "(internal-stop>=" + ymdtoday + "|internal-stop=00000000)&(internal-start!=00000000&internal-start<=" + ymdtoday + ")";
+		else
+			dmeObj.select = "internal-stop>=" + ymdtoday + "|internal-stop=00000000&internal-start!=00000000&internal-start<=" + ymdtoday;
+	}
+	else	
+		dmeObj.cond = "cur-int-post";
+	dmeObj.max = "600";
+	dmeObj.func = "GetMoreRecords()";
+	DME(dmeObj, "FRAME1");
+}
+
+function GetMoreRecords()
+{
+	jobPostings = jobPostings.concat(self.FRAME1.record);
+
+	if (self.FRAME1.Next)
+	{
+		self.FRAME1.location.replace(self.FRAME1.Next);
+	}
+	else
+	{
+		SortPajobreq("description");
+		try
+		{
+			self.MAIN.setLayerSizes();
+			self.DETAIL.setLayerSizes();
+		}
+		catch(e)
+		{}
+		fitToScreen();
+	}
+}
+
+function DspPajobreq(onsort, property)
+{
+	// Job Postings Main Frame
+	var jobPostHtml = '<form name="jobpostform">'
+	+ '<table id="jobPostingsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">'
+	+ '<tr>'
+	+ '<th class="plaintableheaderborder" style="text-align:center;width:7%">'+getSeaPhrase("JOB_OPENINGS_0","ESS")+'</th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center;width:31%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:void(0);" onclick=parent.SortPajobreq("description")'
+	+ ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_1","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</a></th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center;width:61%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="javascript:void(0);" onclick=parent.SortPajobreq("location_description")'
+	+ ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_10","ESS").replace(/\'/g,"\\'")+'\';return true"'
+	+ ' onmouseout="window.status=\' \';return true">'+getSeaPhrase("JOB_PROFILE_6","ESS")+'</a></th>'
+	+ '</tr>'
+
+	for (var i=0; i<jobPostings.length; i++)
+	{
+		var jobRec = jobPostings[i];
+
+		//if (i%2 == 0)
+			jobPostHtml += '<tr>'
+		//else
+		//	jobPostHtml += '<tr class="tablerowhighlight">'
+		jobPostHtml += '<td class="plaintablecellborder" style="text-align:center" nowrap>'
+		+ '<input class="inputbox" type="checkbox" name="cbox"'
+		+ ' onmouseover="window.status=\''+getSeaPhrase("JOB_OPENINGS_15","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		+ ' onmouseout="window.status=\'\';return true">'
+		+ '</td>'
+		+ '<td class="plaintablecellborder"  nowrap>'
+		+ '<a href="javascript:parent.FillDetail('+i+')"'
+		+ ' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+		+ ' onmouseout="window.status=\'\';return true">' + ((jobRec.description)?jobRec.description:'&nbsp;') + '</a></td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>' + ((jobRec.location_description)?jobRec.location_description:'&nbsp;') + '</td>'
+		+ '</tr>'
+	}
+
+	jobPostHtml += '</table>'
+	if (jobPostings.length > 0)
+	{
+		jobPostHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+		+ '<tr><td style="padding-top:5px;padding-bottom:5px;white-space:nowrap">'
+		+ uiButton(getSeaPhrase("JOB_OPENINGS_17","ESS"),"parent.SubmitApplications();return false",false,"submit")
+		+ '</td></tr>'
+		+ '</table>'
+	}
+
+	jobPostHtml += '</form>';
+
+	self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CURRENT_OPENINGS","ESS");
+
+	if (jobPostings.length == 0) {
+		self.MAIN.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft">'+getSeaPhrase("JOB_OPENINGS_16","ESS")+'</div>';
+	}
+	else {
+		self.MAIN.document.getElementById("paneBody").innerHTML = jobPostHtml;
+	}
+	self.MAIN.stylePage();
+	if (onsort) {
+		self.MAIN.styleSortArrow("jobPostingsTbl", property);
+	}
+	else
+	{
+		self.MAIN.setLayerSizes();
+	}
+	document.getElementById("MAIN").style.visibility = "visible";
+
+	// Job Postings Detail Frame
+	var jobDetailHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%">'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("REQUISITION_NUMBER","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlReqCode">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("DATE_NEEDED","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlDateNeeded">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_4","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlOpenings">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlFTE">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("EMPLOYEE_STATUS","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlEmployeeStatus">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_3","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlProcessLevel">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_4","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlDepartment">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_7","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlSupervisor">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlPosition">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_9","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlJob">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_PROFILE_10","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlUnion">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("BARGAINING_UNIT","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlBargainingUnit">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlWorkSchedule">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("SHIFT","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlShift">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_12","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlContact">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlPhoneNbr">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderlite" style="width:40%">'+getSeaPhrase("JOB_OPENINGS_14","ESS")+'</th>'
+	+ '<td class="plaintablecelldisplay" style="width:60%" nowrap><span id="dtlExtension">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '<tr>'
+	+ '<th class="plaintablerowheaderborderlite" style="width:40%">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'</th>'
+	+ '<td class="plaintablecellborderdisplay" style="width:60%" nowrap><span id="dtlPhoneCountryCode">&nbsp;</span></td>'
+	+ '</tr>'
+	+ '</table>'
+
+	try {
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = jobDetailHtml;
+	}
+	catch(e) {}
+
+	self.DETAIL.stylePage();
+	if (!onsort) {
+		self.DETAIL.setLayerSizes();
+	}
+
+	document.getElementById("DETAIL").style.visibility = "visible";
+
+	// if this task has been refreshed following an update, remove any processing message
+	if (typeof(removeWaitAlert) == "function")
+		removeWaitAlert();
+	fitToScreen();	
+}
+
+function FillDetail(n)
+{
+	activateTableRow("jobPostingsTbl",n,self.MAIN);
+
+	try {
+		var tmpObj = jobPostings[n];
+
+		self.DETAIL.document.getElementById("dtlReqCode").innerHTML = (tmpObj.requisition)?tmpObj.requisition:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlDateNeeded").innerHTML = (tmpObj.date_needed)?tmpObj.date_needed:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlOpenings").innerHTML = (tmpObj.remaining_open)?tmpObj.remaining_open:'0';
+		self.DETAIL.document.getElementById("dtlFTE").innerHTML = (tmpObj.remaining_fte)?tmpObj.remaining_fte:'0';
+		self.DETAIL.document.getElementById("dtlEmployeeStatus").innerHTML = (tmpObj.app_status_description)?tmpObj.app_status_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlProcessLevel").innerHTML = (RelFound(tmpObj.process_level_name))?RelFound(tmpObj.process_level_name):'&nbsp;';
+		self.DETAIL.document.getElementById("dtlDepartment").innerHTML = (RelFound(tmpObj.department_name))?RelFound(tmpObj.department_name):'&nbsp;';
+		self.DETAIL.document.getElementById("dtlSupervisor").innerHTML = (tmpObj.supervisor_description)?tmpObj.supervisor_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlPosition").innerHTML = (tmpObj.position_description)?tmpObj.position_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlJob").innerHTML = (tmpObj.job_code_description)?tmpObj.job_code_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlUnion").innerHTML = (tmpObj.union_code_description)?tmpObj.union_code_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlBargainingUnit").innerHTML = (tmpObj.bargain_unit_description)?tmpObj.bargain_unit_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlWorkSchedule").innerHTML = (tmpObj.work_schedule_description)?tmpObj.work_schedule_description:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlShift").innerHTML = (tmpObj.shift)?tmpObj.shift:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlContact").innerHTML = (tmpObj.contact_first || tmpObj.contact_last)?tmpObj.contact_first+' '+tmpObj.contact_last:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlPhoneNbr").innerHTML = (tmpObj.wk_phone_nbr)?tmpObj.wk_phone_nbr:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlExtension").innerHTML = (tmpObj.wk_phone_ext)?tmpObj.wk_phone_ext:'&nbsp;';
+		self.DETAIL.document.getElementById("dtlPhoneCountryCode").innerHTML = (tmpObj.wk_phone_cntry)?tmpObj.wk_phone_cntry:'&nbsp;';
+	}
+	catch(e) {}
+}
+
+function SubmitApplications()
+{
+	emailList = new Array();
+	var jobs_selected = false;
+	var jobForm = self.MAIN.document.jobpostform;
+
+	if (jobPostings.length == 1)
+	{
+		if (jobForm.cbox.checked)
+			jobs_selected = true;
+	}
+	else
+	{
+		for (var i=0; i<jobPostings.length; i++)
+		{
+			if (jobForm.cbox[i].checked)
+			{
+				jobs_selected = true;
+				break;
+			}
+		}
+	}
+
+	if (!jobs_selected)
+	{
+		seaAlert(getSeaPhrase("JOB_OPENINGS_18","ESS"));
+		return;
+	}
+
+	showWaitAlert(getSeaPhrase("JOB_OPENINGS_19","ESS"),self.MAIN);
+	DoApplication();
+}
+
+function DoApplication()
+{
+	var jobs_selected = false;
+	var jobForm = self.MAIN.document.jobpostform;
+
+	if (jobPostings.length == 1)
+	{
+			if (jobForm.cbox.checked)
+			{
+				jobForm.cbox.checked = false;
+				styleElement(jobForm.cbox)
+				jobs_selected = true;
+				ApplyForJob(0);
+			}
+	}
+	else
+	{
+		for (var i=0; i<jobPostings.length; i++)
+		{
+			if (jobForm.cbox[i].checked)
+			{
+				jobForm.cbox[i].checked = false;
+				styleElement(jobForm.cbox[i])
+				jobs_selected = true;
+				ApplyForJob(i);
+				break;
+			}
+		}
+	}
+
+	if (!jobs_selected)
+	{
+		removeWaitAlert(self.MAIN);
+		ShowConfirm();
+	}
+}
+
+function ApplyForJob(n)
+{
+	var jobRec = jobPostings[n];
+
+	var agsObj = new AGSObject(authUser.prodline, "PA43.1");
+	agsObj.event = "CHANGE";
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.debug = false;
+
+	agsObj.field = "FC=C"
+	+ "&PJR-COMPANY=" + parseInt(authUser.company,10)
+	+ "&PJR-REQUISITION=" + escape(parseInt(jobRec.requisition,10))
+	+ "&LINE-FC1=A"
+	+ "&PRA-EMP-APP1=0"
+	+ "&PRA-APPLICANT1=" + parseInt(authUser.employee,10)
+	+ "&PQL-APP-STATUS1=WA"
+	+ "&PQL-DATE1=" + ymdtoday
+	+ "&PRA-DATE-APPLIED1=" + ymdtoday
+	+ "&PRA-HIRE-SOURCE1=WEBAPP"
+
+	agsObj.func = "parent.VerifyApplication(" + n + ")";
+	updatetype = "PRA";
+	AGS(agsObj,"FRAME1");
+}
+
+function VerifyApplication(n)
+{
+	var msgNbr = parseInt(self.lawheader.gmsgnbr, 10);
+	var jobRec = jobPostings[n];
+
+	// if no error was encountered (or if an error is returned that the applicant has already been submitted, ignore the error)
+	// try to submit the next application
+	if (msgNbr == 0 || msgNbr == 106)
+	{
+		emailList[emailList.length] = jobRec;
+
+		// submit the next job application in the list
+		DoApplication();
+	}
+	else
+	{
+		var errorMsg = getSeaPhrase("JOB_SUBMISSION_ERROR", "ESS") + " " + jobRec.description;
+
+		switch(msgNbr)
+		{
+			case 108:
+			case 123:
+				errorMsg += "\n\n" + getSeaPhrase("WEB_APPLICANT_STATUS_ERROR", "ESS");
+				break;
+			case 107:
+			case 124:
+				errorMsg += "\n\n" + getSeaPhrase("WEB_HIRE_SOURCE_ERROR", "ESS");
+				break;
+			default:
+				break;
+		}
+
+		errorMsg += "\n\n(" + self.lawheader.gmsg + ")\n\n" + getSeaPhrase("CONTACT_HR", "ESS");
+
+		seaAlert(errorMsg);
+
+		// when an error is encountered, abort the remaining job application submissions.
+		removeWaitAlert(self.MAIN);
+		if (emailList.length > 0)
+		{
+			ShowConfirm();
+		}
+	}
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function SortPajobreq(property)
+{
+	sortProperty = property;
+	jobPostings.sort(sortByProperty);
+	DspPajobreq(true, property);
+}
+
+function RelFound(str)
+{
+	if (str == "**")
+		return "";
+	else
+		return str;
+}
+
+function EmailContents(modalDialog)
+{
+	var emailHtml = '<div class="dialoglabel" style="width:100%">'+getSeaPhrase("JOB_OPENINGS_20","ESS")+'</div>'
+	+ '<div style="width:100%;text-align:center">'
+
+	if (!modalDialog)
+	{
+		emailHtml += '<form styler="hidden"><span styler="hidden">'
+		+ uiButton(getSeaPhrase("CLOSE","ESS"),"parent.document.getElementById(\'dialog\').style.visibility=\'hidden\';return false",false,"ok")
+		+ '</span></form>'
+	}
+
+	emailHtml += '</div><div style="padding-left:20px">'
+
+	for (var i=0; i<emailList.length; i++)
+	{
+		emailHtml += EmailString(emailList[i].description, emailList[i].contact_nbr_email_address);
+	}
+
+	emailHtml += '</div><p>'
+	return emailHtml;
+}
+
+function EmailString(job,contact_nbr_email_address)
+{
+	var emailStr = "";
+
+	if (NonSpace(contact_nbr_email_address)==0) {
+		emailStr += '<br>'+job;
+	}
+	else {
+		emailStr += '<br><a href="mailto:' + contact_nbr_email_address
+           + '?subject=' + escape(job,1)
+           + '"'
+           + ' onmouseover="window.status=\''+getSeaPhrase("SEND_EMAIL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+           + ' onmouseout="window.status=\'\';return true">'+job
+           + '</a>'
+	}
+	return emailStr;
+}
+
+function ShowConfirm()
+{
+	if (styler.showInfor || styler.showLDS)
+	{
+		seaAlert(EmailContents(true));
+	}
+	else
+	{
+		self.dialog.document.getElementById("paneHeader").innerHTML = getSeaPhrase("NOTIFICATION","ESS");
+		self.dialog.document.getElementById("paneBody").innerHTML = EmailContents();
+		self.dialog.stylePage();
+		self.dialog.setLayerSizes(true);
+		self.dialog.document.getElementById("paneBorder").style.top = "0px";
+		self.dialog.document.getElementById("paneBorder").style.margin = "0px";
+		document.getElementById("dialog").style.visibility = "visible";
+	}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var detailFrame = document.getElementById("DETAIL");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;		
+
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.60) - 12;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 7 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.40) - 12;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 7 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentLeftWidth = parseInt(winWidth*.60) - 23;
+		contentLeftWidthBorder = parseInt(winWidth*.60) - 2;
+		contentRightWidth = parseInt(winWidth*.40) - 23;
+		contentRightWidthBorder = parseInt(winWidth*.40) - 2;				
+		contentHeight = winHeight - 60;	
+		contentHeightBorder = winHeight - 30;		
+	}
+	else
+	{
+		contentLeftWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.60) - 17 : parseInt(winWidth*.60) - 12;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.40) - 17 : parseInt(winWidth*.40) - 12;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 41;		
+	}
+
+	mainFrame.style.width = parseInt(winWidth*.60) + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.MAIN.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}
+	detailFrame.style.width = parseInt(winWidth*.40) + "px";
+	detailFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.DETAIL.onresize && self.DETAIL.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.DETAIL.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.DETAIL.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.DETAIL.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		mainFrame.style.left = "";
+		mainFrame.style.right = "0px";	
+		detailFrame.style.left = "0px";
+		document.getElementById("dialog").style.left = "";
+		document.getElementById("dialog").style.right= "5px";
+	}
+	else
+	{	
+		detailFrame.style.left = parseInt(winWidth*.60,10) + "px";
+	}		
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="GetWebuser()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" style="visibility:hidden;position:absolute;height:464px;width:469px;left:0px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="dialog" name="dialog" style="visibility:hidden;position:absolute;height:225px;width:375px;left:5px;top:64px" src="/lawson/xhrnet/ui/headerpane.htm" allowtransparency="true" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" style="visibility:hidden;position:absolute;height:464px;width:334px;left:469px;top:32px" src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="FRAME1" name="FRAME1" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/esslawheader.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/pajobreq.htm,v 1.17.2.33 2012/06/29 17:12:01 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

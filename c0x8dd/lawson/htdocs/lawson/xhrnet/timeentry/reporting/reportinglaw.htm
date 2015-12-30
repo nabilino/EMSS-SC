@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Transaction Library</title>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script language="JavaScript">
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+var UpdateType;
+var fieldcount = 0;
+var linecount = 0;
+var formlinecount = 0;
+var BreakOut = false;
+var gmsgnbr = '';
+var gmsg = '';
+var gfldnbr = '';
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Program Data.
+//
+function V(fld,val)
+{
+	switch (UpdateType)
+	{
+		case "HS22.1": HS22_1V(fld,val); break;
+		case "HS22.3": HS22_3V(fld,val); break;
+		default: TimeEntryV(fld, val); break;
+	}
+}
+
+function HS22_1V(fld, val)
+{
+	switch (fld)
+	{
+		case "OT-PLAN-CODE": parent.Reports.PlanCode = val; break
+		case "PYT-EMPLOYEE": parent.Reports.Employee = val; break;
+		case "PYT-PAY-PER-START": parent.Reports.PeriodStart = val; break;
+		case "PYT-PAY-PER-END": parent.Reports.PeriodEnd = val; break;
+		case "VIEW-ID": parent.Reports.View = val; break;
+		case "PRO-DESCRIPTION": parent.Reports.PlanCodeDescription = val; break;
+		case "HSU-EMAIL-ADDRESS": parent.Reports.Email = val; break;
+		case "HSU-EMAIL-PERSONAL": parent.Reports.EmailPersonal = val; break;
+		case "HSU-FULL-NAME": parent.Reports.EmployeeName = val.split(",")[1] +" "+ val.split(",")[0]; break;
+		case "LAST-HSU-CODE": parent.Reports.LastHsuCode = val; break;
+		case "LAST-LAST-NAME": parent.Reports.LastLastName = val; break;
+		case "LAST-FIRST-NAME": parent.Reports.LastFirstName = val; break;
+		case "LAST-MIDDLE-INIT": parent.Reports.LastMiddleInit = val; break;
+		case "LAST-EMPLOYEE": parent.Reports.LastEmployee = val; break;
+		default: GetDetailForHS221V(fld, val); break;
+	}
+}
+
+function GetDetailForHS221V(fld, val)
+{
+	if (fld.indexOf("PYT-EMPLOYEE")>=0)
+	{
+		linecount++;
+		formlinecount++;
+		parent.Reports.Detail[linecount-1] = new parent.ReportsDetailObject(val);
+		parent.Reports.Detail[linecount-1].Status = -1;
+		parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE");
+	}
+	if (fld.indexOf("PYT-TIMECARD-TYPE")>=0 && linecount>0)
+	{
+		parent.Reports.Detail[linecount-1].TimecardType = val;
+		if (val == "1")
+			parent.Reports.Detail[linecount-1].TimecardTypeDesc = "Normal";
+		else
+			parent.Reports.Detail[linecount-1].TimecardTypeDesc = "Exception";
+	}
+	else if (fld.indexOf("EMP-OT-PLAN-CODE")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].PlanCode = val;
+	else if (fld.indexOf("ECM-EXIST")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].CommentsExist = val;
+	else if (fld.indexOf("PTF-FULL-NAME")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].FullName = val;
+	else if (fld.indexOf("PYT-TOTAL-HOURS")>=0 && linecount>0)
+	{
+		if (typeof(parent.FormatHours) != "undefined")
+			parent.Reports.Detail[linecount-1].TotalHours = parent.FormatHours(val,2);
+	}
+	else if (fld.indexOf("PYT-STATUS")>=0 && linecount>0)
+	{
+		if (val == "")
+		{
+			parent.Reports.Detail[linecount-1].Status = -1;
+			parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE");
+		}
+		else
+		{
+			parent.Reports.Detail[linecount-1].Status = parent.setValue(val);
+			switch (parseInt(parent.setValue(val)))
+			{
+				case -1: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE"); break;
+				case 0: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_SUBMITTED","TE"); break;
+				case 1: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("SUBMITTED","TE"); break;
+				case 2: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("APPROVED","TE"); break;
+				case 3: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("ON_HOLD","TE"); break;
+				case 4: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("REJECTED","TE"); break;
+				case 5: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_1","TE"); break;
+				case 6: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_2","TE"); break;
+				case 7: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_3","TE"); break;
+				case 8: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_4","TE"); break;
+				case 9: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_5","TE"); break;
+			}
+		}
+	}
+	else if (fld.indexOf("EMAIL-ADDRESS")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].Email = val;
+	else if (fld.indexOf("EMAIL-PERSONAL")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].EmailPersonal = val;		
+	else if (fld.indexOf("DATES-EXIST")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].DatesExist = val;
+	else if (fld.indexOf("PERIOD-STARTS-AT")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].PeriodStartsAt = val;
+	else if (fld.indexOf("PERIOD-STOPS-AT")>=0 && linecount>0)
+		parent.Reports.Detail[linecount-1].PeriodStopsAt = val;
+}
+
+function HS22_3V(fld, val)
+{
+	switch (fld)
+	{
+		case "HSU-COMPANY":	parent.Reports.Company = val; break;
+		case "HSU-EMPLOYEE": parent.Reports.Employee = val; break;
+		case "FROM-DATE": parent.Reports.PeriodStart = val; break;
+		case "TO-DATE": parent.Reports.PeriodEnd = val; break;
+		case "LAST-HSU-CODE": parent.Reports.LastHsuCode = val; break;
+		case "LAST-LAST-NAME": parent.Reports.LastLastName = val; break;
+		case "LAST-FIRST-NAME":	parent.Reports.LastFirstName = val; break;
+		case "LAST-MIDDLE-INIT": parent.Reports.LastMiddleInit = val; break;
+		case "LAST-EMPLOYEE": parent.Reports.LastEmployee = val; break;
+		case "PT-PTM-START-DATE": parent.Reports.LastStartDate = val; break;
+		case "HSU-EMAIL-ADDRESS": parent.Reports.Email = val; break;
+		case "HSU-EMAIL-PERSONAL": parent.Reports.EmailPersonal	= val; break;
+		default: GetDetailForHS223V(fld, val); break;
+	}
+}
+
+function GetDetailForHS223V(fld, val)
+{
+	if (fld.indexOf("PYT-EMPLOYEE")>=0)
+	{
+		if (val == 0) return;
+		linecount++;
+		formlinecount++;
+		parent.Reports.Detail[linecount-1] = new parent.ReportsDetailObject(val);
+		parent.Reports.Detail[linecount-1].Status = null;
+		parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE");
+	}
+	if (fld.indexOf("PYT-TIMECARD-TYPE")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].TimecardType == null)
+		{
+			parent.Reports.Detail[linecount-1].TimecardType = val;
+			parent.Reports.Detail[linecount-1].TimecardTypeDesc = (val == "1") ? "Normal" : "Exception";
+		}
+	}
+	else if (fld.indexOf("PRO-PLAN-CODE")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].PlanCode == null)
+			parent.Reports.Detail[linecount-1].PlanCode = val;
+	}
+	else if (fld.indexOf("PRO-DESCRIPTION")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].PlanCodeDescription == null)
+			parent.Reports.Detail[linecount-1].PlanCodeDescription = val;
+	}
+	else if (fld.indexOf("PTF-FULL-NAME")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].FullName == null)
+			parent.Reports.Detail[linecount-1].FullName = val;
+	}
+	else if (fld.indexOf("PYT-TOTAL-HOURS")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].TotalHours == null)
+			parent.Reports.Detail[linecount-1].TotalHours = parent.FormatHours(val,2);
+	}
+	else if (fld.indexOf("PYT-STATUS")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].Status == null)
+		{
+			if (val == "")
+			{
+				parent.Reports.Detail[linecount-1].Status = -1;
+				parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE");
+			}
+			else
+			{
+				parent.Reports.Detail[linecount-1].Status = parent.setValue(val);
+				switch (parseInt(parent.setValue(val)))
+				{
+					case -1: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_ENTERED","TE"); break;
+					case 0: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("NOT_SUBMITTED","TE"); break;
+					case 1: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("SUBMITTED","TE"); break;
+					case 2: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("APPROVED","TE"); break;
+					case 3: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("ON_HOLD","TE"); break;
+					case 4: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("REJECTED","TE"); break;
+					case 5: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_1","TE"); break;
+					case 6: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_2","TE"); break;
+					case 7: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_3","TE"); break;
+					case 8: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_4","TE"); break;
+					case 9: parent.Reports.Detail[linecount-1].StatusDescription = getSeaPhrase("HISTORICAL_5","TE"); break;
+				}
+			}
+		}
+	}
+	else if (fld.indexOf("EMAIL-ADDRESS")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].Email == null)
+			parent.Reports.Detail[linecount-1].Email = val;
+	}
+	else if (fld.indexOf("EMAIL-PERSONAL")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].EmailPersonal == null)
+			parent.Reports.Detail[linecount-1].EmailPersonal = val;
+	}	
+	else if (fld.indexOf("PYT-START-DATE")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].PeriodStartsAt == null)
+			parent.Reports.Detail[linecount-1].PeriodStartsAt = val;
+	}
+	else if (fld.indexOf("PYT-STOP-DATE")>=0 && linecount>0)
+	{
+		if (parent.Reports.Detail[linecount-1] && parent.Reports.Detail[linecount-1].PeriodStopsAt == null)
+			parent.Reports.Detail[linecount-1].PeriodStopsAt = val;
+	}
+}
+
+function TimeEntryV(fld, val)
+{
+	switch (fld)
+	{
+		case "DETAIL-COUNT": parent.TimeCardTemp.DetailCount = val; break;
+		case "NUMBER-USED": parent.TimeCardTemp.NumberUsed = val; break;
+		case "PPT-COMPANY": parent.EmployeeTemp.Company = val; break;
+		case "PPT-EMPLOYEE": parent.EmployeeTemp.EmployeeNbr = val; break;
+		case "FROM-DATE": parent.TimeCardTemp.StartDate = val; break;
+		case "TO-DATE": parent.TimeCardTemp.EndDate = val; break;
+		case "STATUS": parent.TimeCardTemp.Status = Number(val); break;
+		case "PT-PPT-DATE":	parent.TimeCardTemp.ProtectedDate = val; break;
+		case "PT-PPT-SEQ": parent.TimeCardTemp.ProtectedSeq	= val; break;
+		case "VIEW-ID": parent.TimeCardTemp.View = Number(val); break;
+		case "EMP-OT-PAY-PLAN": parent.EmployeeTemp.PayPlan = val; break;
+		case "EMP-NAME": parent.EmployeeTemp.EmployeeName = val; break;
+		case "EMP-SALARY-CLASS": parent.EmployeeTemp.SalaryClass = val; break;
+		case "EMP-DEPARTMENT": parent.EmployeeTemp.DepartmentName = val; break;
+		case "EMP-SUPERVISOR": parent.EmployeeTemp.SupervisorName = val; break;
+		case "PPT-TIMECARD-TYPE": parent.TimeCardTemp.TimeCardType = val; break;
+		case "EMP-EMAIL-ADDRESS": parent.EmployeeTemp.Email	= val; break;
+		case "EMP-EMAIL-PERSONAL": parent.EmployeeTemp.EmailPersonal = val; break;
+		case "EMP-SUPERVISOR-EMAIL": parent.EmployeeTemp.SupervisorEmail = val; break;
+		case "EMP-HSU-EMAIL-PERS": parent.EmployeeTemp.SupervisorEmailPersonal = val; break;
+		default: GetDetailLineInformation(fld, val); break;
+	}
+}
+
+function GetDetailLineInformation(fld, val)
+{
+	if (!BreakOut)
+	{
+		if (fld.indexOf("TRF-FORM-FIELD")>=0)
+		{
+			if (val == "") return;
+			formlinecount++;
+			fieldcount++;
+			parent.TimeCardTemp.Form[formlinecount] = new parent.FormObject();
+		}
+		if (fld == "TRF-FORM-FIELD" + fieldcount)
+			parent.TimeCardTemp.Form[formlinecount].FormField = val.split("\ ").join("");
+		else if (fld == "TRF-LABEL" + fieldcount)
+			parent.TimeCardTemp.Form[formlinecount].FormLabel = val;
+		else if (fld == "TRF-SIZE-FIELD" + fieldcount)
+			parent.TimeCardTemp.Form[formlinecount].Size = Number(val);
+	}
+	if (fld == "PPT-TIME-SEQ1")
+	{
+		fieldcount = 0;
+		BreakOut = true;
+	}
+	if (BreakOut)
+	{
+		if (fld.indexOf("PPT-TIME-SEQ") >= 0)
+		{
+			fieldcount++;
+			linecount++;
+			parent.TimeCardTemp.Records[linecount] = new parent.RecordsObject();
+		}
+		if (fld == "PPT-TIME-SEQ" + fieldcount)
+			parent.TimeCardTemp.Records[linecount].TimeSeq = val;
+		var TimeRecordObject = parent.TimeCardTemp.Records[linecount];
+		if (typeof(TimeRecordObject) != 'undefined')
+		{
+			if (fld == "PPT-PAY-CODE" + fieldcount)	TimeRecordObject.PayCode = val;
+			else if (fld == "PPT-HOURS" + fieldcount) TimeRecordObject.Hours = val;
+			else if (fld == "PPT-DATE" + fieldcount) TimeRecordObject.Date = val;
+			else if (fld == "PPT-RATE" + fieldcount && val != "") TimeRecordObject.Rate = parent.MoveTrailingSignToFront(val);
+			else if (fld == "PPT-JOB-CODE" + fieldcount) TimeRecordObject.JobCode = val;
+			else if (fld == "PPT-POSITION" + fieldcount) TimeRecordObject.Position = val;
+			else if (fld == "PPT-SHIFT" + fieldcount && val != 0) TimeRecordObject.Shift = val;
+			else if (fld == "PPT-ACTIVITY" + fieldcount && val != "") TimeRecordObject.Activity = val;
+			else if (fld == "PPT-ACTIVITY-DESC" + fieldcount && val != "") TimeRecordObject.ActivityDesc = val;
+			else if (fld == "PPT-ACCT-CATEGORY" + fieldcount) TimeRecordObject.AccountCategory = val;
+			else if (fld == "PPT-GL-COMPANY" + fieldcount && val != 0) TimeRecordObject.GlCompany = val;
+			else if (fld == "PPT-ACCT-UNIT" + fieldcount) TimeRecordObject.AccountUnit = val;
+			else if (fld == "PPT-ACCOUNT" + fieldcount && val != 0) TimeRecordObject.GlAccount = val;
+			else if (fld == "PPT-SUB-ACCOUNT" + fieldcount && val != 0)	TimeRecordObject.SubAccount = val;
+			else if (fld == "PPT-PROCESS-LEVEL" + fieldcount) TimeRecordObject.ProcessLevel = val;
+			else if (fld == "PPT-DEPARTMENT" + fieldcount) TimeRecordObject.Department = val;
+			else if (fld == "PPT-SCHEDULE" + fieldcount) TimeRecordObject.Schedule = val;
+			else if (fld == "PPT-PAY-GRADE" + fieldcount) TimeRecordObject.Grade = val;
+			else if (fld == "PPT-PAY-STEP" + fieldcount && val != 0) TimeRecordObject.Step = val;
+			else if (fld == "PPT-ATTEND-CODE" + fieldcount)	TimeRecordObject.AttendanceCode = val;
+			else if (fld == "PPT-OCCURRENCE" + fieldcount) TimeRecordObject.Occurrence = val;
+			else if (fld == "PPT-COMMENT" + fieldcount)	TimeRecordObject.Comment = val;
+			else if (fld == "PPT-USERFIELD1" + fieldcount) TimeRecordObject.UserField1 = val;
+			else if (fld == "PPT-USERFIELD2" + fieldcount) TimeRecordObject.UserField2 = val;
+		}
+		if (fld == "PPT-STATUS" + fieldcount) if (val != "") TimeRecordObject.Status = val;
+		else if (fld == "PPT-USER-ID" + fieldcount)	TimeRecordObject.UserId = val;
+		else if (fld == "PPT-PROXY-ID" + fieldcount) TimeRecordObject.ProxyId = val;
+		else if (fld == "PPT-MANAGER-ID" + fieldcount) TimeRecordObject.ManagerId = val;
+		else if (fld == "PPT-HISTORY" + fieldcount)	TimeRecordObject.History = val;
+		else if (fld == "IS-SPLIT" + fieldcount) TimeRecordObject.IsSplit = val;
+		else if (fld == "COMMENTS-EXIST" + fieldcount) TimeRecordObject.CommentsExist = val;
+		TimeRecordObject.EmployeeNbr = parent.EmployeeTemp.EmployeeNbr;
+		TimeRecordObject.EmployeeName = parent.EmployeeTemp.EmployeeName;
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// DataReturned function defintion
+//
+function DataReturned(fldNbr, msgNbr, msg)
+{
+	gfldnbr = fldNbr;
+	gmsgnbr = msgNbr;
+	gmsg = msg;
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/reporting/reportinglaw.htm,v 1.10.2.21 2014/02/18 22:58:51 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

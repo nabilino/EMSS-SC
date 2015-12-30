@@ -1,0 +1,62 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/Attic/home.htm,v 1.1.2.5.18.1.2.2 2012/08/08 12:37:21 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Portal User Home</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1" />
+<link rel="stylesheet" href="../portal.css" type="text/css" />
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="home.js"></script>
+</head>
+
+<body style="visibility:hidden;overflow:auto;"  tabIndex="-1"
+		onload="onLoadHome()" onunload="onUnloadHome()" onkeydown="homOnKeyDown(event)">
+
+	<!-- portal brand image -->
+	<img id="imgLogo" alt="Portal Logo" style="margin-left:20px;" src="../images/ico_portal_logo.gif"></img>
+
+	<!-- floating help text div -->
+	<div id="divHelpText" class="ptHomeHelpBox" style="position:absolute;top:80px;left:260px;width:240px;">
+		<span id="lblHelpText" class="ptHomeHelpText" style="position:absolute;top:0px;left:10px;">&nbsp;</span>
+	</div>
+
+	<!-- common tasks header/table -->
+	<div id="divCommonTasks" class="ptHomeHeader" style="position:absolute;left:20px;top:50px;width:500px;">
+		<NOBR><div id="lblCommonTasks" class="ptHomeHeaderText" style="width:150px;">Common Tasks</div></NOBR>
+	</div>
+	<div id="taskDiv" style="position:absolute;left:20px;top:74px;width:260px;">
+		<!-- dynamic table goes here -->
+	</div>
+
+	<!-- useful information header/table -->
+	<div id="divUsefulInfo" class="ptHomeInfo" style="position:absolute;left:560px;top:50px;width:200px;">
+		<div id="lblUsefulInfo" class="ptHomeInfoHeader" style="margin-top:8px;margin-left:8px;width:200px;">
+			Useful Information
+		</div>
+		<div id="infoDiv">
+		<!-- dynamic table goes here -->
+		</div>
+	</div>
+</body>
+</html>

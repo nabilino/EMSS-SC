@@ -1,0 +1,116 @@
+<html>
+<head>
+<title>Life Events</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script>
+function Init()
+{
+	authenticate("frameNm='jsreturn'|funcNm='StartSplash()'|officeObjects=true|desiredEdit='EM'");
+}
+
+function StartSplash()
+{
+	stylePage();
+	document.title = getSeaPhrase("LIFE_EVENTS","ESS");
+
+	var strHtml = "";
+	var bookmark = new Array();
+
+   	if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var bkmks = authUser.OfficeObject;
+		var foundBkmk = new Array();
+
+		var i = 0;
+		var done = false;
+		while ((i < authUser.NbrOfOfficeObj) && (!done))
+		{
+			var bkLawName = (bkmks[i].lawnm) ? bkmks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+
+			if ((!foundBkmk[bkLawName])
+			&& ((bkLawName == "XMLHRADOPTION")
+			|| (bkLawName == "XMLHRBIRTHADOPTION")
+			|| (bkLawName == "XMLHRDIVORCE")
+			|| (bkLawName == "XMLHRLEGALSEPARATION")
+			|| (bkLawName == "XMLHRMARRIAGE")
+			|| (bkLawName == "XMLHRMOVING")
+			|| (bkLawName == "XMLHRSPOUSEEMPLOY")))
+			{
+				foundBkmk[bkLawName] = true;
+				// grant access to this bookmark on the splash screen
+				bookmark[bookmark.length] = bkmks[i];
+				if (bookmark.length == 7)
+					done = true;
+			}
+			i++;
+		}
+	}
+
+	if (bookmark.length > 0)
+		bookmark.sort(sortByBkmkName);
+
+  	strHml = '';
+  	strHtml += '<div class="splashheader" style="left:83px;top:43px">'+getSeaPhrase("LIFE_EVENTS","ESS")+'</div>';
+  	strHtml += '<div class="splashicon"></div>';
+
+	try {
+		var bkObj;
+		var x = 187;
+		var y = 95;
+		var cnt = 0;
+
+  		for (var i=0; i<bookmark.length; i++)
+  		{
+  			bkObj = bookmark[i];
+  			strHtml += '<div class="splashlinkoff" onmouseover="this.className=\'splashlinkon\'" onmouseout="this.className=\'splashlinkoff\'" style="left:'+x+'px;top:'+y+'px" onclick="parent.location.replace(\''+bkObj.url+'\')">';
+  			strHtml += bkObj.name;
+    		strHtml += '</div>';
+    		cnt++;
+    		y += 40;
+    		switch(cnt) {
+    			case 1:	x += 41; break;
+    			case 2: x += 28; break;
+    			case 3: x += 15; break;
+    			case 4: x += 16; break;
+    			default: break;
+  			}
+  		}
+  	}
+  	catch(e) {}
+
+	self.main.document.getElementById("paneBorder").style.border = "0px";
+	self.main.document.getElementById("paneBody").innerHTML = strHtml;
+	self.main.stylePage(true, getSeaPhrase("LIFE_EVENTS","ESS"));
+	document.getElementById("main").style.visibility = "visible";
+}
+
+function sortByBkmkName(obj1, obj2)
+{
+	var name1 = obj1.name;
+	var name2 = obj2.name;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+</script>
+</head>
+<body onload="Init()">
+	<iframe id="main" name="main" style="visibility:hidden;position:absolute;height:510px;width:814px;left:0px;top:0px" src="/lawson/xhrnet/ui/pane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/lifeevents_splash.htm,v 1.3.2.15 2011/05/04 21:10:12 brentd Exp $ -->

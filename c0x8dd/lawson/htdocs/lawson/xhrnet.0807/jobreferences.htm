@@ -1,0 +1,1049 @@
+<html>
+<head>
+<title>Applicant Job References</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/instctrycdselect.js"></script>
+<script src="/lawson/xhrnet/statesuscan.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var searchStr = (window.location.search)?unescape(window.location.search):"";
+var applicant = "0";
+var stateProvFilter = "state";
+var AssociationCodes = new Array();
+var JobReferences = new Array();
+
+if (searchStr)
+{
+	applicant = getVarFromString("number",searchStr);
+}
+
+function StartJobReferences()
+{
+	stylePage();
+	if (searchStr) {
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	}
+	document.title = getSeaPhrase("APP_JOB_REFERENCES","ESS");
+	if (emssObjInstance.emssObj.filterSelect) {
+		GoToListScreen();
+	} else {
+		GetInstCtryCdSelect(authUser.prodline,"GetStates()");
+	}
+}
+
+function GetStates()
+{
+	GrabStates("GetCodes()");
+}
+
+function sortByDescription(obj1, obj2)
+{
+	var name1 = obj1.description;
+	var name2 = obj2.description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function GetCodes()
+{
+  	AssociationCodes = new Array();
+
+   	var dmeObj      = new DMEObject(authUser.prodline,"pcodes");
+   	dmeObj.out      = "JAVASCRIPT";
+   	dmeObj.index    = "pcoset1";
+   	dmeObj.field    = "code;description";
+	dmeObj.key      = "AS";
+   	dmeObj.cond     = "active";
+   	dmeObj.max      = "600";
+   	dmeObj.exclude  = "drill;keys;sorts";
+   	dmeObj.func		= "StoreAssociationCodes()";
+   	DME(dmeObj,"jsreturn");
+}
+
+function StoreAssociationCodes()
+{
+	AssociationCodes = AssociationCodes.concat(self.jsreturn.record);
+
+   	if (self.jsreturn.Next != "") {
+    	self.jsreturn.location.replace(self.jsreturn.Next);
+	}
+	else {
+		AssociationCodes.sort(sortByDescription);
+   		GoToListScreen();
+   	}
+}
+
+function sortByLastName(obj1, obj2)
+{
+	var name1 = obj1.last_name;
+	var name2 = obj2.last_name;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function GoToListScreen(Refresh)
+{
+	JobReferences = new Array();
+
+   	var dmeObj    	= new DMEObject(authUser.prodline, "referenc");
+   	dmeObj.out     	= "JAVASCRIPT";
+	dmeObj.index   	= "refset1";
+	dmeObj.field   	= "addr1;addr2;addr3;addr4;city;state;zip;first-name;middle-init;"
+					+ "last-name;wk-phone-nbr;seq-nbr;country.country-code;hm-phone-nbr;"
+					+ "association;association.description;country.country-desc;full-name";
+	dmeObj.key     	= parseInt(authUser.company,10)+"="+parseInt(applicant,10)+"=";
+	dmeObj.max     	= "600";
+   	dmeObj.exclude 	= "drill;keys;sorts";
+   	dmeObj.func     = (Refresh)?"JobReferences_Finished(true)":"JobReferences_Finished(false)";
+    DME(dmeObj, "jsreturn");
+}
+
+function JobReferences_Finished(Refresh)
+{
+	JobReferences = JobReferences.concat(self.jsreturn.record);
+
+   	if (self.jsreturn.Next != "") {
+    	self.jsreturn.location.replace(self.jsreturn.Next);
+ 	}
+ 	else {
+ 		JobReferences.sort(sortByLastName);
+    	JobReferencesListScreen(Refresh);
+   	}
+}
+
+function JobReferencesListScreen(Refresh)
+{
+	// Clear the right-hand-side detail frame.
+	ClearDetailScreen();
+
+	var jobRec;
+	var jobTitle;
+	var bodyHtml = '';
+
+	if (JobReferences.length > 0)
+	{
+		bodyHtml += '<table id="jobreferencesTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%">'
+
+		for (var i=0; i<JobReferences.length; i++)
+		{
+		   	jobRec = JobReferences[i];
+
+		   	var tblRow = '<tr>'
+			bodyHtml += tblRow+'<th class="plaintablerowheaderborder" style="width:40%;border-bottom:0px;padding-top:5px;text-align:right">'+getSeaPhrase("NAME","ESS")+'</th>'
+			+ '<td class="plaintablecellborder" style="border-bottom:0px;padding-top:5px;text-align:left">'
+			+ '<a href="" onclick="parent.JobReferenceClicked('+i+','+((i*2)-1)+');return false" nowrap>'+((jobRec.full_name)?jobRec.full_name:'&nbsp;')+'</a></td>'
+			+ '</tr>'+tblRow+'<th class="plaintablerowheaderborder" style="width:40%;padding-bottom:5px;text-align:right">'+getSeaPhrase("ASSOCIATION","ESS")+'</th>'
+			+ '<td class="plaintablecellborder" style="padding-bottom:5px;text-align:left" nowrap>'+((jobRec.association_description)?jobRec.association_description:'&nbsp;')+'</td>'
+			+ '</tr>'
+		}
+	    bodyHtml += '</table>'
+	}
+
+	bodyHtml += '<div style="width:100%;text-align:center">'
+	if (searchStr)
+	{
+		bodyHtml += uiButton(getSeaPhrase("ADD","ESS"),"parent.DrawAddDetailContent();return false",false,"addbtn");
+		bodyHtml += uiButton(getSeaPhrase("BACK","ESS"),"parent.CloseJobReferences();return false",false,"closebtn");
+	}
+	else
+	{
+		bodyHtml += uiButton(getSeaPhrase("ADD","ESS"),"parent.DrawAddDetailContent();return false",false,"addbtn");
+	}
+	bodyHtml += '</div>'
+
+	self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INIT_APP_27","ESS");
+	if (!document.all) {
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-bottom:40px;padding-left:20px;padding-right:20px;padding-top:10px">'
+		+getSeaPhrase("ADD_JOBREFERENCE","ESS")
+		+'<p/>'
+		+((JobReferences.length)?getSeaPhrase("CHG_JOBREFERENCE","ESS"):'')
+		+'</div><p/>'+bodyHtml;
+	}
+	else {
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-left:20px;padding-right:20px;padding-top:10px">'
+		+getSeaPhrase("ADD_JOBREFERENCE","ESS")
+		+'<p/>'
+		+((JobReferences.length)?getSeaPhrase("CHG_JOBREFERENCE","ESS"):'')
+		+'</div><p/>'+bodyHtml;
+	}
+
+	self.left.stylePage();
+	document.getElementById("left").style.visibility = "visible";
+	// if this task has been launched as a related link, remove any processing message
+	if (searchStr && typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+	if (Refresh)
+		UpdateComplete();
+	fitToScreen();
+}
+
+function DrawAddDetailContent()
+{
+	var JobReferenceContent = '<form name="jobreferenceform">'
+	+ '<input class="inputbox" type="hidden" name="seqnbr" value="0">'
+	+ '<input class="inputbox" type="hidden" name="fc" value="A">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+	+ '<tr style="padding-top:5px"><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_34","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="firstname" value="" size="15" maxlength="15" onfocus="this.select()">'+uiRequiredIcon()+'</td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_35","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="middlename" value="" size="1" maxlength="1" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_38","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="lastname" value="" size="30" maxlength="30" onfocus="this.select()">'+uiRequiredIcon()+'</td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ASSOCIATION","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="association" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'associationDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'association\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="associationDesc" style="text-align:left;width:200px" class="fieldlabel"></span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap><select class="inputbox" name="association">'+BuildAssociationSelect("")+'</select></td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("WORK_TELEPHONE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="wkphonenbr" value="" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_TELEPHONE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="hmphonenbr" value="" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_1","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr1" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_2","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr2" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_3","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr3" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_4","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr4" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("CITY_OR_ADDR_5","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="city" value="" size="18" maxlength="18" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_ADDR_6","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="state" value="" size="2" maxlength="2" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'stateDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'state\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="stateDesc" style="text-align:left;width:200px" class="fieldlabel"></span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" id="state" nowrap><select class="inputbox" name="state">'+BuildStateSelect("")+'</select>'+uiRequiredIcon()+'</td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_ADDR_7","ESS")
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="zip" value="" size="10" maxlength="10" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldliteunderline" style="width:40%">'+getSeaPhrase("COUNTRY_ONLY","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="country" value="" size="2" maxlength="2" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'countryDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'country\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="countryDesc" style="text-align:left;width:200px" class="fieldlabel"></span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap><select class="inputbox" name="country">'+DrawInstCtryCdSelect("")+'</select></td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th>&nbsp;</th><td class="plaintablecell" style="text-align:left">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessJobReference(\'A\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-right:15px")
+	+ '</td></tr></table>'
+	+ '</form>'
+	+ uiRequiredFooter()
+	+ '</body>'
+
+	try {
+		self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = JobReferenceContent;
+		self.right.stylePage();
+    	self.right.document.jobreferenceform.firstname.focus();
+	}
+	catch(e) {}
+
+	document.getElementById("right").style.visibility = "visible";
+
+	// if this task has been launched as a related link, remove any processing message
+	if (searchStr && typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+
+	HideListButtons();
+	fitToScreen();
+}
+
+function ProcessJobReference(fc)
+{
+	var jobForm = self.right.document.jobreferenceform;
+
+	clearRequiredField(jobForm.firstname);
+	clearRequiredField(jobForm.lastname);
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		clearRequiredField(jobForm.state);
+	}
+	else
+	{
+		clearRequiredField(self.right.document.getElementById("state"));
+	}
+
+   	if (NonSpace(jobForm.firstname.value) == 0)
+   	{
+   		setRequiredField(jobForm.firstname);
+     	parent.seaAlert(getSeaPhrase("FIRST_NAME","ESS"));
+       	jobForm.firstname.focus();
+       	jobForm.firstname.select();
+       	return;
+   	}
+
+  	if (NonSpace(jobForm.lastname.value) == 0)
+   	{
+   		setRequiredField(jobForm.lastname);
+    	parent.seaAlert(getSeaPhrase("LAST_NAME","ESS"));
+       	jobForm.lastname.focus();
+       	jobForm.lastname.select();
+       	return;
+   	}
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		if (NonSpace(jobForm.state.value) == 0 && NonSpace(jobForm.country.value) == 0)
+		{
+			setRequiredField(jobForm.state);
+		 	parent.seaAlert(getSeaPhrase("STATE_PROVINCE","ESS"));
+			jobForm.state.focus();
+			return;
+		}
+	}
+	else
+	{
+		if (jobForm.state.selectedIndex == 0 && jobForm.country.selectedIndex == 0)
+		{
+			setRequiredField(self.right.document.getElementById("state"));
+		 	parent.seaAlert(getSeaPhrase("STATE_PROVINCE","ESS"));
+			jobForm.state.focus();
+			return;
+		}
+	}
+
+  	if (jobForm.middlename.value == "")
+		jobForm.middlename.value = " ";
+   	if (jobForm.addr1.value == "")
+	  	jobForm.addr1.value = " ";
+   	if (jobForm.addr2.value == "")
+	  	jobForm.addr2.value = " ";
+   	if (jobForm.addr3.value == "")
+	   	jobForm.addr3.value = " ";
+   	if (jobForm.addr4.value == "")
+	  	jobForm.addr4.value = " ";
+   	if (jobForm.city.value == "")
+	  	jobForm.city.value = " ";
+   	if (jobForm.zip.value == "")
+	  	jobForm.zip.value = " ";
+    if (jobForm.wkphonenbr.value == "")
+	  	jobForm.wkphonenbr.value = " ";
+   	if (jobForm.hmphonenbr.value == "")
+	  	jobForm.hmphonenbr.value = " ";
+
+	jobForm.fc.value = (fc)?fc:jobForm.fc.value;
+
+	if (searchStr) {
+		parent.showWaitAlert(getSeaPhrase("UPDATING_APP_INFO","ESS"));
+	}
+
+   	var agsObj       = new AGSObject(authUser.prodline,"PA32.1")
+   	agsObj.event     = (jobForm.fc.value == "A")?"ADD":"CHANGE";
+   	agsObj.rtn       = "MESSAGE"
+   	agsObj.longNames = true
+   	agsObj.tds       = false
+   	agsObj.field     = "FC="+jobForm.fc.value
+    	+ "&REF-COMPANY=" + escape(parseInt(authUser.company,10),1)
+    	+ "&REF-APPLICANT=" + escape(parseInt(applicant,10),1)
+
+   	if (jobForm.fc.value != "A") {
+      	agsObj.field += "&REF-SEQ-NBR=" + escape(parseInt(jobForm.seqnbr.value,10),1)
+   	}
+
+	if (jobForm.fc.value != "D") {
+      	agsObj.field += "&REF-LAST-NAME=" + escape(jobForm.lastname.value,1)
+			+ "&REF-FIRST-NAME="      + escape(jobForm.firstname.value,1)
+			+ "&REF-MIDDLE-INIT="     + escape(jobForm.middlename.value,1)
+       		+ "&REF-ADDR1="           + escape(jobForm.addr1.value,1)
+       		+ "&REF-ADDR2="           + escape(jobForm.addr2.value,1)
+       		+ "&REF-ADDR3="           + escape(jobForm.addr3.value,1)
+       		+ "&REF-ADDR4="           + escape(jobForm.addr4.value,1)
+       		+ "&REF-CITY="            + escape(jobForm.city.value,1)
+
+		if (emssObjInstance.emssObj.filterSelect) {
+			agsObj.field += "&REF-STATE=" + escape(jobForm.state.value,1)
+			+ "&REF-COUNTRY-CODE="    + escape(jobForm.country.value,1)
+			+ "&REF-ASSOCIATION="     + escape(jobForm.association.value,1)
+		} else {
+			agsObj.field += "&REF-STATE=" + escape(jobForm.state[jobForm.state.selectedIndex].value,1)
+			+ "&REF-COUNTRY-CODE="    + escape(jobForm.country[jobForm.country.selectedIndex].value,1)
+			+ "&REF-ASSOCIATION="     + escape(jobForm.association[jobForm.association.selectedIndex].value,1)
+		}
+
+    	agsObj.field += "&REF-ZIP="             + escape(jobForm.zip.value,1)
+      		+ "&REF-WK-PHONE-NBR="    + escape(jobForm.wkphonenbr.value,1)
+			+ "&REF-HM-PHONE-NBR="    + escape(jobForm.hmphonenbr.value,1)
+	}
+
+ 	agsObj.func = "parent.DisplayMessage()";
+   	AGS(agsObj,"jsreturn");
+}
+
+function JobReferenceClicked(Index,rowNbr)
+{
+	activateTableRow("jobreferencesTbl",rowNbr,self.left);
+
+	jobRec = JobReferences[Index];
+
+	JobReferenceContent = '<form name="jobreferenceform">'
+	+ '<input class="inputbox" type="hidden" name="seqnbr" value="'+jobRec.seq_nbr+'">'
+	+ '<input class="inputbox" type="hidden" name="fc" value="C">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%">'
+	+ '<tr style="padding-top:5px"><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_34","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="firstname" value="'+jobRec.first_name+'" size="15" maxlength="15" onfocus="this.select()">'+uiRequiredIcon()+'</td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_35","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="middlename" value="'+jobRec.middle_init+'" size="1" maxlength="1" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("DEP_38","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="lastname" value="'+jobRec.last_name+'" size="30" maxlength="30" onfocus="this.select()">'+uiRequiredIcon()+'</td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ASSOCIATION","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="association" value="'+jobRec.association+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'associationDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'association\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="associationDesc" style="text-align:left;width:200px" class="fieldlabel">'+jobRec.association_description+'</span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap><select class="inputbox" name="association">'+BuildAssociationSelect(jobRec.association)+'</select></td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("WORK_TELEPHONE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="wkphonenbr" value="'+jobRec.wk_phone_nbr+'" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_TELEPHONE","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="hmphonenbr" value="'+jobRec.hm_phone_nbr+'" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_1","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr1" value="'+jobRec.addr1+'" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_2","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr2" value="'+jobRec.addr2+'" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_3","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr3" value="'+jobRec.addr3+'" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("ADDR_4","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="addr4" value="'+jobRec.addr4+'" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("CITY_OR_ADDR_5","ESS")+'</th>'
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="city" value="'+jobRec.city+'" size="18" maxlength="18" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_ADDR_6","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="state" value="'+jobRec.state+'" size="2" maxlength="2" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'stateDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'state\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="stateDesc" style="text-align:left;width:200px" class="fieldlabel"></span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" id="state" nowrap><select class="inputbox" name="state">'+BuildStateSelect(jobRec.state)+'</select>'+uiRequiredIcon()+'</td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th class="fieldlabelboldlite" style="width:40%">'+getSeaPhrase("HOME_ADDR_7","ESS")
+	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" name="zip" value="'+jobRec.zip+'" size="10" maxlength="10" onfocus="this.select()"></td></tr>'
+	+ '<tr><th class="fieldlabelboldliteunderline" style="width:40%">'+getSeaPhrase("COUNTRY_ONLY","ESS")+'</th>'
+
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" name="country" value="'+jobRec.country_country_code+'" size="2" maxlength="2" onfocus="this.select()" onkeyup="this.value=\'\';document.getElementById(\'countryDesc\').innerHTML=\'\';">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'country\')" style="margin-left:5px">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0"></a>'
+		+ '<span id="countryDesc" style="text-align:left;width:200px" class="fieldlabel">'+jobRec.country_country_desc+'</span>'
+		+ '</td></tr>'
+	}
+	else
+	{
+		JobReferenceContent += '<td class="plaintablecell" nowrap><select class="inputbox" name="country">'+DrawInstCtryCdSelect(jobRec.country_country_code)+'</select></td></tr>'
+	}
+
+	JobReferenceContent += '<tr><th>&nbsp;</th><td class="plaintablecell" style="text-align:left">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.ProcessJobReference(\'C\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-right:15px")
+	+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.ProcessJobReference(\'D\');return false","margin-top:10px")
+	+ '</td></tr></table>'
+	+ '</form>'
+	+ uiRequiredFooter()
+
+	try {
+		self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.right.document.getElementById("paneBody").innerHTML = JobReferenceContent;
+		self.right.stylePage();
+    	self.right.document.jobreferenceform.firstname.focus();
+	}
+	catch(e) {}
+
+	document.getElementById("right").style.visibility = "visible";
+
+	// if this task has been launched as a related link, remove any processing message
+	if (searchStr && typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+
+	HideListButtons();
+	fitToScreen();
+}
+
+function CloseJobReferences()
+{
+	parent.backToLinks();
+}
+
+function HideListButtons()
+{
+	try {
+		self.left.document.getElementById("addbtn").style.visibility = "hidden";
+		self.left.document.getElementById("closebtn").style.visibility = "hidden";
+	}
+	catch(e) {}
+}
+
+function ShowListButtons()
+{
+	try {
+		self.left.document.getElementById("addbtn").style.visibility = "visible";
+		self.left.document.getElementById("closebtn").style.visibility = "visible";
+	}
+	catch(e) {}
+}
+
+function ClearDetailScreen()
+{
+	deactivateTableRows("jobreferencesTbl",self.left);
+	document.getElementById("right").style.visibility = "hidden";
+	ShowListButtons();
+}
+
+function BuildAssociationSelect(code)
+{
+	var associationSelect = new Array();
+	associationSelect[0] = '<option value=" ">';
+
+	for (var i=0; i<AssociationCodes.length; i++)
+	{
+        associationSelect[i+1] = '<option value="'+AssociationCodes[i].code+'"';
+		associationSelect[i+1] += (code == AssociationCodes[i].code)?' selected>':'>';
+		associationSelect[i+1] += AssociationCodes[i].description;
+	}
+	return associationSelect.join("");
+}
+
+function ReturnDate(dte)
+{
+	self.right.document.forms["jobreferenceform"].elements[date_fld_name].value = dte;
+}
+
+function UpdateComplete()
+{
+	parent.seaAlert(getSeaPhrase("UPDATE_COMPLETE","ESS"));
+}
+
+function DisplayMessage()
+{
+	// if this task has been launched as a related link, remove any processing message
+	if (searchStr && typeof(parent.removeWaitAlert) == "function")
+		parent.removeWaitAlert();
+
+   	if (lawheader.gmsgnbr == "000") {
+      	GoToListScreen(true);
+   	}
+   	else {
+      	parent.seaAlert(self.lawheader.gmsg);
+	}
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnChange(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "state": // state/province
+		case "province":
+			var filterForm = dmeFilter.getFilterForm();
+			var selObj = filterForm.elements["filterField"];
+			var filterField = selObj.options[selObj.selectedIndex].value;
+			if ((filterField == "state") || (filterField == "province")) {
+
+				stateProvFilter = filterField;
+				filterForm.elements["filterBtn"].onclick();
+			}
+		break;
+	}
+}
+
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "association":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("ASSOCIATION","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description;",
+				"AS",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "state":
+			dmeFilter.addFilterField("state", 2, getSeaPhrase("STATE_ONLY","ESS"), true);
+			dmeFilter.addFilterField("province", 2, getSeaPhrase("PROVINCE","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "country":
+			dmeFilter.addFilterField("country-code", 2, getSeaPhrase("COUNTRY_ONLY","ESS"), true);
+			dmeFilter.addFilterField("country-desc", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"instctrycd",
+				"intset1",
+				"country-code;country-desc",
+				"",
+				null,
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "association":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description;",
+			"AS",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "state":
+		if (stateProvFilter == "state") {
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prstate",
+				"psaset1",
+				"state;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		} else {
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"prprovince",
+				"ppvset1",
+				"province;description",
+				"",
+				null,
+				dmeFilter.getSelectStr(),
+				dmeFilter.getNbrRecords(),
+				null);
+		}
+		break;
+		case "country":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"instctrycd",
+			"intset1",
+			"country-code;country-desc",
+			"",
+			null,
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var appForm = self.right.document.jobreferenceform;
+
+	switch(fieldNm.toLowerCase())
+	{
+		case "association":
+			appForm.association.value = selRec.code;
+			try { self.right.document.getElementById("associationDesc").innerHTML = selRec.description; } catch(e) {}
+			appForm.association.focus();
+			break;
+		case "state":
+			if (stateProvFilter == "state") {
+				appForm.state.value = selRec.state;
+			} else {
+				appForm.state.value = selRec.province;
+			}
+			try { self.right.document.getElementById("stateDesc").innerHTML = selRec.description; } catch(e) {}
+			appForm.state.focus();
+			break;
+		case "country":
+			appForm.country.value = selRec.country_code;
+			try { self.right.document.getElementById("countryDesc").innerHTML = selRec.country_desc; } catch(e) {}
+			appForm.country.focus();
+			break;
+		default:
+			break;
+	}
+	try
+	{
+		filterWin.close();
+	} catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var appForm = self.right.document.jobreferenceform;
+	var fld = [null, null];
+	switch(fieldNm.toLowerCase())
+	{
+		case "association":
+			fld = [self.right, appForm.association];
+			break;
+		case "state":
+			fld = [self.right, appForm.state];
+			break;
+		case "country":
+			fld = [self.right, appForm.country];
+			break;
+		default:
+			break;
+	}
+	return fld;
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+
+	switch(fieldNm)
+	{
+		case "association":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("ASSOCIATION","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "state":
+			if (stateProvFilter == "state") {
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px"  styler="list">'
+				selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("STATE_ONLY","ESS")+'</th>'
+				selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+					selectHtml[i+1] += (tmpObj.state) ? tmpObj.state : '&nbsp;'
+					selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</td></tr>'
+				}
+			} else {
+				var tmpObj;
+				selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px">'
+				selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("PROVINCE","ESS")+'</th>'
+				selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+				for (var i=0; i<nbrDmeRecs; i++)
+				{
+					tmpObj = dmeRecs[i];
+					selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+					selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+					selectHtml[i+1] += (tmpObj.province) ? tmpObj.province : '&nbsp;'
+					selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+					selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+					selectHtml[i+1] += '</td></tr>'
+				}
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		case "country":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list">'
+			selectHtml[0] += '<tr><th style="width:50%">'+getSeaPhrase("COUNTRY_ONLY","ESS")+'</th>'
+			selectHtml[0] += '<th style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected('+i+',\''+fieldNm+'\');return false" class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.country_code) ? tmpObj.country_code : '&nbsp;'
+				selectHtml[i+1] += '</td><td style="padding-left:5px" nowrap>'
+				selectHtml[i+1] += (tmpObj.country_desc) ? tmpObj.country_desc : '&nbsp;'
+				selectHtml[i+1] += '</td></tr>'
+			}
+
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow" onmouseover="filterTableRowMouseOver(this);" onmouseout="filterTableRowMouseOut(this);">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'
+				selectHtml[1] += getSeaPhrase("NORECS","ESS");
+				selectHtml[1] += '</td></tr>'
+			}
+
+			selectHtml[selectHtml.length] = '</table>'
+			break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+	try
+	{
+		if (typeof(parent.removeWaitAlert) != "undefined")
+			parent.removeWaitAlert();
+	} catch(e) {}
+}
+
+/* Filter Select logic - end */
+
+function LoadJobReferences()
+{
+   	authenticate("frameNm='jsreturn'|funcNm='StartJobReferences()'|desiredEdit='EM'");
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;		
+
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.50) - 12;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 7 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.50) - 12;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 7 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 23;
+		contentLeftWidthBorder = parseInt(winWidth*.50) - 2;
+		contentRightWidth = parseInt(winWidth*.50) - 23;
+		contentRightWidthBorder = parseInt(winWidth*.50) - 2;				
+		contentHeight = winHeight - 60;	
+		contentHeightBorder = winHeight - 30;		
+	}
+	else
+	{
+		contentLeftWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.50) - 17 : parseInt(winWidth*.50) - 12;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.50) - 17 : parseInt(winWidth*.50) - 12;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 41;		
+	}
+
+	leftFrame.style.width = parseInt(winWidth*.50) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.left.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.left.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}	
+	rightFrame.style.left = parseInt(winWidth*.50) + "px";
+	rightFrame.style.width = parseInt(winWidth*.50) + "px";
+	rightFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.right.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.right.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="LoadJobReferences()" onresize="fitToScreen()">
+	<iframe id="left" name="left" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;left:0%;position:absolute;top:0px;height:464px;width:375px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;left:375px;position:absolute;top:0px;height:464px;width:397px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/jobreferences.htm,v 1.10.2.21 2012/06/29 17:12:00 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

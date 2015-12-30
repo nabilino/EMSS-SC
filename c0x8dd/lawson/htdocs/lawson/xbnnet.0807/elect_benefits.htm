@@ -1,0 +1,504 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var _Processed = true
+var flexflag=0
+var empflag=0
+var compflag=0
+var REC_TYPE=parent.EligPlans[parent.CurrentEligPlan][6]
+parent.choice=0
+parent.SelectedPlan=new Array()
+parent.EMP_CONT_TYPE=''
+function setdata(fc)
+{
+	stylePage();
+	parent.startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	if(REC_TYPE+"".length<2)
+		REC_TYPE="0"+REC_TYPE
+	if(REC_TYPE=="01") 
+	{
+		parent.lawheader.count=0
+		updatetype = "CRT"
+		parent.updatetype="CRT"
+		var object1 = new AGSObject(parent.prodline, "BS13.1")
+		object1.event="ADD"
+		object1.rtn="DATA"
+		object1.debug = false
+		object1.longNames=true
+		object1.tds=false
+		object1.field="FC=I"
+			+ "&COP-COMPANY=" + escape(parent.company)
+			+ "&EMP-EMPLOYEE=" + escape(parent.employee)
+			+ "&COP-PLAN-TYPE=" + escape(parent.EligPlans[parent.CurrentEligPlan][1],1).toString().replace("+","%2B")
+			+ "&COP-PLAN-CODE=" + escape(parent.EligPlans[parent.CurrentEligPlan][2],1).toString().replace("+","%2B")
+		if(parent.rule_type=="N")
+			object1.field+="&BAE-NEW-DATE=" + escape(parent.EligPlans[parent.CurrentEligPlan][5])
+		else
+		 	object1.field+="&BAE-NEW-DATE=" + escape(parent.BenefitRules[2])
+		object1.field += "&BAE-COST-DIVISOR=" + escape(parent.BenefitRules[6])
+			+ "&BAE-RULE-TYPE=" + parent.rule_type
+			+ "&BFS-FAMILY-STATUS=" + escape(parent.eventname.toUpperCase())
+		object1.func="parent.getdep()"
+		AGS(object1,"js1")
+	}
+	if(REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") 
+	{
+		parent.lawheader.count=0
+		updatetype = "CRT2"
+		parent.updatetype="CRT2"
+		var object1 = new AGSObject(parent.prodline, "BS14.1")
+		object1.event="ADD"
+		object1.rtn="DATA"
+		object1.longNames=true
+		object1.tds=false
+		object1.debug = false
+		object1.field="FC=I"
+			+ "&CVR-COMPANY=" + escape(parent.company)
+			+ "&EMP-EMPLOYEE=" + escape(parent.employee)
+			+ "&CVR-PLAN-TYPE=" + escape(parent.EligPlans[parent.CurrentEligPlan][1],1).toString().replace("+","%2B")
+			+ "&CVR-PLAN-CODE=" + escape(parent.EligPlans[parent.CurrentEligPlan][2],1).toString().replace("+","%2B")
+		if(parent.rule_type=="N")
+		  	object1.field+="&BAE-NEW-DATE=" + escape((parent.EligPlans[parent.CurrentEligPlan][5]))
+		else
+		  	object1.field+= "&BAE-NEW-DATE=" + escape(parent.BenefitRules[2])
+		object1.field += "&BAE-COST-DIVISOR=" + escape(parent.BenefitRules[6])
+			+ "&BAE-RULE-TYPE=" + parent.rule_type
+			+ "&BFS-FAMILY-STATUS=" + escape(parent.eventname.toUpperCase())
+		object1.func="parent.getdep()"
+		AGS(object1,"js1")
+	}
+	if(REC_TYPE=="06" || REC_TYPE=="07" || REC_TYPE=="08" || REC_TYPE=="09" || REC_TYPE=="10") 
+	{
+		parent.lawheader.count=0
+		updatetype = "CRT3"
+		parent.updatetype="CRT3"
+		var object1 = new AGSObject(parent.prodline, "BS15.1")
+	 	object1.event="ADD"
+		object1.rtn="DATA"
+		object1.longNames=true
+		object1.debug = false
+		object1.tds=false
+		object1.field="FC=I"
+			+ "&PRE-COMPANY=" + escape(parent.company)
+			+ "&EMP-EMPLOYEE=" + escape(parent.employee)
+			+ "&PRE-PLAN-TYPE=" + escape(parent.EligPlans[parent.CurrentEligPlan][1],1).toString().replace("+","%2B")
+			+ "&PRE-PLAN-CODE=" + escape(parent.EligPlans[parent.CurrentEligPlan][2],1).toString().replace("+","%2B")
+		if(parent.rule_type=="N")
+		  	object1.field+="&BAE-NEW-DATE=" + escape((parent.EligPlans[parent.CurrentEligPlan][5]))
+		else if(parent.rule_type=="F")
+		{
+			if(parent.actiontaken==1)
+				object1.field += "&BAE-NEW-DATE=" + escape(parent.EligPlans[parent.CurrentEligPlan][11])
+			else if(parent.actiontaken==2 || parent.actiontaken==4 || parent.actiontaken==5)
+				object1.field += "&BAE-NEW-DATE=" + escape(parent.EligPlans[parent.CurrentEligPlan][13])
+			else if(parent.actiontaken==3)
+				object1.field += "&BAE-NEW-DATE=" + escape(parent.EligPlans[parent.CurrentEligPlan][15])
+			else	
+				object1.field += "&BAE-NEW-DATE=" + escape(parent.BenefitRules[2])
+		}
+		else
+		  	object1.field+= "&BAE-NEW-DATE=" + escape(parent.BenefitRules[2])
+		object1.field += "&BAE-COST-DIVISOR=" + escape(parent.BenefitRules[6])
+			+ "&BAE-RULE-TYPE=" + parent.rule_type
+			+ "&BFS-FAMILY-STATUS=" + escape(parent.eventname.toUpperCase())
+		object1.func="parent.getdep()"
+		AGS(object1,"js1")
+	}
+	if(REC_TYPE=="12") 
+	{
+		parent.coveredDeps=new Array()
+		parent.updatetype="CRT3"
+		parent.msgNbr=99
+		parent.SelectedPlan=new Array()
+		parent.SelectedPlan[0]=12
+		parent.SelectedPlan[1]=parent.EligPlans[parent.CurrentEligPlan][1]
+		parent.SelectedPlan[2]=parent.EligPlans[parent.CurrentEligPlan][2]
+		parent.document.getElementById("main").src = parent.baseurl+"bensconfirm.htm"
+	}
+}
+function getdep()
+{
+	parent.coveredDeps=new Array()
+	goform()
+}
+function goform()
+{
+	if(_Processed) 
+	{
+		_Processed = false;
+		if(REC_TYPE=="01")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_01.htm"
+		if(REC_TYPE=="02")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_02.htm"
+		if(REC_TYPE=="03" || REC_TYPE=="13")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_03.htm"
+		if(REC_TYPE=="04")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_04.htm"
+		if(REC_TYPE=="05")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_05.htm"
+		if(REC_TYPE=="06")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_06.htm"
+		if(REC_TYPE=="07")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_07.htm"
+		if(REC_TYPE=="08")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_08.htm"
+		if(REC_TYPE=="09")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_09.htm"
+		if(REC_TYPE=="10")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_10.htm"
+		if(REC_TYPE=="12")
+			self.document.getElementById("elect").src = "/lawson/xbnnet/elect_ben_12.htm"
+		fitToScreen();	
+	}
+}
+function header(addlStr)
+{
+	var nme = parent.removespace(parent.EligPlans[parent.CurrentEligPlan][1]+parent.EligPlans[parent.CurrentEligPlan][2])
+	var html = '<br><table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	html += '<tr>'
+	html += '<td class="plaintablecell" style="padding-top:5px">'
+	html += getSeaPhrase("CONBEN_2","BEN")+' '
+	html += '<a href="" onclick="javascript:var winRef=(typeof(parent.parent.openWinDesc2)==\'function\')?parent.parent:parent.parent.parent;winRef.openWinDesc2(\''+parent.EligPlans[parent.CurrentEligPlan][1]+'\',\''+parent.EligPlans[parent.CurrentEligPlan][2]+'\');return false">'
+	html += parent.EligPlans[parent.CurrentEligPlan][4]
+	html += '</a>.'
+	html += ((addlStr)?' '+addlStr:'')
+	html += '</td>'
+	html += '</tr>'
+	html += '</table>'
+	html += '<br>'
+	return html;
+}
+function planMessages(precont,defaul)
+{
+	var msgStr = "";
+	if((parent.updatetype=="CRT2" && !isNaN(parseFloat(parent.SelectedPlan[18])) && parseFloat(parent.SelectedPlan[18])>0)
+	|| (parent.updatetype=="CRT3" && !isNaN(parseFloat(parent.SelectedPlan[16])) && parseFloat(parent.SelectedPlan[16])>0)
+	|| (parent.updatetype=="CRT")) 
+	{
+		if(precont=="P" || precont=="N" || precont=="A") 
+		{
+			if((parent.updatetype=="CRT" && (flexflag!=0 || empflag!=0 || compflag!=0)) || parent.updatetype!="CRT") 
+			{
+				if(precont=="P")
+					msgStr += getSeaPhrase("ELECTBEN_3","BEN")+' '
+				if(precont=="A")
+					msgStr += getSeaPhrase("ELECTBEN_4","BEN")+' '
+			}
+			if(precont=="N")
+				msgStr += getSeaPhrase("ELECTBEN_7","BEN")+' '
+		}
+	} 
+	else
+		msgStr += getSeaPhrase("ELECTBEN_7","BEN")+' '
+	if(REC_TYPE!="08" && REC_TYPE!="09" && REC_TYPE!="06") 
+	{
+		if(flexflag!=0 || empflag!=0 || compflag!=0)
+			msgStr += parent.costdivisor
+	}
+	return msgStr;
+}
+function footer(precont,defaul)
+{
+	var html = '<div>'
+	if((parent.updatetype=="CRT2" && !isNaN(parseFloat(parent.SelectedPlan[18])) && parseFloat(parent.SelectedPlan[18])>0)
+	|| (parent.updatetype=="CRT3" && !isNaN(parseFloat(parent.SelectedPlan[16])) && parseFloat(parent.SelectedPlan[16])>0)
+	|| (parent.updatetype=="CRT")) 
+	{
+		if(precont=="P" || precont=="N" || precont=="A") 
+		{
+			if((parent.updatetype="CRT" && (flexflag!=0 || empflag!=0 || compflag!=0)) || parent.updatetype!="CRT") 
+			{
+				if(precont=="P")
+					parent.setpreaft_flag("P")
+				if(precont=="A")
+					parent.setpreaft_flag("A")
+			}
+			if(precont=="N")
+				parent.setpreaft_flag("")
+		} 
+		else if(precont!=null && precont!='' && typeof(precont)!='undefined') 
+		{
+			html += '<form name="preaft">'
+			html += '<table border="0" cellpadding="0" cellspacing="0" style="width:auto"><tr>'		
+			html += '<td class="plaintablecell">'
+			if(defaul=="P")	
+			{
+				parent.setpreaft_flag("P")
+				html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+				html += '<input class="inputbox" type="radio" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\')" checked><span class="plaintablecell">'+getSeaPhrase("PRE_TAX","BEN")+'</span>'
+				html += '<input class="inputbox" type="radio" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\')"><span class="plaintablecell">'+getSeaPhrase("AFTER_TAX","BEN")+'</span>'
+			} 
+			else if(defaul=="A") 
+			{
+				parent.setpreaft_flag("A")
+				html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+				html += '<input class="inputbox" type="radio" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\')"><span class="plaintablecell">'+getSeaPhrase("PRE_TAX","BEN")+'</span>'
+				html += '<input class="inputbox" type="radio" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\')" checked><span class="plaintablecell">'+getSeaPhrase("AFTER_TAX","BEN")+'</span>'
+			} 
+			else 
+			{
+				parent.setpreaft_flag("")
+				html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+				html += '<input class="inputbox" type="radio" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\')"><span class="plaintablecell">'+getSeaPhrase("PRE_TAX","BEN")+'</span>'
+				html += '<input class="inputbox" type="radio" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\')"><span class="plaintablecell">'+getSeaPhrase("AFTER_TAX","BEN")+'</span>'
+			}
+			html += '</td></tr></table></form>'
+		}
+	} 
+	else
+		parent.setpreaft_flag("")
+	html += '<p class="textAlignRight">'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"), "parent.setBenefit('"+precont+"');return false","margin-right:5px;margin-top:10px")
+	if(parent.LastDoc[parent.currentdoc]!=null)
+		html += uiButton(getSeaPhrase("PREVIOUS","BEN"), "parent.previousTask();return false","margin-right:5px;margin-top:10px")
+	html += uiButton(getSeaPhrase("EXIT","BEN"), "parent.parent.quitEnroll(parent.location);return false","margin-right:5px;margin-top:10px")
+	html += '</p></div>'
+	return html;
+}
+function setBenefit(precont,continueFlag)
+{
+	parent.cantEnroll=new Array()
+	parent.notAvailable=new Array()
+	if(REC_TYPE!="01" && typeof(self.elect.document.forms['preaft'])!='undefined' &&
+	self.elect.document.forms["preaft"].preaft[0].checked==false &&
+	self.elect.document.forms["preaft"].preaft[1].checked==false)
+		parent.seaAlert(getSeaPhrase("ERROR_91","BEN"))
+	else if((REC_TYPE=="01" || REC_TYPE=="03" || REC_TYPE=="13") && parent.choice==0 &&
+	(continueFlag || (!precont || (precont && precont!="N"))))
+		parent.seaAlert(getSeaPhrase("ERROR_92","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="B" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && (parent.spouseExists==false &&
+	parent.depsExist==false))
+		parent.seaAlert(getSeaPhrase("ERROR_101","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="S" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.spouseExists==false)
+		parent.seaAlert(getSeaPhrase("ERROR_102","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="D" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.depsExist==false)
+		parent.seaAlert(getSeaPhrase("ERROR_103","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="P" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.domParterExists==false)
+		parent.seaAlert(getSeaPhrase("ERROR_126","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="O" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && (parent.spouseExists==false && 
+	parent.domParterExists==false))
+		parent.seaAlert(getSeaPhrase("ERROR_127","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="R" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.depsExist==false)
+		parent.seaAlert(getSeaPhrase("ERROR_128","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="C" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && (parent.depsExist==false &&
+	parent.domParterExists==false))		
+		parent.seaAlert(getSeaPhrase("ERROR_129","BEN"))
+	else if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''=="A" &&
+	parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.dependents.length==0)		
+		parent.seaAlert(getSeaPhrase("ERROR_130","BEN"))		
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="S" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	parent.spouseExists==false)
+		parent.seaAlert(getSeaPhrase("ERROR_104","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="D" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	parent.depsExist==false)
+		parent.seaAlert(getSeaPhrase("ERROR_105","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="B" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	(parent.depsExist==false && parent.spouseExists==false))
+		parent.seaAlert(getSeaPhrase("ERROR_106","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="P" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	parent.domParterExists==false)
+		parent.seaAlert(getSeaPhrase("ERROR_131","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="O" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	(parent.spouseExists==false && parent.domParterExists==false))
+		parent.seaAlert(getSeaPhrase("ERROR_132","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="R" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	parent.depsExist==false)
+		parent.seaAlert(getSeaPhrase("ERROR_133","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="C" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	(parent.depsExist==false && parent.domParterExists==false))
+		parent.seaAlert(getSeaPhrase("ERROR_134","BEN"))
+	else if((REC_TYPE=="02" || REC_TYPE=="03" || REC_TYPE=="04" || REC_TYPE=="05" || REC_TYPE=="13") &&
+	parent.SelectedPlan[4]+''=="A" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" &&
+	parent.dependents.length==0)
+		parent.seaAlert(getSeaPhrase("ERROR_135","BEN"))		
+	else 
+	{
+		if(REC_TYPE=="01" || REC_TYPE=="03" || REC_TYPE=="13") 
+		{
+			if(REC_TYPE=="01") 
+			{
+				if(!isNaN(parseFloat(parent.SelectedPlan[parent.choice][5]))) 
+				{
+					if(typeof(self.elect.document.forms['preaft'])!='undefined' && self.elect.document.forms["preaft"].preaft[0].checked==false && self.elect.document.forms["preaft"].preaft[1].checked==false) 
+					{
+						parent.seaAlert(getSeaPhrase("ERROR_91","BEN"))
+						return
+					}
+				} 
+				else
+					parent.setpreaft_flag("")
+			}
+			parent.msgNbr=1
+			parent.currentdoc++
+			if(parent.currentdoc<parent.LastDoc.length) 
+			{
+				var ArrayTemp = parent.LastDoc
+				parent.LastDoc = new Array(0);
+				for(var i=0; i<=parent.currentdoc+1;i++)
+					parent.LastDoc[i] = ArrayTemp[i];
+			}
+			parent.LastDoc[parent.currentdoc]=parent.baseurl+"elect_benefits.htm"
+			if(REC_TYPE=="01" && parent.SelectedPlan[parent.choice][16]+''!="N" && parent.SelectedPlan[parent.choice][16]+''!="E" && parent.EligPlans[parent.CurrentEligPlan][18]=="Y" && parent.dependents.length>0)
+				parent.document.getElementById("main").src = parent.baseurl+"depscr.htm"
+			else if(REC_TYPE!="01" && parent.SelectedPlan[55]+''=="Y" && parent.dependents.length>0)
+				parent.document.getElementById("main").src = parent.baseurl+"depscr.htm"
+			else
+				parent.document.getElementById("main").src = parent.baseurl+"bensconfirm.htm"
+		} 
+		else 
+		{
+			parent.msgNbr=1
+			parent.currentdoc++
+			if(parent.currentdoc<parent.LastDoc.length) 
+			{
+				var ArrayTemp = parent.LastDoc
+				parent.LastDoc = new Array(0);
+				for(var i=0; i<=parent.currentdoc+1;i++)
+					parent.LastDoc[i] = ArrayTemp[i];
+			}
+			parent.LastDoc[parent.currentdoc]=parent.baseurl+"elect_benefits.htm"
+			if(parent.SelectedPlan[55]+''=="Y" && (parseFloat(REC_TYPE)<6 || parseFloat(REC_TYPE)==13) && parent.dependents.length>0)
+				parent.document.getElementById("main").src = parent.baseurl+"depscr.htm"
+			else
+ 				parent.document.getElementById("main").src = parent.baseurl+"bensconfirm.htm"
+		}
+	}
+}
+function previousTask()
+{
+	parent.document.getElementById("main").src = parent.LastDoc[parent.currentdoc];
+	parent.currentdoc--;
+}
+function Choice(num,doc,max)
+{
+ 	parent.choice=num
+}
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+	var electFrame = document.getElementById("elect");
+	var winHeight = 768;
+	var winWidth = 1024;
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;
+		contentHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? winHeight - 65 : winHeight - 65;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth = winWidth - 23;
+		contentWidthBorder = winWidth - 2;
+		contentHeight = winHeight - 65;	
+		contentHeightBorder = winHeight - 35;
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 : winWidth - 12;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 40;	
+	}
+	electFrame.style.width = winWidth + "px";
+	electFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.elect.onresize && self.elect.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.elect.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.elect.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.elect.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.elect.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.elect.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.elect.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.elect.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="setdata('I');fitToScreen()" onresize="fitToScreen()">
+	<iframe id="elect" name="elect" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:visible;position:absolute;top:0px;left:0px;width:721px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe name="js1" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+	<iframe name="lawheader" src="/lawson/xbnnet/besslawheader.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_benefits.htm,v 1.26.2.40 2012/07/23 20:42:25 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,61 @@
+<html>
+<head>
+<title>Lawson Login Help</title>
+</head>
+<body>
+<table width="800">
+    <tr></tr>
+    <tr>
+    <td><p align="center">
+
+    <b><font size="4">Denver Health Lawson Portal Login Help</font></b>
+
+		<p>If you are using Self Service for the first time, your user ID is your initials in lowercase letters followed by your employee number.  Your password is your initials in lowercase and the last six digits of your social security number.</p>
+
+		<p>For example, if <b>John Doe's</b> employee number is <b>12345</b> and his social security number is <b>987-65-4321</b>, his user ID is <b>jd12345</b> and his password is <b>jd654321</b>.</p>
+
+		<p><font color=red><b>If you do not know your user ID or password, please contact the Customer Support Center using the phone number below :</b></p>
+
+			<blockquote>
+			<p><b><font color = black><font size = "6">1-855-555-5555 (1-855-555-5555)</b></p>
+
+			</blockquote>
+		</font>
+
+		<p>When entered incorrectly, the ID and password text boxes turn yellow.  After five attempts, your user ID will be locked (you will see a blue screen) and you will need to contact the Customer Support Center.</p>
+
+		<p>The following requirements exist to access the Lawson Portal and Employee Self Service :</p>
+		<p>
+		<b>Operating System requirements :</b>
+		<ul>
+		<li>Windows XP Pro</li>
+		<li>Windows Vista Business Edition</li>
+		</ul>
+
+		<b>Web Browser requirements :</b>
+		<ul>
+		<li>Internet Explorer 6.0 or above</li>
+		<li>MSXML 4.0 SP2 (4.20.9828.0 or higher)</li>
+		</ul>
+
+		<b>The following operating systems and web browsers are not certified or supported with Portal :</b>
+		<ul>
+		<li>Macintosh OS</li>
+		<li>Netscape</li>
+		<li>Firefox</li>
+		</ul>
+
+		<p>NOTE: The system is closed during payroll processing.  The payroll process begins on Tuesday evenings and is generally complete by Wednesday afternoon the week of your pay date.  You cannot access the system during this time.</p>
+
+		<p>The Employee Self Service application uses pop-up windows.  If you have a pop-up blocker, you may need to disable it.</p>
+
+     <center>
+		<form>
+		<input type=button value="Close Window" onClick="javascript:window.close();">
+		</form>
+	 </center>
+	</td>
+	</tr>
+</table>
+</body>
+</html>

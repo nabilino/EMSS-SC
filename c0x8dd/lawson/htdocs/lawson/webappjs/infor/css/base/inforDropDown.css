@@ -1,0 +1,151 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforDropDown.css,v 1.1.2.8.2.4 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+.inforDropDown
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_dropdown_enabled_15x20.png") no-repeat right center;
+  margin-top : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDropDownOver
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_dropdown_over_15x20.png") no-repeat right center;
+  margin-top : 0px;  
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDropDownActive
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_dropdown_press_15x20.png") no-repeat right center;
+  margin-top : 0px;  
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDropDownDisabled
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_dropdown_disabled_15x20.png") no-repeat right center;
+  margin-top : 0px;  
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+select.inforDropDown
+{
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  width : auto;
+  visibility : hidden;
+  cursor : default;
+}
+ul.inforDropDown
+{
+  position : absolute;
+  background-color : transparent;
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  margin : 0px;
+  padding : 0px;
+  display : none;
+}
+ul.inforDropDownOpen
+{
+  position : absolute;
+  background-color : #ffffff;
+  border : 1px solid #9b9d9f;
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  margin : 0px;
+  padding : 0px;
+  width : 30px;
+  height : auto;
+  display : block;
+  visibility : visible;
+  top : 0px;
+  left : 0px;
+  overflow : auto;
+  overflow-x : visible;
+  z-index : 999999999;
+}
+ul.inforDropDownOpen li
+{
+  display : block;
+  position : relative;
+  margin : 0px;
+  padding-left : 5px;
+  padding-right : 5px;
+  padding-top : 3px;
+  height : 20px;
+  width : auto;
+  overflow : visible;
+  white-space : nowrap;
+}
+ul.inforDropDownOpen li.inforDropDownOpenOver
+{
+  background-color : #ebeff2;
+  display : block;
+  position : relative;
+  margin : 0px;
+  padding-left : 5px;
+  padding-right : 5px;
+  padding-top : 3px;
+  height : 20px;
+  width : auto;
+  overflow : visible;
+  white-space : nowrap;
+}
+ul.inforDropDownOpen li.selected
+{
+  background-color : #c5d0d8;
+  display : block;
+  position : relative;
+  margin : 0px;
+  padding-left : 5px;
+  padding-right : 5px;
+  padding-top : 3px;
+  height : 20px;
+  width : auto;
+  overflow : visible;
+  white-space : nowrap;
+}

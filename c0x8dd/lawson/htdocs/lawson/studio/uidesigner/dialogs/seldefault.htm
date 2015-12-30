@@ -1,0 +1,66 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/seldefault.htm,v 1.2.28.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<TITLE>Default Value</TITLE>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="keyhandlers.js"></SCRIPT>
+<SCRIPT language="javascript" src="seldefault.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="lblTitle">Default Value</phrase>
+		<phrase id="lblAssigned">Assigned</phrase>
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="defInit()" style="background-color:buttonface;visibility:hidden" onkeypress="dlgOnKeyPress()">
+
+	<table border="0" width="100%" cellspacing="4">
+	<tr>
+		<td>
+			<div id="lblTitle" class="dsLabel" style="position:relative;text-align:left;">Default Value</div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<select id="selassigned" class="dsListText" size="11" ondblclick="defSelect()"
+				style="position:relative;height:expression(this.size*17);width:100%;">
+			</select>
+		</td>
+	</tr>
+	<tr><td colspan="2"><HR></td></tr>
+	<tr>
+		<td align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="defSelect()" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

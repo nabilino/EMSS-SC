@@ -1,0 +1,224 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforDialog.css,v 1.1.2.9.2.3 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+.inforDialogTopLeft
+{
+  background : transparent url("../../images/dialog_corner_lft_top_44x54.png") no-repeat 0px 0px;
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  width : 100%;
+  height : 100%;
+  padding : 0px;
+  margin : 0px;
+}
+.inforDialogTopRight
+{
+  background : transparent url("../../images/dialog_corner_rt_top_44x54.png") no-repeat 100% 0px;
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  width : 100%;
+  height : 54px;
+}
+.inforDialogLeftBorder
+{
+  float : left;
+  width : 54px;
+  padding-top : 54px;
+  padding-bottom : 54px;
+  height : auto;
+  [if IE] height : 100%;
+}
+.inforDialogLeft
+{
+  background : transparent url("../../images/dialog_side_left_ctr_44x1.png") repeat-y 0px 0px;
+  position : relative;
+  top : 0px;
+  left : -3px;
+  width : 100%;
+  height : 100%;
+}
+.inforDialogRightBorder
+{
+  float : right;
+  width : 54px;
+  padding-top : 54px;
+  padding-bottom : 54px;
+  height : auto;
+  [if IE] height : 100%;
+}
+.inforDialogRight
+{
+  background : transparent url("../../images/dialog_side_rt_ctr.png") repeat-y 100% 0px;
+  position : relative;
+  top : 0px;
+  left : 3px;
+  width : 100%;
+  height : 100%;
+}
+.inforDialogTopCenter
+{
+  height : 54px;
+  padding-left : 44px;
+  padding-right : 44px;
+  width : auto;
+}
+.inforDialogTop
+{
+  background : transparent url("../../images/dialog_top_ctr_1x54.png") repeat-x 0px 0px;
+  position : relative;
+  top : 0px;
+  left : 0px;
+  right : 0px;
+  height : 54px;
+  width : 100%;
+}
+.inforDialogBottomLeft
+{
+  background : transparent url("../../images/dialog_corner_lft_btm.png") no-repeat 0px 0px;
+  position : absolute;
+  margin-left : -3px;
+  bottom : 0px;
+  left : 0px;
+  width : 100%;
+  height : 54px;
+}
+.inforDialogBottomRight
+{
+  background : transparent url("../../images/dialog_corner_rt_btm.png") no-repeat 100% 0px;
+  position : absolute;
+  margin-left : 3px;
+  bottom : 0px;
+  left : 0px;
+  width : 100%;
+  height : 54px;
+  z-index : 100000;
+}
+.inforDialogBottomCenter
+{
+  position : relative;
+  top : 0px;
+  left : 0px;
+  height : 54px;
+  padding-left : 44px;
+  padding-right : 38px;
+  width : auto;
+}
+.inforDialogBottom
+{
+  background : transparent url("../../images/dialog_side_btm_ctr.png") repeat-x 0px 0px;
+  position : relative;
+  top : 0px;
+  left : 0px;
+  right : 0px;
+  height : 54px;
+  width : 100%;
+}
+div.inforDialogCloseIcon
+{  
+  float : right;
+  padding-right : 28px;
+  padding-top : 32px;
+}
+button.inforDialogCloseIcon
+{
+  border : 0px;
+  background : transparent url("../../images/btn_so_close_enabled.png") no-repeat center center;
+  padding : 0px;
+  height : 12px;
+  width : 12px;  
+}  
+button.inforDialogCloseIconOver
+{
+  border : 0px;
+  background : transparent url("../../images/btn_so_close_over.png") no-repeat center center;
+  padding : 0px;
+  height : 12px;
+  width : 12px;
+}
+.inforDialogTitleBar
+{
+  position : relative;
+  left : -10px;
+  font-face : Arial;
+  font-weight : bold;
+  color : #ffffff;
+  padding-top : 32px;
+}
+.inforDialogContent
+{
+  position : absolute;
+  top : 69px;
+  left : 44px;
+  right : 44px;
+  height : auto;
+  width : auto;
+  z-index : 99999;
+}
+.inforDialogButtonPanel
+{
+  background : transparent;
+  margin : 0px;
+  padding : 15px 5px 10px 5px;
+  width : 100%;
+}
+.inforDialogText
+{
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+}
+.inforDialogSecondaryText
+{
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  padding-top : 5px;
+}
+/* activity dialog */
+.inforActivityDialog
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  height : 225px;
+  width : 535px;
+  padding : 0px;
+  margin : 0px;
+  position : absolute;
+  top : 30%;
+  left : 30%;
+  overflow : visible;
+  z-index : 1000;  
+}
+.inforActivityDialogIcon
+{
+  background : transparent url("../../images/infor_ajax-loader_24x24.gif") no-repeat center top;
+  width : 100%;
+  height : 34px;
+}

@@ -1,0 +1,682 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforDatePicker.css,v 1.1.2.15.2.3 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+.inforDatePicker
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_datepicker_enabled_15x20.png") no-repeat center center;
+  margin-top : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDatePickerOver
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_datepicker_over_15x20.png") no-repeat center center;
+  margin-top : 0px; 
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDatePickerActive
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_datepicker_press_15x20.png") no-repeat center center;
+  margin-top : 0px;  
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+.inforDatePickerDisabled
+{
+  width : 15px;
+  height : 20px;
+  background : transparent url("../../images/btn_datepicker_disabled_15x20.png") no-repeat center center;
+  margin-top : 0px;  
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : pointer;
+}
+/* --- Calendar dropdown -- */
+div.calendarOuter
+{
+  position : absolute;
+  background-color : transparent;
+  visibility : hidden;
+  width : auto;
+  height : auto;
+  z-index : 999999;
+  padding : 0px;
+  margin : 0px;
+  border : 0px;
+}
+div.calendarInner
+{
+  background-color : #d3d3d3;
+  border : 1px solid #000000;
+  position : relative;
+  text-align : center;
+  width : 175px;
+  height : 180px;
+}
+table.calendarNav
+{
+  width : 175px;
+}
+div.calendarNav
+{
+  position : relative;
+  top : 0px;
+  left : 0px;
+  padding : 0px;
+  margin-top : 5px;
+  width : 175px;
+  height : 21px;
+}
+table.calendarTable
+{
+  position : relative;
+  top : 0px;
+  left : 0px;
+  background-color : #ffffff;
+  width : 175px;
+}
+div div span.calendarHeading
+{
+  background-color : transparent;
+  color : #555555;
+  font-size : 11px;
+  font-weight : normal;
+  font-family: Arial;
+}
+div div table td.calendarDayHeader
+{
+  background-color : #f0f0f0;
+  border-bottom : 1px solid #b4b4b4;
+  color : #55555;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  height : 16px;
+  width : 25px;
+  text-decoration : none;
+  text-transform: uppercase;
+  text-align : center;
+  margin : 0px;
+  padding : 0px;
+}
+div div table td.calendarTodayHeader
+{
+  background-color : #f0f0f0;
+  border-bottom : 1px solid #b4b4b4;  
+  color : #55555;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  height : 16px;
+  width : 25px;
+  text-decoration : none;
+  text-transform: uppercase;
+  text-align : center;
+  margin : 0px;
+  padding : 0px;
+}
+div div table td.calendarSystemDateHeader
+{
+  background-color : #f0f0f0;
+  border-bottom : 1px solid #b4b4b4;  
+  color : #55555;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  height : 16px;
+  width : 25px;
+  text-decoration : none;
+  text-transform: uppercase;
+  text-align : center;
+  margin : 0px;
+  padding : 0px;
+}
+div div table td.calendarDay
+{
+  border : none;
+  background-color : transparent;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+div div table td button.calendarDay
+{
+  border : none;
+  background-color : transparent;
+  color : inherit;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;
+  padding : 0px;
+  width: 100%;
+  height : 100%;
+}
+div div table td.calendarDayToday
+{
+  background-color : #c5d0d8;
+  border : none;
+  color : #ffffff;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;  
+}
+div div table td.calendarDayOver
+{
+  border : none;
+  background-color : #ebeff2;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;  
+}
+div div table td button.calendarDayOver
+{
+  border : none;
+  background-color : #ebeff2;
+  color : inherit;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  width : 100%;
+  height : 100%;
+}
+div div table td.calendarDayTodayOver
+{
+  background-color : #c5d0d8;
+  border : none;
+  color : #ffffff;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+td.calendarArrowLeft
+{
+  text-align : left;
+  padding-left : 8px;
+}
+td.calendarArrowRight
+{
+  text-align : right;
+  padding-right : 8px;
+}
+button.calendarArrowLeft
+{
+  border : 0px;
+  background : transparent url("../../images/btn_previous_enabled.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;
+}
+button.calendarArrowLeftOver
+{
+  border : 0px;
+  background : transparent url("../../images/btn_previous_over.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;
+}
+button.calendarArrowLeftActive
+{
+  border : 0px;
+  background : transparent url("../../images/btn_previous_press.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowLeft:disabled
+{
+  background : transparent url("../../images/btn_previous_disabled.png") no-repeat center center;
+}
+button.calendarArrowRight
+{
+  border : 0px;
+  background : transparent url("../../images/btn_next_enabled.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowRightOver
+{
+  border : 0px;
+  background : transparent url("../../images/btn_next_over.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowRightActive
+{
+  border : 0px;
+  background : transparent url("../../images/btn_next_press.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowRight:disabled
+{
+  background : transparent url("../../images/btn_next_disabled.png") no-repeat center center;
+}
+button.calendarArrowDown
+{
+  border : 0px;
+  background : transparent url("../../images/icn_arrow-down_7x5_enabled_gray999999.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px; 
+}
+button.calendarArrowDownOver
+{
+  border : 0px;
+  background : transparent url("../../images/icn_arrow-down_7x5_over_gray555555.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowDownActive
+{
+  border : 0px;
+  background : transparent url("../../images/icn_arrow-down_7x5_press_gray666666.png") no-repeat center center;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  padding : 0px;
+  height : 15px;
+  width : 15px;  
+}
+button.calendarArrowDown:disabled
+{
+  background : transparent url("../../images/icn_arrow-down_7x5_disabled_grayb4b4b4.png") no-repeat center center;
+}
+div div table td.calendarDayGray
+{
+  border : none;
+  background-color : transparent;
+  color : #bfbfbf;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+div div table td.calendarDayGrayOver
+{
+  border : none;
+  background-color : #ebeff2;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+div div table td.calendarDaySystemDate
+{
+  background-color : transparent;
+  border : 1px solid #e57700;
+  color : #e57700;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;  
+}
+div div table td.calendarDaySystemDateOver
+{
+  background-color : #ebeff2;
+  border : 1px solid #e57700;
+  color : #e57700;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+div div table td.calendarDayTodaySystemDate
+{
+  background-color : #c5d0d8;
+  border : 1px solid #e57700;
+  color : #ffffff;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;  
+}
+div div table td.calendarDayTodaySystemDateOver
+{
+  background-color : #ebeff2;
+  border : 1px solid #e57700;
+  color : #e57700;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px;  
+  padding : 0px;
+  height : 18px;
+  width : 25px;
+}
+div.calendarToday
+{
+  padding-top : 5px;
+}
+button.calendarToday
+{
+  color : #e57700;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : default;
+  text-align : center;
+  margin : 0px 5px 0px 5px;  
+  padding : 0px; 
+}
+table.calendarMonthYearPanel
+{
+  position : relative;
+  top : 0px;
+  left : 0px;
+  background-color : #ffffff;
+  width : 175px;
+  height : 150px;
+  font-size : 11px;
+  border-collapse : collapse;
+  margin : 0px;  
+}
+table.calendarMonthYearPanel tr
+{
+  height : 18px;
+}
+table.calendarMonthYearPanel td
+{
+  background-color : transparent;
+  border: none;
+  color : #000000;  
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer; 
+  text-align : left; 
+  line-height : 18px;
+  width : 43px;
+}
+table.calendarMonthYearPanel td.calendarDay
+{
+  text-align : center;
+}
+table.calendarMonthYearPanel td.calendarArrowRight
+{
+  text-align : right;
+}
+table.calendarMonthYearPanel td.calendarDayGridDivider
+{
+  border-right : 1px solid #b4b4b4; 
+  text-align : center;   
+}
+table.calendarMonthYearPanel td.monthYearSelectedGridDivider
+{
+  background-color : #c5d0d8;
+  border-right : 1px solid #b4b4b4;
+  color : #ffffff; 
+  text-align : center;  
+}
+table.calendarMonthYearPanel td div
+{
+  background-color : transparent;
+  border : none;
+  color : #000000;
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;
+  text-decoration : none;
+  cursor : pointer;
+  text-align : center;
+  margin : 0px 2px 0px 2px;
+  padding : 0px;   
+  line-height : 18px;
+  width : 38px;
+}
+table.calendarMonthYearPanel td div.monthYearSelected, table.calendarMonthYearPanel td div.monthYearSelectedOver
+{
+  background-color : #c5d0d8;
+  border : none;  
+  color : #ffffff;
+  white-space : nowrap;
+}
+table.calendarMonthYearPanel td div.calendarDaySystemDate
+{
+  background-color : #c5d0d8;
+  border : 1px solid #e57700;
+  color : #e57700;  
+}
+table.calendarMonthYearPanel td div.calendarDay
+{
+  background-color : transparent;
+  border : none;  
+  color : #000000;
+  white-space : nowrap;
+}
+table.calendarMonthYearPanel td div.calendarDayOver
+{
+  background-color : #ebeff2;
+  border : none;  
+  color : #000000;
+  white-space : nowrap;
+}
+.calendarButton, .calendarButton.disabled 
+{
+  background-color : #6385a1;
+  background-image : -webkit-gradient(linear, left top, left bottom, from(#9eb5c7), to(#56768f)); /* Saf4+, Chrome */
+  background-image : -webkit-linear-gradient(top, #9eb5c7, #56768f); /* Chrome 10+, Saf5.1+ */
+  background-image : -moz-linear-gradient(top, #9eb5c7, #56768f); /* FF3.6 */
+  background-image : -ms-linear-gradient(top, #9eb5c7, #56768f); /* IE10 */
+  background-image : -o-linear-gradient(top, #9eb5c7, #56768f); /* Opera 11.10+ */
+  background-image : linear-gradient(top, #9eb5c7, #56768f);
+  -moz-border-radius : 3px;
+  -webkit-border-radius : 3px;
+  border-radius : 3px;	
+  border : 1px solid #37609b;
+  color : #ffffff;
+  text-shadow : 0 0 0 #f6f6f6;
+  margin : 0px 5px 0px 5px;
+  cursor : default;
+  outline : none;
+  height : 20px;
+  overflow : visible; /* removes extra side padding in IE */
+  font-size : 11px;
+  font-family: Arial;
+  font-weight : normal;	
+}
+/* remove extra inner padding */
+.calendarButton::-moz-focus-inner 
+{ 
+  border : 0px;
+  padding : 0px;
+}
+.calendarButton.disabled 
+{
+  background-color : #eeeeee;
+  background-image : none;
+  border : 1px solid #a3a3a3;
+  color : #a3a3a3;
+  display : inline-block;
+}
+.calendarButton.default 
+{
+  font-weight : bold;
+}
+.calendarButton:hover, .calendarButton:focus 
+{
+  background-color : #2a71b2;
+  background-image : none;	
+}
+.calendarButton:active 
+{
+  background-color : #000000;
+  background-image : none;	
+}	
+.calendarButton.disabled:hover, .calendarButton.disabled:focus, .calendarButton.disabled:active 
+{
+  background-color : #eeeeee;
+  background-image : none;	
+}

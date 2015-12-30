@@ -1,0 +1,41 @@
+<html>
+<head>
+<title>Redirect</title>
+<script>
+
+// "https://" + host + "/lawson/xhrnet/st_lukes/HelpDocument.html?work=JobReqApproval"
+
+var helpPages = {
+	ExpenseApproval: "ExpenseApproval.pdf",
+	JobReqApproval: "JobReqApproval.pdf",
+	MissingDocument: "MissingDocument.html"
+}
+
+function redirect() {
+
+	if (!window.location.origin) { // fix IE missing .origin
+		window.location.origin = window.location.protocol + "//" + window.location.hostname + (window.location.port ? ':' + window.location.port: '');
+	}
+
+	var option = location.search.split('work=')[1]
+	if (helpPages[option]) // if helpPage exists and is defined
+	{
+		var URL = window.location.origin + "/lawson/xhrnet/st_lukes/helpDocuments/" + helpPages[option]
+		window.location.replace(URL)
+	}
+	else if (helpPages.MissingDocument) // is the MissingDocument defined?
+	{
+		var URL = window.location.origin + "/lawson/xhrnet/st_lukes/helpDocuments/" + helpPages.MissingDocument
+		window.location.replace(URL)
+	}
+	else // show a simple message
+		document.body.innerHTML = "Unknown document type \"" + option + "\". This needs to be added by the system administration team.";
+		
+}
+</script>
+</head>
+
+<body onload="redirect()">
+</body>
+
+</html>

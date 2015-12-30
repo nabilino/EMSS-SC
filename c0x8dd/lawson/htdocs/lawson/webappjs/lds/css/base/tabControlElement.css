@@ -1,0 +1,201 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/tabControlElement.css,v 1.2.2.4.2.3 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Tab control --- */
+.tabControlLeftSideStyler
+{
+  background-image : url("../../images/06_tabcontrol_panel_left.png");
+  margin-top : 23px;
+}
+.tabControlRightSideStyler
+{
+  padding-left : 0px;
+  padding-right : 0px;
+}
+ul.tabControlStyler
+{
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 24px;
+  width : auto;
+  position : relative;
+  top : -23px;
+  left : -5px;
+  margin : 0px;
+  padding : 0px;
+  float : left;
+  cursor : default;
+}
+ul.tabControlStyler li
+{
+  display : inline;
+  padding : 0px;
+}
+ul.tabControlStyler li span.activeTabLeft
+{
+  background : transparent url("../../images/06_tabcontrol_activ_left.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 5px;
+  float : left;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.activeTab
+{
+  background : transparent url("../../images/06_tabcontrol_activ_panel.png") repeat-x 0px 0px;
+  color : #0065a4;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 24px;
+  width : auto;
+  padding-top : 5px;
+  float : left;
+  text-align : center;
+  white-space : nowrap;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.activeTabRight
+{
+  background : transparent url("../../images/06_tabcontrol_activ_right.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 24px;
+  float : left;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTabLeft
+{
+  background : transparent url("../../images/06_tabcontrol_rest_left.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 5px;
+  float : left;
+  margin-left : -5px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTab
+{
+  background : transparent url("../../images/06_tabcontrol_rest_panel.png") repeat-x 0px 0px;
+  color : #6d6d6d;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 24px;
+  width : auto;
+  padding-top : 5px;
+  float : left;
+  text-align : center;
+  white-space : nowrap;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTabRight
+{
+  background : transparent url("../../images/06_tabcontrol_rest_right.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 24px;
+  float : left;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTabLeftHover
+{
+  background : transparent url("../../images/06_tabcontrol_over_left.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 5px;
+  float : left;
+  margin-left : -5px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTabHover
+{
+  background : transparent url("../../images/06_tabcontrol_over_panel.png") repeat-x 0px 0px;
+  color : #0065a4;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 24px;
+  width : auto;
+  padding-top : 5px;
+  float : left;
+  text-align : center;
+  white-space : nowrap;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.inactiveTabRightHover
+{
+  background : transparent url("../../images/06_tabcontrol_over_right.png") no-repeat 0px 0px;
+  height : 24px;
+  width : 24px;
+  float : left;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.primary
+{
+  margin-left : 0px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+ul.tabControlStyler li span.secondary
+{
+  margin-left : -5px;
+  display : -moz-inline-stack;
+  display : inline-block;
+}
+.tabContentActive
+{
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  display : block;
+  height : 100%;
+  width : 100%;
+  overflow : auto;
+  clear : both;
+  position : relative;
+  top : -23px;
+  padding-top : 5px;
+  scrollbar-base-color : #c7dbe7;  
+}
+.tabContentInactive
+{
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  display : none;
+  height : 100%;
+  width : 100%;
+  clear : both;
+  position : relative;
+  top : -23px;
+  padding-top : 5px;
+}

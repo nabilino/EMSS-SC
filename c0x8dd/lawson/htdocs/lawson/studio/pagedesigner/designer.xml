@@ -1,0 +1,58 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/designer.xml,v 1.1.4.1.26.2 2012/08/08 12:48:53 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<DESIGNER id="page" phraseId="lblPortalPage" installed="y">
+	<INDEXHTM>index.htm</INDEXHTM>
+	<MENU>menu.xml</MENU>
+	<TOOLBOX>toolbox.xml</TOOLBOX>
+	<MESSAGE>msgs.xml</MESSAGE>
+	<ICON>images/logo2.gif</ICON>
+	<VIEWS>
+		<VIEW id="design" phraseId="lblDesign" editor="WYSIWYG" src="pgdesign.htm" lwidth="15" rwidth="15" default="y"/>
+		<VIEW id="source" phraseId="lblSource" editor="TEXT" src="pgsource.htm" lwidth="0" rwidth="0"/>
+		<VIEW id="script" phraseId="lblScript" editor="TEXT" src="pgscript.htm" lwidth="0" rwidth="0"/>
+	</VIEWS>
+	<DOCUMENTS>
+		<DOCUMENT id="pagedoc">
+			<PROPERTIES>
+				<PROPERTY id="id" phraseId="lblName" readonly="1" init="MAINBODY" edit="X" draw="text" type="simple"/>
+				<PROPERTY id="title_str" phraseId="lblTitle" readonly="0" init="Portal Page" edit="X" draw="text" type="simple"/>
+				<PROPERTY id="version" phraseId="lblVersion" readonly="0" init="1.0" edit="X" draw="text" type="simple"/>
+				<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="600" edit="999" draw="text" type="simple"/>
+				<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="600" edit="999" draw="text" type="simple"/>
+				<PROPERTYPAGE id="proppage" htm="pagedesigner/dialogs/datamap.htm" height="500" width="500" />
+			</PROPERTIES>
+			<RULES>
+				<RULE id="minHeight" value="300"/>
+				<RULE id="minWidth" value="300"/>
+				<RULE id="isParent" value="1"/>
+				<RULE id="isChild" value="0"/>
+			</RULES>
+			<EVENTS>
+				<EVENT id="oninit" label="OnInit" parms="" returns=""/>
+				<EVENT id="ondatasrcupdate" label="OnDatasrcUpdate" parms="" returns=""/>
+				<EVENT id="onterminate" label="OnTerminate" parms="" returns=""/>
+			</EVENTS>
+		</DOCUMENT>
+	</DOCUMENTS>
+</DESIGNER>

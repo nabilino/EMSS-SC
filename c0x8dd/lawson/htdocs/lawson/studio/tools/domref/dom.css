@@ -1,0 +1,176 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/tools/domref/dom.css,v 1.2.4.1.4.3.22.2 2012/08/08 12:48:54 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */
+.anchorActive
+{
+	background-color: transparent;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: none;
+	text-align: left;
+	overflow:visible;
+	border: 0px;
+	cursor: hand;
+	height: 20px;
+	width: 10px;
+	margin-right: 4px;
+}
+.anchorFocus
+{
+	background-color:lightgrey;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: none;
+	text-align: left;
+	overflow:visible;
+	border: 0px;
+	cursor: hand;
+	height: 20px;
+	width: 10px;
+	margin-right: 4px;
+}
+.anchorHover
+{
+	background-color:#D4DFF0;
+	color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:9pt;
+	text-decoration: none;
+	text-align: left;
+	overflow:visible;
+	border: 0px;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	width: 10px;
+	margin-right: 4px;
+}
+BODY
+{
+	background-color:white;
+	color:black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:8pt;
+	margin:0px;
+	height:100%;
+	overflow:hidden;
+	width:100%;
+}
+.listDiv
+{
+	width:100%;
+	height:100%;
+	overflow:auto;
+}
+.listTitle
+{
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:10pt;
+	font-weight:bold;
+	width:100%;
+	cursor:default;
+}
+.listText
+{
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	font-size:10pt;
+	padding-left:2px;
+	padding-right:2px;
+}
+.treeBranch
+{
+	margin-top:1px;
+	margin-left:1px;
+	width:100%;
+	overflow:hidden;
+}
+.treeDiv
+{
+	width:100%;
+	height:100%;
+	overflow:auto;
+	background-color:white;
+	border-right:1px solid black;
+	padding-top:4px;
+	padding-left:4px;
+}
+.treeExpandIcon
+{
+	width: 9px;
+	height: 12px;
+	margin-bottom: 3px;
+	overflow: hidden;
+}
+.treeImage
+{
+	margin-left: 3px;
+	margin-right: 3px;
+	overflow: hidden;
+}
+.treeText
+{
+	overflow:hidden;
+	background-color: white;
+	color: black;
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	vertical-align: text-top;
+	padding: 2px;
+	padding-left: 4px;
+	padding-right: 4px;
+	cursor:default;
+}
+.treeTextExample
+{
+	color: black;
+	font-size: 8pt;
+	font-family: Courier New;
+}
+.treeTextHighlight
+{
+	overflow:hidden;
+	background-color:#D4DFF0;
+	color: black;
+	vertical-align: text-top;
+	padding: 2px;
+	padding-left: 4px;
+	padding-right: 4px;
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	cursor:default;
+}
+.treeTextSelected
+{
+	overflow:hidden;
+	color: white;
+	background-color: #003366;
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	vertical-align: text-top;
+	padding: 2px;
+	padding-left: 4px;
+	padding-right: 4px;
+	cursor:default;
+}

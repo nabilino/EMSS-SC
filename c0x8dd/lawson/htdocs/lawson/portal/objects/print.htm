@@ -1,0 +1,117 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<head>
+<script language="javascript" src="../servenv.js"></script>
+<link type="text/css" rel="stylesheet" href="../portal.css">
+<link type="text/css" rel="stylesheet" href="../drill/drill.css">
+<link type="text/css" rel="stylesheet" href="table.css">
+
+<!-- must override body style in portal.css ---------------------------------->
+<style type="text/css">
+BODY
+{
+	background-color:white;
+    font-family: Tahoma, Arial, sans-serif;
+	font-weight:normal;
+	font-size:10pt;
+	margin:;
+	overflow:auto;
+	height:;
+	width:;
+}
+</style>
+
+<script language="javascript">
+//-----------------------------------------------------------------------------
+
+var portalWnd=window.opener;
+var printMgr=portalWnd.printMgr;
+
+//-----------------------------------------------------------------------------
+function initPrint()
+{
+	show(printMgr.content,true);
+
+	var btn=window.document.getElementById("btnClose");
+	btn.innerHTML=portalWnd.lawsonPortal.getPhrase("LBL_CLOSE");
+	btn=window.document.getElementById("btnPrint");
+	btn.innerHTML=portalWnd.lawsonPortal.getPhrase("LBL_PRINT");
+	btn.focus();
+}
+//-----------------------------------------------------------------------------
+function show(content,bOnInit)
+{
+	bOnInit = (typeof(bOnInit) == "boolean" ? bOnInit : false);
+
+	window.document.getElementById("printDiv").innerHTML=content;
+	window.document.getElementById("printTitle").innerHTML=printMgr.title
+	window.document.title=
+		portalWnd.lawsonPortal.getPhrase("LBL_PRINTABLE_VIEW") + ": " + printMgr.title;
+
+	if (!bOnInit)
+	{
+		var btn=window.document.getElementById("btnPrint");
+		btn.focus();
+	}
+}
+//-----------------------------------------------------------------------------
+function doPrint()
+{
+	window.print()
+}
+</script>
+
+<!-- cross browser way to implement window event handlers -------------------->
+<script language="javascript" for="window" event="onbeforeprint()">
+	var mElement=window.document.getElementById("btnPrint");
+	mElement.style.display="none";
+	mElement=window.document.getElementById("btnClose");
+	mElement.style.display="none";
+	mElement=window.document.getElementById("imgDivider");
+	mElement.style.display="none";
+</script>
+<script language="javascript" for="window" event="onafterprint()">
+	var mElement=window.document.getElementById("btnPrint");
+	mElement.style.display="inline";
+	mElement=window.document.getElementById("btnClose");
+	mElement.style.display="inline";
+	mElement=window.document.getElementById("imgDivider");
+	mElement.style.display="inline";
+</script>
+</head>
+
+<!-- print content body ------------------------------------------------------>
+<body onload="initPrint()" scroll="visible">
+	<div id="scrollDiv" class="scrollDiv" style="position:absolute;left:10px;top:0px;width:98%;overflow:visible;">
+		<button id="btnPrint" class="xTToolBarButton" onclick="doPrint()" 
+			onmouseover="this.className='xTToolBarButtonHighlight'" onmouseout="this.className='xTToolBarButton'"
+			style="position:absolute;top:8px;left:0px;width:70px;">Print</button>
+		<span id="printTitle" class="ptFormTitle" style="position:absolute;top:8px;left:90px;">&nbsp;</span>
+		<button id="btnClose" class="xTToolBarButton" onclick="window.close()" 
+			onmouseover="this.className='xTToolBarButtonHighlight'" onmouseout="this.className='xTToolBarButton'"
+			style="position:absolute;top:8px;right:16px;width:70px;">Close</button>
+		<img id="imgDivider" src="../images/portal_topdivider.gif" style="position:absolute;top:38px;left:0px;height:3px;width:98%;" />
+		<div id="printDiv" style="position:absolute;top:48px;left:0px;width:96%;z-index:0;"></div>
+	</div>
+</body>
+
+</html>

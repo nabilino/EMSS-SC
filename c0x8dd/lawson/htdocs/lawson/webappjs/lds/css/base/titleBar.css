@@ -1,0 +1,272 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/titleBar.css,v 1.2.2.5.2.3 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Title bar --- */
+.titleBarStyler
+{
+  background-color : #004a94;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : absolute;
+  top : 0px;
+  left : 0px;
+}
+.titleBarPanelStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : absolute;
+  top : 0px;
+  left : 0px;
+}
+.titleBarRuleStyler
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 2px;
+  width : 100%;
+  padding : 0px;
+  margin : 0px;
+  position : absolute;
+  top : 24px;
+  left : 0px;
+}
+.titleBarRuleIconStyler
+{
+  width : 100%;
+  height : 2px;
+  vertical-align : top;
+}
+.titleBarIconStyler
+{
+  width : 100%;
+  height : 26px;
+}
+ul.titleBarContentStyler
+{
+  list-style : none;
+  height : 26px;
+  margin : 0px;
+  padding : 0px;
+  width : 100%;
+  float : left;
+}
+ul.titleBarContentStyler li
+{
+  display : inline;
+  padding : 0px;
+  margin : 0px;
+}
+ul.titleBarContentStyler li span.titleBarLogoStyler
+{
+  background : transparent url("../../images/18x18_icon_infor.png") no-repeat 0px 3px;
+  height : 18px;
+  width : 18px;
+  position : relative;
+  margin-top : 2px;
+  margin-left : 8px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  float : left;
+}
+ul.titleBarContentStyler li span.titleBarAppNameStyler
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : auto;
+  position : relative;
+  padding-top : 5px;
+  margin-left : 15px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  float : left;
+  overflow : hidden;
+  white-space : nowrap;
+}
+ul.titleBarContentStyler li span.titleBarMenuStyler
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : auto;
+  padding-top : 5px;
+  margin-left : 15px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  float : left;
+  cursor : default;
+}
+ul.titleBarContentStyler li span.titleBarIconPanelStyler
+{
+  background-color : transparent;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : auto;
+  padding-top : 5px;
+  margin-left : 10px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  float : right;
+}
+span.titleBarMessageStyler
+{
+  background : transparent;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : auto;
+  margin-right : 15px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  float : left;
+  overflow : hidden;
+  white-space : nowrap;
+}
+span.titleBarIconHomeStyler
+{
+  background : transparent url("../../images/18px-home.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+span.titleBarIconHomeStylerActive
+{
+  background : transparent url("../../images/18px-home-active.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+span.titleBarIconHelpStyler
+{
+  background : transparent url("../../images/18px-help.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+span.titleBarIconHelpStylerActive
+{
+  background : transparent url("../../images/18px-help-active.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+span.titleBarIconLogOffStyler
+{
+  background : transparent url("../../images/18px-off.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+span.titleBarIconLogOffStylerActive
+{
+  background : transparent url("../../images/18px-off-active.png") no-repeat 0px 0px;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-size : 12px;
+  font-weight : normal;
+  height : 26px;
+  width : 28px;
+  margin : 0px;
+  padding : 0px;
+  position : relative;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}

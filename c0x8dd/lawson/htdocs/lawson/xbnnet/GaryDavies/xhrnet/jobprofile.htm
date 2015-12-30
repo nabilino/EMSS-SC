@@ -1,0 +1,46 @@
+<html>
+<head>
+<title>Job Profile</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script>
+function LoadJobProfile()
+{
+	authenticate("frameNm='jsreturn'|funcNm='JobProfileContent()'|officeObjects=true|desiredEdit='EM'");
+}
+function JobProfileContent()
+{
+	stylePage();
+	// Adjust the frame height for Netscape
+	setLayerSizes();
+
+	// Set the task title.
+	setTaskHeader("header",getSeaPhrase("JOB_PROFILE_1","ESS"),"Employment");
+
+	// Placing this document in the frameset causes Netscape to spin.
+	self.main.location.replace("/lawson/xhrnet/empprofile.htm?from=main");
+}
+</script>
+</head>
+<body onload="LoadJobProfile()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" class="contentframe" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;position:absolute;top:32px;height:464px;left:0%;width:803px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/jobprofile.htm,v 1.5.2.12 2011/05/04 21:10:12 brentd Exp $ -->

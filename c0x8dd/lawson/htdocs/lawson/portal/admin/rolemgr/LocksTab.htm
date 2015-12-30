@@ -1,0 +1,67 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/LocksTab.htm,v 1.2.2.3.4.3.14.1.2.2 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the bookmark locks tab HTML -->
+<table border="0" width="95%" height="95%" cellpadding="0" cellspacing="0" style="margin:10px;">
+<tr>
+	<td style="height:16px;">
+		<div id="headerDiv" style="width:695px;">
+			<table border="0" cellpadding="2" cellspacing="1" width="100%">
+			<tr>
+				<td class="xTTableColumnHeader" valign="center" style="text-align:center;width:400px;">
+					<label id="lblBookmarkName" onselectstart="window.portalWnd.cmnBlockSelect()">Bookmark Name</label>
+				</td>
+				<td class="xTTableColumnHeader" valign="center" style="text-align:center;width:140px;">
+					<label id="lblSubLock" onselectstart="window.portalWnd.cmnBlockSelect()">Subscription Lock</label>
+				</td>
+				<td class="xTTableColumnHeader" valign="center" style="text-align:center;width:140px">
+					<label id="lblLayoutLock" onselectstart="window.portalWnd.cmnBlockSelect()">Layout Lock</label>
+				</td>
+			</tr>
+			</table>
+		</div>
+	</td>
+</tr><tr>
+	<td valign="top">
+		<div id="treeDiv" class="tree" style="top:20px;width:720px;height:100%;" 
+					onresize="window.tabMgr.tabs['tabLocks'].onTreeResize(this)">
+			<span id="bkmrkTree" level="0" style="width:100%;"></span>
+		</div>
+	</td>
+</tr><tr>
+	<td style="height:16px;">
+		<div id="bkmrkInputs" style="top:390px;width:695px;margin:2px;">
+			<input type="text" id="txtBkmrkSearch" class="xTTextBox" style="position:relative;width:120px;" 
+				onfocus="window.tabMgr.tabs['tabLocks'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabLocks'].onTextBlur(event,this)" value="">
+			<input type="button" id="btnBkmrkFind" class="xTToolBarButton" value="Find" 
+					style="width:70;position:relative;" onclick="window.tabMgr.tabs['tabLocks'].onSearch()"/>
+			<input type="button" id="btnBkmrkPrev" class="xTToolBarButton" value="Previous" 
+					style="width:70;position:relative;margin-left:4px;" onclick="window.tabMgr.tabs['tabLocks'].onPrev()"/>
+			<input type="button" id="btnBkmrkNext" class="xTToolBarButton" value="Next" 
+					style="width:70;position:relative;margin-left:4px;" onclick="window.tabMgr.tabs['tabLocks'].onNext()"/>
+		</div>
+	</td>
+</tr>
+</table>

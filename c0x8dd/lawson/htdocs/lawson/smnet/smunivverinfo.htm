@@ -1,0 +1,54 @@
+<HTML>
+<!--
+#-------------------------------------------------------------------------------------
+# Copyright (c) 2005 Siemens Medical Solutions Health Services Corporation.
+# All rights reserved. This software is proprietary to Siemens.
+# It is protected by copyright laws in the US and abroad, and is licensed for use
+# by customers only in strict accordance with the license agreement governing its use.
+#-------------------------------------------------------------------------------------
+# Module:	smftpdirinfo.htm
+#
+# Description:	Secure FTP Directories Information window
+#
+# Notes:
+#
+# History:      Date	 Who	Charm/comment
+#               -------- ------	-------------
+#               09/09/05 phm1	Original version - CharmNT - #1600
+#-------------------------------------------------------------------------------------
+-->
+
+<HEAD>
+	<link id="StyleLink" type="text/css" href="smstyle.css" rel="stylesheet">
+</HEAD>
+
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+
+<SPAN class=smWelcome>Execute univver</SPAN>
+<hr size="2" width="95%" align="left">
+
+<p>This utility executes Lawson's <B>univver</B> command against a selected environment program. If you do not know the exact location of the environment program, this utility will scan several directory structures to find the program.  If the program is found in more than one directory, this utility will execute <B>univver</B> against each location.
+<p>The following directory trees are scanned:
+<ul>
+<li>/{hhrr}/{environment}/env also referred to as <B>$GENDIR</B>
+<li>/{hhrr}/{environment}/web
+<li>The WebSphere Application server install location for Lawson applications
+</ul>
+
+<p>Note the following rules pertaining to the find:
+<ul>
+<li>The find is not case-sensitive, so entering <B>ios.jar</B> will find <B>IOS.jar</B>.
+<li>You can enter multiple program names separated by space or comma or semicolon.
+<li>The wildcard character (*) is permitted.  For example, <B>lawson*.jar</B> or <B>pflow*</B>
+<li>You can enter the full file path, as long as the directory is in the current environment.
+For example, entering <B>/env/bin/importdb</B> will be found under your /{hhrr}/{environment}/env/bin directory.
+The path must be case-specific, though the file does not need to be.
+<li>If the find returns too many files to process in a timely manner, you will be asked to make the criteria more specific.
+<li>"Version Level Not Found" and "no version string" are not errors.  It is possible that the generic nature of the search found a same-named non-versioned file in a subdirectory. For example, entering <B>qcompile</B> will find the versioned qcompile in <B>/env/bin/</B> but will also find a non-versioned qcompile in <B>/env/lib/help/menu/</B> directory.
+</ul>
+
+
+
+
+</HTML>
+

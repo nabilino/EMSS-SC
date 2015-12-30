@@ -1,0 +1,56 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/wzdesigner/dialogs/testcondition.htm,v 1.2.28.2 2012/08/08 12:48:52 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></script>
+<script language="javascript" src="testcondition.js"></script>
+<title>Condition</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+</head>
+
+<body onload="tcInit()" style="background-color:buttonface;margin:10px;visibility:hidden" >
+	<table border="0" width="100%" cellspacing="0">
+	<tr>
+		<td>
+			<label id="lblTstCndTitle" class="dsLabel" 
+				style="position:relative;text-align:left;">Enter Condition:</label>
+	    </td>
+	</tr>
+	<tr>
+	   	<td>
+			<input id="txtValue" type="textbox" class="dsTextBox"
+				style="position:relative;width:100%"></input>
+		</td>
+	</tr>
+	<tr>
+		<td align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="tcOK()" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+</body>
+</html>

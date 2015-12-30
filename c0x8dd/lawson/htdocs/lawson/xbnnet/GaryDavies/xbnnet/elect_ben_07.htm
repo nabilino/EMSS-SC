@@ -1,0 +1,221 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var head=""
+var bod=""
+var flexflag=0
+var empflag=0
+var compflag=0
+REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+
+function startProgram()
+{
+	var html = '<div class="plaintablecell" style="padding:10px">'
+
+	html += '<table border="0" cellpadding="0" cellspacing="0">'
+	html += '<tr><td class="plaintablecell" valign="top">'
+
+	html += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" styler="list">'
+	html += '<tr>'
+	html += '<th class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("MAX_HOURS","BEN")+'</th></tr>'
+	html += '<tr>'
+	html += '<td class="plaintablecellborder" style="text-align:center">'
+	html += parent.parent.roundToPennies(parseFloat(parent.parent.SelectedPlan[19]))
+	html += '</td>'
+	html += '</tr>'
+	html += '</table>'
+
+	html += '</td><td class="plaintablecell" valign="top">'
+
+	var addlStr = "";
+
+	precont = parent.parent.SelectedPlan[26]
+	defaul = parent.parent.SelectedPlan[28]
+
+	if(precont=="P"||precont=="N"||precont=="A")
+	{
+		if(precont=="P")
+		{
+			parent.parent.setpreaft_flag("P")
+			addlStr += '<br>'+getSeaPhrase("ELECTBEN_3","BEN")
+		}
+		if(precont=="A")
+		{
+			parent.parent.setpreaft_flag("A")
+			addlStr += '<br>'+getSeaPhrase("ELECTBEN_4","BEN")
+		}
+		if(precont=="N")
+		{
+			parent.parent.setpreaft_flag("")
+			addlStr += '<br>'+getSeaPhrase("ELECTBEN_7","BEN")
+		}
+	}
+
+	html += parent.header(addlStr);
+
+	html += '</td></tr>'
+	html += '<td class="plaintablecell" valign="top" colspan="2">'
+
+	html += '<form name=hrs1 onSubmit="return false">'
+	html += '<span class="plaintablecell">'
+	if(parent.parent.SelectedPlan[35]=="B")
+		html += getSeaPhrase("ELECTBEN_27","BEN")+'&nbsp;<input class="inputbox" id=hrs type=text size=8 name=hrs>'
+	if(parent.parent.SelectedPlan[35]=="S")
+		html += getSeaPhrase("ELECTBEN_28","BEN")+'&nbsp;<input class="inputbox" id=hrs type=text size=8 name=hrs>'
+	html += '</span>'
+	html += '<br>'
+
+	html += footer(parent.parent.SelectedPlan[26],parent.parent.SelectedPlan[28])
+
+	html += '</td></tr>'
+	html += '</table>'
+	html += '</div>'
+
+	parent.parent.removeWaitAlert();
+	if (typeof(parent.parent.parent.removeWaitAlert) != "undefined") {
+		parent.parent.parent.removeWaitAlert();
+	}
+	document.getElementById("paneBody").innerHTML = html
+	document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8]+'</span>';
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+
+function footer(precont,defaul)
+{
+	var html = "";
+	html += '<span class="plaintablecell">'
+	if(precont=="P"||precont=="N"||precont=="A")
+	{
+		if(precont=="P")
+		{
+			parent.parent.setpreaft_flag("P")
+			//html += '<br>'+getSeaPhrase("ELECTBEN_3","BEN")
+		}
+		if(precont=="A")
+		{
+			parent.parent.setpreaft_flag("A")
+			//html += '<br>'+getSeaPhrase("ELECTBEN_4","BEN")
+		}
+		if(precont=="N")
+		{
+			parent.parent.setpreaft_flag("")
+			//html += '<br>'+getSeaPhrase("ELECTBEN_7","BEN")
+		}
+	}
+	else
+	{
+		html += '<br>'
+		if(defaul=="P")
+		{
+			parent.parent.setpreaft_flag("P")
+			html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+			html += '<INPUT class="inputbox" TYPE=radio name=preaft value=pre onClick=parent.parent.setpreaft_flag("P") CHECKED>'+getSeaPhrase("PRE_TAX","BEN")
+			html += '<INPUT class="inputbox" TYPE=radio name=preaft value=aft onClick=parent.parent.setpreaft_flag("A")>'+getSeaPhrase("AFTER_TAX","BEN")
+		}
+		else
+		{
+			if(defaul=="A")
+			{
+				parent.parent.setpreaft_flag("A")
+				html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+				html += '<INPUT class="inputbox" TYPE=radio name=preaft value=pre onClick=parent.parent.setpreaft_flag("P")>'+getSeaPhrase("PRE_TAX","BEN")
+				html += '<INPUT class="inputbox" TYPE=radio name=preaft value=aft onClick=parent.parent.setpreaft_flag("A") CHECKED>'+getSeaPhrase("AFTER_TAX","BEN")
+			}
+			else
+			{
+				parent.parent.setpreaft_flag("")
+				html += getSeaPhrase("ELECTBEN_6","BEN")+' '
+				html += '<INPUT class="inputbox" TYPE=radio name=preaft value=pre onClick=parent.parent.setpreaft_flag("P")>'+getSeaPhrase("PRE_TAX","BEN")
+				html += '<INPUT class="inputbox" TYPE=radio name=preaft value=aft onClick=parent.parent.setpreaft_flag("A")>'+getSeaPhrase("AFTER_TAX","BEN")
+			}
+		}
+	}
+	html += '<p>'
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"limitCheck(this.form);return false","margin-top:10px")
+	if(parent.parent.LastDoc[parent.parent.currentdoc]!=null)
+	{
+		html += uiButton(getSeaPhrase("PREVIOUS","BEN"),"parent.parent.document.getElementById('main').src='"+parent.parent.LastDoc[parent.parent.currentdoc]+"';parent.parent.currentdoc--;return false","margin-top:10px")
+	}
+	html += uiButton(getSeaPhrase("EXIT","BEN"),"parent.parent.quitEnroll(parent.location);return false","margin-top:10px")
+	html += '</p></form>'
+	html += '</span>'
+
+	return html;
+}
+
+function limitCheck(frm)
+{
+	var maxhrs=parseFloat(parent.parent.SelectedPlan[19])
+	var hrs=parseFloat(parent.parent.roundToPennies(frm.hrs.value))
+	if(hrs>maxhrs)
+	{
+		parent.parent.seaAlert(getSeaPhrase("ERROR_81","BEN")+" "+parent.parent.roundToPennies(maxhrs));
+		frm.hrs.focus();
+		frm.hrs.select();
+	}
+	else
+	{
+		if(!isNaN(hrs))
+		{
+			var divisor=1
+			if(parent.parent.BenefitRules[6]=="P")
+				divisor=parent.parent.SelectedPlan[37]
+			else if(parent.parent.BenefitRules[6]=="M")
+				divisor=12
+			else if(parent.parent.BenefitRules[6]=="S")
+				divisor=24
+			parent.parent.NbrHours=hrs
+			if(parent.parent.SelectedPlan[35]=="B")
+				parent.parent.SelectedPlan[16]=(parent.parent.NbrHours*parseFloat(parent.parent.SelectedPlan[16]))/parseFloat(divisor)
+			if(parent.parent.SelectedPlan[35]=="S")
+			{
+				if(!isNaN(parseFloat(parent.parent.SelectedPlan[18])))
+				{
+					parent.parent.SelectedPlan[18]=(parent.parent.NbrHours*parseFloat(parent.parent.SelectedPlan[18]))/parseFloat(divisor)
+					parent.parent.SelectedPlan[16]=""
+				}
+				else
+				{
+					parent.parent.SelectedPlan[16]=(parent.parent.NbrHours*parseFloat(parent.parent.SelectedPlan[16]))/parseFloat(divisor)
+				}
+			}
+			parent.parent.SelectedPlan[23]=hrs
+			parent.parent.SelectedPlan[22]=""
+		}
+		else
+		{
+			parent.parent.seaAlert(getSeaPhrase("ERROR_93", "BEN"));
+			frm.hrs.focus();
+			frm.hrs.select();
+			return;
+		}
+		parent.setBenefit(parent.parent.SelectedPlan[26])
+	}
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_07.htm,v 1.13.2.11 2009/05/19 15:43:05 brentd Exp $ -->

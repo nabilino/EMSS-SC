@@ -1,0 +1,338 @@
+<html>
+<head>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xbnnet/updatedb.js"></script>
+<script src="/lawson/xbnnet/le_updatedb.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script>
+var _Processed = true
+var head=""
+var bod=""
+var bod2=""
+var payperiod=parent.BenefitRules[6]
+var payDesc=""
+var depsExist = false;
+var depHash = new Array();
+var appObj;
+parent.flg=0
+parent.flexFlag=false
+parent.Ycost=0
+parent.Fcost=0
+parent.Ccost=0
+parent.Pcost=0
+parent.flexflag=0
+parent.empflag=0
+parent.compflag=0
+parent.empcost=0
+parent.empprecost=0
+parent.empaftcost=0
+parent.compcost=0
+parent.flexcost=0
+parent.taxable=""
+function callback()
+{
+    stylePage();
+	if (!parent.GotNewFlex && parent.BenefitRules[8] == "Y")
+	 	FlexDollars("I")
+	else
+		DspSummary()
+}
+function FlexDollars(fc)
+{
+	if (parent.rule_type == "F")
+		parent.parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"))
+	else
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"))
+	if(fc == "+")
+		fc = "%2B"
+	parent.lawheader.count=0
+	NbrRecs = 0
+	TC_val = ""
+	HK_val = ""
+	parent.updatetype = "FLX2"
+	if (parent.rule_type != "N")
+		parent.FlexDate = parent.BenefitRules[2]
+	var obj = new parent.AGSObject(parent.prodline,"BS11.1")
+	obj.event="ADD"
+	obj.rtn="DATA"
+	obj.longNames=true
+	obj.tds=false
+	obj.field="FC="+fc
+		+ "&EFD-COMPANY=" + escape(parent.company)
+		+ "&EFD-EMPLOYEE=" + escape(parent.employee)
+		+ "&BAE-DATE=" + escape(parent.FlexDate)
+		+ "&BAE-COST-DIVISOR=" + escape(parent.BenefitRules[6])
+	obj.func="parent.main.DspSummary()"
+	if (fc == "%2B")
+		obj.field += "&_f2=" + escape(TC_val) + "&_f288=" + escape(HK_val)
+	obj.debug=false
+	parent.AGS(obj,"jsreturn")
+}
+function GetHeader()
+{
+	var hdr ='<table border="0" cellspacing="0" cellpadding="0">'
+	hdr += '<tr><td class="plaintablecellbold">'
+	hdr += getSeaPhrase("NEW_BENS","BEN")
+	if(parent.event=="annual" || parent.rule_type=="A")
+		hdr += " "+getSeaPhrase("AS_OF","BEN").toLowerCase()+" "+parent.newdate
+	hdr += '</td></tr></table>'
+	return hdr
+}
+function test1(arr,index)
+{
+	var eligdate = arr[5]
+	if (eligdate.indexOf("/") == -1)
+		eligdate = parent.FormatDte4(arr[5])
+	bod+=parent.getCoverage(arr[2],arr[0],arr[1],eligdate,arr[6],arr.isflex)
+}
+function DspSummary()
+{
+	parent.GotNewFlex = true
+	if(_Processed) {
+		_Processed = false
+		var span=2
+		if(parent.rule_type!="A")
+			span=3
+		for (var i=1;i<parent.EligPlans.length;i++)
+			parent.enrollError[i]=false
+		parent.removeStoppedElections()
+		parent.InitSummaryTotals()
+		for (var i=0; i<parent.ElectedPlans.length; i++)
+		{
+			var plan_type = ""
+			var plan_code = ""
+			if(parseInt(parent.ElectedPlans[i][0],10)==1)
+			{
+				plan_type = parent.ElectedPlans[i][2][11]
+				plan_code = parent.ElectedPlans[i][2][12]
+			}
+			if((parseInt(parent.ElectedPlans[i][0],10)>1 && parseInt(parent.ElectedPlans[i][0],10)<6) || parseInt(parent.ElectedPlans[i][0],10)==13)
+			{
+				plan_type = parent.ElectedPlans[i][2][37]
+				plan_code = parent.ElectedPlans[i][2][38]
+			}
+			if(parseInt(parent.ElectedPlans[i][0],10)>5 && parseInt(parent.ElectedPlans[i][0],10)<11)
+			{
+				plan_type = parent.ElectedPlans[i][2][38]
+				plan_code = parent.ElectedPlans[i][2][39]
+			}
+			if(parseInt(parent.ElectedPlans[i][0],10)==12)
+			{
+				plan_type = parent.ElectedPlans[i][2][1]
+				plan_code = parent.ElectedPlans[i][2][2]
+			}
+			if(parent.ElectedPlans[i][2]) {
+				for (var k=1;k<parent.EligPlans.length;k++){
+					parent.ElectedPlans[i].isflex = false;
+					if (parent.EligPlans[k][1] == plan_type && parent.EligPlans[k][2] == plan_code &&
+					parent.EligPlans[k][22] == "Y")
+					{
+						parent.ElectedPlans[i].isflex = true;
+						break;
+					}
+				}
+				test1(parent.ElectedPlans[i],i)
+				if(parent.DependentBens[i]) {
+					for(var x=0; x<parent.DependentBens[i][1].length; x++) {
+							if(parent.DependentBens[i][1][x].first_name && parent.DependentBens[i][1][x].last_name)	{
+								depHash[i] = true;
+								depsExist=true;
+								break;
+							}
+					}
+				}
+			}
+		}
+		// dependents table
+		if (depsExist) {
+			var NbrCoveredDeps=0;
+			bod2+='<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" styler="list">'
+			bod2+='<tr>'
+			bod2+='<th class="plaintableheaderborder" style="text-align:center">'
+			bod2+=getSeaPhrase("PLAN","BEN")
+			bod2+='</th><th class="plaintableheaderborder" style="text-align:center">'
+			bod2+=getSeaPhrase("COVERED_DEP","BEN")
+			bod2+='</th></tr>'
+			for(var i=0; i<parent.ElectedPlans.length; i++) {
+				NbrCoveredDeps=0;
+				if(parent.ElectedPlans[i][2]) {
+					if(parent.DependentBens[i] && depHash[i]) {
+						bod2+='<tr><td class="plaintablecellborder">'
+						bod2+=parent.ElectedPlans[i][1]+'&nbsp;</td>'
+						bod2+='<td class="plaintablecellborder">'
+						bod2+='<table border="0" cellpadding="0" cellspacing="0" width="100%">'
+						for(var x=0; x<parent.DependentBens[i][1].length; x++) {
+							if(parent.DependentBens[i][1][x].first_name && parent.DependentBens[i][1][x].last_name)	{
+								for (var y=0; y<parent.dependents.length; y++) {
+									if (parent.dependents[y].seq_nbr == parent.DependentBens[i][1][x].dependent) {
+										if (NbrCoveredDeps % 2 == 0) {
+											bod2+='<tr>'
+											bod2+='<td class="plaintablecell" style="width:50%;text-align:left" nowrap>'
+										} else {
+											bod2+='<td class="plaintablecell" style="width:50%;text-align:right" nowrap>'
+										}
+										bod2+=parent.dependents[y].label_name_1
+										bod2+='</td>'
+										NbrCoveredDeps++
+										if (NbrCoveredDeps % 2 == 0) {
+											bod2+='</tr>'
+										}
+										break;
+									}
+								}
+							}
+						}
+						bod2+='</table>'
+						bod2+='</td></tr>'
+					}
+				}
+			}
+			bod2+='</table><br>'
+		}
+		head+='<center>'
+		head+='<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" styler="list">'
+		head+='<tr>'
+		head+='<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>'
+		head+='<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("COVERAGE","BEN")+'</th>'
+		if(parent.rule_type!="A")
+			head+='<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>'
+		if(parent.flexflag==1)
+			head+='<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+		else
+			head+='<th class="plaintableheaderborder">&nbsp;</th>'
+		// Add a spacer column for display
+		head+='<th class="plaintableheaderborder">&nbsp;</th>'
+		if(parent.empflag==1)
+			head+='<th class="plaintableheaderborder" style="text-align:center" colspan=2>'+getSeaPhrase("YOUR_COST","BEN")+'</th>'
+		else
+			head+='<th class="plaintableheaderborder" style="text-align:center" colspan=2>&nbsp;</th>'
+		if(parent.compflag==1)
+			head+='<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("CO_COST","BEN")+'</th>'
+		else
+			head+='<th class="plaintableheaderborder" style="text-align:center">&nbsp;</th>'
+		head+='</tr>'	
+		var html = '<div style="padding:10px">';
+		html+=head
+		html+=bod
+		html+='</table><br>'
+		if(parent.changedPlan) {
+			html+='<table border="0" cellspacing="0" cellpadding="0">'
+			html+='<tr><td class="plaintablecell">*&nbsp;'+getSeaPhrase("ELECT_CHG","BEN")+'</td>'
+			html+='</tr>'
+			html+='</table><br>'
+		}
+		html+=bod2
+		html+=parent.GetSummaryTable()
+		html+='<br>'
+		html+='<table border="0" cellspacing="0" cellpadding="0">'
+		html+='<tr>'
+		html+='<td class="plaintablecell">'
+		if(parent.errorPlans.length==0 && (parent.errorGroups.length==0 || !parent.verifyPlanGrps))	{
+			if(parent.alreadyElect!="Y" || parent.changedPlan) {
+				html+=uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.start_update_process();return false", "margin-top:10px")
+			}
+		} else {
+			var msg=""
+			if (parent.errorPlans.length>0 && parent.errorGroups.length>0 && parent.verifyPlanGrps)
+				msg=getSeaPhrase("SUMBEN_3","BEN")
+			else if (parent.errorPlans.length>0)
+				msg=getSeaPhrase("SUMBEN_4","BEN")
+			else if (parent.errorGroups.length>0 && parent.verifyPlanGrps)
+				msg=getSeaPhrase("SUMBEN_5","BEN")
+			parent.seaAlert(msg)
+		}
+		html+=uiButton(getSeaPhrase("MAKE_CHANGES","BEN"),"parent.no();return false", "margin-top:10px")
+		if(parent.errorPlans.length==0 && (parent.errorGroups.length==0 || !parent.verifyPlanGrps))
+			html+=uiButton(getSeaPhrase("EXIT","BEN"),"parent.show_choice_win(true);return false", "margin-top:10px")
+		html+='</tr>'
+		html+='</table>'
+		html+='</center>'
+		html+='</div>'
+		if (typeof(parent.parent.removeWaitAlert) != "undefined")
+			parent.parent.removeWaitAlert()
+		else
+			parent.removeWaitAlert()
+		self.summary.document.getElementById("paneBody").innerHTML = html
+		self.summary.document.getElementById("paneHeader").innerHTML = getSeaPhrase("ELECTIONS_AS_OF","BEN")+' '+parent.newdate;
+		self.summary.stylePage();
+		document.getElementById("summary").style.visibility = "visible";
+	}
+}
+function no()
+{
+	parent.document.getElementById("main").src = parent.baseurl+"besschange.htm"
+}
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var summaryFrame = document.getElementById("summary");
+	var winHeight = 464;
+	var winWidth = 721;
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.summary.onresize && self.summary.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.summary.onresize = null;
+	}
+	summaryFrame.style.width = (winWidth - 10) + "px";
+	summaryFrame.style.height = (winHeight - 25) + "px";
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? (winWidth - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (winWidth - 12) : (winWidth - 12));
+	var fullPaneContentWidth = (window.styler && window.styler.showLDS) ? fullContentWidth - 15 : fullContentWidth - 5;
+	try
+	{
+		if (fullContentWidth > 0)
+			self.summary.document.getElementById("paneBorder").style.width = fullContentWidth + "px";
+		if (winHeight >= 35)
+			self.summary.document.getElementById("paneBorder").style.height = (winHeight - 35) + "px";
+		if (fullPaneContentWidth >= 5)
+		{
+			self.summary.document.getElementById("paneBodyBorder").style.width = fullPaneContentWidth + "px";
+			self.summary.document.getElementById("paneBody").style.width = (fullPaneContentWidth - 5) + "px";
+		}
+		if (winHeight >= 55)
+		{
+			self.summary.document.getElementById("paneBodyBorder").style.height = (winHeight - 55) + "px";
+			self.summary.document.getElementById("paneBody").style.height = (winHeight - 60) + "px";
+		}
+		if (fullContentWidth >= 15)
+			self.summary.document.getElementById("paneHeader").style.width = (fullContentWidth - 15) + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="callback();fitToScreen()" onresize="fitToScreen()">
+	<iframe id="summary" name="summary" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:0px;left:0px;width:721px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="printScreen" name="printScreen" src="/lawson/xhrnet/ui/pane.htm" style="visibility:visible;position:absolute;top:0px;left:0px;width:1px;height:1px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe name="bnreturn" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+	<iframe name="lawheader" src="/lawson/xbnnet/besslawheader.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/bensummary.htm,v 1.26.2.24 2011/06/21 16:10:37 brentd Exp $ -->

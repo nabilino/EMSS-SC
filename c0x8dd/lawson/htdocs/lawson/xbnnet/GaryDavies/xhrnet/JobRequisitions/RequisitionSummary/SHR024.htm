@@ -1,0 +1,388 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" 	CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" 	CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Requisition Summary</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/transaction.js"> </script>
+<script src="/lawson/webappjs/data.js"> </script>
+<script src="/lawson/webappjs/commonHTTP.js"> </script>
+<script src="/lawson/xhrnet/waitalert.js"> </script>
+<script src="/lawson/xhrnet/esscommon80.js"> </script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"> </script>
+<script src="/lawson/webappjs/user.js"> </script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"> </script>
+<script src="/lawson/xhrnet/JobRequisitions/Lib/PA42.js"> </script>
+<script src="/lawson/xhrnet/JobRequisitions/RequisitionSummary/SHR024_DME.js"> </script>
+<script src="/lawson/xhrnet/ui/ui.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"> </script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"> </script>
+<script>
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+
+var HrSuper, Requisitions;
+var ReqStorage = new Array();
+var PA42;
+var sortProperty;
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize function.
+//
+
+function Initialize()
+{
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialization Complete function.
+//
+
+function AuthenticateFinished()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	document.title = getSeaPhrase("JOB_REQUISITIONS","ESS");
+	setTaskHeader("header",getSeaPhrase("JOB_REQUISITIONS","ESS"),"Manager");
+	document.getElementById("header").style.visibility = "visible";
+
+	//Add any more initialization routines here.
+	GetDME_HRSUPER();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Draw the window. (used if you want to draw a window using javascript.)
+
+function Draw()
+{
+	LoadContents();
+}
+
+function LoadContents()
+{
+	PaintTopWindow();
+	PaintBottomWindow();
+	removeWaitAlert();
+}
+
+function sortByProperty(obj1, obj2)
+{
+	var name1 = obj1[sortProperty];
+	var name2 = obj2[sortProperty];
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function SortByHeaderValue(Value)
+{
+	sortProperty = Value;
+	HrSuper.sort(sortByProperty);
+	PaintTopWindow(true,Value);
+	PaintBottomWindow();
+}
+
+function PaintTopWindow(onsort,property)
+{
+	var strHtml = '';
+
+	if(HrSuper.length)
+	{
+		strHtml += '<table id="jobReqsTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list">\n';
+		strHtml += '<tr>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:26%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'description\');return false">';
+		strHtml += getSeaPhrase("JOB_OPENINGS_2","ESS")+'</a></th>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:11%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'requisition\');return false">';
+		strHtml += getSeaPhrase("NUMBER","ESS")+'</a></th>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:10%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'req_status_description\');return false">';
+		strHtml += getSeaPhrase("STATUS","ESS")+'</a></th>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:12%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'date_needed\');return false">';
+		strHtml += getSeaPhrase("DATE_NEEDED","ESS")+'</a></th>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:12%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'open_date\');return false">';
+		strHtml += getSeaPhrase("DATE_OPENED","ESS")+'</a></th>\n';
+		strHtml += '<th class="plaintableheaderborder" style="text-align:center;width:29%" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="" onclick="parent.SortByHeaderValue(\'contact_last\');return false">';
+		strHtml += getSeaPhrase("JOB_OPENINGS_12","ESS")+'</a></th>\n';
+		strHtml += '</tr>\n';
+
+		for(var i=0; i<HrSuper.length; i++)
+		{
+			//if (i%2 == 0)
+				strHtml += '<tr>\n'
+			//else
+			//	strHtml += '<tr class="tablerowhighlight">\n'
+
+			strHtml += '<td class="plaintablecellborder" style="width:26%;text-align:left" nowrap>';
+			strHtml += '<a href="" onclick="javascript:parent.GetDetail('+i+');return false"'
+			strHtml += ' onmouseover="window.status=\''+getSeaPhrase("VIEW_DETAIL","ESS").replace(/\'/g,"\\'")+'\';return true"'
+			strHtml += ' onmouseout="window.status=\'\';return true">'+((HrSuper[i].description)?HrSuper[i].description:'&nbsp;')+'</a></td>\n'
+			strHtml += '<td class="plaintablecellborder" style="text-align:right;width:11%" nowrap>'+((HrSuper[i].requisition)?HrSuper[i].requisition:'0')+'</td>\n'
+			strHtml += '<td class="plaintablecellborder" style="text-align:left;width:10%" nowrap>'+((HrSuper[i].req_status_description)?HrSuper[i].req_status_description:'&nbsp;')+'</td>\n'
+			strHtml += '<td class="plaintablecellborder" style="text-align:center;width:12%" nowrap>'+((HrSuper[i].date_needed)?FormatDte4(HrSuper[i].date_needed):'&nbsp;')+'</td>\n'
+			strHtml += '<td class="plaintablecellborder" style="text-align:center;width:12%" nowrap>'+((HrSuper[i].open_date)?FormatDte4(HrSuper[i].open_date):'&nbsp;')+'</td>\n'
+			strHtml += '<td class="plaintablecellborder" style="text-align:left;width:29%" nowrap>'+((HrSuper[i].label_name)?HrSuper[i].label_name:'&nbsp;')+'</td>\n'
+			strHtml += '</tr>\n';
+		}
+
+		strHtml += '</table>\n';
+	}
+	else
+	{
+		strHtml += '<div class="fieldlabelbold" style="text-align:left;padding-bottom:10px;padding-left:10px;padding-top:5px">';
+		strHtml += getSeaPhrase("NO_REQUISTIONS","ESS");
+		strHtml += '</div>';
+	}
+
+	strHtml += '';
+
+	try
+	{
+		self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REQS_IN_PROCESS","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = strHtml;
+	}
+	catch(e) {}
+
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+
+	if (onsort)
+	{
+		self.MAIN.styleSortArrow("jobReqsTbl", property);
+	}
+	else
+	{
+		document.getElementById("MAIN").style.visibility = "visible";
+	}
+
+}
+
+function PaintBottomWindow()
+{
+	var strHtml = '';
+	strHtml += '<table border="0" cellspacing="0" cellpadding="0" width="100%">\n';
+	// Postion, Phone Number
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_PROFILE_8","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlPosition">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("PHONE_NUMBER","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlPhone">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Job, Extension
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_PROFILE_9","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlJob">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("JOB_OPENINGS_14","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlExtension">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Openings, Phone Country Code
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_OPENINGS_4","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlOpenings">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("PHONE_COUNTRY_CODE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlPhoneCountry">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// FTE, Employee Status
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("FULL_TIME_EMPLOYEE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlFTE">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("EMPLOYEE_STATUS","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlEmpStatus">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Process Level, Temporary Dates
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_PROFILE_3","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlProcessLevel">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("TEMP_DATES","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlTempDates">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Department, User Level
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_PROFILE_4","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlDepartment">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("USER_LEVEL","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlUserLevel">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Location, Supervisor
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("JOB_PROFILE_6","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlLocation">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("JOB_PROFILE_7","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlSupervisor">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Salary Type, Union
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("SALARY_TYPE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlSalaryType">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("JOB_PROFILE_10","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlUnion">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Salary, Bargaining Unit
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("SALARY","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlSalary">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("BARGAINING_UNIT","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlBargainingUnit">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Currency, Requested By
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("QUAL_16","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlCurrency">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("REQUESTED_BY","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlRequestedBy">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Overtime, Budgeted
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("OVERTIME","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlOvertime">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("BUDGETED","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlBudgeted">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Pay Schedule, Replacement
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("PAY_SCHEDULE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlPaySchedule">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("REPLACEMENT","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlReplacement">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Pay Grade, Replacement For
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("PAY_GRADE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlPayGrade">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("REPLACEMENT_FOR","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlReplacementFor">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Pay Step, Internal Posting Dates
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("PAY_STEP","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlPayStep">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("INTERNAL_POSTING_DATES","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlIntPostDates">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Work Schedule, External Posting Dates
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("WORK_SCHEDULE","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlWorkSchedule">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">'+getSeaPhrase("EXTERNAL_POSTING_DATES","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap><span id="dtlExtPostDates">&nbsp;</span></td>\n';
+	strHtml += '</tr>\n';
+	// Shift, <Empty>
+	strHtml += '<tr>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:17%">'+getSeaPhrase("SHIFT","ESS")+'</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:33%" nowrap><span id="dtlShift">&nbsp;</span></td>\n';
+	strHtml += '<td class="plaintablerowheaderborderlite" style="text-align:right;width:21%">&nbsp;</td>\n';
+	strHtml += '<td class="plaintablecellborderdisplay" style="text-align:left;width:29%" nowrap>&nbsp;</td>\n';
+	strHtml += '</tr>\n';
+	strHtml += '</table>\n';
+	strHtml += '';
+
+	try {
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = strHtml;
+	}
+	catch(e) {}
+
+	self.DETAIL.stylePage();
+	self.DETAIL.setLayerSizes();
+}
+
+function FillBottomWindow(Index)
+{
+	var TempDatesExist = (NonSpace(PA42.TemporaryDatesBegin) || NonSpace(PA42.TemporaryDatesEnd))?true:false;
+	var OvertimeExists = (PA42.ExemptFromOvertime.Code=="Y" || PA42.ExemptFromOvertime.Code=="N")?true:false;
+	var SalaryClassExists = (PA42.SalaryClass.Code=="S" || PA42.SalaryClass.Code=="H")?true:false;
+	var IntPostDatesExist = (NonSpace(PA42.InternalPostDateStart) || NonSpace(PA42.InternalPostDateStop))?true:false;
+	var ExtPostDatesExist = (NonSpace(PA42.ExternalPostDateStart) || NonSpace(PA42.ExternalPostDateStop))?true:false;
+	var SalaryExists = (NonSpace(PA42.SalaryBeginning) || NonSpace(PA42.SalaryEnd))?true:false;
+	var Salary;
+
+	if(PA42.SalaryEnd)
+		Salary = PA42.SalaryBeginning+' - '+PA42.SalaryEnd;
+	else
+		Salary = PA42.SalaryBeginning;
+
+	activateTableRow("jobReqsTbl",(typeof(Index)!="undefined")?Index:PA42.CurrentIndex,self.MAIN);
+
+	self.DETAIL.document.getElementById("dtlPosition").innerHTML = (PA42.Position.Description)?PA42.Position.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlPhone").innerHTML = (PA42.WorkPhoneNumber)?PA42.WorkPhoneNumber:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlJob").innerHTML = (PA42.JobCode.Description)?PA42.JobCode.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlExtension").innerHTML = (PA42.WorkPhoneExt)?PA42.WorkPhoneExt:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlOpenings").innerHTML = (PA42.RemainingOpen)?Number(MoveTrailingSignToFront(PA42.RemainingOpen)):'&nbsp;';
+	self.DETAIL.document.getElementById("dtlPhoneCountry").innerHTML = (PA42.WorkPhoneCountry)?PA42.WorkPhoneCountry:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlFTE").innerHTML = (PA42.RemainingFTE)?PA42.RemainingFTE:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlEmpStatus").innerHTML = (PA42.EmployeeStatus.Description)?PA42.EmployeeStatus.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlProcessLevel").innerHTML = (PA42.ProcessLevel.Description)?PA42.ProcessLevel.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlTempDates").innerHTML = (TempDatesExist)?PA42.TemporaryDatesBegin+' - '+PA42.TemporaryDatesEnd:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlDepartment").innerHTML = (PA42.Department.Description)?PA42.Department.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlUserLevel").innerHTML = (PA42.UserLevel.Description)?PA42.UserLevel.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlLocation").innerHTML = (PA42.Location.Description)?PA42.Location.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlSupervisor").innerHTML = (PA42.Supervisor.Description)?PA42.Supervisor.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlSalaryType").innerHTML = (SalaryClassExists)?((PA42.SalaryClass.Code=="S")?getSeaPhrase("SALARIED","ESS"):getSeaPhrase("HOURLY","ESS")):'&nbsp;';
+	self.DETAIL.document.getElementById("dtlUnion").innerHTML = (PA42.Union.Description)?PA42.Union.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlSalary").innerHTML = (SalaryExists)?Salary:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlBargainingUnit").innerHTML = (PA42.BargainUnit.Description)?PA42.BargainUnit.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlCurrency").innerHTML = (PA42.Currency.Description)?PA42.Currency.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlRequestedBy").innerHTML = (PA42.RequestedBy.Description)?PA42.RequestedBy.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlOvertime").innerHTML = (OvertimeExists)?((PA42.ExemptFromOvertime.Code=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS")):getSeaPhrase("NA","ESS");
+	self.DETAIL.document.getElementById("dtlBudgeted").innerHTML = (PA42.Budgeted.Code=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS");
+	self.DETAIL.document.getElementById("dtlPaySchedule").innerHTML = (PA42.Schedule.Description)?PA42.Schedule.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlReplacement").innerHTML = (PA42.Replacement.Code=="Y")?getSeaPhrase("YES","ESS"):getSeaPhrase("NO","ESS");
+	self.DETAIL.document.getElementById("dtlPayGrade").innerHTML = (PA42.Grade)?PA42.Grade:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlReplacementFor").innerHTML = (PA42.ReplacementEmployee.Description)?PA42.ReplacementEmployee.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlPayStep").innerHTML = (PA42.Step)?PA42.Step:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlIntPostDates").innerHTML = (IntPostDatesExist)?PA42.InternalPostDateStart+' - '+PA42.InternalPostDateStop:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlWorkSchedule").innerHTML = (PA42.WorkSchedule.Description)?PA42.WorkSchedule.Description:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlExtPostDates").innerHTML = (ExtPostDatesExist)?PA42.ExternalPostDateStart+' - '+PA42.ExternalPostDateStop:'&nbsp;';
+	self.DETAIL.document.getElementById("dtlShift").innerHTML = (PA42.Shift.Code)?PA42.Shift.Code:'&nbsp;';
+	self.DETAIL.stylePage();
+	self.DETAIL.setLayerSizes(true);
+	document.getElementById("DETAIL").style.visibility = "visible";
+}
+
+function GetDetail(Index)
+{
+	activateTableRow("jobReqsTbl",Index,self.MAIN);
+
+	if (ReqStorage[HrSuper[Index].requisition]) {
+		PA42 = ReqStorage[HrSuper[Index].requisition];
+		FillBottomWindow(Index);
+	}
+	else {
+		PA42 = new PA42Object();
+		PA42.CurrentIndex = Index;
+		PA42.Inquire(HrSuper[Index].requisition, "StoreReqData");
+	}
+}
+
+function StoreReqData()
+{
+	ReqStorage[HrSuper[PA42.CurrentIndex].requisition] = PA42;
+	FillBottomWindow();
+}
+</script>
+</head>
+<body style="width:100%;height:100%" onload="Initialize()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:10px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;width:803px;top:32px;height:190px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" style="visibility:hidden;position:absolute;left:0px;width:803px;top:222px;height:334px;"src="/lawson/xhrnet/ui/headerpanelite.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn"   style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader"   style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/JobRequisitions/Lib/SEA_LAW.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/JobRequisitions/RequisitionSummary/SHR024.htm,v 1.15.2.14 2011/05/04 21:10:23 brentd Exp $ -->

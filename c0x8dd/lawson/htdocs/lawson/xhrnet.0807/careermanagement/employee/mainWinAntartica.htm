@@ -1,0 +1,331 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<HTML>
+<HEAD>
+<TITLE>Career Management</TITLE>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<!-- Stylesheet //-->
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<!-- Common Libraries //-->
+<SCRIPT SRC="/lawson/webappjs/common.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/commonHTTP.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/waitalert.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/transaction.js"></SCRIPT>
+<SCRIPT SRC="/lawson/webappjs/data.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmldateroutines.js"></SCRIPT>
+<script src="/lawson/webappjs/user.js"></script>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/ui/ui.js"></SCRIPT>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<!-- HR Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/esscommon80.js"></SCRIPT>
+<!-- Common Career Management Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/cmlib.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/writeattach.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/lib/getattach.js"></SCRIPT>
+<!-- Career Management Employee Libraries //-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/employee/emplib.js"></SCRIPT>
+<!-- Change this to the Template of your choice//-->
+<SCRIPT SRC="/lawson/xhrnet/careermanagement/Skins/Antartica/Template.js"></SCRIPT>
+<SCRIPT LANGUAGE="JavaScript">
+var CareerProfile, JobDetail;
+var Lockout = false;
+var _DIRECTREPORTSINDEX = -1;
+
+function OpenProgram(TabSelected)
+{
+	document.getElementById("main").style.visibility = "hidden";
+	stylePage();
+	self.PGCONTROL.stylePage();
+	document.title = getSeaPhrase("CM_154","CM");
+	_cbdhtml_ResetAll();
+
+	// ui change
+	showWaitAlert(getSeaPhrase("CM_155","CM"));
+
+	// set task header
+	setTaskHeader("HEADER",getSeaPhrase("CM_154","CM"),"Career");
+
+	if(!DMECALLED)
+	{
+		GetSelectBoxesForGeneralUsage("OpenProgram("+TabSelected+")","EMPLOYEE");
+		return;
+	}
+
+	//Define the tabs here. If the user wishes to hide tabs they can do so by commenting out
+	//the line which defines the TabPane.
+
+	var TabsArray = new Array(
+								new TabPane("ActionPlan", getSeaPhrase("CM_89","CM"), 130, getSeaPhrase("CM_160","CM")),
+								new TabPane("JobProfile", getSeaPhrase("CM_156","CM"), 130, getSeaPhrase("CM_161","CM")),
+								new TabPane("Qualifications", getSeaPhrase("CM_157","CM"), 130, getSeaPhrase("CM_162","CM")),
+								new TabPane("Openings", getSeaPhrase("CM_85","CM"), 130, getSeaPhrase("CM_163","CM")),
+								new TabPane("Explore", getSeaPhrase("CM_158","CM"), 130, getSeaPhrase("CM_164","CM")),
+								new TabPane("Training", getSeaPhrase("CM_159","CM"), 130, getSeaPhrase("CM_165","CM"))
+							 );
+
+	var Tab 				= new TabObject(TabsArray, TabSelected);
+		Tab.BorderColor 	= MainTabBorderColor;
+		Tab.bgColorTabDown 	= MainTabbgColorTabDown;
+		Tab.bgColorTabUp 	= MainTabbgColorTabUp;
+		Tab.fgColorTabDown 	= MainTabfgColorTabDown;
+		Tab.fgColorTabUp 	= MainTabfgColorTabUp;
+		Tab.fontSize 		= MainTabfontSize;
+		Tab.fontFamily 		= MainTabfontFamily;
+		Tab.fontWeight		= MainTabfontWeight;
+		Tab.TabName			= "MainTabs";
+
+	if(arguments.length>1)
+		var TabName = arguments[1];
+	else
+		var TabName = 0;
+
+	if(arguments.length>2)
+		var ProfileTabName = arguments[2];
+	else
+		var ProfileTabName = 0;
+
+	with(self.main.document)
+	{
+		Lockout = true;
+		self.main.document.body.innerHTML = "";
+
+		var divObj = self.main.document.createElement("div");
+		self.main.document.body.appendChild(divObj);
+		var tabDrawResult = Tab.Draw(BackgroundColor);
+		divObj.innerHTML = tabDrawResult;
+
+		divObj = self.main.document.createElement("div")
+        divObj.setAttribute("id", Tab.TabName + "," + TabsArray[TabSelected].Code + ",TabBody");
+        self.main.document.body.appendChild(divObj);
+
+		switch(TabsArray[TabSelected].Code)
+		{
+			case "ActionPlan": 	_CURRENTTAB = "ACTIONPLAN";
+								DrawActionPlanWindows();
+								break;
+
+			case "JobProfile":
+								if (_CURRENTTAB == "MYJOBPROFILE")
+								{
+									DrawJobProfileWindows(TabName, true);
+								}
+								else
+								{
+									_CURRENTTAB = "MYJOBPROFILE";
+									DrawJobProfileWindows(TabName);
+								}
+								break;
+
+			case "Qualifications":_CURRENTTAB = "MYQUALIFICATIONS";
+								DrawMyQualificationsWindows();
+								break;
+
+			case "Openings": 	_CURRENTTAB = "JOBOPENINGS";
+								DrawJobOpeningsWindows();
+								break;
+
+			case "Explore": 	_CURRENTTAB = "EXPLORECAREERS";
+								DrawExploreCareersWindows(TabName,ProfileTabName);
+								break;
+
+			case "Training":
+								if (_CURRENTTAB == "TRAININGOPTIONS")
+								{
+									DrawTrainingOptionsWindows(true);
+								}
+								else
+								{
+									_CURRENTTAB = "TRAININGOPTIONS";
+									DrawTrainingOptionsWindows();
+								}
+								break;
+		}
+	}
+}
+
+function FinishedDrawingTabs()
+{
+	if (parentTask == "") {
+		initEmployeeRelatedBookmarkLinks();
+		DrawRelatedBookmarkLinks()
+		ShowRelatedBookmarkLinks(true)
+	}
+
+	self.main.stylePage();
+	document.getElementById("main").style.visibility = "visible";
+	Lockout = false;
+	removeWaitAlert();
+	fitToScreen();
+}
+
+function OnTabClicked_MainTabs(TabName)
+{
+	ResetTabValues()
+	if(!Lockout)
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			ShowFilterList(false);
+			closeDmeFieldFilter();
+		}
+
+		switch(TabName)
+		{
+			case "ActionPlan": 		if (_CURRENTTAB != "ACTIONPLAN") OpenProgram(0);break;
+			case "JobProfile": 		if (_CURRENTTAB != "MYJOBPROFILE") OpenProgram(1);break;
+			case "Qualifications": 	if (_CURRENTTAB != "MYQUALIFICATIONS") OpenProgram(2);break;
+			case "Openings" : 		if (_CURRENTTAB != "JOBOPENINGS") OpenProgram(3);break;
+			case "Explore": 		if (_CURRENTTAB != "EXPLORECAREERS") OpenProgram(4);break;
+			case "Training": 		if (_CURRENTTAB != "TRAININGOPTIONS") OpenProgram(5);break;
+		}
+	}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("main");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;
+		contentHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? winHeight - 65 : winHeight - 65;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth = winWidth - 23;
+		contentWidthBorder = winWidth - 2;
+		contentHeight = winHeight - 65;	
+		contentHeightBorder = winHeight - 5;
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 : winWidth - 12;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 42;	
+	}
+	
+	//don't size smaller than 850 x 600
+	if (winWidth >= 850)
+		mainFrame.style.width = winWidth + "px";
+	if (winHeight >= 600)
+		mainFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.main.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		if (winWidth >= 850)
+		{
+			self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+			self.main.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+			self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		}
+		if (winHeight >= 600)
+		{
+			self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+			self.main.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+			self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+		}
+	}
+	catch(e)
+	{}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		mainFrame.style.left = "";
+		mainFrame.style.right = "5px";
+	}
+	else
+	{
+		mainFrame.style.left =  "5px";
+	}	
+}
+var cmTimer = setTimeout("AuthenCM()",3000);
+</SCRIPT>
+</HEAD>
+<!-- PT 111057: Netscape 6.2+ will not print hidden frame contents -->
+<body style="overflow:auto" onload="AuthenCM()" onresize="fitToScreen()">
+	<iframe id="HEADER" name="HEADER" src="/lawson/xhrnet/ui/header.htm" style="position:absolute;left:0px;width:820px;top:0px;height:32px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" src="/lawson/xhrnet/careermanagement/cmmain.htm" style="visibility:hidden;position:absolute;left:5px;width:820px;top:32px;height:635px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:1px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="PGCONTROL" name="PGCONTROL" style="visibility:visible;height:1px;width:0px;" src="/lawson/xhrnet/ui/pane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="HIDDEN" name="HIDDEN" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/careermanagement/lib/cm_lawheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="filterList" name="filterList" src="/lawson/xhrnet/dot.htm" allowtransparency="true" frameborder="no" marginwidth="0" marginheight="0" scrolling="no" style="visibility:hidden;position:absolute;left:150px:top:150px;width:450px;height:263px"></iframe>
+</body>
+</HTML>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/careermanagement/employee/mainWinAntartica.htm,v 1.8.2.32 2012/06/29 17:12:13 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

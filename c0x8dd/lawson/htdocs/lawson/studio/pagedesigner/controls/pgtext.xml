@@ -1,0 +1,61 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/controls/pgtext.xml,v 1.1.34.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="text" phraseId="lblText" img="text.gif" host="portalpage">
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="TITLE" phraseId="lblTitle" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="col" phraseId="lblLeft" readonly="0" init="100" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="row" phraseId="lblTop" readonly="0" init="100" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="50" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="50" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="border" phraseId="lblBorder" readonly="0" init="0" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="scroll" phraseId="lblScroll" readonly="0" init="1" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="zindex" phraseId="lblzIndex" readonly="0" init="0" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="tp" readonly="0" init="NUGTXT" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="nm" readonly="0" init="Text" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="interval" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="host" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="ahide" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="src" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTYSET id="textcontent" draw="page" type="object"/>
+	<PROPERTYPAGE id="proppage" htm="pagedesigner/dialogs/proppgtext.htm" height="350" width="450" />
+	<EVENT id="oninit" label="OnInit" parms="" returns="" />
+	<EVENT id="onclick" label="OnClick" parms="" returns="" />
+	<RULES>
+		<RULE id="minHeight" value="20"/>
+		<RULE id="minWidth" value="50"/>
+		<RULE id="isParent" value="0"/>
+		<RULE id="isChild" value="1"/>
+	</RULES>
+</CONTROL>

@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/controls/colabel.xml,v 1.1.8.2.22.2 2012/08/08 12:48:52 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="label" phraseId="lblLabel" img="label.gif" host="form1" >
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="nbr" phraseId="lblFieldNbr" readonly="1" init="" edit="X" draw="text" type="simple" />
+	<PROPERTY id="row" phraseId="lblTop" readonly="0" init="2" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="col" phraseId="lblLeft" readonly="0" init="4" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="1" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="sz" phraseId="lblWidth" readonly="0" init="20" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="nm" phraseId="lblText" readonly="1" init="" edit="X" draw="textbrowse" type="simple" >
+		<BUTTON id="openText" htm=""/>
+	</PROPERTY>
+	<PROPERTY id="font" phraseId="lblFont" readonly="0" init="" edit="X" draw="textbrowse" type="simple">
+		<BUTTON id="openFont" htm=""/>
+	</PROPERTY>
+	<PROPERTY id="color" phraseId="lblColor" readonly="0" init="" edit="X" draw="textbrowse" type="simple">
+		<BUTTON id="openColor" htm="" />
+	</PROPERTY>
+	<PROPERTY id="al" phraseId="lblJustify" readonly="0" init="right" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblLeft" value="left"/>
+			<OPTION phraseId="lblRight" value="right"/>
+			<OPTION phraseId="lblCenter" value="center"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="par" phraseId="" readonly="1" init="" edit="X" draw="hide" type="simple" />
+	<PROPERTY id="det" phraseId="" readonly="1" init="" edit="X" draw="hide" type="simple" />
+	<RULES>
+		<RULE id="minHeight" value="1"/>
+		<RULE id="minWidth" value="4"/>
+		<RULE id="isParent" value="0"/>
+		<RULE id="isChild" value="1"/>
+		<RULE id="isObject" value="0"/>
+		<RULE id="singleUse" value="0"/> 
+		<RULE id="useInDetail" value="1"/> 
+		<RULE id="nodeName" value="fld"/> 
+		<RULE id="nodeTp" value="label"/> 
+		<RULE id="allowDataBind" value="0"/> 
+	</RULES>
+</CONTROL>

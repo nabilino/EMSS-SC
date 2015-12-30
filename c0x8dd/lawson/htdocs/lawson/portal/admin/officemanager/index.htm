@@ -1,0 +1,72 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/officemanager/index.htm,v 1.21.2.7.4.1.14.3.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Bookmark Manager</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+
+<script language="javascript" src="../../layout.js"></script>
+<script language="javascript" src="../../objects/FeedBack.js"></script>
+<script language="javascript" src="../admincommon.js"></script>
+<script language="javascript" src="forms.js"></script>
+<script language="javascript" src="popup.js"></script>
+<script language="javascript" src="officemanager.js"></script>
+
+<link rel="stylesheet" href="../../portal.css" type="text/css" />
+<link rel="stylesheet" href="officemanager.css" type="text/css" />
+</head>
+
+<body tabIndex="-1" onload="initOfficeManager();" onunload="unloadFunc()" onkeydown="handleKeyDown(event)" 
+	onhelp="onOMHelp(event)" style="margin:0px;" onresize="sizeFind()">
+
+	<div id="treeTitle" class="xTTreeTitle" style="position:absolute;top:0px;left:10px;width:260px;height:28px;">Bookmarks</div>
+
+	<div id="Tree" level="0" param="" class="tree" style="position:absolute;top:28px;left:10px;width:260px;">
+	</div>
+
+	<div id="lyrFind" treeprev="" treenext="" treereload="" class="xTTreeFind" style="position:absolute;width:270px;top:-1000px;left:0px;height:25px;text-align:right;">
+		<input type="text" id="txtSearch" class="xTTextBox" style="position:relative;margin-bottom:2px;width:100px;"
+			onfocus="portalWnd.cmnOnTextboxFocus(event,this)" onblur="portalWnd.cmnOnTextboxBlur(event,this)">
+		</input>
+		<button id="spansearch" class="xTToolBarButton" onclick="doSearch()" style="margin-left:4px;">Find</button>
+		<button id="btnAdd" class="xTToolBarButton" onclick="loadBookmarkAddTop()" style="margin-left:4px;margin-right:2px;">Add</button>
+	</div>
+
+	<div id="formareaTitleBar" class="xTTreeTitle" style="position:absolute;top:0px;left:290px;height:28px;width:200px;">Bookmark Manager Tips</div>
+	<div id="lyrFormArea" class="xTFormArea" style="top:0px;overflow:auto;"></div>
+
+	<div id="lyrDrag" style="position:absolute;visibility:hidden;" class="xTDragHighlight">
+		<img src="../../images/spacer.gif" height="1" width="1" border="0">
+	</div>
+	<iframe id="iFrameNode" src="../../blank.htm" frameborder="no" scrolling="no" style="position:absolute;left:290px;top:28px;height:100%;width:100%;"></iframe>
+
+	<div id="lyrPopupCover" onmousedown="popupHide(true)" 
+			style="position:absolute;left:-1000px;top:-1000px;width:100px;height:100px;visibility:hidden;">
+	</div>
+	<div id="lyrPopup" onMouseOut="popupMouseOut" class="xTPopupBG" 
+			style="position:absolute;left:-1000px;top:-1000px;width:100px;height:100px;visibility:hidden;">
+	</div>
+</body>
+</html>

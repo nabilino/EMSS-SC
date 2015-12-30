@@ -1,0 +1,89 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/proppgurl.htm,v 1.2.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Property Page</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="proppgurl.js"></script>
+</head>
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<table height="100%" width="100%" border="0">
+		<tr height="30">
+			<td>
+				<span id="lblUrl" class="dsLabel" style="position:relative;">Address</span>
+				<input id="txtUrl" class="dsTextBox" style="position:relative;width:280;" onblur="ppgOnblurUrl()"></input>
+			</td>
+		</tr>
+		<tr height="20">
+			<td>
+				<span id="lblEg" class="dsLabel" style="position:relative;left:50">Example: http://www.myserver.com/index.htm?&lt;&lt;var1&gt;&gt;</span>
+			</td>
+		</tr>
+		<tr style="height:expression(body.clientheight-80)">
+			<td>
+				<table width="100%"  height="100%" border="0">
+					<tr height="20">
+						<td><span id="lblVar" class="dsLabel" style="position:relative;">Variables</span></td>
+					</tr>
+					<tr>
+						<td><div id="cont" style="width:100%;height:100%;position:relative;border-color:threedhighlight threedshadow threedshadow threedhighlight;border-width:1px;border-style:solid;">
+							<table width="100%"  height:"100%" border="0">
+								<tr>
+									<td valign="top" align="center" width="50%">
+										<select id="lstVariable" class="dsListText" size="10" style="height:expression(this.size*17);width:150px;" onclick="ppgListItemClick(this)"></select>
+									</td>
+									<td valign="top" align="left" width="50%">
+										<span id="lblName" class="dsLabel" style="position:relative;">Name</span>
+										<input id="txtName" class="dsTextBox" style="position:relative;width:160;"></input>
+										<span id="lblVal" class="dsLabel" style="position:relative;">Value</span>
+										<input id="txtValue" class="dsTextBox" style="position:relative;width:160;"></input>
+										<span id="filler" style="width:200;"></span>
+										<span id="filler2" style="width:30;"></span>
+										<input id="btnAdd" type="button" class="dsDlgButton" value="Add" flag="add" onclick="ppgVariable(this)" style="position:relative;width:80;"></input>
+										<input id="btnDel" type="button" class="dsDlgButton" value="Remove" onclick="ppgVariable(this)" style="position:relative;width:80;"></input>
+									</td>
+								</tr>
+							</table>
+						</div></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr height="30">
+			<td align="right">
+				<input id="btnOK" type="button" class="dsDlgButton" onclick="ppgOK()"
+					style="position:relative;width:70px;" value="OK">
+				</input>
+				<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+					style="position:relative;width:70px;" value="Cancel">
+				</input>
+				<input id="btnApply" type="button" class="dsDlgButton" disabled onclick="ppgUpdate()"
+					style="position:relative;width:70px;" value="Apply">
+				</input>
+			</td>
+		</tr>
+	</table>
+</body>
+</html>

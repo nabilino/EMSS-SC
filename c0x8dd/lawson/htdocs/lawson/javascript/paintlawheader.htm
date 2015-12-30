@@ -1,0 +1,273 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+<head>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script>
+
+function beginForm(tkn,type,username)
+{
+	parent.detailscreen = false
+	var P = null
+	var keyfcs = ""
+	var datafcs = ""
+	var ldatafcs = ""
+	var laddfcs = ""
+	var notokenxfer = ""
+	var j = beginForm.arguments.length
+	for (var i = 3;i < j;i++)
+	{
+		P = beginForm.arguments[i].split("=")
+		if (P[0] == "KEYFCS")
+			keyfcs = P[1]
+		if (P[0] == "DATAFCS")
+			datafcs = P[1]
+		if (P[0] == "LDATAFCS")
+			ldatafcs = P[1]
+		if (P[0] == "NOTOKENXFER")
+			notokenxfer = P[1]
+		if (P[0] == "LADDFCS")
+			laddfcs = P[1]
+	}
+	if (notokenxfer == "1")
+	{
+		parent.windowscreen = true
+		alert("Window type screens not supported")
+	}
+	else
+		parent.windowscreen = false
+	parent.beginForm(tkn,keyfcs,datafcs,ldatafcs,laddfcs)
+}
+
+function startTabs()
+{
+}
+
+function startTabRegion()
+{
+}
+
+function startTabForm()
+{
+}
+
+function finishTabForm()
+{
+}
+
+function finishTabRegion()
+{
+}
+
+function finishTabs()
+{
+}
+
+function startDetail(n)
+{
+	parent.dtl_lines = n
+	parent.detailscreen = true
+	parent.dtl_area = true
+	parent.first_fn = ""
+	parent.last_fn = ""
+}
+
+function finishDetail()
+{
+	parent.dtl_area = false
+}
+
+function Field(fldnbr,type,length)
+{
+	if (parent.dtl_area)
+	{
+		if (parent.first_fn == "")
+			parent.first_fn = fldnbr
+		parent.last_fn = fldnbr
+	}
+//	if (type == "Hidden" || type == "Translation" || type == "Sp" || type == "Push")
+	if (type == "Translation" || type == "Sp" || type == "Push")
+	{
+		if (type == "Sp")
+			parent.hk_name = fldnbr
+		parent.currentType = ""
+		return
+	}
+	parent.currentType = type
+	if (type == "Fc")
+	{
+		if (parent.dtl_area)
+		{
+			type = "text"
+			parent.currentType = "text"
+		}
+		else
+			return
+	}
+	var fldname = ""
+	var label = ""
+	var edit = ""
+	var req = "SB"
+	var P = null
+	var maxlen = 0
+	var dec = 0
+	var dft_val = ""
+	var kfn = ""
+	var skfn = ""
+	var tab_region = ""
+	var tab_form = ""
+	var row = ""
+	var j = Field.arguments.length
+	for (var i = 3;i < j;i++)
+	{
+		P = Field.arguments[i].split("=")
+		if (P[0] == "fldnm")
+			fldname = P[1]
+		if (P[0] == "label" || P[0] == "clabel")
+			label = P[1]
+		if (P[0] == "edit")
+		{
+			edit = P[1]
+			if (edit == "right")
+				edit = "upper"
+			if (edit == "time")
+				edit = "numeric"
+		}
+		if (P[0] == "req" && P[1] == "true")
+		{
+			if (parent.form_type == "BATCH")
+				type = "Key"
+			if (type == "Key")
+				req = (parent.dtl_area ? "LK" : "SK")
+			else
+				req = (parent.dtl_area ? "LR" : "SR")
+		}
+		if (P[0] == "maxlen")
+			maxlen = P[1]
+		if (P[0] == "dec")
+			dec = P[1]
+		if (P[0] == "value")
+			dft_val = P[1]
+		if (P[0] == "kfn")
+			kfn = P[1]
+		if (P[0] == "skfn")
+			skfn = P[1]
+		if (P[0] == "TabRegion")
+			tab_region = P[1]
+		if (P[0] == "TabForm")
+			tab_form = P[1]
+		if (P[0] == "row")
+			row = P[1]
+	}					
+	if (row == "00" && parent.currentType != "Hidden")
+	{
+		parent.currentType = ""
+		return
+	}
+	var tmpname = parent.getName(fldname)
+	var occ = 0
+	for (var i = 0;i <= parent.fld_count;i++)
+	{
+		if (parent.frm_fields[i].name == tmpname)
+		{
+// temp fix for ags problem with batch screen field names
+			if (parent.form_type == "BATCH" && (length != parent.frm_fields[i].size || edit != parent.frm_fields[i].edit))
+			{
+				fldname = label.substring(0,label.indexOf(" "))
+				break
+			}
+// end of fix
+			if (type != parent.frm_fields[i].type || tab_form != parent.frm_fields[i].tab_form)
+			{
+				parent.currentType = ""
+				break
+			}
+			if (parent.frm_fields[i].occ == 0)
+			{
+				parent.frm_fields[i].label += "1"
+				parent.frm_fields[i].ags_name += "1"
+				parent.frm_fields[i].occ = 1
+				parent.ags_ary[parent.frm_fields[i].ags_name] = i
+			}
+			parent.frm_fields[i].occ++
+			occ = parent.frm_fields[i].occ
+			if (label == "")
+				label = parent.frm_fields[i].label.substring(0,parent.frm_fields[i].label.length - 1) + occ
+			break
+		}
+	}
+	if (occ != 0)
+		fldname += occ
+// temp code
+	if (parent.currentType == "Hidden" && fldname == "Tc" && row == "00")
+		parent.currentType = ""
+	if (fldname == "Originator")
+		parent.currentType = ""
+//
+	if (parent.currentType != "")
+	{
+		if (parent.dtl_area)
+			parent.dtl_fields[++parent.dtl_count] = new parent.Detail_Object(fldnbr,fldname,label,edit,length,req,type,maxlen,dec,dft_val,kfn,skfn,tab_region,tab_form)
+		else
+			parent.frm_fields[++parent.fld_count] = new parent.Field_Object(fldnbr,fldname,label,edit,length,req,type,maxlen,dec,dft_val,kfn,skfn,tab_region,tab_form)
+	}
+}
+
+function sV(value,xlt)
+{
+	if (value == "")
+		value = " "
+	if (value.indexOf(":") != -1)
+	{
+		var str = value.split(":")
+		var beg = Number(str[0])
+		var end = Number(str[1])
+		for (var i = beg;i <= end;i++)
+			parent.sV(i,i)
+	}
+	else
+		parent.sV(value,xlt)
+}
+
+function NewFormLoaded(token,frmname)
+{
+	parent.NewFormLoaded(frmname)
+}
+
+function V(fldnbr,fldval)
+{
+	parent.agsReturn(fldnbr,fldval)
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	if (msgnbr != 0)
+	{
+		if (parent.form_save)
+		{
+			alert(msg)
+			parent.form_save = false
+		}
+		else
+		{
+			msg += parent.getFieldName(fldnbr)
+			alert(msg)
+			parent.frm_running = false
+			parent.agsMessage(msg,fldnbr,true)
+		}
+	}
+	else
+	{
+		if (!parent.form_save)
+			parent.agsMessage(msg,fldnbr,false)
+	}
+}
+</script>
+</head>
+</html>
+
+

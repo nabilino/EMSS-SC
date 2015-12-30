@@ -1,0 +1,77 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/index.htm,v 1.4.2.3.4.1.14.2.2.3 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<HEAD>
+<TITLE>Portal Role Manager</TITLE>
+
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="../../objects/FeedBack.js"></SCRIPT>
+<SCRIPT language="javascript" src="../../objects/PortalRole.js"></SCRIPT>
+<SCRIPT language="javascript" src="rolemgr.js"></SCRIPT>
+<SCRIPT language="javascript" src="migrate.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../portal.css"></link>
+
+</HEAD>
+
+<BODY tabIndex="-1" onload="rolInit()" onunload="rolOnUnload()" style="visibility:hidden" 
+			onkeydown="rolOnKeyDown(event)" onbeforeunload="rolOnBeforeUnload(event)" onresize="rolOnResize()">
+	<table id="tblFiles" border="0" cellspacing="8" style="width:400px;margin:10px;">
+	<tr>
+		<td>
+			<label class="xTLabel" id="lblSelectFile" for="txtfolder"
+				style="position:relative;text-align:left;">Select role file (or New for new file):
+			</label>
+		<br/>
+			<input type="text" class="xTTextBoxDisabled" id="txtfile" disabled
+				style="position:relative;width:320px;">
+			</input>
+			<br/>
+			<div id="listFiles" class="xTListText" onselectstart="portalWnd.cmnBlockSelect(event)"
+				style="position:relative;width:320px;height:180px;margin-top:4px;border-style:inset;border-width:2px;border-color:grey;overflow:auto;">
+			</div>
+		</td>
+	</tr>
+	</table>
+
+	<!-- display tabs frame -->
+	<iframe id="frmDisplayTabs" frameborder="no" scrolling="no" src="../../blank.htm" style="position:absolute;display:none;top:0;left:0;width:100%;height:100%;">
+	</iframe>
+
+	<!-- migration div -->
+	<div id="divMigrate" style="position:absolute;display:none;top:0;left:0;width:100%;height:100%;">
+		<table id="msgTable" border="0" style="margin:20px;">
+		<tr>
+		<td width="60px" align="center" valign="top">
+			<img id="imgMigBusy" src="../../images/icobusy.gif"></img>
+		</td>
+		<td width="300px" align="left" valign="center">
+			<label id="lblMigPrompt" class="xTLabel" style="text-align:left;overflow:visible;">
+				Please wait, performing migration...
+			</label>
+		</td>
+		</table>
+	</div>
+
+</BODY>
+</HTML>

@@ -1,0 +1,530 @@
+<html>
+<head>
+<title>Direct Deposit</title>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<script SRC="/lawson/webappjs/common.js"></script>
+<script SRC="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script SRC="/lawson/xhrnet/email.js"></script>
+<script SRC="/lawson/xhrnet/esscommon80.js"></script>
+<script SRC="/lawson/xhrnet/empinfo.js"></script>
+<script SRC="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script SRC="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script SRC="/lawson/xhrnet/directdeposit/jslib/directdepositlib.js"></script>
+<script SRC="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var per="%";
+var parentTask="";
+var appObj;
+
+if (fromTask)
+{
+	parentTask = getVarFromString("from",fromTask);
+}
+
+function BankAccountObject(bnk_acct_nbr, ach_option, prenote_option, bnk_acct_nbr2)
+{
+	this.bnk_acct_nbr = bnk_acct_nbr;
+	this.ach_option = ach_option;
+	this.prenote_option = prenote_option;
+	if (bnk_acct_nbr2) {
+		this.bnk_acct_nbr2 = bnk_acct_nbr2;
+	}
+}
+
+// Authenticate the web user.
+function OpenProgram()
+{
+	authenticate("frameNm='jsreturn'|funcNm='GetEmployeeInfo()'|sysenv=true|desiredEdit='EM'");
+}
+
+// Load the user's employee data.
+function GetEmployeeInfo()
+{
+	StoreDateRoutines();
+
+	prodline = authUser.prodline;
+	company	= authUser.company;
+	employee = authUser.employee;
+
+	try {
+		if (fromTask) {
+			parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+		}
+	}
+	catch(e)
+	{}
+
+	try
+	{
+		if (fromTask)
+		{
+			parent.document.getElementById(window.name).style.visibility = "visible";
+		}
+	}
+	catch(e)
+	{}
+
+	var empfields = "label-name-1;first-name;last-name;process-level;email-address;"
+	+ "addr1;addr2;city;state;zip;country-code;auto-deposit;company.name;work-country;"
+	+ "process-level.name"
+	GetEmpInfo(prodline,company,employee,"employee",empfields,"DspEmployeeInfo()");
+}
+
+// Store employee data in recordset Employee and load the PR System rules.
+function DspEmployeeInfo()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		Employee = EmpInfo
+
+		if (parentTask == "main") {
+			if (Employee.work_country == "UK") {
+				parent.document.title = getSeaPhrase("DD_222","DD");
+				parent.setTaskHeader("header",getSeaPhrase("DD_222","DD"),"Pay");
+			}
+			else {
+				parent.document.title = getSeaPhrase("DD_83","DD");
+				parent.setTaskHeader("header",getSeaPhrase("DD_83","DD"),"Pay");
+			}
+		}
+
+		// Provide an edit so that only clients with a US or CA work country have access
+		// to the Direct Deposit task.
+		if (Employee.work_country != "US" &&
+		    Employee.work_country != "CA" &&
+		    Employee.work_country != "UK")
+		{
+			parent.seaAlert(getSeaPhrase("DD_1","DD")+"\n"+ getSeaPhrase("DD_2","DD"));
+			CloseProgram();
+			return;
+		}
+
+		if (Employee.work_country == "UK")
+		{
+			if (fromTask) {
+				parent.showWaitAlert(getSeaPhrase("DD_3","DD"));
+			}
+		}
+		else
+		{
+			if (fromTask) {
+				parent.showWaitAlert(getSeaPhrase("DD_4","DD"));
+			}
+		}
+
+		var	obj 		= new DMEObject(prodline,"prsystem")
+			obj.out		= "JAVASCRIPT"
+			obj.index 	= "prsset1"
+			obj.field	= "bank-code"
+			obj.max		= "1"
+			obj.key		= parseInt(company,10) + "=" + escape(Employee.process_level)
+			obj.func	= "DspPrSystem()"
+			obj.debug	= false
+		DME(obj,"jsreturn")
+	}
+	else
+	{
+		var msg = (Employee.work_country == "UK")?"DD_6":"DD_5"
+
+		parent.seaAlert(getSeaPhrase(msg,"DD")+"\n"+
+		      getSeaPhrase("DD_2","DD")+"\n\n"+
+		      getSeaPhrase("DD_7","DD"))
+		CloseProgram()
+	}
+}
+
+// Store the prsystem bank code used to associate the bank account info with cash account info.
+function DspPrSystem()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		PrSystem = self.jsreturn.record[0]
+		var obj   	 	= new DMEObject(prodline,"bankfile")
+			obj.out   	= "JAVASCRIPT"
+			obj.index 	= "bflset1"
+			obj.field 	= "bnk-acct-nbr;bank-account.ach-option;bank-account.prenote-option;"
+						+ "bnk-acct-nbr2;bank-account2.ach-option;bank-account2.prenote-option"
+			obj.max 	= "1"
+			obj.key		= parseInt(company,10) + "=" + escape(PrSystem.bank_code)
+			obj.func  	= "DspBankAccount()"
+			obj.debug	= false
+		DME(obj,"jsreturn")
+	}
+	else
+	{
+		var msg = (Employee.work_country == "UK")?"DD_6":"DD_5"
+
+		parent.seaAlert(getSeaPhrase(msg,"DD")+"\n"+
+		      getSeaPhrase("DD_2","DD")+"\n\n"+
+		      getSeaPhrase("DD_8","DD"))
+		CloseProgram()
+	}
+}
+
+// Store the prenotification flag in recordset BankAccount and load the employee's
+// direct deposit accounts.
+function DspBankAccount()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		var bankRec = self.jsreturn.record[0]
+
+		if (bankRec.bank_account_ach_option == "Y" || bankRec.bank_account2_ach_option == "Y" || bankRec.bank_account_ach_option == "B" || bankRec.bank_account2_ach_option == "B")
+		{
+			if (bankRec.bank_account_ach_option == "Y" || bankRec.bank_account_ach_option == "B")
+			{
+				BankAccount = new BankAccountObject(bankRec.bnk_acct_nbr,bankRec.bank_account_ach_option,
+					bankRec.bank_account_prenote_option)
+			}
+			else
+			{
+				BankAccount = new BankAccountObject(bankRec.bnk_acct_nbr2,bankRec.bank_account2_ach_option,
+					bankRec.bank_account2_prenote_option)
+			}
+
+			GetSystemRules();
+			return
+		}
+	}
+
+	var msg1 = "DD_5"
+	var msg2 = "DD_9"
+
+	if (Employee.work_country == "UK")
+	{
+		msg1 = "DD_6"
+		msg2 = "DD_10"
+	}
+
+	// If we get this far, we either have no bank account record, or ACH is not
+	// setup for the user's process level.
+		parent.seaAlert(getSeaPhrase(msg1,"DD")+"\n"+
+		      getSeaPhrase("DD_2","DD")+"\n\n"+
+		      getSeaPhrase(msg2,"DD"))
+	CloseProgram()
+}
+
+function GetSystemRules()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       	setTimeout(function(){ GetSystemRules(); }, 10);
+       	return;
+	}
+
+	var sysCompany = company.toString()
+	for(var i=sysCompany.length;i<4;i++)
+		sysCompany = "0" + sysCompany
+
+	var obj   	 	= new DMEObject(prodline,"sysrules")
+		obj.out   	= "JAVASCRIPT"
+		obj.field 	= "task;system;key1;alphadata1;"
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			obj.field += "alphadata2;";
+		}
+
+		obj.field	+= "alphadata3;alphadata4;alphadata5;numeric1;email-address"
+		obj.key   	= "AUTODEPOSIT=PR=" + sysCompany
+		obj.max	 	= "1"
+		obj.func  	= "DspRules()"
+		obj.debug	= false
+	DME(obj,"jsreturn")
+}
+
+// Store PR System rules in recordset SysRules and load the prenotification flag.
+function DspRules()
+{
+	var msg1 = "DD_5"
+	var partialMsg = "DD_11"
+	var fullMsg = "DD_13"
+
+	if (Employee.work_country == "UK")
+	{
+		msg1 = "DD_6"
+		partialMsg = "DD_12"
+		fullMsg = "DD_14"
+	}
+
+	if (self.jsreturn.NbrRecs)
+	{
+		Rules = self.jsreturn.record[0]
+		Rules.notify = Rules.alphadata4	  // set the payroll email option from alphadata4
+		Rules.notifyee = Rules.alphadata5 // set the ee email option from alphadata5
+		Rules.company_accts = (Rules.numeric1)?parseInt(Rules.numeric1,10):0
+		Rules.partial_ach = (!NonSpace(Rules.alphadata3))?"Y":Rules.alphadata3
+		Rules.waive_receipt = "N";
+
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+		{
+			if (NonSpace(Rules.alphadata2) > 0)
+				Rules.waive_receipt = Rules.alphadata2;
+		}
+
+		if (Rules.partial_ach == "N" && Employee.auto_deposit == "P")
+		{
+		parent.seaAlert(getSeaPhrase(msg1,"DD")+"\n"+
+		      getSeaPhrase("DD_2","DD")+"\n\n"+
+		      getSeaPhrase(partialMsg,"DD"))
+			CloseProgram()
+		}
+		// PT 121559
+		//else if (Rules.partial_ach == "Y" && Employee.auto_deposit == "Y")
+		//{
+		//parent.seaAlert(getSeaPhrase(msg1,"DD")+"\n"+
+		//      getSeaPhrase("DD_2","DD")+"\n\n"+
+		//      getSeaPhrase(fullMsg,"DD"))
+		//	CloseProgram()
+		//}
+		else
+			GetAccounts()
+	}
+	else
+	{
+		parent.seaAlert(getSeaPhrase(msg1,"DD")+"\n"+
+		      getSeaPhrase("DD_2","DD")+"\n\n"+
+		      getSeaPhrase("DD_15","DD"))
+		CloseProgram()
+	}
+}
+
+// Load the employee's direct deposit accounts.
+function GetAccounts(action,notify)
+{
+	AchDistNbrFree = new Array()
+	AchOrderNbrFree = new Array()
+	maxDistPtr = 0
+	maxOrderPtr = 0
+	freeOrderPtr = 1
+
+	// If we are refreshing the account list following an account add, make sure the add window gets closed.
+	CloseAddAccountWindows()
+
+	for (var i=1;i<=MAXACCOUNTS;i++)
+	{
+		AchDistNbrFree[i] = true
+		AchOrderNbrFree[i] = true		
+	}
+
+    var obj = new DMEObject(prodline,"emachdepst")
+    obj.out = "JAVASCRIPT"
+	obj.index = "eadset1"
+	obj.field = "ach-dist-nbr;ach-dist-order;ebank-id;ebnk-acct-nbr;account-type,xlt;bank-roll-no;"
+			+ "net-percent;deposit-amt;description;check-desc;beg-date;end-date;default-flag;"
+			+ "account-type;ded-cycle;country-code;ca-inst-nbr;ca-transit-nbr;employee.auto-deposit"
+	if (Employee.work_country == "UK")
+		obj.field += ";payable-to"
+
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "9.0.1")
+	{
+		obj.field += ";print-rcpt"
+	}
+
+	obj.key	= parseInt(company,10) + "=" + parseInt(employee,10)
+	obj.max = "" + (MAXACCOUNTS+1)
+	if (action || notify)
+	{
+		if (action && !notify)
+			obj.func = "DspAccounts('"+action+"')"
+		else if (!action && notify)
+			obj.func = "DspAccounts('',true)"
+		else
+			obj.func = "DspAccounts('"+action+"',true)"
+	}
+	else
+	{
+		obj.func = "DspAccounts()"
+	}
+	obj.sortasc = "ach-dist-order"
+	obj.debug = false
+	DME(obj,"jsreturn")
+}
+
+// Store direct deposit accounts in recordset DepositAccounts and proceed to main
+// tabular display.
+function DspAccounts(action,notify)
+{
+	Accounts = new AccountObj()
+	CLEARDEFAULTS = false
+
+	// Initialize the flags for resetting the auto deposit field on HR11.
+	CLEARFLAG = false
+	SETFLAG = false
+
+	if (self.jsreturn.NbrRecs)
+	{
+		var EmpACHFlag = self.jsreturn.record[0].employee_auto_deposit
+		if (EmpACHFlag == "N" || !NonSpace(EmpACHFlag))
+			SETFLAG = true
+	}
+	else if (Employee.auto_deposit == "N" || !NonSpace(Employee.auto_deposit))
+		SETFLAG = true
+
+	var AcctList = Accounts.Hash // List of accounts by country
+	// Initialize an account list for the employee's work country
+	Accounts.Countries[Accounts.Countries.length] = Employee.work_country
+	AcctList[Employee.work_country] = new AccountsHash(Employee.work_country)
+
+	for (var i=0; i<self.jsreturn.NbrRecs; i++)
+	{
+		var acct_country = self.jsreturn.record[i].country_code.toString()
+
+		// Treat accounts with blank country codes as "US"
+		if (typeof(acct_country) == "undefined" || !NonSpace(acct_country))
+			acct_country = "US"
+
+		// Separate the direct deposit accounts by country code.
+		if (!AcctList[acct_country] || typeof(AcctList[acct_country]) == "undefined")
+		{
+			Accounts.Countries[Accounts.Countries.length] = acct_country
+			AcctList[acct_country] = new AccountsHash(acct_country)
+		}
+
+		var thisCtry = AcctList[acct_country]
+		var index = thisCtry.Recs.length
+		var thisAcct = new Object()
+
+		thisCtry.Recs[index] = self.jsreturn.record[i]
+		thisAcct = thisCtry.Recs[index]
+		thisAcct.isNew = false
+		thisAcct.isTouched = false
+		var distNo = parseInt(thisAcct.ach_dist_nbr,10)
+		var orderNo = parseInt(thisAcct.ach_dist_order,10)
+		thisAcct.ach_dist_nbr = distNo
+		thisAcct.ach_dist_order = orderNo
+		thisAcct.beg_date = (NonSpace(thisAcct.beg_date))?formatDME(thisAcct.beg_date):" "
+		thisAcct.end_date = (NonSpace(thisAcct.end_date))?formatDME(thisAcct.end_date):" "
+		thisAcct.print_rcpt = (thisAcct.print_rcpt)?thisAcct.print_rcpt:" ";
+
+		// Keep track of the largest distribution number assigned by PR12.
+		if (distNo > maxDistPtr)
+			maxDistPtr = distNo
+		AchOrderNbrFree[orderNo] = false // Flag this ACH-DIST-ORDER as used.
+		AchDistNbrFree[distNo] = false // Flag this ACH-DIST-NBR as used.
+
+		if (orderNo > maxOrderPtr)
+			maxOrderPtr = orderNo
+
+		// Store the account based on whether it is active (open) or inactive (closed).
+		if (thisAcct.ach_dist_order > 0 && NonSpace(thisAcct.beg_date)
+		&& (!NonSpace(thisAcct.end_date) || formjsDate(thisAcct.end_date) > ymdtoday)
+		&& HasDedCycle(acct_country,index))
+		{
+			Accounts.totalOpen++
+			if (thisAcct.default_flag == "Y")
+			{
+				thisCtry.DefaultAccount[0] = thisAcct
+				thisCtry.defaultAcctPtr = thisAcct.ach_dist_nbr
+			}
+			else
+			{
+				thisCtry.OpenAccounts[thisCtry.OpenAccounts.length] = thisAcct
+				if (thisAcct.net_percent > 0)
+					thisCtry.totalPercent += parseFloat(thisAcct.net_percent)
+			}
+		}
+		else
+		{
+			Accounts.totalClose++
+			thisCtry.ClosedAccounts[thisCtry.ClosedAccounts.length] = thisAcct
+
+			// Queue up any inactive accounts that have the default flag set to "Y" so that
+			// we can reset those flags before the user's first update (to avoid PR12 edits).
+			if (thisAcct.default_flag == "Y" && thisAcct.ach_dist_order > 0)
+			{
+				CLEARDEFAULTS = true
+				thisAcct.default_flag = "N"
+				thisAcct.ach_dist_order = 0
+				if (!NonSpace(thisAcct.end_date))
+					thisAcct.end_date = fmttoday
+				thisCtry.DefaultQueue[thisCtry.DefaultQueue.length] = thisAcct
+			}
+		}
+	}
+
+	Accounts.sysAvailable = Accounts.sysLimit - (Accounts.totalOpen + Accounts.totalClose)
+
+	// Always place the default account last in the list of open accounts, if one exists.
+	// Provide totals for both available accounts per country.
+	for (var i=0; i<Accounts.Countries.length; i++)
+	{
+		var thisCtry = AcctList[Accounts.Countries[i]]
+
+		thisCtry.OpenAccounts = thisCtry.OpenAccounts.concat(thisCtry.DefaultAccount)
+		thisCtry.openCount = thisCtry.OpenAccounts.length
+		thisCtry.closeCount = thisCtry.ClosedAccounts.length
+		thisCtry.compAvailable = Rules.company_accts - thisCtry.openCount
+		if (Accounts.sysAvailable < thisCtry.compAvailable)
+			thisCtry.acctAvailable = Accounts.sysAvailable
+		else
+			thisCtry.acctAvailable = AcctList[Accounts.Countries[i]].compAvailable
+	}
+
+	if (action || notify)
+	{
+		if (action && notify)
+			DspDeposits(action,true)
+		else if (action && !notify)
+			DspDeposits(action,false)
+		else if (!action && notify)
+			DspDeposits("",true)
+	}
+	else {
+	    DspDeposits("",false)
+	}
+}
+
+// Check if an account has a deduction cycle defined.
+function HasDedCycle(country,index)
+{
+	var cycle_obj = ""
+
+	for (var i=1;i<10;i++)
+	{
+		cycle_obj = eval('Accounts.Hash["'+country+'"].Recs['+index+'].ded_cycle_' + i)
+		if (NonSpace(cycle_obj)) return true
+	}
+	// If we get this far, all cycle fields were blank.
+	return false
+}
+
+// Close all windows and show initial splash screen.
+function CloseProgram()
+{
+	if (fromTask) {
+		parent.removeWaitAlert();
+	}
+	try {
+		CloseWindows();
+	}
+	catch(e) {}
+	CloseDirectDeposit();
+}
+</script>
+</head>
+<body onload="OpenProgram()">
+	<iframe id="list" name="list" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;position:absolute;left:0px;width:750px;top:0px;height:225px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="detail" name="detail" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;position:absolute;left:0px;width:750px;top:225px;height:250px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="chgdetail" name="chgdetail" src="/lawson/xhrnet/ui/headerpanehelplite.htm" style="visibility:hidden;position:absolute;left:0px;width:423px;top:225px;height:250px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/directdeposit/ddheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="email" name="email" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/directdeposit/directdeposit.htm,v 1.13.2.25 2011/05/04 21:10:22 brentd Exp $ -->

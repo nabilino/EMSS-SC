@@ -1,0 +1,400 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	var head = ''
+	var bod = ''
+	var bod2 = ''
+	parent.Fcost = 0
+	var totEmpCost = 0
+	var totCompCost = 0
+	var totEmpPercent = 0
+	var benefits = '<table style="width:90%" cellspacing="0" cellpadding="0" border="0"><tr><td class="plaintablecell">'
+	if(parent.rule_type=="N" && parent.CurrentBens.length>0) 
+	{
+		benefits += getSeaPhrase("CURBEN_1","BEN") + '<br>'
+		         + getSeaPhrase("CURBEN_2","BEN")
+	}
+	else 
+	{
+		benefits += getSeaPhrase("CURBEN_3","BEN") + ' '
+		         + (parent.CurrentBenDate.indexOf("/") == -1 ? parent.FormatDte4(parent.CurrentBenDate) : parent.CurrentBenDate)
+	}
+	benefits += '</td></tr></table><br>'
+    	     + '<center><table class="plaintableborder" width="'+parent.TableWidth+'" border="0" cellspacing="0"'
+             + ' cellpadding="0" styler="list">'
+	benefits += '<tr>'
+			 + '<th class="plaintableheaderborder" style="text-align:center" nowrap scope=col>'+getSeaPhrase("PLAN","BEN")+'</th>'
+			 + '<th class="plaintableheaderborder" style="text-align:center" nowrap scope=col>'+getSeaPhrase("START_DATE","BEN")+'</th>'
+		  	 + '<th class="plaintableheaderborder" style="text-align:center" nowrap scope=col>'+getSeaPhrase("COVERAGE","BEN")+'</th>'
+	parent.InitSummaryTotals()
+	
+		for (var i=1; i<parent.CurrentBens.length; i++)
+		{
+			var YourCost = 0
+			var PreAft = ""
+			if(parent.CurrentBens[i][13]=="P")
+				PreAft = getSeaPhrase("PRE_TAX","BEN")
+			if(parent.CurrentBens[i][13]=="B")
+				PreAft = getSeaPhrase("BOTH","BEN")
+			if(parent.CurrentBens[i][13]=="A")
+				PreAft = getSeaPhrase("AFTER_TAX","BEN")
+			var empcst1 = 0
+			var empcst2 = 0
+			var flxcnt = 0
+			if(parent.CurrentBens[i][21]!="")
+			{
+				flxcnt = parseFloat(parent.CurrentBens[i][21])
+			}
+			// Default after-tax cost is BEN-EMP-AFT-CONT field.
+			if(parent.CurrentBens[i][19]!="")
+			{
+				empcst2 = parseFloat(parent.CurrentBens[i][19])
+			}			
+			// PT 150518. Use the BEN-BOND-DED-AMT field for RS plans if the cost divisor is not annual.
+			// If an annual cost divisor is used, the annual employee cost should be stored in the BEN-EMP-AFT-CONT field.
+			if((parent.CurrentBens[i][13]=="A" || parent.CurrentBens[i][13]=="B") && parent.CurrentBens[i][1]=="RS")
+			{
+				if(parent.BenefitRules[6]=="P" && parent.CurrentBens[i][26]!="")
+				{
+					empcst2 = parseFloat(parent.CurrentBens[i][26])
+				}
+				else if((parent.BenefitRules[6]=="M" || parent.BenefitRules[6]=="S") && parent.CurrentBens[i][27]!="" && typeof(parent.CurrentBens[i][44])!="undefined" && parent.CurrentBens[i][44]!="" && parseInt(parent.CurrentBens[i][44],10) != 0)
+				{
+					empcst2 = parseFloat(parent.CurrentBens[i][27])/parseFloat(parent.CurrentBens[i][44]);
+				}
+			}			
+			// Default pre-tax cost is BEN-EMP-PRE-CONT field.
+			if(parent.CurrentBens[i][18]!="")
+			{
+				empcst1 = parseFloat(parent.CurrentBens[i][18])
+			}
+			// PT 150518. Use the BEN-BOND-DED-AMT field for RS plans if the cost divisor is not annual.
+			// If an annual cost divisor is used, the annual employee cost should be stored in the BEN-EMP-PRE-CONT field.
+			if((parent.CurrentBens[i][13]=="P" || parent.CurrentBens[i][13]=="B") && parent.CurrentBens[i][1]=="RS")
+			{
+				if (parent.BenefitRules[6]=="P" && parent.CurrentBens[i][26]!="")
+				{
+					empcst1 = parseFloat(parent.CurrentBens[i][26])
+				}
+				else if((parent.BenefitRules[6]=="M" || parent.BenefitRules[6]=="S") && parent.CurrentBens[i][27]!="" && typeof(parent.CurrentBens[i][44])!="undefined" && parent.CurrentBens[i][44]!="" && parseInt(parent.CurrentBens[i][44],10) != 0)
+				{
+					empcst1 = parseFloat(parent.CurrentBens[i][27])/parseFloat(parent.CurrentBens[i][44]);
+				}
+			}
+			YourCost = empcst1 + empcst2
+			if(YourCost==0)
+				YourCost = ""
+			else
+			{
+				if(parent.CurrentBens[i][11]!="P")
+				{
+					// PT96844 - If this is a record type 6 plan (spending account) with a
+					// flat amount, use the BEN-BOND-DED-AMT as the employee cost, since this
+					// could have been a mid-year enrollment.
+					// PT 150518. Do not use BEN-BOND-DED-AMT if cost divisor is annual.
+					if (parent.CurrentBens[i][22]=="06" && parent.BenefitRules[6]=="P" && parent.CurrentBens[i][26]!="")
+					{
+						YourCost = parent.CurrentBens[i][26]
+					}
+					totEmpCost += parseFloat(YourCost)
+					// Pre-tax amount contributions
+					if(parent.CurrentBens[i][13]=="P" || parent.CurrentBens[i][13]=="B")
+					{
+						if(parseFloat(empcst1)<0)
+							parent.EmpNegPreTaxTotal += parseFloat(Math.abs(empcst1))
+						else
+						{
+							if (parent.CurrentBens[i][39]== "Y")
+								parent.EmpPreTaxFlexTotal += parseFloat(empcst1)
+							parent.EmpPreTaxTotal += parseFloat(empcst1)
+						}
+					}
+					// After-tax amount contributions
+					if(parent.CurrentBens[i][13]=="A" || parent.CurrentBens[i][13]=="B")
+						parent.EmpAfterTaxTotal += parseFloat(empcst2)
+				}
+				else
+				{
+					totEmpPercent += parseFloat(YourCost)
+					// Pre-tax percent contributions
+					if(parent.CurrentBens[i][13]=="P" || parent.CurrentBens[i][13]=="B")
+						parent.EmpPreTaxPercentTotal += parseFloat(empcst1)
+					// After-tax percent contributions
+					if(parent.CurrentBens[i][13]=="A" || parent.CurrentBens[i][13]=="B")
+						parent.EmpAfterTaxPercentTotal += parseFloat(empcst2)
+				}
+				YourCost = parent.formatCont(YourCost)
+			}
+			bod += '<tr><td class="plaintablecellborder" nowrap>&nbsp;' + parent.CurrentBens[i][5] + '&nbsp;</td>'
+			bod += '<td class="plaintablecellborder" nowrap>&nbsp;'
+		         + (parent.CurrentBens[i][3].indexOf("/") == -1 ? parent.FormatDte4(parent.CurrentBens[i][3]) : parent.CurrentBens[i][3])
+				 + '&nbsp;</td>'
+			if(parent.CurrentBens[i][22]=="01")
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.CurrentBens[i][23] + '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="02")
+			{
+				if(parent.CurrentBens[i][31]=="E")
+				{
+					bod += '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td></tr>'
+					   + '<tr><td class="plaintablecellborder" align=right nowrap>&nbsp;'+getSeaPhrase("EMPLOYEE","BEN")+'</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][8])+'</td>'
+				}
+				else if(parent.CurrentBens[i][31]=="S")
+				{
+					bod += '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td></tr>'
+					   + '<tr><td class="plaintablecellborder" align=right nowrap>&nbsp;'+getSeaPhrase("SPOUSE","BEN")+'</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][8])+'</td>'
+				}
+				else if(parent.CurrentBens[i][31]=="D")
+				{
+					bod += '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td></tr>'
+					   + '<tr><td class="plaintablecellborder" align=right nowrap>&nbsp;'+getSeaPhrase("DEPENDENT","BEN")+'</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][8])+'</td>'
+				}
+				else if(parent.CurrentBens[i][31]=="B")
+				{
+					bod+= '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td></tr>'
+					   + '<tr><td class="plaintablecellborder" align=right nowrap>&nbsp;'+getSeaPhrase("SPOUSE","BEN")+'</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][8])+'</td><td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td></tr>'
+					   + '<tr><td class="plaintablecellborder" align=right nowrap>&nbsp;'+getSeaPhrase("DEPENDENT","BEN")+'</td>'
+					   + '<td class="plaintablecellborder">&nbsp;</td>'
+					   + '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][24])+'</td>'
+				}
+				else if(parent.CurrentBens[i][31]=="")
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'+parent.formatCont(parent.CurrentBens[i][8])+'</td>'
+				}
+			}
+			else if(parent.CurrentBens[i][22]=="03" || parent.CurrentBens[i][22]=="13")
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.formatCont(parent.CurrentBens[i][8]) + '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="04")
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.formatCont(parent.CurrentBens[i][8]) + '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="05")
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.CurrentBens[i][20]+getSeaPhrase("PER","BEN") + '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="06")
+			{
+				if (parent.CurrentBens[i][11] == "P")
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'
+					if(!isNaN(parseFloat(parent.formatCont(parent.CurrentBens[i][27]))))
+						bod += parent.formatCont(parent.CurrentBens[i][27])+ ' ' + getSeaPhrase("PERCENT_OF_TOTAL","BEN")
+				}
+				else
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'
+					if(!isNaN(parseFloat(parent.formatCont(parent.CurrentBens[i][27]))))
+						bod += parent.formatCont(parent.CurrentBens[i][27])+ ' ' + getSeaPhrase("PER_YEAR","BEN")
+				}
+				bod += '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="07")
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'
+				if(!isNaN(parseFloat(parent.CurrentBens[i][30])))
+					bod += parent.CurrentBens[i][30]+ ' ' + getSeaPhrase("HOURS","BEN")
+				bod += '&nbsp;</td>'	
+			}
+			else if(parent.CurrentBens[i][22]=="08" || parent.CurrentBens[i][22]=="09")
+			{
+				if (parent.CurrentBens[i][11] == "P")
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'
+					if(!isNaN(parseFloat(parent.formatCont(parent.CurrentBens[i][27]))))
+						bod += parent.formatCont(parent.CurrentBens[i][27])+ ' ' + getSeaPhrase("PERCENT_OF_TOTAL","BEN")
+				}
+				else
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;'
+					if(!isNaN(parseFloat(parent.formatCont(parent.CurrentBens[i][27]))))
+						bod += parent.formatCont(parent.CurrentBens[i][27])+ ' ' + getSeaPhrase("PER_YEAR","BEN")
+				}
+				bod += '&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="10")
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="11")
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;</td>'
+			}
+			else if(parent.CurrentBens[i][22]=="12")
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;</td>'
+			}
+			if(parent.CurrentBens[i][21]!=0 && parent.CurrentBens[i][21]!="")
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;' + parent.formatCont(parent.CurrentBens[i][21]) + '&nbsp;</td>'
+				parent.Fcost+=parseFloat(flxcnt)
+			}
+			else
+			{
+				bod += '<td class="plaintablecellborder" nowrap>&nbsp;</td>'
+			}
+			// Add spacer column for display
+			bod += '<td class="plaintablecellborder" style="width:'+parent.TableSpacer+';text-align:center;border-right:0px" nowrap>&nbsp;</td>'
+			if(parent.CurrentBens[i][13]=="B")
+			{
+				if(empcst1!=0)
+				{
+					bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.formatCont(empcst1)
+					if(parent.CurrentBens[i][11] == "P")
+						bod += getSeaPhrase("PER","BEN")
+					bod += '&nbsp;</td><td class="plaintablecellborder" nowrap>&nbsp;'
+					bod += getSeaPhrase("PRE_TAX","BEN")
+					bod += '&nbsp;</td>'
+				}
+				if(empcst2!=0)
+				{
+					if(empcst1!=0)
+					{
+						bod += '<td class="plaintablecellborder" align=right>&nbsp;</td></tr>'
+						bod += '<tr><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.formatCont(empcst2)
+						if(parent.CurrentBens[i][11] == "P")
+							bod += getSeaPhrase("PER","BEN")
+						bod += '&nbsp;</td><td class="plaintablecellborder" nowrap>&nbsp;'
+						bod += getSeaPhrase("AFTER_TAX","BEN")
+						bod += '&nbsp;</td>'
+					}
+					else
+					{
+						bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + parent.formatCont(empcst2)
+						if(parent.CurrentBens[i][11] == "P")
+							bod += getSeaPhrase("PER","BEN")
+						bod += '&nbsp;</td><td class="plaintablecellborder" nowrap>&nbsp;'
+						bod += getSeaPhrase("AFTER_TAX","BEN")
+						bod += '&nbsp;</td>'					
+					}
+				}
+			}
+			else
+			{
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;' + YourCost
+				if (parent.CurrentBens[i][11] == "P" && YourCost!="")
+					bod += getSeaPhrase("PER","BEN")
+				bod += '&nbsp;</td>'
+				if(YourCost!="")
+					bod += '<td class="plaintablecellborder" nowrap>&nbsp;' + PreAft
+				else
+					bod += '<td class="plaintablecellborder" nowrap>&nbsp;'
+				bod += '&nbsp;</td>'
+			}
+			if(parent.CurrentBens[i][22]!="08" && parent.CurrentBens[i][22]!="09")
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;' + parent.formatCont(parent.CurrentBens[i][12]) + '&nbsp;</td>'
+				if(parent.CurrentBens[i][12]!="" && parent.CurrentBens[i][12]!=null && parent.CurrentBens[i][11]!="P")
+				{
+					totCompCost += parent.unFormat(parent.formatCont(parent.CurrentBens[i][12]))
+					parent.CompanyTotal += parseFloat(parent.CurrentBens[i][12])
+				}
+			}
+			else
+			{
+				bod += '<td class="plaintablecellborder" align=right>&nbsp;</td>'
+			}
+			if(parent.CurrentDeps[i])
+			{
+				bod += '</tr><tr><td class="plaintablecellborder" nowrap>'
+				for(var x=0; x<parent.CurrentDeps[i][1].length; x++)
+				{
+					if(parent.CurrentDeps[i][1][x].label_name_1)
+					{
+						if(x>0)
+							bod += '<br>'
+						bod += ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'+parent.CurrentDeps[i][1][x].label_name_1
+					}
+				}
+				bod += '</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+				bod += '<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'
+				bod += '<td class="plaintablecellborder" align=right nowrap>&nbsp;</td>'
+			}
+		}
+		if(parseFloat(parent.Fcost)!=0)
+		{
+			head += '<th class="plaintableheaderborder" style="text-align:center">&nbsp;'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+		}
+		else
+		{
+			head += '<th class="plaintableheaderborder" style="text-align:center">&nbsp;</th>'
+		}
+		// Add spacer column for display
+		head += '<th class="plaintableheaderborder" style="width:'+parent.TableSpacer+';text-align:center;border-right:0px">&nbsp;</th>'
+		if(parseFloat(totEmpCost)!=0)
+		{
+			head += '<th class="plaintableheaderborder" style="text-align:center" colspan="2">&nbsp;'+getSeaPhrase("YOUR_COST","BEN")+'</th>'
+		}
+		else
+		{
+			head +='<th class="plaintableheaderborder" style="text-align:center" colspan="2">&nbsp;</th>'
+		}
+		if(parseFloat(totCompCost)!=0)
+		{
+			head += '<th class="plaintableheaderborder" style="text-align:center">&nbsp;'+getSeaPhrase("CO_COST","BEN")+'</th>'
+		}
+		else
+		{
+			head += '<th class="plaintableheaderborder" style="text-align:center">&nbsp;</th>'
+		}
+		bod += '</tr></table>'
+		bod2 += '<br>'+parent.GetSummaryTable()
+		bod2 += '<center><br>'
+		if(parent.rule_type=="N" && parent.CurrentBens.length>0)
+		{
+		}
+		else
+		{
+			bod2 += '<p>'
+				+ uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.keepcheck2();return false","margin-top:10px")
+				+ uiButton(getSeaPhrase("EXIT","BEN"),"parent.quitEnroll(self.location.href);return false","margin-top:10px")
+				+ '</p></center>'
+		}
+	document.getElementById("paneBody").innerHTML = '<div style="padding:10px">'
+		+ benefits + head + bod + bod2 + '</div>'
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("CURBEN_22","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;
+		</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/currentbens.htm,v 1.20.2.16 2010/12/01 17:25:45 brentd Exp $ -->

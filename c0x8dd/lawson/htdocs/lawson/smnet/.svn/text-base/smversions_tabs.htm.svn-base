@@ -1,0 +1,18 @@
+<HTML>
+<head>
+  <title>ASP Versions</title>
+</HEAD>
+
+<INPUT type="button" value="Home" onClick="parent.Versions.location.href='/lawson/smnet/versions/smversions.htm';" >
+<INPUT type="button" value="Apps" onClick="parent.Versions.location.href='/lawson/smnet/versions/smapplications_version.htm';" >
+<INPUT type="button" value="Envir" onClick="parent.Versions.location.href='/lawson/smnet/versions/smenvironment_version.htm';" >
+<INPUT type="button" value="IOS" onClick="parent.Versions.location.href='/lawson/smnet/versions/smios_version.htm';" >
+<INPUT type="button" value="Portal" onClick="parent.Versions.location.href='/lawson/smnet/versions/smportal_version.htm';" >
+<INPUT type="button" value="Web" onClick="parent.Versions.location.href='/lawson/smnet/versions/smwebapps_version.htm';" >
+<INPUT type="button" value="3rd Party" onClick="parent.Versions.location.href='/lawson/smnet/versions/sm3rdparty_version.htm';" >
+<INPUT type="button" value="Univver" onClick="parent.Versions.location.href='/cgi-lawson/velunivver.cgi';" >
+<INPUT type="button" value="Collect Versions" onClick="parent.Versions.location.href='/cgi-lawson/velunivver.cgi?action=collectversions';
+">
+
+
+</html>

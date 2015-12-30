@@ -1,0 +1,190 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/usherdialog.htm,v 1.3.28.2 2012/08/08 12:48:48 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Design Studio Files</title>
+<link id="studioStyle" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<link id="usherStyle" type="text/css" rel="stylesheet" href="dlg.css"></link>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="iconselect.js"></script>
+<script language="javascript" src="maple.js"></script>
+<script language="javascript" src="provselect.js"></script>
+<script language="javascript" src="usherdialog.js"></script>
+</head>
+
+<body onload="initUsher()" onkeydown="handleKeyDown()" 
+		style="display:none;background-color:threedface;font-family:Arial,sans-serif;font-size:10px;">
+		
+<form name="usherForm">
+	<div id="tab0" class="dsTabButtonActive"
+		style="position: absolute;left:0px;top:6px;width:75px;height:20px;z-index:99;"
+		tabIndex="1" onclick="showPanel(0)" onfocus="showPanel(0)"><label id="label0">New</label></div>
+	<div id="tab1" class="dsTabButtonInactive"
+		style="position: absolute;left:75px;top:6px;width:75px;height:20px;z-index:99;"
+		tabIndex="0" onclick="showPanel(1)" onfocus="showPanel(1)"><label id="label1">Existing</label></div>
+	<div id="tab2" class="dsTabButtonInactive"
+		style="position: absolute;left:150px;top:6px;width:75px;height:20px;z-index:99;"
+		tabIndex="0" onclick="showPanel(2)" onfocus="showPanel(2)"><label id="label2">Recent</label></div>
+
+	<!-- New -->
+	<div id="panel0" class="dsTabPaneActive" style="left: 0px; top: 25px; height: 232px;">
+		<div id="uNewMaple" class="dsWorkspace" 
+			style="position:absolute;left: 5px; top: 5px; width: 255px; height: 220px; overflow:auto;" tabIndex="1">
+		</div>
+		<div id="uNewDocIconSelect" class="dsWorkspace" 
+			style="position:absolute;left: 270px; top: 5px; width: 255px; height: 220px; overflow: auto;" tabIndex="1">
+		</div>
+	</div>
+		
+	<!-- Existing -->
+	<div id="panel1" class="dsTabPaneInactive" style="left: 0px; top: 25px; height: 232px;">
+		<div id="uExistingProvIconSelect" class="dsWorkspace" style="position:absolute;left: 5px; top: 5px; width: 105px; height: 220px;" tabIndex="0">
+		</div>
+
+		<div id="uExistingProvPanel" class="dsTabPaneActive" style="position:absolute;left: 120px; top: 5px; width: 405px; height: 220px;">
+			<div id="uExistingProvSelect" style="position:relative;left: 2px; top: 2px; width: 395px; height: 192px; overflow: hidden;">
+			
+				<!-- existing prov select -->			
+				<table width="100%" height="100%">
+				<tr>
+					<td valign="top">
+						<table cellpadding="0">
+							<tr>
+								<td nowrap>
+									<label for="uExistingProvSelSpan" class="dsLabel" accesskey="l"><u>L</u>ook in:</label>
+									<span id="uExistingProvSelSpan" class="uInput" style="position:relative;width:180px;height:16px;vertical-align:top;" tabIndex="1">
+										<input type="text" class="uInputText" id="uExistingProvPath" disabled="true"
+											style="border:0px;margin:0px;padding:0px;width:170px;height:16px;"/>
+										<img id="uExistingProvSelWorkspaceImg" src="../images/seldrop.gif" alt="Select Workspace" class="dsWindowButton"
+											style="width:10px;height:16px;" align="top"/>
+									</span>
+								</td>
+								<td align="left" valign="middle" nowrap>
+									<input type="button" id="uExistingProvBack" class="dsViewButton" value="" title="Go back" tabindex="1" hidefocus
+										onmouseover="this.className='dsViewButtonHover';" onmouseout="this.className='dsViewButton';" 
+										onfocus="this.className='dsViewButtonHover';" onblur="this.className='dsViewButton';" 
+										style="position:relative;width:20px;height:20px;font-size:7pt;background-position:center;background-repeat:no-repeat;background-image:url(../images/folderback.gif);margin-left:4px;">
+									</input>
+									<input type="button" id="uExistingProvUp" class="dsViewButton" value="" title="Up one level" tabindex="1" hidefocus
+										onmouseover="this.className='dsViewButtonHover';" onmouseout="this.className='dsViewButton';" 
+										onfocus="this.className='dsViewButtonHover';" onblur="this.className='dsViewButton';" 
+										style="position:relative;width:20px;height:20px;font-size:7pt;background-position:center;background-repeat:no-repeat;background-image:url(../images/folderup.gif);">
+									</input>
+									<input type="button" id="uExistingProvDel" class="dsViewButton" value="" title="Delete selected file" tabindex="1" hidefocus
+										onmouseover="this.className='dsViewButtonHover';" onmouseout="this.className='dsViewButton';" 
+										onfocus="this.className='dsViewButtonHover';" onblur="this.className='dsViewButton';" 
+										style="position:relative;width:20px;height:20px;font-size:7pt;background-position:center;background-repeat:no-repeat;background-image:url(../images/delete.gif);">
+									</input>
+								</td>
+							</tr>
+						</table>
+						<table cellpadding="0">
+							<tr>
+								<td>
+									<div id="uExistingFileList" class="dsWorkspace" style="width:380px;height:100px;" tabindex="1">
+										<table id="tblHeader" style="width:380px;height:20px;" border="0" cellspacing="0" cellpadding="0">
+											<thead class="dsTableHeader">
+												<tr>
+													<td class="uTableHeader0">Name</td>
+													<td class="uTableHeader1">Modified</td>
+												</tr>
+											</thead>
+										</table>
+										<div style="width:380px;height:80px;overflow:auto;">
+											<table id="uExistingFileTable" border="0" cellspacing="0" cellpadding="0">
+												<tbody>
+													<tr>
+														<td class="uFileList0">&nbsp;</td>
+														<td class="uFileList1">&nbsp;</td>
+													</tr>
+												</tbody>
+											</table>
+										</div>
+									</div>
+								</td>
+							</tr>
+						</table>
+						<table cellpadding="0">
+							<tr>
+								<td>
+									<label for="uExistingFileName" accesskey="n" class="dsLabel">File <u>n</u>ame:</label>
+								</td>
+								<td>
+									<input type="text" id="uExistingFileName" class="uInput" tabindex="1" onfocus="lastFocus=this;" />
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<label for="uExistingFileTypeSelect" accesskey="t" class="dsLabel">Files of <u>t</u>ype:</label>
+								</td>
+								<td>
+									<select id="uExistingFileTypeSelect" size="1" class="uInput" tabindex="1">
+										<option value="xml">XML Files (*.xml)</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+				</table>
+				<!-- existing prov select -->			
+			</div>
+		</div>
+	</div>
+
+	<!-- Recent -->
+	<div id="panel2" class="dsTabPaneInactive" style="left: 0px; top: 25px; height: 232px;">
+		<div id="uRecentMaple" class="dsWorkspace" style="left: 5px; top: 5px; width: expression(document.body.clientWidth-10); height: 220px; overflow: auto;" tabIndex="0"></div>
+	</div>
+
+	<!-- Description -->
+	<div id="panelDesc" class="dsActiveControl"
+		style="position: absolute; left: 0px; top: 260px; height: 40px; width:100%;padding-left:0px;overflow: auto;">
+		<label id="uDesc" class="dsLabel" style="text-align:left;position: absolute;top:2px;left:2px;width: expression(panelDesc.width-4);expression(panelDesc.height-4);vertical-align:middle;">&nbsp;</label>
+	</div>
+	
+	<!-- Output related -->
+	<div id="panelButton" style="position:absolute; left: 0px; top: 310px; height: 30px; width:100%;">
+		<table width="100%" border="0">
+		<tr>
+			<td>&nbsp;</td>
+			<td align="center">
+				<input type="button" id="btnOK" class="dsButton" style="width: 50px;" 
+					onclick="doOK()" tabIndex="1" value="OK" />
+				<input type="button" id="btnCancel" class="dsButton" style="width: 50px;" 
+					onclick="doCancel()" tabIndex="1" value="Cancel" />
+			</td>
+			<td>&nbsp;</td>
+		</tr>
+		</table>
+	</div>
+
+	<!-- Maple select -->
+	<div id="uExistingProvSelWorkspaceMaple" class="dsWorkspace"
+		style="visibility:hidden;position:absolute;overflow:auto;height:100px;">
+	</div>
+</form>
+
+</body>
+</html>

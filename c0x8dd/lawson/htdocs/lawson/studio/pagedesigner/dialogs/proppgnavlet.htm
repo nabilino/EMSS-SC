@@ -1,0 +1,137 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/dialogs/proppgnavlet.htm,v 1.3.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+	<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+	<script language="JavaScript" src="proppgnavlet.js"></script>
+	<title>Property Pages</title>
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+</head>
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<div id="divLAW">
+		<table id="daSys">
+			<tr>
+				<td align="left" valign="center"><span id="lblPRODUCT_LINE" class="dsLabel" style="position:relative;">Data Area</span></td>
+				<td align="left" valign="center">
+					<select id="lstDa" class="dsTextBox" style="position:relative;width:2in;" onchange="ppgFillSysListBox()">
+						<option value="selectda" selected>Select a productline</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td align="left" valign="center"><span id="lblSYSTEM" class="dsLabel" style="position:relative;">System</span></td>
+				<td align="left" valign="center">
+					<select id="lstSys" class="dsTextBox" style="position:relative;width:2in;" onchange="ppgFillTokenListBox()">
+						<option value="selectsys">Select a system code</option>
+					</select>
+				</td>
+			</tr>
+
+			<tr>
+				<td id="lblLAWSON_MENU" class="dsLabel" align="left" valign="center" style="position:relative;">Lawson Program</td>
+				<td align="left" valign="center">
+					<select id="lstTkn" class="dsTextBox" style="position:relative;width:2in;" onchange="ppgFillProgListBox()">
+						<option value="selectmenu" selected>Select a menu/program</option>
+					</select>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<div id="divUSER">
+		<table>
+			<tr>
+				<td id="lblAVAIL_PROGRAMS" class="dsLabel" style="position:relative;text-align:center;">Available Menus/Programs</td>
+				<td></td>
+				<td id="lblSELECTED_PROGRAMS" class="dsLabel" style="position:relative;text-align:center;">Selected Menus/Programs</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td>
+					<select id="lstProg" size="10" class="dsListText" style="position:relative;width:185;height:expression(this.size*18);" ondblclick="ppgAddItem()">
+					</select>
+				</td>
+				<td align="center" valign="center">
+					<input id="btnMOVE_RIGHT" align="center" class="dsDlgButton" type="button" onclick="ppgAddItem()" value=">" style="position:relative;width:40px"></input>
+					<input id="btnMOVE_ALLRIGHT" style="position:relative;width:40px" align="center" class="dsDlgButton" type="button" onclick="ppgAddAllItem()" value=">>"></input>
+					<br></br>
+					<input id="btnMOVE_LEFT" align="center" class="dsDlgButton" type="button" onclick="ppgRemoveItem()" value="<" style="position:relative;width:40px"></input>
+					<input id="btnMOVE_ALLLEFT" style="position:relative;width:40px" align="center" class="dsDlgButton" type="button" onclick="ppgRemoveAllItem()" value="<<"></input>
+				</td>
+				<td>
+					<select id="lstProgSelected" size="10" class="dsListText" style="position:relative;width:185;height:expression(this.size*18);" onChange="ppgPopulateFields(false)" ondblclick="ppgRemoveItem()">
+					</select>
+				</td>
+				<td>
+					<table  style="width:100%;table-layout:fixed;">
+						<colgroup><col width="25%"/><col width="73%"/></colgroup>
+						<tr><td></td><td></td></tr>
+						<tr>
+							<td align="left" valign="center"><span id="lblCaption" class="dsLabel" style="position:relative;">Caption</span></td>
+							<td >
+							<input id="txtCaption" class="dsTextBox" style="position:relative;width:200px;" type="text" onblur="ppgPopulateOption(this)"/>
+							</td>
+						</tr>
+						<tr>
+							<td align="left" valign="center"><span id="lblDESC" class="dsLabel" style="position:relative;">Description</span></td>
+							<td >
+							<input id="txtDescription" style="position:relative;width:200px;" class="dsTextBox" type="text" onblur="ppgPopulateOption(this)"/>
+							</td>
+						</tr>
+						<tr>
+							<td align="left" valign="center"><span id="lblHYPERLINK_URL" class="dsLabel" style="position:relative;">URL</span></td>
+							<td ><input id="txtURL" style="position:relative;width:200px;" class="dsTextBox" type="text" onblur="ppgPopulateOption(this)"/></td>
+						</tr>
+						<tr>
+							<td align="left" valign="center"><span id="lblCUR_POS" class="dsLabel" style="position:relative;visibility:hidden;">Current Position</span></td>
+							<td ><input id="chkCurPos" type="checkbox" style="position:relative;width:200px;visibility:hidden;" onclick="ppgPopulateOption(this)"></input></td>
+						</tr>
+						<tr>
+							<td colspan=2><div id="lblCurPos1" class="dsLabel" style="position:relative;text-align:center;"></div></td>
+						</tr>
+					</table>
+				</td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td align="center">
+					<input id="btnMOVE_UP" type="button" value="Up" class="dsDlgButton" style="position:relative;width:50px;" onclick="ppgMove('up')"></input>
+					<input id="btnMOVE_Down" type="button" value="Down" class="dsDlgButton" style="position:relative;width:50px;" onclick="ppgMove('down')"></input>
+				</td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td align="right">
+					<input id="btnOK" class="dsDlgButton" type="button" onclick="ppgOK()" value="OK" style="position:relative;width:70px;"></input>
+					<input id="btnCancel" class="dsDlgButton" type="button" onclick="window.close()" value="Cancel" style="position:relative;width:70px;"></input>
+					<input id="btnApply" class="dsDlgButton" type="button" onclick="ppgUpdate()" value="Apply" disabled style="position:relative;width:70px;"></input>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

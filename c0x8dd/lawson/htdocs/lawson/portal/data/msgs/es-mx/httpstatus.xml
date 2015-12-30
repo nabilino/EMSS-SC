@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/es-mx/Attic/httpstatus.xml,v 1.1.2.1.4.3.6.1.8.2 2012/08/08 12:37:31 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="English">
+		<phrase id="100">La solicitud puede continuar.</phrase>
+		<phrase id="101">El servidor cambió los protocolos en un encabezado de actualización.</phrase>
+		<phrase id="200">La solicitud finalizó correctamente.</phrase>
+		<phrase id="201">La solicitud se completó y originó la creación de un nuevo recurso.</phrase>
+		<phrase id="202">La solicitud se aceptó para el proceso, pero éste no se completó.</phrase>
+		<phrase id="203">La metainformación devuelta en el encabezado de la entidad no es el conjunto definitivo que se puede obtener del servidor de origen.</phrase>
+		<phrase id="204">El servidor finalizó la solicitud pero no dispone de información nueva para enviar.</phrase>
+		<phrase id="205">Solicitud finalizada, el programa de cliente debería restablecer la vista del documento que hizo que la solicitud se enviara para que el usuario pudiera iniciar fácilmente otra acción de entrada.</phrase>
+		<phrase id="206">El servidor completó la solicitud parcial GET para el recurso. </phrase>
+		<phrase id="300">El servidor no pudo decidir el contenido que debe devolver.</phrase>
+		<phrase id="301">El recurso solicitado se asignó a un nuevo URI (Identificador de recursos uniforme) permanente. Cualquier referencia a este recurso debe realizarse mediante uno de los URI devueltos.</phrase>
+		<phrase id="302">El recurso solicitado reside temporalmente en otro URI (Identificador de recursos uniforme).</phrase>
+		<phrase id="303">La respuesta a la solicitud se encuentra en otro URI (Identificador de recursos uniforme) y debería recuperarse utilizando un método GET HTTP en ese recurso.</phrase>
+		<phrase id="304">El recurso solicitado no se modificó.</phrase>
+		<phrase id="305">Para tener acceso al recurso solicitado debe utilizar el proxy que consta en el campo de ubicación.</phrase>
+		<phrase id="307">La solicitud redirigida mantiene el mismo verbo HTTP. Comportamiento de HTTP/1.1.</phrase>
+		<phrase id="400">El servidor no pudo procesar la solicitud porque la sintaxis no es válida.</phrase>
+		<phrase id="401">El recurso solicitado necesita autenticación de usuario.</phrase>
+		<phrase id="402">Sin implementar actualmente en el protocolo HTTP.</phrase>
+		<phrase id="403">El servidor entendió la solicitud, pero rechaza su ejecución.</phrase>
+		<phrase id="404">El servidor no encuentra nada que coincida con el URI (Identificador de recursos uniforme) solicitado.</phrase>
+		<phrase id="405">El verbo HTTP utilizado no está permitido.</phrase>
+		<phrase id="406">No se encontraron respuestas aceptables para el cliente.</phrase>
+		<phrase id="407">Se requiere autenticación del proxy.</phrase>
+		<phrase id="408">El tiempo de espera del servidor se excedió mientras esperaba la solicitud.</phrase>
+		<phrase id="409">No se puede completar la solicitud porque está en conflicto con el estado actual del recurso. El usuario debe volver a enviarla con más información.</phrase>
+		<phrase id="410">El recurso solicitado ya no está disponible en el servidor ni se conoce ninguna dirección de reenvío.</phrase>
+		<phrase id="411">El servidor no acepta la solicitud si no dispone de una longitud de contenido definida.</phrase>
+		<phrase id="412">La condición previa de uno o más campos del encabezado de la solicitud se evaluó como falsa al probarla en el servidor.</phrase>
+		<phrase id="413">El servidor rechaza la ejecución de una solicitud porque su entidad es mayor de lo que puede procesar.</phrase>
+		<phrase id="414">El servidor rechaza la solicitud porque el URI (Identificador de recursos uniforme) solicitado es demasiado grande para que el servidor lo pueda interpretar.</phrase>
+		<phrase id="415">El servidor rechaza la solicitud porque su entidad tiene un formato no compatible con el recurso solicitado para el método solicitado.</phrase>
+		<phrase id="449">La solicitud debe reintentarse después de efectuar la acción apropiada.</phrase>
+		<phrase id="500">El servidor encontró una condición inesperada que impidió completar la solicitud. </phrase>
+		<phrase id="501">El servidor no admite la funcionalidad necesaria para completar la solicitud.</phrase>
+		<phrase id="502">El servidor, mientras funcionaba como puerta de enlace o proxy, recibió una respuesta no válida del servidor principal al que tuvo acceso mientras intentaba completar la solicitud.</phrase>
+		<phrase id="503">Sobrecarga temporal en el servicio.</phrase>
+		<phrase id="504">Tiempo de espera excedido mientras la solicitud esperaba una puerta de enlace.</phrase>
+		<phrase id="505">El servidor no admite o rechaza la versión del protocolo HTTP que se utilizó en el mensaje de la solicitud.</phrase>
+	</Translate>
+</LAWXML>

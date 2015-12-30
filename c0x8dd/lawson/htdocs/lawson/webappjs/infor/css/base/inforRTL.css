@@ -1,0 +1,302 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/Attic/inforRTL.css,v 1.1.4.3.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+
+/*  These CSS files are for 'rtl' (right to left) screen layout.  These MUST be imported last. */
+
+/* *********************************/
+/* inforModuleHeader.css           */
+/* *********************************/
+
+.inforModuleHeaderLeft
+{
+  float : right;
+}
+
+.inforModuleHeaderRight
+{
+  float : left;
+}
+
+.inforPageTitleText
+{
+  display : inline-block;
+}
+
+/* *******************/
+/* inforFleldSet.css */
+/* *******************/
+
+.inforFieldSetLabel
+{
+  text-align : right;
+}
+
+/* *******************/
+/* inforDialog.css 	 */
+/* *******************/
+
+div.inforDialogCloseIcon
+{  
+  float : left;
+  padding-right : 0px;
+  padding-left : 28px;
+}
+.inforDialogTitleBar
+{
+  left : auto;
+  right : 0px;
+}
+
+/* *******************/
+/* inforTabSet.css 	 */
+/* *******************/
+
+ul.inforTabset li span.inforTabLeftActive
+{
+  background : transparent url("../../images/bg_tab_active_rt_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTabActive
+{
+  float : right;
+}
+ul.inforTabset li span.inforTabRightActive
+{
+  background : transparent url("../../images/bg_tab_active_lft_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTabLeft
+{
+  background : transparent url("../../images/bg_tab_inactiveBar_rt_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTab
+{
+  float : right;
+}
+ul.inforTabset li span.inforTabRight
+{
+  background : transparent url("../../images/bg_tab_inactiveBar_lft_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTabLeftOver, ul.inforTabset li span.inforTabLeftActiveOver
+{
+  background : transparent url("../../images/bg_tab_over_rt_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTabOver, ul.inforTabset li span.inforTabActiveOver
+{
+  float : right;
+}
+ul.inforTabset li span.inforTabRightOver, ul.inforTabset li span.inforTabRightActiveOver
+{
+  background : transparent url("../../images/bg_tab_over_lft_7x22.png") no-repeat 0px 0px;
+  float : right;
+}
+ul.inforTabset li span.inforTabSeparator
+{
+  float : right;
+}
+.inforTabContentActive
+{
+  float : right;
+}
+.inforTabContent
+{
+  float : right;
+}
+
+/* *********************************/
+/* inforStandardIconButtons.css    */
+/* *********************************/
+
+.inforRequiredIndicator 
+{
+  float : right;
+  margin-left : 2px;    
+}
+.inforExpanderExpanded
+{
+  background : transparent url("../../images/icn_expandLeft_21x21_55595c_enabled.png") no-repeat 0px 0px;
+}
+.inforExpanderExpandedOver
+{
+  background : transparent url("../../images/icn_expandLeft_21x21_55595c_over.png") no-repeat 0px 0px;
+}
+.inforExpanderExpandedActive
+{
+  background : transparent url("../../images/icn_expandLeft_21x21_55595c_press.png") no-repeat 0px 0px;
+}
+
+/* ***********************/
+/* inforTextBox.css 	 */
+/* ***********************/
+
+.inforTextboxLeft
+{
+  background : transparent url("../../images/field_regular-right.png") no-repeat center left;
+}
+.inforTextboxRight
+{
+  background : transparent url("../../images/field_regular-left.png") no-repeat center left;
+}
+
+/* ***********************/
+/* inforLookup.css 		 */
+/* ***********************/
+
+.inforLookup
+{
+  background : transparent url("../../images/btn_lookup_enabled_15x20_rtl.png") no-repeat center center;
+}
+.inforLookupOver
+{
+  background : transparent url("../../images/btn_lookup_over_15x20_rtl.png") no-repeat center center;
+}
+.inforLookupActive
+{
+  background : transparent url("../../images/btn_lookup_press_15x20_rtl.png") no-repeat center center;
+}
+.inforLookupDisabled
+{
+  background : transparent url("../../images/btn_lookup_disabled_15x20_rtl.png") no-repeat center center;
+}
+
+/* ***********************/
+/* inforDatePicker.css   */
+/* ***********************/
+
+.inforDatePicker
+{
+  background : transparent url("../../images/btn_datepicker_enabled_15x20_rtl.png") no-repeat center center;
+}
+.inforDatePickerOver
+{
+  background : transparent url("../../images/btn_datepicker_over_15x20_rtl.png") no-repeat center center;
+}
+.inforDatePickerActive
+{
+  background : transparent url("../../images/btn_datepicker_press_15x20_rtl.png") no-repeat center center;
+}
+.inforDatePickerDisabled
+{
+  background : transparent url("../../images/btn_datepicker_disabled_15x20_rtl.png") no-repeat center center;
+}
+button.calendarArrowLeft
+{
+  background : transparent url("../../images/btn_next_enabled.png") no-repeat center center;
+}
+button.calendarArrowLeftOver
+{
+  background : transparent url("../../images/btn_next_over.png") no-repeat center center;
+}
+button.calendarArrowLeftActive
+{
+  background : transparent url("../../images/btn_next_press.png") no-repeat center center;  
+}
+button.calendarArrowLeft:disabled
+{
+  background : transparent url("../../images/btn_next_disabled.png") no-repeat center center;
+}
+button.calendarArrowRight
+{
+  background : transparent url("../../images/btn_previous_enabled.png") no-repeat center center;  
+}
+button.calendarArrowRightOver
+{
+  background : transparent url("../../images/btn_previous_over.png") no-repeat center center;  
+}
+button.calendarArrowRightActive
+{
+  background : transparent url("../../images/btn_previous_press.png") no-repeat center center;  
+}
+button.calendarArrowRight:disabled
+{
+  background : transparent url("../../images/btn_previous_disabled.png") no-repeat center center;
+}
+td.calendarArrowLeft
+{
+  text-align : right;
+  padding-right : 8px;
+}
+td.calendarArrowRight
+{
+  text-align : left;
+  padding-left : 8px;
+}
+table.calendarMonthYearPanel td
+{ 
+  text-align : right;
+}
+table.calendarMonthYearPanel td.calendarArrowRight
+{
+  text-align : left;
+}
+table.calendarMonthYearPanel td.calendarDayGridDivider, table.calendarMonthYearPanel td.monthYearSelectedGridDivider
+{
+  border-left : 1px solid #b4b4b4;
+  border-right : none;
+}
+
+/* ***********************/
+/* inforDropDown.css     */
+/* ***********************/
+
+.inforDropDown
+{
+  background : transparent url("../../images/btn_dropdown_enabled_15x20_rtl.png") no-repeat right center;
+}
+.inforDropDownOver
+{
+  background : transparent url("../../images/btn_dropdown_over_15x20_rtl.png") no-repeat right center;
+}
+.inforDropDownActive
+{
+  background : transparent url("../../images/btn_dropdown_press_15x20_rtl.png") no-repeat right center;
+}
+.inforDropDownDisabled
+{
+  background : transparent url("../../images/btn_dropdown_disabled_15x20_rtl.png") no-repeat right center;
+}
+
+/* ***********************/
+/* inforSearch.css   	 */
+/* ***********************/
+
+.inforSearch
+{
+  background : transparent url("../../images/btn_search_enabled_15x20_rtl.png") no-repeat center center;
+}
+.inforSearchOver
+{
+  background : transparent url("../../images/btn_search_over_15x20_rtl.png") no-repeat center center;
+}
+.inforSearchActive
+{
+  background : transparent url("../../images/btn_search_press_15x20_rtl.png") no-repeat center center;
+}
+.inforSearchDisabled
+{
+  background : transparent url("../../images/btn_search_disabled_15x20_rtl.png") no-repeat center center;
+}

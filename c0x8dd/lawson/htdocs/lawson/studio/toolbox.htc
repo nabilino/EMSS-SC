@@ -1,0 +1,279 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/toolbox.htc,v 1.4.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<PUBLIC:COMPONENT id="tb" tagName="TOOLBOX">
+<PUBLIC:DEFAULTS viewLinkContent/>
+
+<PUBLIC:METHOD name="disableControl"/>
+<PUBLIC:METHOD name="disableToolbox"/>
+<PUBLIC:METHOD name="enableControl"/>
+<PUBLIC:METHOD name="enableToolbox"/>
+<PUBLIC:METHOD name="getElementById"/>
+<PUBLIC:METHOD name="onClickControl"/>
+<PUBLIC:METHOD name="onCreateControl"/>
+<PUBLIC:METHOD name="paintToolbox"/>
+<PUBLIC:METHOD name="selectControl"/>
+<PUBLIC:METHOD name="setFocusToolbox"/>
+<PUBLIC:METHOD name="themeControl"/>
+
+<PUBLIC:PROPERTY NAME="enabled" get="isEnabled"/>
+
+<SCRIPT language="javascript" src="servenv.js"></SCRIPT>
+<SCRIPT language="javascript">
+
+var oObj = "";
+tb.enabled = true;
+
+function getElementById(id)
+{
+	return document.getElementById(id);
+}
+
+function isEnabled()
+{
+	return tb.enabled;
+}
+
+//HTML painting / Event handlers
+//------------------------------------------------------------------------------------
+function paintToolbox()
+{
+	var ctlgrp = null, ctl = null;
+	var i = 0, j = 0;
+	var row, cell;
+	var strHtml = "";
+	var clsName = "";
+	var ctlGrps = designStudio.activeDesigner.toolBox.controlGroups;
+	var folder = studioPath + "/" + designStudio.activeDesigner.designerInfo.folder;
+	var oTable = document.getElementById("htmTools");
+
+	for (i = oTable.rows.length; i > 0; i--)
+		oTable.deleteRow(i-1);
+
+	for (i = 0; i < ctlGrps.count; i++)
+	{
+		row = oTable.insertRow(oTable.rows.length);
+		ctlgrp = ctlGrps.item(i);
+
+		if (ctlgrp.active)
+		{
+			cell = row.insertCell(0);
+			strHtml = "<TABLE id=\"controls\" width=\"100%\" height=\"100%\" border=\"0\" cellpadding=\"0\" cellspacing=\"0\">";
+			strHtml += "<TR><TD style=\"height:20px;\" class=\"dsActiveControlGroupBtn\" id=\"grp_";
+			strHtml += ctlgrp.name + "\" onselectstart=\"return false;\">" + ctlgrp.name + "</TD></TR>";
+
+			for (j = 0; j < ctlgrp.controls.count; j++)
+			{
+				ctl = ctlgrp.controls.item(j);			
+				if (ctl.render)
+				{
+					if (j == 0)
+						ctlgrp.activeControl = ctl.id;
+					clsName = (j > 0) ? "dsControl" : "dsActiveControl";
+					strHtml += "<TR><TD style=\"height:20px;\">";
+					strHtml += "<INPUT type=\"button\" id=\"ctl_" + ctl.id + "\" class=\"" + clsName + "\" hideFocus=\"1\" style=\"margin-top:2px;margin-bottom:2px;width:100%;";
+					if (ctl.image)
+						strHtml += "background-image:url('" + folder + "/images/" + ctl.image + "');background-position:left;background-repeat:no-repeat;";
+					strHtml += "\" onclick=\"dsToolBox.onClickControl()\"";
+					strHtml += " onfocus=\"dsToolBox.onClickControl()\"";
+					strHtml += " ondblclick=\"dsToolBox.onCreateControl()\" value=\"" + ctl.name + "\"/></TD></TR>";
+				}
+			}
+			strHtml += "<TR><TD>&nbsp;</TD></TR></TABLE>";
+			cell.innerHTML = strHtml;
+		}
+		else
+		{
+			row.style.height = "20px";
+			cell = row.insertCell(0);
+			cell.id = "grp_" + ctlgrp.id;
+			cell.className = "dsControlGroupBtn";
+			cell.innerText = ctlgrp.name;
+			cell.onclick = onClickControlGroup;
+		}
+	}
+}
+
+function onClickControlGroup()
+{
+	if (!designStudio.activeDesigner) return;
+	if (!tb.enabled) return;
+
+	var grpId = event.srcElement.id.substr(4);
+	designStudio.activeDesigner.toolBox.controlGroups.item(grpId).setActive();
+}
+
+function onClickControl()
+{
+	if (!designStudio.activeDesigner) return;
+	if (!tb.enabled) return;
+
+	var ctlId = event.srcElement.id.substr(4);
+	var grp = designStudio.activeDesigner.toolBox.controlGroups.item(designStudio.activeDesigner.toolBox.activeCtlGrp);
+	var ctl = grp.controls.item(ctlId);
+	selectControl(grp, ctl);
+	grp.activeControl = ctlId;
+	var evtObj = designStudio.createEventObject(ON_CLICK_TOOLBOX_ITEM, window.event, null, ctlId);
+	designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+}
+
+function controlKeyDown()
+{
+	if (event.keyCode == keys.ENTER)
+	{
+		onClickControl();
+		onCreateControl();
+	}
+}
+
+function selectControl(grp, ctl)
+{
+	//Change classes in toolbox html
+	var cell = document.getElementById("ctl_" + grp.activeControl);
+	cell.className = "dsControl";
+	cell = document.getElementById("ctl_" + ctl.id);
+	cell.className = "dsActiveControl";
+}
+
+function themeControl(grp, ctl)
+{
+	//Change classes in toolbox html
+	var cell = document.getElementById("ctl_" + grp.activeControl);
+	cell.className = "dsControl";
+	var tableControl = document.getElementById("controls");
+	var inputControl = tableControl.getElementsByTagName("INPUT");
+	var len = inputControl.length;
+	for(var i=0; i<len; i++)
+		inputControl[i].className = "dsControl";
+
+	var cell = document.getElementById("ctl_"+ctl.id);
+	cell.className = "dsActiveControl";
+}
+
+function onCreateControl()
+{
+	if (!designStudio.activeDesigner) return;
+	if (!tb.enabled) return;
+
+	var evtObj = designStudio.createEventObject(ON_DBLCLICK_TOOLBOX_ITEM, window.event, null, ctlId);
+	if (!designStudio.activeDesigner.eventHandler.processEvent(evtObj))
+		return;
+
+	var ctlId = event.srcElement.id.substr(4);
+	if (designStudio.activeDesigner.activeDocument)
+		designStudio.activeDesigner.activeDocument.createControlInstance(ctlId);
+}
+
+function enableControl(ctlId)
+{
+	var ctlBtn = document.getElementById("ctl_" + ctlId);
+	if (!ctlBtn) return;
+	ctlBtn.disabled = false;
+}
+
+function disableControl(ctlId)
+{
+	if (!designStudio.activeDesigner) return;
+	var ctlBtn = document.getElementById("ctl_" + ctlId);
+	if (!ctlBtn) return;
+	ctlBtn.disabled = true;
+
+	// if active control, reset the activeControl
+	if (ctlBtn.className == "dsActiveControl")
+	{
+		ctlBtn.className = "dsControl";
+		var ctls = designStudio.activeDesigner.toolBox.controlGroups.item(designStudio.activeDesigner.toolBox.activeCtlGrp).controls;
+		for (var i = 0; i < ctls.count; i++)
+		{
+			var ctl = document.getElementById("ctl_" + ctls.hash[i]);
+			if (ctl && !ctl.disabled)
+			{
+				designStudio.activeDesigner.toolBox.controlGroups.item(designStudio.activeDesigner.toolBox.activeCtlGrp).activeControl = ctl.id.substr(4);
+				ctl.className = "dsActiveControl";
+				ctl.focus();
+				break;
+			}
+		}
+	}
+}
+function enableToolbox()
+{
+	var tblHead = document.getElementById("tb_title");
+	tblHead.disabled = false;
+	var oTable = document.getElementById("htmTools");
+	oTable.disabled = false;
+	tb.enabled = true;
+}
+function disableToolbox()
+{
+	var tblHead = document.getElementById("tb_title");
+	tblHead.disabled = true;
+	var oTable = document.getElementById("htmTools");
+	oTable.disabled = true;
+	tb.enabled = false;
+}
+function setFocusToolbox()
+{
+	var ctl = designStudio.activeDesigner.toolBox.controlGroups.item(
+		designStudio.activeDesigner.toolBox.activeCtlGrp).activeControl;
+	if (ctl)
+	{
+		ctl = document.getElementById("ctl_" + ctl);
+		if (ctl && !ctl.disabled)
+			ctl.focus();
+		else
+		{
+			var ctls = designStudio.activeDesigner.toolBox.controlGroups.item(
+						designStudio.activeDesigner.toolBox.activeCtlGrp).controls
+			var len = ctls.count;
+			for (var i = 0; i < len; i++)
+			{
+				ctl = document.getElementById("ctl_" + ctls.hash[i]);
+				if (ctl && !ctl.disabled)
+				{
+					ctl.focus();
+					break;
+				}
+			}
+		}
+	}
+}
+</SCRIPT>
+</PUBLIC:COMPONENT>
+
+<link type="text/css" id="dsStyle" href="studio.css" rel="stylesheet"></link>
+
+<BODY style="background-color:threedface;height:expression(top.dockLeft.clientHeight);width:expression(top.dockLeft.clientWidth);">
+	<table id="tblToolboxHead" width="100%" border="0" cellpadding="0" cellspacing="1" bgColor="threedface" style="table-layout:fixed;">
+		<tr>
+			<td colspan="2" style="height:20px;padding:0;">
+				<div id="tb_title" class="dsActiveControlGroup" style="top:0;left:0;height:20px;text-align:left;padding-left:5px;padding-top:2px;" onselectstart="return false;">
+					Toolbox
+				</div>
+			</td>
+		</tr>
+	</table>
+	<div style="position:absolute;top:expression(tblToolboxHead.clientHeight);left:0;width:100%;height:expression(document.body.clientHeight-tblToolboxHead.clientHeight);overflow:auto;" onkeydown="controlKeyDown()">
+		<table id="htmTools" width="100%" height="100%" border="0" cellpadding="0" cellspacing="4"></table>
+	</div>
+</BODY>

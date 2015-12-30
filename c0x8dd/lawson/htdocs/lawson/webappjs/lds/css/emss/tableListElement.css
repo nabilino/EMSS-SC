@@ -1,0 +1,309 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/emss/tableListElement.css,v 1.2.2.4.2.2 2014/01/10 14:30:00 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Lists --- */
+table.listStyler
+{
+  background : transparent url("../../images/01_list_recess_panel.png");
+  background-repeat : repeat-x;
+  background-position : 0px 27px;
+}
+table.listStyler td
+{
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  border-right : 1px solid #ebf1f7;
+  padding-left : 5px;
+  padding-right : 5px;
+  padding-top : 1px;
+  height : 23px;
+}
+table.listStyler th
+{
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+}
+.listHeaderLeftSideStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : 100%;
+  height : 100%;
+  background : transparent url("../../images/list_background-1.png") no-repeat 0px 0px;
+}
+.listHeaderLeftStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : auto;
+  height : 100%;
+  padding-left : 7px;
+  background : transparent url("../../images/01_list_titlebar-1.png") no-repeat 0px 0px;
+}
+.listHeaderLeftBackgroundStyler
+{
+  background : #79a4c3 url("../../images/01_list_titlebar-2.png") repeat-x 0px 0px;
+  width : 100%;
+  height : 100%;
+}
+.listHeaderLeftBorderStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : auto;
+  height : 27px;
+  background : transparent url("../../images/list_background-4.png") no-repeat 0px 7px;
+  border-right : 1px solid #abc6da;
+}
+.listHeaderMiddleBorderStyler
+{
+  padding : 0px;
+  margin : 0px;
+  height : 100%;
+  width : auto;
+  background : #79a4c3 url("../../images/01_list_titlebar-2.png") repeat-x 0px 0px;
+  border-right : 1px solid #abc6da;
+  vertical-align : middle;
+}
+.listHeaderMiddleBorderHoverStyler
+{
+  padding : 0px;
+  margin : 0px;
+  height : 100%;
+  width : auto;
+  background : #79a4c3 url("../../images/01_list_headerrollover.png") repeat-x 0px 0px;
+  border-right : 1px solid #abc6da;
+  vertical-align : middle;
+}
+.listHeaderMiddleBorderActiveStyler
+{
+  padding : 0px;
+  margin : 0px;
+  height : 100%;
+  width : auto;
+  background : #79a4c3 url("../../images/01_list_headerhighlight.png") repeat-x 0px 0px;
+  border-right : 1px solid #abc6da;
+  vertical-align : middle;
+}
+.listHeaderMiddleStyler
+{
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  font-size : 12px;
+  text-align : center;	
+  height : auto;
+  width : 100%;
+  cursor : default;
+}
+.listHeaderMiddleContentStyler
+{
+  /*white-space : nowrap;*/
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  font-size : 12px;
+  text-align : center;
+  position : relative;
+  top : 0px;
+  padding : 0px;
+  margin : 0px;
+  padding-right : 8px;
+  cursor : default;
+  height : 100%;
+  width : auto;
+  display : -moz-inline-stack;
+  display : inline-block;  
+}
+.listHeaderMiddleContentSortAscendingStyler
+{
+  background : transparent url("../../images/01_line_pulldownarrow_up.png") no-repeat 100% 50%;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  font-size : 12px;
+  text-align : center;
+  position : relative;
+  top : 0px;
+  padding : 0px;
+  margin : 0px;
+  padding-right : 8px;
+  cursor : default;
+  height : 100%;
+  width : auto; 
+  overflow-y : hidden;
+  text-overflow : ellipsis;
+  display : -moz-inline-stack;
+  display : inline-block;  
+}
+.listHeaderMiddleContentSortDescendingStyler
+{
+  background : transparent url("../../images/01_line_pulldownarrow.png") no-repeat 100% 50%;
+  color : #ffffff;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : bold;
+  font-size : 12px;
+  text-align : center;
+  position : relative;
+  top : 0px;
+  padding : 0px;
+  margin : 0px;
+  padding-right : 8px;
+  cursor : default;
+  height : 100%;
+  width : auto;
+  overflow-y : hidden;
+  text-overflow : ellipsis;
+  display : -moz-inline-stack;
+  display : inline-block;  
+}
+.listHeaderRightSideStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : 100%;
+  height : 100%;
+  background : transparent url("../../images/list_background-3.png") no-repeat 100% 0px;
+}
+.listHeaderRightStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : auto;
+  height : 100%;
+  padding-right : 7px;
+  background : transparent url("../../images/01_list_titlebar-3.png") no-repeat 100% 0px;
+}
+.listHeaderRightBackgroundStyler
+{
+  background : #79a4c3 url("../../images/01_list_titlebar-2.png") repeat-x 0px 0px;
+  width : auto;
+  height : 100%;
+}
+.listHeaderRightBorderStyler
+{
+  vertical-align : top;
+  padding : 0px;
+  width : auto;
+  height : 27px;
+  background : transparent url("../../images/list_background-6.png") no-repeat 100% 7px;
+}
+.listLeftBorderStyler
+{
+  padding : 0px;
+  width : 7px;
+  background : transparent url("../../images/01_list_recess_left.png") no-repeat 0px 0px;
+  border-right : 1px solid #ebf1f7;
+}
+.listRightBorderStyler
+{
+  padding : 0px;
+  width : 7px;
+  background : transparent url("../../images/01_list_recess_right.png") no-repeat 100% 0px;
+}
+.listBottomBorderStyler
+{
+  padding : 0px;
+  border : 0px;
+  height : 2px;
+  text-align : center;
+}
+.listBottomRuleStyler
+{
+  height : 2px;
+  position : relative;
+  top : 3px;
+  left : 0px;
+}
+.listRowHoverStyler
+{
+  padding : 0px;
+  background : transparent url("../../images/01_list_highlight_act_panel.png") repeat-x left center;
+  height : 23px;
+}
+.listRowHoverLeftStyler
+{
+  padding : 0px;
+  background : transparent url("../../images/01_list_highlight_act_left.png") no-repeat right center;
+  height : 23px;
+  width : 4px;
+  position : absolute;
+  display : none;
+  visibility : visible;
+  z-index : 999;
+}
+.listRowHoverRightStyler
+{
+  padding : 0px;
+  background : transparent url("../../images/01_list_highlight_act_right.png") no-repeat left center;
+  height : 23px;
+  width : 4px;
+  position : absolute;
+  display : none;
+  visibility : visible;
+  z-index : 999;
+}
+.listHeaderSortDescendingStyler
+{
+  background : transparent url("../../images/01_line_pulldownarrow.png") no-repeat 0px 0px;
+  margin: 0px;
+  padding : 0px;
+  height : 4px;
+  width : 8px;
+  display : -moz-inline-box;
+  display : inline-block;
+  position : relative;
+  top : 12px;
+  float : right;
+}
+.listHeaderSortAscendingStyler
+{
+  background : transparent url("../../images/01_line_pulldownarrow_up.png") no-repeat 0px 0px;
+  margin : 0px;
+  padding : 0px;
+  height : 4px;
+  width : 8px;
+  display : -moz-inline-box;
+  display : inline-block;
+  position : relative;
+  top : 12px;
+  float : right;
+}
+.textAlignLeft
+{
+  text-align : left;
+}
+.textAlignCenter
+{
+  text-align : center;
+}
+.textAlignRight
+{
+  text-align : right;
+  padding-right : 5px;
+}

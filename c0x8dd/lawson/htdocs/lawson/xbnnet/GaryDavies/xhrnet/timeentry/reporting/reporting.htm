@@ -1,0 +1,637 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<title>Time Entry Reporting</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/rpttimeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StringBuffer.js"></script>
+<script language="JavaScript">
+
+var Statuses = new Array();
+
+var Details = new DetailObject();
+var ReportsDetail;
+
+function DetailObject()
+{
+	this.StartDate = null;
+	this.EndDate = null;
+	this.EmployeeNumbers = new Array();
+	this.Statuses = new Array();
+}
+
+function OpenProgram()
+{
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		return;
+	}
+
+	authenticate("frameNm='jsreturn'|funcNm='StartReporting()'|sysenv=true|desiredEdit='EM'")
+}
+
+function StartReporting()
+{
+	stylePage();
+	showWaitAlert(getSeaPhrase("LOADING_REPORTING","TE"));
+	document.title = getSeaPhrase("TE_REPORTING","TE");
+	setTaskHeader("taskheader", getSeaPhrase("TIME_ENTRY","TE"), "TimeEntry");
+	document.getElementById("paneBorder").style.visibility = "visible";
+	Reports = null;
+
+	if (!self.main.document || !self.main.document.getElementById("paneBody1"))
+	{
+		setTimeout("StartReporting()", 5);
+		return;
+	}
+
+	Statuses = new Array(getSeaPhrase("STATUS_M1","TE"),
+									getSeaPhrase("STATUS_0","TE"),
+									getSeaPhrase("STATUS_1","TE"),
+									getSeaPhrase("STATUS_2","TE"),
+									getSeaPhrase("STATUS_3","TE"),
+									getSeaPhrase("STATUS_4","TE"),
+									getSeaPhrase("STATUS_5","TE"),
+									getSeaPhrase("STATUS_6","TE"),
+									getSeaPhrase("STATUS_7","TE"),
+									getSeaPhrase("STATUS_8","TE"),
+									getSeaPhrase("STATUS_9","TE"));
+
+	var html = '<form name="frmReportType">'
+	html += '<table border="0" width="100%"><tr><td style="text-align:center;vertical-align:top;margin-left:auto;margin-right:auto">'
+	html += '<table border="0" width="100%"><tr><td class="plaintablecell" style="text-align:center;margin-left:auto;margin-right:auto;vertical-align:top">'+getSeaPhrase("WHICH_REPORT_TYPE","TE")
+	html += '<table width="100%" border="0" cellpadding="1" cellspacing="0"><tr><td style="text-align:center;margin-left:auto;margin-right:auto">'
+	html += '<table align="center" width="100%" border="0" cellpadding="4" cellspacing="0"><tr><td style="text-align:center;margin-left:auto;margin-right:auto">'
+	html += '<table border="0" align="center">'
+	html += '<tr>'
+	html += '<td><input type="radio" name="radReportType"></td>'
+	html += '<td><a href="" onclick="parent.LinkedClicked(\'radReportType\',0);return false;">'+getSeaPhrase("DETAIL","TE")+'</a></td>'
+	html += '</tr>'
+	html += '<tr>'
+	html += '<td><input type="radio" name="radReportType"></td>'
+	html += '<td><a href="" onclick="parent.LinkedClicked(\'radReportType\',1);return false;">'+getSeaPhrase("MISSING_CARD","TE")+'</a></td>'
+	html += '</tr>'
+	html += '<tr>'
+	html += '<td><input type="radio" name="radReportType"></td>'
+	html += '<td><a href="" onclick="parent.LinkedClicked(\'radReportType\',2);return false;">'+getSeaPhrase("PAY_PERIOD_SUMMARY","TE")+'</a></td>'
+	html += '</tr>'
+	html += '<tr><td colspan="2">'
+	html += '<p align="center">'
+	html += uiButton(getSeaPhrase("CONTINUE","TE"), "parent.ReportTypeClicked();return false")
+	if (opener)
+	{
+		html += uiButton(getSeaPhrase("CANCEL","TE"), "parent.close();return false")
+	}
+	html += '</p>'
+	html += '</td></tr>'
+	html += '</table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</form>'
+
+	self.main.document.getElementById("paneBody1").innerHTML = html;
+	self.main.stylePage();
+	fitToScreen();
+	document.getElementById("main").style.visibility = "visible";
+	removeWaitAlert()
+}
+
+function LinkedClicked(name, count)
+{
+	var radioBtn = self.main.document.forms["frmReportType"].elements[name][count];
+	radioBtn.click();
+	self.main.styleElement(radioBtn);
+
+	StylerEMSS.resetRadioButtons(self.main.document.forms["frmReportType"], name);
+}
+
+function ReportTypeClicked()
+{
+	var TypeClicked;
+	for (var i=0; i<self.main.document.frmReportType.radReportType.length; i++)
+	{
+		if (self.main.document.frmReportType.radReportType[i].checked)
+		{
+			TypeClicked = i;
+		}
+	}
+
+	if (typeof(TypeClicked) == "undefined")
+	{
+		seaAlert(getSeaPhrase("SELECT_REPORT_TYPE","TE"));
+		return;
+	}
+
+	if (TypeClicked == 0 || TypeClicked == 2)
+	{
+		showWaitAlert(getSeaPhrase("GATHERING_DATA","TE"));
+		CallHS221ForDetailView(TypeClicked);
+	}
+	else if (TypeClicked == 1)
+	{
+		var html = '<form name="frmReportType">'
+		html += '<table border="0" width="100%" height="100%"><tr><td style="text-align:center;vertical-align:top;margin-left:auto;margin-right:auto">'
+		html += '<table border="0" width="100%">'
+		html += '<tr class="plaintablecell"><td style="text-align:center">'+getSeaPhrase("ENTER_PERIOD_START_RANGE","TE")+'</td></tr>'
+		html += '<tr class="plaintablecell"><td style="text-align:center">'+getSeaPhrase("PERIODS_START_DATE_FALLS_FOLLOWING","TE")+'</td></tr>'
+		html += '<table border="0" width="100%" cellpadding="1" cellspacing="0"><tr><td style="text-align:center;margin-left:auto;margin-right:auto">'
+		html += '<table align="center" width="100%" border="0" cellpadding="4" cellspacing="0">'
+		html += '<tr><td style="text-align:center;margin-left:auto;margin-right:auto">'
+		html += '<input class="inputbox" type="text" size="10" maxlength="10" name="startdate">'
+		html += '<a href="" onclick="parent.DateSelect(\'startdate\');return false;">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+		html += ' - <input class="inputbox" type="text" size="10" maxlength="10" name="enddate">'
+		html += '<a href="" onclick="parent.DateSelect(\'enddate\');return false;">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+		html += '</td></tr>'
+		html += '<tr><td>&nbsp;</td></tr>'
+		html += '<tr><td style="text-align:center;margin-left:auto;margin-right:auto">'
+		html += uiButton(getSeaPhrase("CONTINUE","TE"), "parent.MissedTimeCards();return false")
+		html += uiButton(getSeaPhrase("BACK","TE"), "parent.StartReporting();return false")
+		html += '</td></tr>'
+		html += '</table>'
+		html += '</td></tr></table>'
+		html += '</table>'
+		html += '</td></tr></table>'
+		html += '</form>'
+
+		self.main.document.getElementById("paneBody1").innerHTML = html;
+		self.main.stylePage();
+	}
+}
+
+function CallHS221ForDetailView(TypeClicked)
+{
+	if (Reports == null)
+	{
+		Reports = new ReportsObject(authUser.company, authUser.employee)
+		PlanCodes = new PlanCodeObject(authUser.company, authUser.employee)
+		parent.lawheader.linecount = 0;
+		parent.lawheader.formlinecount = 0;
+	}
+
+	parent.lawheader.UpdateType = "HS22.1"
+
+	var obj	    = new AGSObject(authUser.prodline, "HS22.1")
+	obj.event     = "ADD"
+	obj.rtn       = "DATA"
+	obj.longNames = true;
+	obj.tds       = false
+	obj.func      = "parent.DrawDetailReports("+TypeClicked+")";
+
+	if (arguments.length && arguments[1])
+		obj.field		= "FC=%2B"
+	else
+		obj.field		= "FC=I"
+
+	obj.field		+= "&HSU-COMPANY="+authUser.company
+					+ "&HSU-EMPLOYEE="+authUser.employee
+
+	if (arguments.length && arguments[1])
+	{
+		obj.field += "&LAST-EMPLOYEE="+Reports.LastEmployee
+		obj.field += "&LAST-HSU-CODE="+Reports.LastHsuCode
+		obj.field += "&LAST-LAST-NAME="+escape(Reports.LastLastName)
+		obj.field += "&LAST-FIRST-NAME="+escape(Reports.LastFirstName)
+		obj.field += "&LAST-MIDDLE-INIT="+escape(Reports.LastMiddleInit)
+	}
+
+	obj.out       = "JAVASCRIPT"
+	obj.debug     = false
+	AGS(obj, "jsreturn")
+}
+
+function DrawDetailReports(TypeClicked)
+{
+	if (typeof(ReportsDetail) == "undefined" || ReportsDetail.length == 0)
+	{
+		ReportsDetail = Reports.Detail;
+	}
+
+	if (!ReportsDetail.length)
+	{
+		removeWaitAlert();
+		seaAlert(getSeaPhrase("NO_DIRECT_REPORT_CONTACT_HR","TE"));
+		StartReporting();
+		return;
+	}
+
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		removeWaitAlert();
+		return;
+	}
+
+	if(	self.lawheader.gmsgnbr == "000" &&
+		self.lawheader.gmsg == "More records exist, use PageDown")
+	{
+		CallHS221ForDetailView(TypeClicked, true);
+		return;
+	}
+
+	var Desc = '<table align="center" border="0" cellpadding="0" cellspacing="0">'
+	for (var i=0; i<ReportsDetail.length; i++)
+	{
+		Desc += '<tr>'
+		Desc += '<td style="text-align:center">'
+		Desc += '<input class="inputbox" type="checkbox" name="directreports'+i+'" onclick="parent.SingleDirectReportsClicked();">'
+		Desc += '</td>'
+		Desc += '<td class="plaintablecell">'
+		Desc += ReportsDetail[i].FullName
+		Desc += '</td>'
+		Desc += '</tr>'
+	}
+	Desc += '</table>'
+
+	var html = '<form name="frmReportType">'
+	html += '<table border="0" width="100%" height="100%"><tr><td style="text-align:center;vertical-align:top">'
+	html += '<table border="0" width="100%"><tr><td class="plaintablecell" style="text-align:center">'+getSeaPhrase("WHICH_EMPLOYEE_TO_INCLUDE","TE")
+	html += '<table width="100%" border="0" cellpadding="1" cellspacing="0"><tr><td style="text-align:center">'
+	html += '<table align="center" width="100%" border="0" cellpadding="4" cellspacing="0">'
+	html += '<tr><td style="text-align:center" class="plaintablecell"><input class="inputbox" type="checkbox" name="alldirectreports" checked onclick="parent.AllDirectReportsClicked();"> '+getSeaPhrase("ALL_DIRECT_REPORTS","TE")+'</td>'
+	html += '<tr><td style="text-align:center" class="plaintablecell">'+getSeaPhrase("ENCLOSED_OR","TE")+'</td>'
+	html += '<tr><td style="text-align:center">'
+
+	html += Desc
+
+	html += '</td></tr><tr><td align=center class="plaintablecell">'
+	if (TypeClicked == 2)
+	{
+		html += getSeaPhrase("ENTER_PAY_PERIOD_DATES","TE")
+	}
+	else
+	{
+		html += getSeaPhrase("ENTER_TO_FROM_DATES","TE")
+	}
+
+	html += '<tr><td style="text-align:center">'
+	html += '<input class="inputbox" type="text" size="10" maxlength="10" name="startdate">'
+	html += '<a href="" onclick="parent.DateSelect(\'startdate\');return false;">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+	html += ' - <input class="inputbox" type="text" size="10" maxlength="10" name="enddate">'
+	html += '<a href="" onclick="parent.DateSelect(\'enddate\');return false;">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan()
+	html += '<tr><td style="text-align:center">&nbsp;'
+	html += '<tr><td style="text-align:center">'
+	html += '<p align="center">'
+	html += uiButton(getSeaPhrase("CONTINUE","TE"),"parent.Detail_Statuses("+TypeClicked+");return false")
+	html += uiButton(getSeaPhrase("BACK","TE"),"parent.StartReporting();return false")
+	html += '</p>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table></form>'
+
+	self.main.document.getElementById("paneBody1").innerHTML = html;
+	self.main.stylePage();
+	removeWaitAlert();
+}
+
+var left = false;
+
+function AllDirectReportsClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+
+	for (var i=0; i<ReportsDetail.length; i++)
+	{
+		var checkBox = formObj.elements["directreports" + i];
+		checkBox.checked = false;
+		self.main.styleElement(checkBox);
+	}
+}
+
+function SingleDirectReportsClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	var checkBox = formObj.elements["alldirectreports"];
+
+	checkBox.checked = false;
+	self.main.styleElement(checkBox);
+}
+
+function ReturnDate(date)
+{
+  	self.main.document.frmReportType.elements[date_fld_name].value = date
+}
+
+function MissedTimeCards()
+{
+	// PT 142767
+	if (NonSpace(self.main.document.frmReportType.startdate.value) > 0 && ValidDate(self.main.document.frmReportType.startdate) == false)
+	{
+       	return;
+	}
+
+ 	if (NonSpace(self.main.document.frmReportType.enddate.value) > 0 && ValidDate(self.main.document.frmReportType.enddate) == false)
+ 	{
+   		return;
+	}
+
+	//PT 157755
+  	if (getDteDifference(formjsDate(self.main.document.frmReportType.startdate.value),
+  		formjsDate(self.main.document.frmReportType.enddate.value)) <= 0)
+  	{
+		setRequiredField(self.main.document.frmReportType.startdate);
+		seaAlert(getSeaPhrase("START_MUST_BEFORE_END","TE"));
+		return;
+	}
+
+	var periodstart = self.main.document.frmReportType.startdate.value;
+	var periodend = self.main.document.frmReportType.enddate.value;
+	DrawMissingWindow(periodstart, periodend);
+}
+
+function Detail_Statuses(TypeClicked)
+{
+	if (typeof(self.main.document.forms["frmReportType"]) != "undefined")
+	{
+		// PT 142767
+		if (NonSpace(self.main.document.frmReportType.startdate.value) > 0 && ValidDate(self.main.document.frmReportType.startdate) == false)
+    	   	return;
+
+ 		if (NonSpace(self.main.document.frmReportType.enddate.value) > 0 && ValidDate(self.main.document.frmReportType.enddate) == false)
+   			return;
+
+		//PT 157755
+  		if (getDteDifference(formjsDate(self.main.document.frmReportType.startdate.value),
+  			formjsDate(self.main.document.frmReportType.enddate.value)) <= 0)
+  		{
+			setRequiredField(self.main.document.frmReportType.startdate);
+			seaAlert(getSeaPhrase("START_MUST_BEFORE_END","TE"));
+			return;
+		}
+
+		Details.EmployeeNumbers = new Array(0);
+		Details.StartDate = self.main.document.frmReportType.startdate.value;
+		Details.EndDate = self.main.document.frmReportType.enddate.value;
+		Details.ShowBlankRecords = false;
+		Details.ShowAllRecords = false;
+
+		if (self.main.document.forms["frmReportType"].alldirectreports.checked)
+		{
+			for (var i=0; i<ReportsDetail.length; i++)
+			{
+				Details.EmployeeNumbers[Details.EmployeeNumbers.length] = ReportsDetail[i].Employee;
+			}
+		}
+		else
+		{
+			var formObj = self.main.document.forms["frmReportType"];
+			for (var i=0; i<ReportsDetail.length; i++)
+			{
+				if (eval("formObj.directreports"+i).checked)
+				{
+					Details.EmployeeNumbers[Details.EmployeeNumbers.length] = ReportsDetail[i].Employee;
+				}
+			}
+		}
+	}
+
+	var html = '<form name="frmReportType">'
+	html += '<table border="0" width="100%" height="100%"><tr><td align="center" style="text-align:center;vertical-align:top">'
+	html += '<table border="0" cellspacing="0" cellpadding="0" style="margin-left:auto;margin-right:auto"><tr><td class="plaintablecell">'+getSeaPhrase("SELECT_STATUS_TO_INCLUDE","TE")
+	html += '<table width="100%" border="0" cellpadding="1" cellspacing="0"><tr><td align="center">'
+	html += '<table align="center" width="100%" border="0" cellpadding="4" cellspacing="0"><tr><td align="center">'
+	html += '<table border="0">'
+	html += '<tr>'
+	html += '<td class="plaintablecell">'
+	html += '<input class="inputbox" type=checkbox name=allstatuses checked onclick="parent.AllStatusesClicked();">'
+	html += '</td>'
+	html += '<td class="plaintablecell">'+getSeaPhrase("ALL","TE")+'</td>'
+	html += '</tr>'
+	html += '<tr>'
+	html += '<td class="plaintablecell" colspan="2" align="center">'+getSeaPhrase("ENCLOSED_OR","TE")+'</td>'
+	html += '</tr>'
+
+	for (var i=0; i<Statuses.length; i++)
+	{
+		html += '<tr>'
+		html += '<td class="plaintablecell"><input class="inputbox" type="checkbox" name="statuses'+i+'" onclick="parent.StatusesClicked();"></td>'
+		html += '<td class="plaintablecell">'+Statuses[i]+'</td>'
+		html += '</tr>'
+	}
+
+	html += '<tr>'
+	html += '<td colspan="2" align="center">'
+	html += uiButton(getSeaPhrase("CONTINUE","TE"),"parent.Draw_Detail("+TypeClicked+");return false")
+	html += uiButton(getSeaPhrase("BACK","TE"),"parent.DrawDetailReports("+TypeClicked+");return false")
+	html += '</td>'
+	html += '</tr>'
+	html += '</table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</td></tr></table>'
+	html += '</form>'
+
+	self.main.document.getElementById("paneBody1").innerHTML = html;
+	self.main.stylePage();
+}
+
+function AllStatusesClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+
+	for (var i=0; i<Statuses.length; i++)
+	{
+	    var checkBox = formObj.elements["statuses" + i];
+	    checkBox.checked = false;
+	    self.main.styleElement(checkBox);
+	}
+}
+
+function StatusesClicked()
+{
+	var formObj = self.main.document.forms["frmReportType"];
+	var checkBox = formObj.elements["allstatuses"];
+
+	checkBox.checked = false;
+	self.main.styleElement(checkBox);
+}
+
+function Draw_Detail(TypeClicked)
+{
+	Details.Statuses = new Array(0);
+
+	if (self.main.document.forms["frmReportType"].allstatuses.checked)
+	{
+		Details.ShowAllRecords = true;
+		for (var i=0; i<Statuses.length; i++)
+		{
+			Details.Statuses[Details.Statuses.length] = true;
+		}
+	}
+	else
+	{
+		Details.ShowAllRecords = false; //PT116112
+		var formObj = self.main.document.forms["frmReportType"];
+
+		for (var i=0; i<Statuses.length; i++)
+		{
+			if (eval("formObj.statuses"+i).checked)
+			{
+				Details.Statuses[i] = true;
+			}
+			else
+			{
+				Details.Statuses[i] = false;
+			}
+		}
+	}
+
+	Details.ShowBlankRecords = (Details.Statuses.length > 0 && Details.Statuses[0]);
+
+	if (TypeClicked == 2)
+	{
+		DrawSummaryWindow();
+	}
+	else
+	{
+		DrawDetailWindow();
+	}
+}
+
+function checkResolution()
+{
+	if (screen.width <= "800" && screen.height <= "600")
+	{
+		if (document.body.clientHeight) {
+			document.getElementById("paneBorder").style.height = (document.body.clientHeight - 40)+'px';
+		}
+		window.moveTo(0,0);
+		window.resizeTo(screen.width,screen.height);
+	}
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+
+	var winHeight = 520;
+	var winWidth = 800;
+	var headerHeight = 0;
+	var outerPane = self.main.document.getElementById("outerPane");
+	var paneBody1 = self.main.document.getElementById("paneBody1");
+	var paneBody2 = self.main.document.getElementById("paneBody2");
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var tblFrame = document.getElementById("main");
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.main.onresize = null;
+	}
+
+	if (winHeight > (headerHeight + 95))
+	{
+		tblFrame.style.height = (winHeight - headerHeight - 95) + "px";
+	}
+	if (winWidth > 15)
+	{
+		tblFrame.style.width = (winWidth - 15) + "px";
+	}
+
+	var paneBorder = document.getElementById("paneBorder");
+	if (winHeight > headerHeight)
+	{
+		paneBorder.style.height = (winHeight - headerHeight) + "px";
+	}
+
+	if (outerPane)
+	{
+		outerPane.setAttribute("styler", "groupbox");
+		outerPane.style.paddingRight = "5px";
+		if (winWidth > 35)
+		{
+			outerPane.style.width = (winWidth - 35) + "px";
+		}
+		outerPane.style.overflow = "auto";
+		if (winHeight > (headerHeight + 95))
+		{
+			outerPane.style.height = (winHeight - headerHeight - 95) + "px";
+		}
+	}
+
+	if (paneBody1 && paneBody2)
+	{
+		paneBody1.style.height = "auto";
+		paneBody1.style.width = "100%";
+	}
+}
+
+</script>
+</head>
+
+<body style="overflow:hidden" onload="fitToScreen();checkResolution();OpenProgram()" onresize="fitToScreen()">
+
+<iframe id="taskheader" name="taskheader" src="/lawson/xhrnet/ui/header.htm" style="visibility:visible;position:absolute;height:34px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no">
+</iframe>
+
+<div id="paneBorder" class="panebordertimeentry" style="position:absolute;top:34px;left:0px;visibility:hidden;height:560px;overflow:hidden">
+	<table id="paneTable" border="0" width="100%" cellpadding="0" cellspacing="0">
+	<tr style="height:16px" styler="hidden">
+	<td>
+		<table border="0" cellspacing="0" cellpadding="0" width="100%" height="100%">
+		<tr>
+		<td>
+			<div id="paneHeader" class="paneheadertimeentry" width="100%" height="100%">&nbsp;</div>
+		</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="main" id="main" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;position:relative;width:100%;height:490px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="footer" src="/lawson/xhrnet/ui/plain.htm" style="visibility:visible;position:relative;width:100%;height:31px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td>
+		<iframe name="jsreturn" src"/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="lawheader" src="/lawson/xhrnet/timeentry/reporting/reportinglaw.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="printFm" src="/lawson/xhrnet/ui/plain.htm" style="visibility:visible;position:relative;top:0px;left:0px;width:100%;height:1px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="PGCONTROL" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	</td></tr>
+	</table>
+</div>
+
+</body>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/reporting/reporting.htm,v 1.18.2.32 2011/05/04 21:10:22 brentd Exp $ -->

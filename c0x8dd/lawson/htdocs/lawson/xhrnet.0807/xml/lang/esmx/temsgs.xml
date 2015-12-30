@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="esmx" version="10.0">
+		<phrase id="CLK_PAGE_UP"><![CDATA[Haga clic para ir una página hacia arriba]]></phrase>
+		<phrase id="CLK_PAGE_DOWN"><![CDATA[Haga clic para ir una página hacia abajo]]></phrase>
+		<phrase id="PRINT_TE_CARD"><![CDATA[Imprimir parte de introducción de tiempo]]></phrase>
+		<phrase id="START_DATE"><![CDATA[Fecha de inicio]]></phrase>
+		<phrase id="DATE"><![CDATA[Fecha]]></phrase>
+		<phrase id="DISP_CALENDAR"><![CDATA[Mostrar calendario]]></phrase>
+		<phrase id="END_DATE"><![CDATA[Fecha finalización]]></phrase>
+		<phrase id="INVALID_ACQUIRED_DAT"><![CDATA[Fecha adquirida no válida]]></phrase>
+		<phrase id="ACQUIRED_DAT_REQUIRED"><![CDATA[Fecha adquirida es un campo obligatorio]]></phrase>
+		<phrase id="INVALID_LAST_DAT"><![CDATA[Fecha de última utilización]]></phrase>
+		<phrase id="LAST_DAT_REQUIRED"><![CDATA[Fecha de última utilización es un campo obligatorio]]></phrase>
+		<phrase id="START_MUST_BEFORE_END"><![CDATA[La fecha de inicio debe ser anterior a la fecha de finalización]]></phrase>
+		<phrase id="RETRIEVE_REC_IN_PERIOD"><![CDATA[Recuperando registro para un período dado...]]></phrase>
+		<phrase id="NO_REC_DISP"><![CDATA[No hay registros para mostrar]]></phrase>
+		<phrase id="LOADING_TE"><![CDATA[Cargando introducción de tiempo...]]></phrase>
+		<phrase id="TIME_ENTRY"><![CDATA[Reg tiemp]]></phrase>
+		<phrase id="SENDING_EMAIL"><![CDATA[Enviando email...]]></phrase>
+		<phrase id="SENDING_EMPLOYEE_NOTICE"><![CDATA[Enviando aviso a empleado...]]></phrase>
+		<phrase id="SENDING_SUPERVISOR_APPROVAL"><![CDATA[Enviando aviso de aprobación al supervisor...]]></phrase>
+		<phrase id="TIME_CARD_RETURNED_PERIOD"><![CDATA[ ha devuelto su parte de trabajo para revisión durante el período de ]]></phrase>
+		<phrase id="TIME_CARD_CHANGED_PERIOD"><![CDATA[ ha devuelto su parte de trabajo para revisión durante el período de ]]></phrase>
+		<phrase id="TIME_CARD_SUBMITTED_PERIOD"><![CDATA[ ha devuelto su parte de trabajo para revisión durante el período de ]]></phrase>
+		<phrase id="TO"><![CDATA[ a ]]></phrase>
+		<phrase id="DOT"><![CDATA[.]]></phrase>
+		<phrase id="EMPLOYEE_EMAIL_NOT_AVAILABLE"><![CDATA[No se puede enviar correo electrónico. No se ha configurado una dirección de email para el empleado]]></phrase>
+		<phrase id="EMAIL_SENT"><![CDATA[El email enviado]]></phrase>
+		<phrase id="TIME_CARD_RETURNED"><![CDATA[ ha devuelto su parte de trabajo para revisión.]]></phrase>
+		<phrase id="TIME_CARD_CHANGED"><![CDATA[ ha cambiado su parte de trabajo.]]></phrase>
+		<phrase id="TIME_CARD_SUBMITTED"><![CDATA[ ha enviado su parte de trabajo para aprobación.]]></phrase>
+		<phrase id="LOADING_PRE_PERIOD"><![CDATA[Cargando período anterior...]]></phrase>
+		<phrase id="LOADING_NEXT_PERIOD"><![CDATA[Cargando período siguiente...]]></phrase>
+		<phrase id="PAY_PERIOD_LOADED"><![CDATA[El período de pago ya está cargado.]]></phrase>
+		<phrase id="UPDATING_EXCEPTION_TE"><![CDATA[Actualizando introducción de tiempo de excepción...]]></phrase>
+		<phrase id="PREPARE_PRINT_SCREEN"><![CDATA[Preparando pantalla para impresión.]]></phrase>
+		<phrase id="PAY_PLAN"><![CDATA[Plan pago:]]></phrase>
+		<phrase id="OPEN_LEAVE_BALANCE_WIN"><![CDATA[Saldos bajas]]></phrase>
+		<phrase id="TO_PRE_PERIOD"><![CDATA[Mover al período anterior]]></phrase>
+		<phrase id="TO_NEXT_PERIOD"><![CDATA[Mover al período siguiente]]></phrase>
+		<phrase id="OPEN_CALENDAR"><![CDATA[Abrir calendario]]></phrase>
+		<phrase id="INVALID_PERIOD"><![CDATA[Este período se encuentra fuera del rango de elegibilidad. No puede introducir ningún dato para este período.]]></phrase>
+		<phrase id="TE_LOCKED"><![CDATA[La introducción de tiempo se ha bloqueado. No podrá introducir datos.]]></phrase>
+		<phrase id="OLD_PERIOD"><![CDATA[Este período se ha marcado como de historial. No puede introducir ningún dato para este período.]]></phrase>
+		<phrase id="UPDATE_CARD"><![CDATA[Actualizar parte]]></phrase>
+		<phrase id="CLOSE_TE"><![CDATA[Cerrar introducción de tiempo]]></phrase>
+		<phrase id="CONTINUE_SUBMITTED_AS_APPROVED"><![CDATA[Todos los partes de tiempo enviados se definirán como aprobados. ¿Desea continuar?]]></phrase>
+		<phrase id="SAVE_CHANGE"><![CDATA[Guardar cambios]]></phrase>
+		<phrase id="NOT_SAVE_CHANGE"><![CDATA[No guardar cambios]]></phrase>
+		<phrase id="DO_NOTHING"><![CDATA[No hacer nada]]></phrase>
+		<phrase id="TE_ERROR"><![CDATA[ERROR   Hay un problema interno con la introducción de tiempo. Póngase en contacto con el departamento de Recursos Humanos.  Descripción: ]]></phrase>
+		<phrase id="USE_EXCEPTION_TE"><![CDATA[Utilice la introducción de tiempo de excepción para editar este período.]]></phrase>
+		<phrase id="USE_REGULAR_TE"><![CDATA[Utilice la introducción de tiempo regular para editar este período.]]></phrase>
+		<phrase id="CONTACT_PAYROLL_FOR_HELP"><![CDATA[Pida ayuda al departamento de nóminas si desea obtener ayuda.]]></phrase>
+		<phrase id="PAY_PLAN_DATE_NOT_SETUP"><![CDATA[Las fechas no se han configurado para el plan de pagos ]]></phrase>
+		<phrase id="EMPLOYEE_DATES_NOT_SETUP"><![CDATA["Las fechas no se han configurado para uno o varios de los empleados con el rango de fechas que introdujo.]]></phrase>
+		<phrase id="ERROR"><![CDATA[ERROR]]></phrase>
+		<phrase id="NEED_HIGH_RESOLUTION"><![CDATA[Esta versión de introducción de tiempo se ha optimizado para trabajar con una resolución mayor. Ajuste su monitor a 800 X 600 o una resolución mayor.]]></phrase>
+		<phrase id="OPEN_TIPS_WIN"><![CDATA[Abrir ventana de sugerencias]]></phrase>
+		<phrase id="OPEN_COMMENTS"><![CDATA[Abrir comentarios para ]]></phrase>
+		<phrase id="EMPLOYEE"><![CDATA[Empleado:]]></phrase>
+		<phrase id="EXCEPTION"><![CDATA[Excepción]]></phrase>
+		<phrase id="NORMAL"><![CDATA[Normal]]></phrase>
+		<phrase id="TO_PRE_DAY"><![CDATA[Mover al día anterior]]></phrase>
+		<phrase id="TO_NEXT_DAY"><![CDATA[Mover al día siguiente]]></phrase>
+		<phrase id="CARD_NOT_ENTERED"><![CDATA[Este parte de trabajo no se ha introducido.]]></phrase>
+		<phrase id="CARD_ENTERED_NOT_SUBMITTED"><![CDATA[Este parte de trabajo se ha introducido pero no se ha enviado.]]></phrase>
+		<phrase id="CARD_SUBMITTED"><![CDATA[Este parte de trabajo se ha enviado.]]></phrase>
+		<phrase id="CARD_APPROVED"><![CDATA[Este parte de trabajo se ha aprobado.]]></phrase>
+		<phrase id="CARD_ON_HOLD"><![CDATA[Este parte de trabajo se ha colocado en espera.]]></phrase>
+		<phrase id="CARD_REJECTED"><![CDATA[Este parte de trabajo se ha rechazado.]]></phrase>
+		<phrase id="CARD_APPROVED_NO_MORE"><![CDATA[Este parte de trabajo se ha aprobado. No puede introducir ningún dato para este período.]]></phrase>
+		<phrase id="CARD_ON_HOLD_NO_MORE"><![CDATA[Este parte de trabajo se ha colocado en espera. No puede introducir ningún dato para este período.]]></phrase>
+		<phrase id="CARD_RETURNED_NEED_CHANGE"><![CDATA[Este parte de trabajo se ha devuelto para su revisión.  Realice los cambios necesarios y vuelva a enviarlo.]]></phrase>
+		<phrase id="ENTER_TIME_CLICK_MULTIENTRIES"><![CDATA[Introduzca su tiempo a continuación. Para varias entradas de un solo día, desplácese a diariamente. Para ello haga clic en ]]></phrase>
+		<phrase id="ENTER_EXCEPTION_TIME"><![CDATA[Introduzca su tiempo de excepción a continuación.]]></phrase>
+		<phrase id="ENTER_TIME"><![CDATA[Introduzca su tiempo a continuación.]]></phrase>
+		<phrase id="REPORTS"><![CDATA[Informes]]></phrase>
+		<phrase id="TOTAL_HOURS"><![CDATA[Horas totales]]></phrase>
+		<phrase id="SUBMIT_CARD_FOR_APPROVE"><![CDATA[Enviar para aprobación]]></phrase>
+		<phrase id="DEL_DATED_INFO"><![CDATA[Borrar para la fecha seleccionada]]></phrase>
+		<phrase id="PRINT_CURRENT_CARD"><![CDATA[Imprimir parte]]></phrase>
+		<phrase id="COPY_DAY"><![CDATA[Copiar]]></phrase>
+		<phrase id="PASTE_DAY"><![CDATA[Pegar]]></phrase>
+		<phrase id="RETURN_PERIOD_VIEW"><![CDATA[Volver a vista de período]]></phrase>
+		<phrase id="RETURN_LIST"><![CDATA[Volver a lista]]></phrase>
+		<phrase id="STATUS"><![CDATA[Estado:]]></phrase>
+		<phrase id="SUBMITTED"><![CDATA[Enviado]]></phrase>
+		<phrase id="APPROVED"><![CDATA[Aprobado]]></phrase>
+		<phrase id="ON_HOLD"><![CDATA[Retenido]]></phrase>
+		<phrase id="REJECTED"><![CDATA[Rechazado]]></phrase>
+		<phrase id="HISTORICAL"><![CDATA[De historial:]]></phrase>
+		<phrase id="NOT_ENTERED"><![CDATA[Sin introducir]]></phrase>
+		<phrase id="HELD"><![CDATA[Retenido]]></phrase>
+		<phrase id="NONE"><![CDATA[Ninguno]]></phrase>
+		<phrase id="HOLD"><![CDATA[Espera]]></phrase>
+		<phrase id="SPLIT"><![CDATA[Dividir]]></phrase>
+		<phrase id="OPEN_SELECT_WIN"><![CDATA[Abrir ventana seleccionada]]></phrase>
+		<phrase id="TO_PAINT_SCREEN"><![CDATA[Pantalla para pintar: ]]></phrase>
+		<phrase id="OPEN_DAILY_WIN"><![CDATA[Abrir ventana diariamente para ]]></phrase>
+		<phrase id="CARD_FOR"><![CDATA[El parte de trabajo de ]]></phrase>
+		<phrase id="BEEN_UPDATED"><![CDATA[ se ha actualizado.]]></phrase>
+		<phrase id="SUBMITTED_CARD_FOR"><![CDATA[El parte de trabajo que envió para ]]></phrase>
+		<phrase id="SUBMITTED_FOR_APPROVAL"><![CDATA[ se ha enviado para aprobación.]]></phrase>
+		<phrase id="USE_DAILY_TE_CHANGE_MULTIENTRIED"><![CDATA[Para cambiar varias entradas del mismo día, deberá utilizar Introducción de tiempo diariamente]]></phrase>
+		<phrase id="VIEWS_OFF"><![CDATA[Las vistas se han desactivado]]></phrase>
+		<phrase id="VIEWS_ON"><![CDATA[Las vistas se han activado]]></phrase>
+		<phrase id="NO_MORE_THAN_24_HOURS"><![CDATA[No puede utilizar más de 24 horas al día.]]></phrase>
+		<phrase id="VALUE_BE_NUMERIC"><![CDATA[El valor debe ser numérico]]></phrase>
+		<phrase id="UPDATING_PERIOD_TE"><![CDATA[Actualizando introducción de tiempo de período...]]></phrase>
+		<phrase id="ENTER_TIME_TO_UPDATE"><![CDATA[Introduzca la hora a la que se va a actualizar]]></phrase>
+		<phrase id="RESUBMIT_CARD?"><![CDATA[¿Desea volver a enviar su parte de trabajo?]]></phrase>
+		<phrase id="CLEAR_CARD?_OK_FOR_NON_EXCEPTION"><![CDATA[¿Desea borrar su parte de trabajo? Si no se trata de un registro de excepción, seleccione Aceptar]]></phrase>
+		<phrase id="ABOUT_TO_DEL"><![CDATA[Está a punto de borrar ]]></phrase>
+		<phrase id="DEL_REC_CORRECT?"><![CDATA[ los registros del sistema. ¿Es correcta esta información?]]></phrase>
+		<phrase id="ABOUT_TO_DEL_LINE"><![CDATA[Está a punto de borrar la línea ]]></phrase>
+		<phrase id="DEL_FROM_SYS_CORRECT?"><![CDATA[ del sistema. ¿Es correcta esta información?]]></phrase>
+		<phrase id="EMPLOYEE_NO"><![CDATA[Número de empleado ]]></phrase>
+		<phrase id="SUPERVISOR"><![CDATA[Supervisor: ]]></phrase>
+		<phrase id="DEPARTMENT"><![CDATA[Departamento:]]></phrase>
+		<phrase id="CARD_FOR"><![CDATA[El parte de trabajo de:]]></phrase>
+		<phrase id="EMPLOYEE_ONLY"><![CDATA[Empleado]]></phrase>
+		<phrase id="SUPERVISOR_ONLY"><![CDATA[Supervisor]]></phrase>
+		<phrase id="SUPERVISOR_NAM_PRINT"><![CDATA[Nombre del supervisor (imprimir)]]></phrase>
+		<phrase id="SUPERVISOR_PHONE_NO"><![CDATA[Nº de teléfono del supervisor]]></phrase>
+		<phrase id="NO_DATES_FOR_PAY_PLAN_CONTACT_HR"><![CDATA[No hay fechas asociadas al plan de pagos de este empleado. Póngase en contacto con el departamento de Recursos Humanos si desea obtener más información.]]></phrase>
+		<phrase id="CANNT_COMPLETE_REQUEST"><![CDATA[No se puede completar las solicitud]]></phrase>
+		<phrase id="COMMENTS_LOADED_FOR_DAY"><![CDATA[Ya se han cargado los comentarios para ese día.]]></phrase>
+		<phrase id="MOVING_TO_NEW_DATE"><![CDATA[Moviendo a nueva fecha...]]></phrase>
+		<phrase id="COMMENTS"><![CDATA[Comentarios]]></phrase>
+		<phrase id="UPDATE"><![CDATA[Actualizar]]></phrase>
+		<phrase id="DELETE"><![CDATA[Borrar]]></phrase>
+		<phrase id="CLEAR"><![CDATA[Quitar]]></phrase>
+		<phrase id="DONE"><![CDATA[Listo]]></phrase>
+		<phrase id="DELETE_COMMENTS?"><![CDATA[Está a punto de borrar este comentario. ¿Está seguro?]]></phrase>
+		<phrase id="LOADING_PRE_DAY"><![CDATA[Cargando día anterior...]]></phrase>
+		<phrase id="LOADING_NEXT_DAY"><![CDATA[Cargando día siguiente...]]></phrase>
+		<phrase id="DATE_LOADED"><![CDATA[La fecha ya se ha cargado.]]></phrase>
+		<phrase id="LOADING_PRE_VIEW"><![CDATA[Cargando vista de período...]]></phrase>
+		<phrase id="UPDATING_DAILY_TE"><![CDATA[Actualizando introducción de tiempo diariamente...]]></phrase>
+		<phrase id="COPY_FORM_TO_PASTE"><![CDATA[Copie un formulario para pegar.]]></phrase>
+		<phrase id="WAIT_LOADING_SELECT_WIN"><![CDATA[Espere mientras se carga la ventana de selección.]]></phrase>
+		<phrase id="CANNT_OPEN_SELECT_BOX_NO_DATA"><![CDATA[No se puede abrir el cuadro de selección. (Sin datos)]]></phrase>
+		<phrase id="CANNT_OPEN_SELECT_BOX_RESET_BROWSER"><![CDATA[No se puede abrir el cuadro de selección. (Reinicie el explorador)]]></phrase>
+		<phrase id="CANNT_OPEN_WIN_RESTART_BROWSER"><![CDATA[No se puede abrir la ventana. Debe reiniciar el explorador.]]></phrase>
+		<phrase id="DEL_ACTIVITY"><![CDATA[Borrar esta actividad]]></phrase>
+		<phrase id="MORE"><![CDATA[Más]]></phrase>
+		<phrase id="NO_POSTING_LEVEL_ACTIVITIES"><![CDATA[No hay actividades a nivel de publicación.]]></phrase>
+		<phrase id="LOADING_DAILY_TE"><![CDATA[Cargando introducción de tiempo diariamente...]]></phrase>
+		<phrase id="MANAGER_APPROVAL"><![CDATA[Aprobación del gestor]]></phrase>
+		<phrase id="ENTER_EMAIL_ADDR"><![CDATA[Introduzca a continuación la dirección de correo electrónico]]></phrase>
+		<phrase id="SUBJECT_TE"><![CDATA[Asunto: Reg tiemp]]></phrase>
+		<phrase id="LOADING_MANAGER_APPROVAL"><![CDATA[Cargando aprobación del gestor...]]></phrase>
+		<phrase id="QUIT_MANAGER_APPROVAL"><![CDATA[Salir de aprobación del gestor]]></phrase>
+		<phrase id="LOADING_SUMMARY_APPROVAL"><![CDATA[Cargando aprobación de resumen...]]></phrase>
+		<phrase id="STATUS_UPDATED"><![CDATA[El estado se ha actualizado.]]></phrase>
+		<phrase id="COMMENTS_LOWER"><![CDATA[Comentarios]]></phrase>
+		<phrase id="EMAIL"><![CDATA[Email]]></phrase>
+		<phrase id="NAME"><![CDATA[Nombre]]></phrase>
+		<phrase id="TIMECARD_TYPE"><![CDATA[Tipo de parte de trabajo]]></phrase>
+		<phrase id="SUBMITTED_HOURS"><![CDATA[Horas enviadas]]></phrase>
+		<phrase id="DETAIL"><![CDATA[Detalle]]></phrase>
+		<phrase id="STATUS_ONLY"><![CDATA[Estado]]></phrase>
+		<phrase id="SEND_EMAIL_TO"><![CDATA[Enviar email a ]]></phrase>
+		<phrase id="SEND_EMAIL"><![CDATA[Enviar email]]></phrase>
+		<phrase id="NOT_ENTERED_CARD"><![CDATA[ no se ha introducido un parte de trabajo.]]></phrase>
+		<phrase id="NOT_SUBMITTED_CARD"><![CDATA[ no se ha enviado un parte de trabajo para aprobación.]]></phrase>
+		<phrase id="SUBMITTED_CARD"><![CDATA[ ha enviado un parte de trabajo para aprobación.]]></phrase>
+		<phrase id="HISTORICAL_ONLY"><![CDATA[De historial]]></phrase>
+		<phrase id="LOADING_NEW_PERIOD"><![CDATA[Cargando período nuevo...]]></phrase>
+		<phrase id="UPDATING_SUMMARY"><![CDATA[Actualizando resumen...]]></phrase>
+		<phrase id="CARD_RETURNED_FOR_REVIEW"><![CDATA[ ha devuelto su parte de trabajo para revisión.]]></phrase>
+		<phrase id="CARD_JUST_APPROVED"><![CDATA[ ha aprobado su parte de trabajo.]]></phrase>
+		<phrase id="SENDING_EMPLOYEE_EMAIL_NOTICE"><![CDATA[Enviando aviso por email al empleado...]]></phrase>
+		<phrase id="GATHERING_DATA"><![CDATA[Recopilando datos. Por favor, espere...]]></phrase>
+		<phrase id="TE_REPORT_DETAIL"><![CDATA[Detalle de informe sobre introducción de tiempo]]></phrase>
+		<phrase id="EMPLOYEE_NAME"><![CDATA[Nombre empleado]]></phrase>
+		<phrase id="N_A"><![CDATA[N/A]]></phrase>
+		<phrase id="OK_TO_SUMMARIZE_REPORT"><![CDATA[El informe siguiente se resumirá, excluidos los registros que no contienen datos. Pulse Aceptar para continuar.]]></phrase>
+		<phrase id="WAIT_FOR_SORTING"><![CDATA[Clasificando. Por favor, espere...]]></phrase>
+		<phrase id="TE_REPORT_MISSED_CARD"><![CDATA[Informe sobre introducción de tiempo - [Partes de trabajo que faltan]]]></phrase>
+		<phrase id="NO_EMPLOYEE_HAVING_MISSING_CARD"><![CDATA[No tiene empleados a quienes les falten partes de trabajo para el rango de fechas introducido.]]></phrase>
+		<phrase id="PRESS_SEND_TO_NOTIFY_EMPLOYEE_MISSING"><![CDATA[Para notificar a los empleados que se muestran a continuación los partes de trabajo que les faltan, pulse el botón Enviar email.]]></phrase>
+		<phrase id="PAY_PERIOD_START_DATE"><![CDATA[Fecha de inicio del período de pago]]></phrase>
+		<phrase id="CARD_STATUS"><![CDATA[Estado de parte de trabajo]]></phrase>
+		<phrase id="NO_EMAIL_ADDRESS"><![CDATA[Sin dirección de correo electrónico]]></phrase>
+		<phrase id="NOT_DEFINED"><![CDATA[Sin definir]]></phrase>
+		<phrase id="NOT_SUBMITTED"><![CDATA[Sin enviar]]></phrase>
+		<phrase id="RETURNED"><![CDATA[Devuelto]]></phrase>
+		<phrase id="CARD_BEGINING_NOT_SUBMITTED"><![CDATA[No ha enviado su parte de trabajo para el período que comienza ]]></phrase>
+		<phrase id="SUBMIT_ASAP"><![CDATA[. Hágalo lo antes posible.]]></phrase>
+		<phrase id="CARD_BEGINING_PERIOD"><![CDATA[Su parte de trabajo del período que comienza ]]></phrase>
+		<phrase id="RETURNED_FOR_REVIEW_RESUBMIT_ASAP"><![CDATA[ se devolvió para su revisión. Vuelva a enviarlo lo antes posible.]]></phrase>
+		<phrase id="TE_REPORTING"><![CDATA[Informe intro tiempo]]></phrase>
+		<phrase id="STATUS_M1"><![CDATA[-1: Sin introducir]]></phrase>
+		<phrase id="STATUS_0"><![CDATA[0- Datos introducidos pero sin enviar]]></phrase>
+		<phrase id="STATUS_1"><![CDATA[1- Enviados]]></phrase>
+		<phrase id="STATUS_2"><![CDATA[2- Aprobados]]></phrase>
+		<phrase id="STATUS_3"><![CDATA[3- En espera]]></phrase>
+		<phrase id="STATUS_4"><![CDATA[4- Rechazados]]></phrase>
+		<phrase id="STATUS_5"><![CDATA[5- Introducidos, de historial]]></phrase>
+		<phrase id="STATUS_6"><![CDATA[6- Enviados, de historial]]></phrase>
+		<phrase id="STATUS_7"><![CDATA[7- Aprobados, de historial]]></phrase>
+		<phrase id="STATUS_8"><![CDATA[8- En espera, de historial]]></phrase>
+		<phrase id="STATUS_9"><![CDATA[9- Rechazados, de historial]]></phrase>
+		<phrase id="MISSING_CARD"><![CDATA[Falta parte de trabajo]]></phrase>
+		<phrase id="PAY_PERIOD_SUMMARY"><![CDATA[Resumen de período de pago]]></phrase>
+		<phrase id="SELECT_REPORT_TYPE"><![CDATA[Seleccione un tipo de informe.]]></phrase>
+		<phrase id="NO_DIRECT_REPORT_CONTACT_HR"><![CDATA[No tiene empleados que le notifiquen datos. Póngase en contacto con el departamento de Recursos Humanos.]]></phrase>
+		<phrase id="ALL_DIRECT_REPORTS"><![CDATA[Todos los informes directos]]></phrase>
+		<phrase id="ENCLOSED_OR"><![CDATA[(o bien)]]></phrase>
+		<phrase id="ENTER_PAY_PERIOD_DATES"><![CDATA[Introduzca las fechas de "inicio" y "finalización" del período de pago.]]></phrase>
+		<phrase id="ENTER_TO_FROM_DATES"><![CDATA[Introduzca las fechas "hasta" y "desde".]]></phrase>
+		<phrase id="ALL"><![CDATA[Todo]]></phrase>
+		<phrase id="SHOW_BLANK_REC"><![CDATA[Mostrar registros en blanco]]></phrase>
+		<phrase id="HISTORICAL_1"><![CDATA[Introducido (de historial)]]></phrase>
+		<phrase id="HISTORICAL_2"><![CDATA[Enviado (de historial)]]></phrase>
+		<phrase id="HISTORICAL_3"><![CDATA[Aprobado (de historial)]]></phrase>
+		<phrase id="HISTORICAL_4"><![CDATA[En espera (de historial)]]></phrase>
+		<phrase id="HISTORICAL_5"><![CDATA[Rechazado (de historial)]]></phrase>
+		<phrase id="TE_REPORT_SUMMARY"><![CDATA[Resumen de informe de introducción de tiempo]]></phrase>
+		<phrase id="PAY_PERIOD"><![CDATA[Período de pago]]></phrase>
+		<phrase id="HOURS"><![CDATA[Horas]]></phrase>
+		<phrase id="TIPS"><![CDATA[Gratificaciones]]></phrase>
+		<phrase id="DID_U_KNOW"><![CDATA[¿Sabía que?]]></phrase>
+		<phrase id="WHERE_TO_CHANGE_TIPS"><![CDATA[Puede personalizar este texto de ayuda si modifica el archivo "tips.htm" ubicado en "/lawson/xhrnet/timeentry/tips/tips.htm"]]></phrase>
+		<phrase id="SAVE_CHANGES"><![CDATA[¿Desea guardar los cambios?]]></phrase>
+		<phrase id="SAVE"><![CDATA[Guardar]]></phrase>
+		<phrase id="NO"><![CDATA[No]]></phrase>
+		<phrase id="CANCEL"><![CDATA[Cancelar]]></phrase>
+		<phrase id="ENTER_DATES_FOR_PRINT_CARD"><![CDATA[Para imprimir la información del parte de introducción de tiempo, introduzca las fechas de inicio y finalización.]]></phrase>
+		<phrase id="CONTINUE"><![CDATA[Continuar]]></phrase>
+		<phrase id="PRINT"><![CDATA[Imprimir]]></phrase>
+		<phrase id="QUIT"><![CDATA[Salir]]></phrase>
+		<phrase id="WHICH_REPORT_TYPE"><![CDATA[¿Qué tipo de informe desea crear?]]></phrase>
+		<phrase id="WHICH_EMPLOYEE_TO_INCLUDE"><![CDATA[¿A qué empleados desea incluir en su informe?]]></phrase>
+		<phrase id="BACK"><![CDATA[Atrás]]></phrase>
+		<phrase id="SELECT_STATUS_TO_INCLUDE"><![CDATA[Seleccione los estados que desee incluir en este informe]]></phrase>
+		<phrase id="ENTER_PERIOD_START_RANGE"><![CDATA[Introduzca un rango de fechas de inicio de período de pago:]]></phrase>
+		<phrase id="PERIODS_START_DATE_FALLS_FOLLOWING"><![CDATA[(los períodos de pago cuya fecha de inicio se encuentra entre las fechas siguientes)]]></phrase>
+		<phrase id="SELECT_GROUP_REVIEW_CARDS"><![CDATA[Seleccione el grupo de empleados cuyos partes de trabajo desee revisar.]]></phrase>
+		<phrase id="SELECT_EMPLOYEE_REVIEW_CARDS"><![CDATA[Seleccione el nombre del empleado cuyos partes de trabajo desee revisar.]]></phrase>
+		<phrase id="CLEAR_FORM"><![CDATA[Borrar formulario]]></phrase>
+		<phrase id="APPROVE_ALL_SUBMITTED"><![CDATA[Aprobar todos los enviados]]></phrase>
+		<phrase id="LOADING_REPORTING"><![CDATA[Cargando informe de introducción de tiempo...]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/esmx/temsgs.xml,v 1.3.2.7 2012/06/29 17:12:09 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,1368 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor3/css/emss/Attic/infor.css,v 1.1.2.47 2014/03/12 18:51:22 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* **** LTR styling *****************************/
+body.panecontents
+{
+	background-color : #ffffff !important;	
+}
+form, button, label, p, input, textarea
+{
+	font-size : 12px !important;
+}
+td input.inforTextbox
+{
+	vertical-align : top;
+}
+.inforFieldSetLabel
+{
+	font-size : 1.2em !important;
+}
+.inforDataGrid
+{
+	font-size : inherit !important;
+}
+.inforTabset a, .inforHyperlink
+{
+	font-size: 12px !important;
+}	
+.progressmsg, .taskheader, .progressbar, .taskicon
+{	
+	display : none;
+}
+.filterList #paneHeader, .filterList #paneRecords
+{
+	font-size : 1.2em !important;
+}
+.panewrapper
+{
+	font-size : 1.2em !important;
+}
+/* --- Print styling --- */
+@media print 
+{   
+	button.inforFormButton
+	{
+		display : none;
+	}  	
+}
+.paneborder
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 1.2em !important;
+	height : 100%;
+	padding-top : 10px;
+	padding-bottom : 5px;
+	padding-left : 5px;	
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+	scrollbar-base-color : #f0f0f0;	
+	scrollbar-shadow-color : #999999;
+	scrollbar-darkshadow-color : #999999;
+	scrollbar-arrow-color : #555555;
+	height : auto;	
+}
+.paneborderlite
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 1.2em !important;
+	height : 100%;	
+	padding-top : 10px;
+	padding-bottom : 5px;
+	padding-left : 5px;	
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+	scrollbar-base-color : #f0f0f0;
+	scrollbar-shadow-color : #999999;
+	scrollbar-darkshadow-color : #999999;
+	scrollbar-arrow-color : #555555;
+	height : auto;	
+}
+.helppaneborder
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 1.2em !important;
+	height : 100%;	
+	<!--[if !IE]>
+		height : 100%;
+	<![endif]-->
+	padding-top : 10px;
+	padding-bottom : 5px;
+	padding-left : 5px;
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+}
+.panebordertimeentry, #outerPane
+{
+	font-size : 1.2em !important;
+}
+.paneheader, .paneheaderlite, .helppaneheader, .paneheadertimeentry
+{
+	background-color : transparent;
+    color : #13a3f7;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 14px;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.paneheader2
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.dialoglabel
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	z-index : 9;
+}
+.helpwindowtableheader
+{
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+  	display : -moz-inline-box;
+  	display : inline-block;
+}
+.panebodyborder, .panebodybordernested
+{
+	height : 100%;
+	overflow : hidden;
+	width : 100%;
+    z-index : 7;
+}
+.panebodyborder2
+{
+	height : 100%;
+	overflow : hidden;
+	width : 100%;
+    z-index : 7;
+}
+.panebodyborder3
+{
+	height : 100%;
+	overflow : hidden;
+	font-size : 1.2em !important;
+	width : 100%;
+    z-index : 7;
+}
+.panebody, .panebodynested, .panebodylite
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	width : 100%;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #f0f0f0;
+    scrollbar-shadow-color : #999999;
+    scrollbar-darkshadow-color : #999999;
+    scrollbar-arrow-color : #555555;
+}
+.helppanebody
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 100%;
+	overflow-y : auto;
+	overflow-x : hidden;
+	width : 100%;
+	padding : 5px;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #f0f0f0;
+    scrollbar-shadow-color : #999999;
+    scrollbar-darkshadow-color : #999999;
+    scrollbar-arrow-color : #555555;
+}
+.panebodylite2
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	width : 49%;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #f0f0f0;
+    scrollbar-shadow-color : #999999;
+    scrollbar-darkshadow-color : #999999;
+    scrollbar-arrow-color : #555555;
+}
+.noborderright, .borderright
+{
+}
+.helpicon
+{
+	cursor : pointer;
+	left : 0px;	
+	position : absolute;
+	z-index : 12;
+	display : none;
+}
+.calendaricon, .searchicon
+{
+	cursor : pointer;
+	position :relative;
+	text-align : left;
+	z-index : 10;
+	display : none;
+}
+.helpwindowicon
+{
+	height : 18px;
+	left : 5px;
+	position : absolute;
+	top : 5px;
+	width : 18px;
+	z-index : 12;
+	display : none;
+}
+.fieldlabelboldleft, .fieldlabelboldliteleft, .fieldlabelboldliteunderlineleft
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelbold, .fieldlabelboldlite, .fieldlabelboldliteunderline
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldwhiteblue, .fieldlabelboldwhitegreen
+{
+    color : #13a3f7;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size: 14px;
+    border-bottom: 1px solid #cccccc;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0px 15px 0px 0px;
+}
+.fieldlabelbolddialog
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 16px;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovtbold
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovtboldred
+{
+	background-color : transparent;
+    color : red;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1reditalic
+{
+	background-color : transparent;
+    color : red;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1bold
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1italic
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt1
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+	text-align : left;
+}
+.fieldlabelgovt4
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    font-size : 20px;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+	text-align : left;
+}
+.fieldlabelgovt5
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    font-size : 28px;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+	text-align : left;	
+}
+.fieldlabelgovt6
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    font-size : 36px;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+	text-align : left;
+}
+.plaintableborder, .tableborderbox
+{
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.plaintablerowheaderborderbottomblue
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;
+}
+.plaintableheaderbordersidesonly2
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;
+}
+.plaintablecellboldborderright, .plaintableheadertallwhiteright, .plaintableheaderborderright,
+.plaintablecellboldright, .plaintableheaderwhiteright
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheaderborder, .plaintableheaderbordergreytop, .plaintableheaderbordergrey, .plaintableheaderbordergreybluetop,
+.plaintableheaderborderdarkgreybluetop, .plaintableheaderbordergreywhite, .plaintableheaderbordertall, .plaintableheader, 
+.plaintableheaderwhite, .plaintableheadertall, .plaintableheadertallwhite, .plaintableheaderborderlite, 
+.plaintableheaderborderactive, .plaintableheaderbordertalllite, .plaintableheaderlite, .plaintableheaderactive, 
+.plaintableheadertalllite, .plaintablecellbold, .plaintablecellboldnopadding, .plaintablecellboldborder,
+.plaintableheaderbordersidesbold
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.plaintablecelldisplayright, .plaintablecellborderdisplayright, .plaintablecellborderright, 
+.plaintablecellright, .plaintablecellsmallright
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellborderlite, .plaintablecellborderactive, .plaintablecellborderactive2,
+.plaintablecellborder, .plaintablecellborder2, .plaintablecellborderredfont, .plaintablecellbordertall, 
+.plaintablecellborderleft, .plaintablecellborderyellowbg, .plaintablecellbordergreenbg, .plaintablecell, 
+.plaintablecellnopadding, .plaintablecellsmall, .plaintablecelllite, .plaintablecellactive, .plaintablecelltall, 
+.plaintablecellborderyellowbg, .plaintablecellbordergreenbg, .plaintableheaderbordersides
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.fieldlabel
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+	text-align : right;
+}
+.fieldlabelleft
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+	text-align : left;	
+}
+.plaintablecellborderdisplay, .plaintablecelldisplay, .plaintablecellbordertalldisplay
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+span.plaintablecelldisplay
+{
+	display : inline-block;	
+}
+.plaintablerowheaderdisplay, .plaintablerowheaderborderbottomdisplay, .plaintablerowheaderborderbottomleft
+{
+	background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.plaintablecellred, .plaintablecellredactive
+{
+	background-color : transparent;
+	color : #c71407;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.plaintablecellredright
+{
+	background-color : transparent;
+	color : #c71407;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : right;
+}
+.plaintablecellborder2
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 2px;
+	padding-right : 2px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.plaintablerowheaderbold
+{		
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	padding-bottom : 2px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 2px;	
+	z-index : 10;
+	text-align : right;
+}
+.plaintablerowheader, .plaintablerowheaderborder, .plaintablerowheaderborderbottom, .plaintablerowheaderborderwhite, 
+.plaintablerowheaderborderwhiteOverDue, .plaintablerowheaderborderlite, .plaintablerowheaderlite, 
+.plaintablerowheaderbordertall, .plaintablerowheaderborderlitewhite
+{		
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 2px;	
+	z-index : 10;
+	text-align : right;
+}
+.tableborder
+{
+	border-left : 1px solid #ced0cf;
+	border-top : 1px solid #ced0cf;
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.tablecellborder
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 7px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.tablecellborderyellowbg
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	background-color : #bdd2e1;
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 7px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.tablecellbordergreenbg
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	background-color : #e0dee1;
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-bottom : 2px;
+	padding-left : 7px;
+	padding-right : 5px;
+	padding-top : 2px;
+	z-index : 10;
+	text-align : left;	
+}
+.tabletimeentry
+{
+	white-space : nowrap;
+}
+.datestring
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-style : italic;
+	text-align : left;
+	padding-bottom : 3px;
+	padding-left : 3px;
+	z-index : 10;
+	display : inline-block;
+}
+.panefooter
+{
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    position : relative;
+	float : none;
+	left : 0px;
+	padding-left : 0px;
+	padding-bottom : 10px;
+	z-index : 10;
+	width : auto;
+	display : block;
+	text-align : left;
+}
+.balanceinnertotals
+{
+	background-color : transparent;
+	text-align : left;
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	width : auto;
+}
+.balanceinnertotals hr
+{
+	text-align : center;
+	width : 82%;
+	height : 1px;
+	color : #1a1a1a;
+	background-color : transparent;
+	padding : 0px;
+}
+.balanceinnertotals span /*Misc*/
+{
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.balanceinnertotals h2, .balanceinnertotals li.carryover /*carryover*/
+{
+	color : #d5000e;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	margin : 0px;
+	padding-left : 10px;
+}
+.balanceinnertotals li
+{
+	color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balanceinnertotals ul
+{
+	list-style-type : none;
+	margin : 0px;
+	padding : 0px;
+}
+.balanceinnerdetails
+{
+	background-color : transparent;
+	text-align : left;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	width : auto;
+}
+.balanceinnerdetails hr
+{
+	text-align : left;
+	width : 90%;
+	height : 1px;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	background-color : transparent;
+	padding : 0px;
+}
+.balanceinnerdetails li span /*Misc*/
+{
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-weight : normal;
+}
+.balanceinnerdetails li span span /*Misc*/
+{
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-weight : normal;
+}
+.balanceinnerdetails h2, .balanceinnerdetails li.carryover /*carryover*/
+{
+	color : #d5000e;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	margin : 0px;
+}
+.balanceinnerdetails li
+{
+	color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.balanceinnerdetails ul
+{
+	margin : 0px;
+	padding : 0px;
+}
+.balancetotals
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+	padding-top: 10px;
+	padding-left : 10px;
+	padding-right : 10px;
+	text-align : left;
+    margin : 0;
+}
+.balancedetails
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	padding-left : 15px;
+	padding-right : 10px;
+	text-align : left;
+    margin : 0;
+}
+.balancedetails h3 /*Group*/
+{
+	color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    font-size : 12px;
+	padding-top : 10px;
+	padding-bottom : 0px;
+	margin-bottom : 2px;
+}
+.balancedetails li
+{
+	color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;	
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balancedetails li.carryover, .balancedetails li.carryover span /*carryover*/
+{
+	color : #d5000e;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+	margin : 0px;
+}
+li span.listItem
+{
+	background-color : transparent;
+}
+li span.listItem:hover
+{
+	background-color : #f2f2f2;
+}
+li span.listItem:active
+{
+	background-color : #13a3f7;
+}
+.filterBar
+{
+    background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+td.filterButton span
+{
+	display : inline-block;
+}
+.filterButton
+{
+    background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 18px;
+    cursor : pointer;
+}
+.filterRecordNbrs
+{
+	color : #666666;
+	display : inline-block;
+}
+.filterRecordNbrs span
+{
+	display : inline-block;
+}
+table.filterTable
+{
+    width : 100%;
+}
+table.filterTable thead
+{
+    background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterTable th
+{
+    background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterTableRow
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.filterTableRow:hover
+{
+    background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    cursor : pointer;
+}
+a.filterTable:link, a.filterTable:visited, a.filterTable:active
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+a.filterTable:hover, a.filterTable:visited:hover
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.filterList
+{
+	background : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    margin : 0px;
+    padding : 0px;
+}
+.filterListBody
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    font-size : 1.2em;
+    width : 100%;
+}
+table.filterListTable
+{
+    width : 100%;
+}
+table.filterListTable thead
+{
+    background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterListTable th
+{
+    background-color : transparent;
+    color : #666666;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : bold;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterListTableRow
+{
+	text-decoration : underline;
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.filterListTableRow2
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+.filterListTableRow:hover
+{
+	text-decoration : underline;
+    background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    cursor : pointer;
+}
+a.filterListTable:link, a.filterListTable:visited, a.filterListTable:active
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+}
+a.filterListTable:hover, a.filterListTable:visited:hover
+{
+	background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    text-decoration : underline;
+}
+td.filterListButton span
+{
+	display : inline-block;
+}
+.filterListButton
+{
+    background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 18px;
+    cursor : pointer;
+    vertical-align : bottom;
+}
+.filterListButtonDisabled
+{
+    background-color : transparent;
+    color : gray;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 18px;
+    cursor : none;
+    vertical-align : bottom;
+}
+.filterListButton:hover, .filterListButton:focus
+{
+    background-color : transparent;
+    color : #1a1a1a;
+    font-family : Helvetica, Arial, sans-serif;
+    font-weight : normal;
+    height : 18px;
+    cursor : pointer;
+    vertical-align : bottom;
+}
+.nophotoicon
+{
+	height : 18px;
+	width : 18px;
+}
+.splashheader
+{
+	color : #666666;
+	font-family : Helvetica, Arial, sans-serif;
+	font-size : 40px;
+	font-weight : normal;
+	position : absolute;
+}
+.splashlink
+{
+	color : #13a3f7;
+	text-decoration : underline;
+	cursor : pointer;
+	font-family : Helvetica, Arial, sans-serif;
+	font-size : 26px;
+	font-weight : normal;
+	position : absolute;
+	white-space : nowrap;
+}
+.splashlink:focus 
+{
+	border : 1px dotted #13a3f7;
+}
+.splashlink:hover 
+{
+	color : #ff6400;
+}
+.splashicon
+{
+	display : none;
+}
+.panewrapperCM
+{
+	height : 100%;
+	width : 100%;
+}
+.panepaddingCM
+{
+	padding-top : 3px;
+	padding-bottom : 3px;
+	padding-right : 3px;
+	padding-left : 3px;
+	height : 100%;
+	width : 100%;
+}
+.panebackgroundCM
+{
+	background-color : #ffffff;
+	height : 100%;
+	width : 100%;
+}
+.panebackgroundliteCM
+{
+	background-color : #ffffff;
+	height : 100%;
+	width : 100%;
+}
+.paneouterborderCM
+{
+	position : relative;
+	height : 100%;
+	width : 100%;
+	overflow : hidden;
+}
+.paneframeCM
+{
+	padding-top : 0px;
+	padding-bottom : 0px;
+	padding-right : 0px;
+	padding-left : 0px;
+	vertical-align : top;
+	height : 100%;
+}
+.paneinnerborderCM
+{
+	position : relative;
+	background-color : transparent;
+	height : 100%;
+	width : 100%;
+}
+.titleCM
+{
+	color : #1a1a1a;
+   	font-family : Arial;
+	font-size : 12px;
+	font-weight : bold;
+}
+.titlesmallCM
+{
+	color : #1a1a1a;
+   	font-family : Arial;
+	font-size : 12px;
+	font-weight : bold;
+}
+.layertitleCM
+{
+	color : #13A3F7;
+   	font-family : Arial;
+	font-size : 14px;
+	font-weight : normal;
+}
+.contentlabelCM, .contentlabelCM label
+{
+   	color : #666666;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : normal;
+	text-align : right;
+	padding : 1px 5px 1px 1px;
+}
+.contenttextCM
+{
+   	color : #000000;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.contenttextheaderCM, .contenttextheaderCM label
+{
+   	color : #000000;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.tablerowhighlightCM
+{
+   	background-color : transparent;
+}
+a.contenttextCM
+{
+	color : #000000;
+	font-family : Arial;
+    font-size : 12px;
+}
+td.contenttextCM
+{
+   	color : #000000;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : normal;
+}
+.contenttextdisplayCM
+{
+   	color : #000000;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.buttonCM, .button2CM
+{
+   	color : #000000;
+   	cursor : pointer;
+   	font-family : Arial;
+   	font-size : 12px;
+   	font-weight : normal;
+}
+.tabbordercolorCM
+{
+	background-color : transparent;
+}
+.tabbackgroundcolorCM
+{
+	background-color : transparent;
+}
+.tabupCM
+{
+	cursor : pointer;
+	background-color : transparent;
+   	color : #1a1a1a;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : bold;
+	text-decoration : none;
+	display : block;
+}
+.tabdownCM
+{
+	cursor : pointer;
+	text-decoration : none;
+	background-color : transparent;
+   	color : #1a1a1a;
+   	font-family : Arial;
+   	font-size : 12px;
+	font-weight : bold;
+	display : block;
+	padding-bottom : 3px;
+	padding-top: 3px;
+}
+.popuphelptextCM
+{
+	background-color : transparent;
+	color : #1a1a1a;
+	font-family : Arial;
+	font-size : 12px;
+	font-weight : normal;
+}
+.offscreen
+{
+	position : absolute;
+	width : auto;
+	left : -9999px;
+}
+#paneInnerTabs
+{
+	padding : 0px;
+}
+.dataDiv
+{
+	width : 100%;
+	overflow : auto;
+	padding-bottom : 5px;
+}
+.buttonBar
+{
+	float : right;
+	padding-right : 15px;
+}
+.textAlignLeft
+{
+	text-align : left !important;
+}
+.textAlignRight
+{
+	text-align : right !important;
+}
+.floatLeft
+{
+	float : left;
+}
+.floatRight
+{
+	float : right;
+}
+.inputbox
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Arial;
+	font-size : 12px;
+	font-weight : normal;
+}

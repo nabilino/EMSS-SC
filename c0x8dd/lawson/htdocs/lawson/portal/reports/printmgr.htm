@@ -1,0 +1,67 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/printmgr.htm,v 1.5.2.3.18.1.2.3 2012/08/08 12:37:19 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<HEAD>
+	<TITLE>Report Properties</TITLE>
+	<script language="javascript" src="../servenv.js"></script>
+	<script language="javascript" src="printmgr.js"></script>
+	<script language="javascript" src="../dropdown.js"></script>	
+	<link id="StyleLink" type="text/css" href="../forms/lawform.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" href="../dropdown.css" rel="stylesheet">
+</HEAD>
+
+<BODY onload="init()" onkeydown="handleKeyDown(event)" style="visibility:hidden;" tabIndex="-1">
+
+	<!-- REPORT -->
+	<span id="lblFile" class="label" style="position:absolute; TOP:20px;LEFT:1%;WIDTH:25%">&nbsp;</span>
+	<select id="selFiles" class="textbox" style="position:absolute; TOP:20px;LEFT:28%;WIDTH:25%" onchange="onPrtChange(this.selectedIndex)"></select>
+
+	<!-- FILE ASSIGNMENTS -->
+	<span id="recFileAssignments" class="rectLines" style="Z-INDEX: -1;position:absolute; TOP:55px;LEFT:2%;WIDTH:96%"></span>
+	<span id="lblFileAssignments" class="rectLabel" style="position:absolute; TOP:50px;LEFT:5%;WIDTH:25%">&nbsp;</span>
+	
+	<!-- PATH -->
+	<span id="lblPath" class="label" style="position:absolute; TOP:80px;LEFT:1%;WIDTH:25%">&nbsp;</span>
+	<input id="txtPath" class="textbox" type="text" style="position:absolute; TOP:80px;LEFT:28%;WIDTH:65%" isDirty="false" onchange="onMyChange(this)" onfocus="rptPropOnFocus(this)" onblur="rptPropOnBlur(this)"></input>
+
+	<!-- DESTINATION -->
+	<span id="lblDestination" class="label" style="position:absolute; TOP:105px;LEFT:1%;WIDTH:25%">&nbsp;</span>
+	<select id="selDest" class="textbox" style="position:absolute; TOP:105px;LEFT:28%;WIDTH:15%" isDirty="false" onchange="onDestOptionChange(this.value, true)" isBuilt="NO" destination=""></select>
+	<select id="txtDest" class="textbox" style="position:absolute; TOP:105px;LEFT:45%;WIDTH:25%" isDirty="false" onchange="onDestinationChange(this.selectedIndex, true)"></select>
+	<input disabled type="text" id="selPrinters"  class="textbox" style="position:absolute;TOP:105px;LEFT:45%;WIDTH:22%;visibility:hidden" isDirty="false"></input>
+	<img class=selectButton id="imgSelBtn2" style="cursor:hand;position:absolute;TOP:105px;LEFT:67%;visibility:hidden" onclick="doPrinterSelect()" src="../images/ico_form_dropselect.gif">
+	<span id="outDest" class="output" style="position:absolute; TOP:105px;LEFT:72%;WIDTH:27%;OVERFLOW: hidden;text-Overflow:ellipsis">&nbsp;</span>
+
+	<!-- COPIES -->
+	<span id="lblCopies" class="label" style="position:absolute; TOP:130px;LEFT:1%;WIDTH:25%">&nbsp;</span>
+	<input id="txtCopies" class="textbox" type="text" style="position:absolute; TOP:130px;LEFT:28%;WIDTH:5%" maxlength="2" edit="numeric" isDirty="false" onchange="onMyChange(this)" onfocus="rptPropOnFocus(this)" onblur="rptPropOnBlur(this)" onkeypress="portalWnd.edCheckNumeric(event, this)" onkeyup="portalWnd.edCheckDec(event,this)"></input>
+	<!-- SAVE -->
+	<label id="lblSave" for="cbxSave" class="label" style="position:absolute; TOP:130px;LEFT:34%;WIDTH:10%">&nbsp;</label>
+	<input id="cbxSave" type="checkbox" style="position:absolute; TOP:130px;LEFT:45%;" isDirty="false" onchange="onMyChange(this)"></input>
+
+	<!-- DIALOG TOOLBAR -->
+	<div id="toolBarDiv" class="toolbar" style="display:none; position:absolute; TOP:170px; WIDTH:100%;" ALIGN="center"></div>
+</BODY>
+</HTML>
+

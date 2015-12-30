@@ -1,0 +1,697 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.2 Final//EN">
+<HTML>
+<HEAD>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires"  CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<TITLE>Stock Options</TITLE>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<SCRIPT SRC="/lawson/webappjs/commonHTTP.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/esscommon80.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/stockoptions/lib/getattach.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/stockoptions/lib/shr064.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/waitalert.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmldateroutines.js"></SCRIPT>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<SCRIPT SRC="/lawson/xhrnet/xml/xmlcommon.js"></SCRIPT>
+<SCRIPT SRC="/lawson/xhrnet/ui/ui.js"></SCRIPT>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+
+<!-- Load any additional libraries here... -->
+
+<SCRIPT LANGUAGE="JavaScript">
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize Function.
+//
+function Initialize()
+{
+	clearTimeout(Timer);
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialization Complete Function.
+//
+function AuthenticateFinished()
+{
+	// Add any additional initialization routines or assignments here, including global variables.
+	//  Note: remove the "Investment Information" string found in the MainTabs array below
+	//	if it is not desired as an option on the main Grant Options tabbed window.
+	//
+	stylePage();
+
+	document.title = getSeaPhrase("STOCK_OPTIONS","ESS");
+
+	// Set the task title.
+	setTaskHeader("header",getSeaPhrase("STOCK_OPTIONS","ESS"),"Stock");
+
+	optionTabs = new uiTabSet("optionTabs",new Array(getSeaPhrase("STOCK_OPTION_GRANTS","ESS"),getSeaPhrase("SHARES_TO_EXPIRE","ESS"),getSeaPhrase("EXERCISE_HISTORY","ESS"),getSeaPhrase("INVESTMENT_INFORMATION","ESS")));
+
+	StoreDateRoutines();
+	Brokers = new BrokerObject();
+
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	GetStockOptionGrants("I");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top left tabbed window - Stock Option Grants.
+//
+function PaintTopLeftWindow(onsort, sortField)
+{
+	if (onsort)
+	{
+		if (optionTabs.activetab != 2)
+		{
+			hideDetailFrames();
+		}
+		else
+		{
+			ClearExerciseHistory();
+		}
+		RePaintTopLeftWindow(onsort, sortField);
+		return;
+	}
+
+	var htmlStr = '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" width="100%" styler="list">';
+	htmlStr += '<tr><th class="plaintableheaderborderlite" style="width:25%;text-align:center">'+getSeaPhrase("EXERCISE_TYPE","ESS")+'&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("EXERCISE_PRICE","ESS")+'&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("MARKET_PRICE","ESS")+'</a>&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:27%;text-align:center">'+getSeaPhrase("BROKER","ESS")+'&nbsp;&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("FEES","ESS")+'&nbsp;&nbsp;</th>';
+	htmlStr += '<tr><td class="plaintablecellborder" style="width:20%;text-align:center"><span id="dtlType">&nbsp;</span></td>';
+	htmlStr += '<td class="plaintablecellborder" style="width:18%;text-align:center"><span id="dtlPrice">&nbsp;</span></td>';
+	htmlStr += '<td class="plaintablecellborder" style="width:18%;text-align:center"><span id="dtlMktValue">&nbsp;</span></td>';
+	htmlStr += '<td class="plaintablecellborder" style="width:26%;text-align:center"><span id="dtlBrokerName">&nbsp;</span></td>';
+	htmlStr += '<td class="plaintablecellborder" style="width:20%;text-align:center"><span id="dtlFees">&nbsp;</span></td>';
+	htmlStr += '</tr></table>';
+
+	try {
+		self.historydetail.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.historydetail.document.getElementById("paneBody").innerHTML = htmlStr;
+		self.historydetail.stylePage();
+		self.historydetail.setLayerSizes(true);
+	}
+	catch(e) {}
+
+	optionTabs.draw = true;
+	optionTabs.frame = self.topleft;
+	optionTabs.isDetail = false;
+	optionTabs.tabHtml = new Array();
+	optionTabs.tabHtml[0] = PaintStockOptionGrantTable(0, false);
+	optionTabs.tabHtml[1] = PaintStockOptionGrantTable(1, false);
+	optionTabs.tabHtml[2] = ""; //PaintStockOptionGrantTable(2, false);
+	optionTabs.tabHtml[3] = window.investinfo.document.body.innerHTML;
+	optionTabs.create();
+
+   	optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+
+	document.getElementById("topleft").style.visibility = "visible";
+
+	removeWaitAlert();
+}
+
+function RePaintTopLeftWindow(onsort, sortField)
+{
+	if (!optionTabs.rendered) {
+		return;
+	}
+
+	switch (String(optionTabs.activetab)) {
+
+		// first tab
+		case "0":
+   			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			optionTabs.setTabHtml(0,PaintStockOptionGrantTable(0, false));
+			break;
+
+		// second tab
+		case "1":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			optionTabs.setTabHtml(1,PaintStockOptionGrantTable(1, false));
+			break;
+
+		// third tab
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EXERCISE_HISTORY","ESS");
+			optionTabs.setTabHtml(2,PaintStockOptionGrantTable(2, false));
+			break;
+
+		// fourth tab
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+			optionTabs.setTabHtml(window.investinfo.document.body.innerHTML);
+			break;
+
+		default:
+			break;
+	}
+
+	optionTabs.setActiveTab(optionTabs.activetab);
+    try
+    {
+    	optionTabs.frame.styleSortArrow("optionTbl" + String(Number(optionTabs.activetab)), sortField);
+	}
+	catch(e)
+	{}
+	document.getElementById("topleft").style.visibility = "visible";
+
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the bottom left window - Vesting Detail.
+// Override this function, if desired.
+//
+// function PaintBottomLeftWindow() { }
+//
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top right window - Option Detail.
+// Override this function, if desired.
+//
+// function PaintTopRightWindow(index) { }
+//
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the second bottom left window - Model Stock Options.
+//
+function PaintBottomLeft2Window(index)
+{
+	var returnVal = '<div style="padding-top:10px">';
+	returnVal += '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr><td class="fieldlabelbold" colspan="4" style="text-align:center;padding-bottom:10px;">';
+	returnVal += getSeaPhrase("ENTER_WIN_LOSS_INFO","ESS")+'</td></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("MARKET_PRICE_PER_SHARE","ESS")+'</td><td>';
+	returnVal += '<input id="mktprice" name="mktprice" type="text" size="10" ';
+	returnVal += 'maxlength="10" value=""></td>'; // onchange="parent.ValidateNumber(this,9,4,null,true)"></td>';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("NUMBER_OF_SHARES","ESS")+'</td><td>';
+	returnVal += '<input id="nbrshares" name="nbrshares" type="text" size="9" ';
+	returnVal += 'maxlength="9" value=""></tr>'; // onchange="parent.ValidateNumber(this,9,0)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("FEDERAL_TAX","ESS")+'</td><td>';
+	returnVal += '<input id="fedtax" name="fedtax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value="">'; // onchange="parent.ValidatePercent(this,5,2,null,true)">';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("SOCIAL_SECURITY","ESS")+'</td><td>';
+	returnVal += '<input id="sstax" name="sstax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value=""></tr>'; // onchange="parent.ValidatePercent(this,5,2,null,true)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("STATE_TAX","ESS")+'</td><td>';
+	returnVal += '<input id="statetax" name="statetax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value="">'; // onchange="parent.ValidatePercent(this,5,2,null,true)">';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("MEDICARE","ESS")+'</td><td>';
+	returnVal += '<input id="medicare" name="medicare" type="text" size="8" ';
+	returnVal += 'maxlength="8" value=""></tr>'; // onchange="parent.ValidatePercent(this,5,2,null,true)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">&nbsp;</td>'
+	returnVal += '<td>'+uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.ContinueModel("+index+");return false","margin-left:0px");
+	returnVal += uiButton(getSeaPhrase("DONE","ESS"),"parent.QuitModel();return false");
+	returnVal += '</td></tr>';
+	returnVal += '</table>';
+	returnVal += '</div>';
+
+   	self.bottomleft2.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomleft2.stylePage();
+	document.getElementById("bottomleft2").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the third bottom left window - Model Stock Options Detail.
+//
+function PaintBottomLeft3Window(index)
+{
+	var returnVal = '<div class="fieldlabelbold" style="text-align:left;padding:10px">';
+	returnVal += getSeaPhrase("SHOW_OPTION_MODEL_DETAIL","ESS")+'</div>';
+	returnVal += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("NUMBER_OF_SHARES","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(BN334.NumberShares,true)+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("EXERCISE_COST","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.ExerciseCost,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("GRANT_PRICE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+
+	if (optionTabs.activetab == 1) {
+		returnVal += formatComma(roundValue(BN332.ToExpireRecords[index].GrantPrice,4));
+		returnVal += '</td>';
+	}
+	else
+	{
+		returnVal += formatComma(roundValue(BN332.AvailRecords[index].GrantPrice,4));
+		returnVal += '</td>';
+	}
+
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("GAIN_LOSS","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.GainLoss,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("MARKET_PRICE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.MarketSharePrice,4))+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TAXABLE_WAGES","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TaxableWages,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TRANSACTION_VALUE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TransactionValue,2))+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TAX_AMOUNT","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TaxAmount,2))+'</td></tr></table>';
+	returnVal += '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr>'
+	returnVal += '<td style="text-align:right" colspan="4">'+uiButton(getSeaPhrase("START_OVER","ESS"),"parent.QuitModelResults();return false","margin-left:0px");
+	returnVal += uiButton(getSeaPhrase("DONE","ESS"),"parent.QuitModel();return false");
+	returnVal += '</td></tr>';
+	returnVal += '</table>';
+
+	document.getElementById("bottomleft2").style.visibility = "hidden";
+
+   	self.bottomleft3.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomleft3.stylePage();
+	document.getElementById("bottomleft3").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the bottom right window - Contact Broker.
+//
+function PaintBottomRightWindow()
+{
+	var returnVal = '<div class="fieldlabelbold" style="position:relative;text-align:left;padding-right:10px;padding-left:10px;padding-top:10px;padding-bottom:15px">'
+	returnVal += getSeaPhrase("TO_CONTACT_BROKER","ESS")+'</div><br/>';
+
+	returnVal += '<div style="position:relative"><table border="0" cellpadding="0" cellspacing="0" width="100%">';
+
+	for (var i=0; i<Brokers.Contacts.length; i++)
+	{
+		returnVal += '<tr><td class="plaintablecell" style="width:25%;">&nbsp;</td><td class="plaintablecell" style="width:75%;text-align:left;">';
+		returnVal += '<a href="" onclick="parent.GetBrokerURL(\''+escape(Brokers.Contacts[i].broker,1)+'\');return false;">';
+		returnVal += Brokers.Contacts[i].name+'</a></td>';
+	}
+	returnVal += '</table></div>';
+
+   	self.bottomright.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomright.stylePage();
+	document.getElementById("bottomright").style.visibility = "visible";
+	removeWaitAlert();
+}
+
+function OptionModel(index)
+{
+	// Highlight the grant record selected
+	if(activateTableRow("optionTbl"+optionTabs.activetab,index,optionTabs.frame)) {
+		// if the user has selected a different record to model, hide the detail frame
+		document.getElementById("topright").style.visibility = "hidden";
+	}
+
+	document.getElementById("bottomleft").style.visibility = "hidden";
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+
+	if (optionTabs.activetab == 1) {
+		self.bottomleft2.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		self.bottomleft2.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.AvailRecords[index].Certificate;
+	}
+
+	PaintBottomLeft2Window(index);
+
+	self.bottomright.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTACT_BROKER","ESS");
+
+	if (typeof(Brokers) == "undefined" || typeof(Brokers.RetrievedBrokers) == "undefined" || !Brokers.RetrievedBrokers) {
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+		GetBrokerCodes();
+	}
+	else if (Brokers.Contacts.length > 0) {
+		Brokers.RetrievedBrokers = true;
+		PaintBottomRightWindow();
+	}
+}
+
+function GetBrokerCodes()
+{
+	Brokers = new BrokerObject();
+
+	var pDMEObj 	= new DMEObject(authUser.prodline, "BNBROKER");
+	pDMEObj.out 	= "JAVASCRIPT";
+	pDMEObj.index 	= "BRKSET1";
+	pDMEObj.field 	= "broker;name";
+	pDMEObj.key 	= "";
+	pDMEObj.max 	= "600";
+	pDMEObj.func 	= "GetBrokerCodes_Done()";
+	pDMEObj.cond 	= "active";
+	pDMEObj.sortasc = "name";
+	pDMEObj.exclude = "drills;keys";
+	pDMEObj.debug 	= false;
+	DME(pDMEObj,"jsreturn2");
+}
+
+function GetBrokerCodes_Done()
+{
+	Brokers.Contacts = Brokers.Contacts.concat(window.jsreturn2.record);
+
+	if (window.jsreturn2.Next) {
+		window.jsreturn2.location.replace(window.jsreturn2.Next);
+	}
+	else if (Brokers.Contacts.length > 0) {
+		Brokers.RetrievedBrokers = true;
+		PaintBottomRightWindow();
+	}
+}
+
+function GetBrokerURL(broker)
+{
+	var loadMsg = '<html><head><title>'+getSeaPhrase("BROKER","ESS")+'</title>';
+	loadMsg += '<link rel="stylesheet" type="text/css" href="/lawson/xhrnet/ui/ui.css"/>';
+	loadMsg += '</head><body>';
+	loadMsg += '<table border="0" cellspacing="0" cellpadding="0" width="100%">';
+	loadMsg += '<tr><td>';
+	loadMsg += '<div class="fieldlabelbold" style="text-align:center;padding-top:50px;">'+getSeaPhrase("LOAD_BROKER_SITE","ESS");
+	loadMsg += '</div>';
+	loadMsg += '</td></tr>';
+	loadMsg += '</body></html>';
+
+	BrokerWin = window.open("/lawson/xhrnet/dot.htm",broker.toString().toUpperCase());
+	with (BrokerWin.document)
+	{
+		open();
+		write(loadMsg);
+		close();
+	}
+
+	var pAttachObj 	= new GETATTACHObject(authUser.prodline,"BNBROKER");
+	pAttachObj.index = "BRKSET1";
+	pAttachObj.rectype  = "U";
+	pAttachObj.key 	= "K1=" + escape(broker,1);
+	pAttachObj.out = "JS";
+	pAttachObj.opm = "T";
+	pAttachObj.data = "TRUE";
+	pAttachObj.stat = "TRUE";
+	pAttachObj.header = "TRUE";
+	pAttachObj.encode = "TEXT";
+	pAttachObj.debug = false;
+	pAttachObj.func = "GetBrokerURL_Done";
+	GETATTACH(pAttachObj,"jsreturn2");
+}
+
+function GetBrokerURL_Done()
+{
+	if (window.jsreturn2.UrlData.length)
+	{
+		var brokerURL = window.jsreturn2.UrlData[0][0];
+		if (typeof(BrokerWin) != "undefined" && !BrokerWin.closed)
+			BrokerWin.location.replace(brokerURL);
+		else BrokerWin = window.open(brokerURL);
+	}
+	else
+	{
+		if (typeof(BrokerWin) != "undefined" && !BrokerWin.closed)
+		{
+			seaAlert(getSeaPhrase("NO_BROKER_LINK","ESS"));
+			BrokerWin.close();
+		}
+		else
+			seaAlert(getSeaPhrase("NO_BROKER_LINK","ESS"));
+	}
+}
+
+function ContinueModel(index)
+{
+	BN334 = new BN334Object();
+	var formObj;
+
+	with (self.bottomleft2.document)
+	{
+		formObj = getElementById("mktprice");
+		if (ValidFormValue("number",formObj,9,4,null,true) == false) return;
+		BN334.MarketSharePrice = formObj.value;
+
+		formObj = getElementById("nbrshares");
+		if (ValidFormValue("number",formObj,9,0) == false) return; //formObj.value = "";
+		BN334.NumberShares = formObj.value;
+
+		formObj = getElementById("fedtax");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.FederalTax = formObj.value.split("%").join("");
+
+		formObj = getElementById("sstax");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.SocialSecurity = formObj.value.split("%").join("");
+
+		formObj = getElementById("statetax");
+
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.StateTax = formObj.value.split("%").join("");
+
+		formObj = getElementById("medicare");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.Medicare = formObj.value.split("%").join("");
+	}
+
+	// Display a message informing the user that their numbers are in the process of being calculated.
+	if (optionTabs.activetab == 1) {
+		self.bottomleft3.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		self.bottomleft3.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.AvailRecords[index].Certificate;
+	}
+
+	showWaitAlert(getSeaPhrase("CALCULATING_ESTIMATES","ESS"));
+
+	window.lawheader.nbr = 0;
+	window.lawheader.token = "BN33.4";
+
+	var pAGSObj = new AGSObject(authUser.prodline, "BN33.4");
+	pAGSObj.event = "ADD";
+	pAGSObj.rtn = "DATA";
+	pAGSObj.longNames = "ALL";
+	pAGSObj.tds = false;
+	pAGSObj.func = "parent.ContinueModel_Done("+index+")";
+	pAGSObj.field = "FC=M&BXR-COMPANY=" + authUser.company;
+	pAGSObj.field += "&BXR-EMPLOYEE=" + authUser.employee;
+
+	if (optionTabs.activetab == 1) {
+		pAGSObj.field += "&BXR-OPT-GRANT-NBR="+BN332.ToExpireRecords[index].GrantID;
+		pAGSObj.field += "&BXR-STOCK-CTF="+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		pAGSObj.field += "&BXR-OPT-GRANT-NBR="+BN332.AvailRecords[index].GrantID;
+		pAGSObj.field += "&BXR-STOCK-CTF="+BN332.AvailRecords[index].Certificate;
+	}
+
+	pAGSObj.field += "&MARKET-PRICE="+BN334.MarketSharePrice;
+	pAGSObj.field += "&SHARES="+BN334.NumberShares;
+	pAGSObj.field += "&FEDERAL-TAX="+BN334.FederalTax;
+	pAGSObj.field += "&STATE-TAX="+BN334.StateTax;
+	pAGSObj.field += "&SOCIAL-SEC-TAX="+BN334.SocialSecurity;
+	pAGSObj.field += "&MEDICARE="+BN334.Medicare;
+	pAGSObj.out = "JAVASCRIPT";
+	pAGSObj.debug = false;
+	AGS(pAGSObj, "jsreturn");
+}
+
+function ContinueModel_Done(index)
+{
+	if (window.lawheader.gmsgnbr == "000")
+	{
+		PaintBottomLeft3Window(index);
+	}
+	else
+	{
+		removeWaitAlert();
+		seaAlert(window.lawheader.gmsg);
+		switch(window.lawheader.gmsgnbr)
+		{
+			default: break;
+		}
+	}
+}
+
+function GetExerciseHistory(func)
+{
+	ExerciseHist = new HistoryObject();
+	ExerciseHist.func = func;
+
+	var pDMEObj 	= new DMEObject(authUser.prodline, "BNEMPEXER");
+	pDMEObj.out 	= "JAVASCRIPT";
+	pDMEObj.index 	= "BXRSET1";
+	pDMEObj.field 	= "opt-grant-nbr;stock-ctf;exercise-date;shares-exe;exercise-cost;transac-value;gain-lost-val;"
+	pDMEObj.field   += "tax-wage-upd;emp-tax-amt;pending,xlt;exer-type,xlt;exercise-price;fair-mkt-val;"
+	pDMEObj.field   += "stock-fees;broker.name"
+	pDMEObj.key 	= authUser.company+"="+authUser.employee;
+	pDMEObj.max 	= "600";
+	pDMEObj.cond 	= "exercised";
+	pDMEObj.func 	= "GetExerciseHistory_Done()";
+	pDMEObj.exclude = "drills;keys";
+	pDMEObj.debug 	= false;
+	DME(pDMEObj,"jsreturn2");
+}
+
+function GetExerciseHistory_Done()
+{
+	ExerciseHist.Records = ExerciseHist.Records.concat(self.jsreturn2.record);
+
+	if (self.jsreturn2.Next) {
+		self.jsreturn2.location.replace(self.jsreturn2.Next);
+	}
+	else // Continue on to the next processing function
+	{
+		ExerciseHist.RetrievedHist = true;
+
+		// Make sure shares to expire are sorted by status and then by certificate.
+		if (ExerciseHist.Records.length > 0)
+		{
+			SortByProperty = "pending_xlt";
+			ExerciseHist.Records.sort(sortByAlpha);
+			SortByProperty = "stock_ctf";
+			ExerciseHist.Records.sort(sortByAlpha);
+		}
+		eval(ExerciseHist.func);
+	}
+}
+
+function HistoryDetail(index)
+{
+	// highlight the grant record selected
+	activateTableRow("optionTbl"+optionTabs.activetab,index,optionTabs.frame);
+
+	try {
+		var tmpObj = ExerciseHist.Records[index];
+
+		self.historydetail.document.getElementById("dtlType").innerHTML = (tmpObj.exer_type_xlt)?tmpObj.exer_type_xlt:'&nbsp;';
+		self.historydetail.document.getElementById("dtlPrice").innerHTML = (tmpObj.exercise_price)?tmpObj.exercise_price:'0';
+		self.historydetail.document.getElementById("dtlMktValue").innerHTML = (tmpObj.fair_mkt_val)?tmpObj.fair_mkt_val:'0';
+		self.historydetail.document.getElementById("dtlBrokerName").innerHTML = (tmpObj.broker_name)?tmpObj.broker_name:'&nbsp;';
+		self.historydetail.document.getElementById("dtlFees").innerHTML = (tmpObj.stock_fees)?tmpObj.stock_fees:'&nbsp;';
+	}
+	catch(e) {}
+}
+
+function QuitModel()
+{
+	document.getElementById("bottomleft2").style.visibility = "hidden";
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+
+	// if there is option detail displayed, re-display the vesting detail frame
+	if (document.getElementById("topright").style.visibility == "visible") {
+		document.getElementById("bottomleft").style.visibility = "visible";
+	}
+	else {
+		document.getElementById("bottomleft").style.visibility = "hidden";
+	}
+}
+
+function QuitModelResults()
+{
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+	document.getElementById("bottomleft2").style.visibility = "visible";
+}
+
+function optionTabs_OnClick(tab)
+{
+	var tabProps = tab.id.split("_");
+	var tabId = tabProps[0];
+	var tabType = tabProps[1];
+	var tabNbr = tabProps[2];
+
+	removeWaitAlert();
+
+	// remove any detail windows, if the user has selected a different tab
+	if (tabNbr != optionTabs.activetab) {
+		hideDetailFrames();
+	}
+
+	// clear the last selected table row, irrespective of the active tab
+	for (var i=0; i<optionTabs.tabs.length; i++) {
+		if (i != tabNbr) {
+			deactivateTableRows("optionTbl"+tabNbr,optionTabs.frame);
+		}
+	}
+
+	switch (tabNbr) {
+		case "0":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			break;
+		case "1":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			break;
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EXERCISE_HISTORY","ESS");
+			document.getElementById("historydetail").style.visibility = "visible";
+			if (typeof(ExerciseHist) == "undefined" || typeof(ExerciseHist.RetrievedHist) == "undefined" || !ExerciseHist.RetrievedHist) {
+				showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+				setTimeout(function() { GetExerciseHistory("ShowExerciseHistory()"); }, 5);
+				return false;
+			}
+			break;
+		case "3":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+			break;
+		default:
+			break;
+	}
+	return true;
+}
+
+function ShowExerciseHistory()
+{
+	optionTabs.setTabHtml(2,PaintStockOptionGrantTable(2, false));
+	optionTabs.setActiveTab(2);
+	//setTimeout("showTabByNbr(2)",100);
+	removeWaitAlert();
+}
+
+function ClearExerciseHistory()
+{
+	try {
+		self.historydetail.document.getElementById("dtlType").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlPrice").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlMktValue").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlBrokerName").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlFees").innerHTML = "&nbsp;";
+	}
+	catch(e) {}
+}
+
+var Timer = setTimeout("Initialize()",3000);	// Sets a timer to call the initialize function if
+												// the frameset fails to call it.
+
+</SCRIPT>
+</HEAD>
+
+<!-- Define your frameset here -->
+
+<body onload="Initialize()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topleft" name="topleft" src="/lawson/xhrnet/ui/innertabpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:675px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topright" name="topright" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:675px;width:203px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft" name="bottomleft" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft2" name="bottomleft2" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft3" name="bottomleft3" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="historydetail" name="historydetail" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomright" name="bottomright" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:675px;width:203px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn2" name="jsreturn2" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="investinfo" name="investinfo" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/investinfo.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/shr064_law.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/stockoptions/employee/shr064.htm,v 1.11.2.22 2011/05/04 21:10:19 brentd Exp $ -->

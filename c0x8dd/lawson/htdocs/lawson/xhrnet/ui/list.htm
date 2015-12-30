@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Value Selection</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var RECORDS_PER_PAGE = 25;
+var searchStr = (window.location.search) ? unescape(window.location.search) : "";
+
+function getVarFromString(varName, str)
+{
+	var url = unescape(str);
+	var ptr = url.indexOf(varName + "=");
+	var ptr2;
+	var val1 = "";
+	if (ptr != -1)
+	{
+		var val1 = url.substring(ptr + varName.length + 1,url.length);
+		var ptr2;
+		if ((ptr2 = val1.indexOf("&")) != -1)
+		{
+			if (ptr2 == -1)
+				ptr2 = val1.length;
+			val1 = val1.substring(0,ptr2);
+		}
+	}
+	return val1;
+}
+
+function initFieldFilter(winRef)
+{
+	if (!winRef)
+		winRef = parent;
+	var fieldNm = "";
+	var recsPerPage;
+	var filterForm = document.forms['filterForm'];
+	var recordForm = document.forms['recordsForm'];
+	if (searchStr != "")
+	{
+		fieldNm = getVarFromString("fieldNm", searchStr);
+		recsPerPage = getVarFromString("recs", searchStr);
+		if (recsPerPage != "")
+			RECORDS_PER_PAGE = Number(recsPerPage);
+	}
+	filterForm.elements["fieldNm"].value = fieldNm;
+	var selObj = recordForm.elements["nbrRecords"];
+	var selOptions = selObj.options;
+	var len = selOptions.length;
+	var i = len - 1;
+	var found = false;
+	while ((i >= 0) && (!found))
+	{
+		if (Number(selOptions[i].value) <= Number(RECORDS_PER_PAGE))
+		{
+			found = true;
+			selObj.selectedIndex = i;
+		}
+		i--;
+	}
+	if (!found)
+		selObj.selectedIndex = 0;
+	translateFilterLabels();
+	dmeFilterOnLoad(filterForm, document.forms['recordsForm'], document.getElementById('paneBody'), winRef, "list");
+	var filterField = filterForm.elements["filterField"];
+	if (filterField.selectedIndex >= 0)
+		setFilterOptions(fieldNm, filterField.options[filterField.selectedIndex].value, filterForm.elements["filterOption"]);
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+			document.getElementById("closeBtn").style.display = "";
+	}
+	catch(e) {}
+	fitToScreen();
+}
+
+function translateFilterLabels()
+{
+	var phraseWin = findPhraseWnd(true);
+	var filterForm = document.forms["filterForm"];
+	var recordsForm = document.forms["recordsForm"];
+	var filterBtn = filterForm.elements["filterBtn"];
+	var prevFilterBtn = recordsForm.elements["prevFilterBtn"];
+	var nextFilterBtn = recordsForm.elements["nextFilterBtn"];	
+	var closeBtn = document.getElementById("closeBtn");
+	try
+	{
+		var filterOptions = filterForm.elements["filterOption"].options;
+		for (var i=0; i<filterOptions.length; i++)
+		{
+			var opt = filterOptions[i];
+			opt.text = getFilterOptionTranslation(opt.value);			
+		}
+	} 
+	catch(e) {}
+	try
+	{
+		setWinTitle(phraseWin.getSeaPhrase("VALUE_SELECT","ESS"));
+		filterBtn.innerText = phraseWin.getSeaPhrase("FILTER","ESS");
+		filterBtn.setAttribute("title", phraseWin.getSeaPhrase("FILTER_RESULTS","ESS"));
+		filterBtn.setAttribute("aria-label", phraseWin.getSeaPhrase("FILTER_RESULTS","ESS"));		
+		prevFilterBtn.innerText = phraseWin.getSeaPhrase("PREVIOUS","ESS");
+		prevFilterBtn.setAttribute("title", phraseWin.getSeaPhrase("PREV_PAGE","ESS"));
+		prevFilterBtn.setAttribute("aria-label", phraseWin.getSeaPhrase("PREV_PAGE","ESS"));		
+		nextFilterBtn.innerText = phraseWin.getSeaPhrase("NEXT","ESS");
+		nextFilterBtn.setAttribute("title", phraseWin.getSeaPhrase("NEXT_PAGE","ESS"));
+		nextFilterBtn.setAttribute("aria-label", phraseWin.getSeaPhrase("NEXT_PAGE","ESS"));
+		closeBtn.innerText = phraseWin.getSeaPhrase("CLOSE","ESS");
+		closeBtn.setAttribute("title", phraseWin.getSeaPhrase("CLOSE","ESS"));
+		closeBtn.setAttribute("aria-label", phraseWin.getSeaPhrase("CLOSE","ESS"));
+		document.getElementById("lblView").innerHTML = phraseWin.getSeaPhrase("VIEW","ESS");
+		document.getElementById("lblRecords").innerHTML = phraseWin.getSeaPhrase("RECORDS","ESS");
+		document.getElementById("lblFilterField").innerHTML = phraseWin.getSeaPhrase("FILTER_FIELD","ESS");
+		document.getElementById("lblFilterOption").innerHTML = phraseWin.getSeaPhrase("FILTER_FIELD_CRITERIA","ESS");
+		document.getElementById("lblKeywords").innerHTML = phraseWin.getSeaPhrase("KEYWORDS","ESS");
+		document.getElementById("lblBeginDlg").innerHTML = phraseWin.getSeaPhrase("BEGIN_DLG","ESS");
+		document.getElementById("lblEndDlg").innerHTML = phraseWin.getSeaPhrase("END_DLG","ESS");
+		var loadingLbl = phraseWin.getSeaPhrase("LOADING_ICON","ESS");
+		document.getElementById("spinArrow").setAttribute("alt", loadingLbl);
+		document.getElementById("spinArrow").setAttribute("title", loadingLbl);		
+	}
+	catch(e) {}
+}
+
+function handleKeyPress(evt)
+{
+	evt = evt || window.event;
+	var keyCode = evt.keyCode || evt.which;
+	var key = String.fromCharCode(keyCode);
+    if (evt)
+    {
+ 		// Enter key is pressed; route the event to the button click   	
+    	if (keyCode == 13)
+    		document.forms["filterForm"].elements["filterBtn"].click();
+    	else
+    	{
+    		var filterField = document.forms["filterForm"].elements["filterField"];
+    		var isNumeric = filterField.options[filterField.selectedIndex].getAttribute("isNumeric") == "true";
+    		if (isNumeric)
+    		{
+				// Key codes: 46 = delete; 8 = backspace; 37-40: arrow keys.
+				// Make sure that the charCode is '0' while doing this check as there are characters, such as '%&( that have the same key code.
+	    		var isValidOtherKey = (evt.charCode == 0 && ((keyCode == 46) || (keyCode == 8) || (keyCode > 36 && keyCode < 41)));
+				var digitCheck = /\d/;
+				if (!digitCheck.test(key))
+				{
+					if (!isValidOtherKey)
+						return false;
+				}   
+			}
+    	}
+    }
+    return true;
+}
+
+window.onkeydown = function(evt)
+{
+	evt = evt || window.event;
+	var keyCode = evt.keyCode || evt.which;
+	var key = String.fromCharCode(keyCode);
+    if (evt)
+    {
+ 		// Close on esc  	
+    	if (keyCode == 27)
+    		doClose();
+    	else if (keyCode == 9) // Keep focus in control
+    	{
+    		var first = null;
+    		var last = null;
+    		var len = document.forms.length;
+    		var elms, len2;
+    		for (var i=0; i<len; i++)
+    		{	
+    			elms = document.forms[i].elements;
+        		len2 = elms.length;
+        		for (var j=0; j<len2; j++)
+        		{
+        			if (elms[j].getAttribute("type") != "hidden" && elms[j].style.display != "none" && elms[j].style.visibility != "hidden" && !elms[j].disabled)
+        			{
+        				first = elms[j];
+        				break;
+        			}	
+        		}  
+        		if (first != null)
+        			break;
+    		}	
+    		for (var i=len-1; i>=0; i++)
+    		{	
+    			elms = document.forms[i].elements;
+        		len2 = elms.length;
+        		for (var j=len2-1; j>=0; j--)
+        		{
+        			if (elms[j].getAttribute("type") != "hidden" && elms[j].style.display != "none" && elms[j].style.visibility != "hidden" && !elms[j].disabled)
+        			{	
+        				last = elms[j];
+        				break;
+        			}	
+        		}
+        		if (last != null)
+        			break;
+    		}
+			if (evt.target.nodeName == "HTML") 
+			{
+				// Tabbed in from the address bar to the page
+				focusElement(first);
+				return false;
+			}
+			if (evt.target === last && !evt.shiftKey) 
+			{
+				focusElement(first);
+				return false;
+			} 
+			else if (evt.target === first && evt.shiftKey) 
+			{
+				focusElement(last);
+				return false;
+			}    		
+    	}	
+    }
+    return true;
+}
+
+function dmeFieldRecordSelected(e, recIndex, fieldNm)
+{
+	var evt = e || window.event;
+	if (evt)
+	{	
+		var srcNode = (evt.srcElement) ? evt.srcElement : ((evt.target) ? evt.target : null);
+		if (srcNode && srcNode.nodeName.toLowerCase() == "a")
+		{
+			if (evt.stopPropagation)
+				evt.stopPropagation();
+			else
+				evt.cancelBubble = true;
+		}
+	}
+	parent.dmeFieldRecordSelected(recIndex, fieldNm);
+	doClose();		
+}
+
+function doClose()
+{
+	var filterForm = document.forms["filterForm"];
+	var dmeFilter = dmeFilterFieldHash.get(filterForm.elements["fieldNm"].value);
+	dmeFilter.doneProcessing("");
+	try
+	{
+		if (window.frameElement && window.frameElement.getAttribute("name") == "filterselectiframe")
+			window.frameElement.style.display = "none";
+	}
+	catch(e) {}
+	try
+	{
+		if (typeof(dmeFilter.getLaunchedFrom().getDmeFieldElement) != "undefined")
+		{		
+			var fldObj = dmeFilter.getLaunchedFrom().getDmeFieldElement(dmeFilter.getFieldNm());
+			dmeFilter.getLaunchedFrom().focusElement(fldObj[1]);
+		}
+	}
+	catch(e) {}
+}
+
+function fitToScreen()
+{
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	contentWidth = winWidth;
+	contentWidthBorder = winWidth;
+	contentHeight = winHeight - 60;	
+	contentHeightBorder = winHeight;
+	setLayerSizes = function() {};
+	try
+	{
+		document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		document.getElementById("paneBody").style.width = contentWidth + "px";
+		document.getElementById("paneBody").style.height = contentHeight + "px";
+		document.getElementById("paneBody").style.overflowY = "auto";
+		document.getElementById("paneBody").style.overflowX = "hidden";
+		document.getElementById("paneRecords").style.width = contentWidth + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body class="filterList" style="overflow:hidden;width:100%;height:100%;visibility:hidden" onload="initFieldFilter();" onresize="fitToScreen()">
+<span id="lblBeginDlg" class="offscreen">Beginning of dialog content</span>
+<div id="paneBorder">
+	<table id="paneTable" border="0" style="height:100%;width:100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px;padding-bottom:2px;padding-left:0px">
+		<div id="paneHeader" style="padding-top:2px;padding-bottom:2px;padding-left:0px;padding-right:0px;width:100%">
+			<div id="filterBar" class="filterBar" style="width:100%">
+				<form onsubmit="return false;" name="filterForm" id="filterForm">
+				<input name="fieldNm" id="fieldNm" type="hidden" value=""/>
+				<table border="0" cellpadding="0" cellspacing="0" style="width:100%;border-bottom:0px" role="presentation">
+				<thead></thead>
+				<tbody>
+					<tr>
+					<td nowrap="nowrap" style="white-space:nowrap;padding-left:3px">
+						<label id="lblFilterField" class="offscreen" for="filterField">Filter Field</label>
+						<select id="filterField" name="filterField" class="filteritem" style="width:80px" onchange="setFilterOptions(this.form.elements['fieldNm'].value,this.options[this.selectedIndex].value,this.form.elements['filterOption']);">
+						<!-- Database search fields go here. Set dynamically by addFilterField() in ui.js -->
+						</select>
+					</td>
+					<td nowrap="nowrap" style="white-space:nowrap;padding-left:3px">
+						<label id="lblFilterOption" class="offscreen" for="filterOption">Filter Field Criteria</label>
+						<select id="filterOption" name="filterOption" class="filteritem" style="width:75px">
+							<option value="contains">contains</option>
+							<option value="starts with">starts with</option>
+							<option value="is">is</option>
+						</select>
+					</td>
+					<td nowrap="nowrap" style="white-space:nowrap">
+						<label id="lblKeywords" class="offscreen" for="keywords">Keywords</label>
+						&nbsp;<input class="filteritem" style="color:#999999;width:75px" size="10" maxlength="30" id="keywords" name="keywords" type="text" value="" onkeypress="return handleKeyPress(event);">
+					</td>
+					<td nowrap="nowrap" style="white-space:nowrap;padding-left:3px">
+						<div class="floatLeft">
+						<button disabled="disabled" class="filterSearchButton" style="margin-left:2px;margin-right:2px" type="button" role="button" title="Filter Results" aria-label="Filter Results" name="filterBtn" id="filterBtn" onclick="doFilter(this.form,document.forms['recordsForm'],document.getElementById('paneBody'),parent,'list');">Filter</button>
+						<button class="filterSearchButton" style="display:none;margin-left:2px;margin-right:2px" type="button" role="button" title="Close" aria-label="Close" name="closeBtn" id="closeBtn" onclick="doClose();">Close</button>
+						<img id="spinArrow" style="vertical-align:middle" alt="Loading Icon" title="Loading Icon" src="/lawson/xhrnet/ui/images/ico_arrow_spin3_sm_gray.gif" styler="activityicon"/>
+						</div>
+					</td>
+					</tr>
+				</tbody>
+				</table>
+				</form>
+			</div>
+		</div>
+	</td></tr>
+	<tr><td class="filterListBody" style="height:auto;vertical-align:top">
+		<div id="paneBody" class="panebody" style="background-color:transparent" tabindex="0">
+			<!-- Record table HTML goes here. Set dynamically by drawDmeFieldFilterContent() in your app. -->
+		</div>
+	</td></tr>
+	<tr><td style="height:20px">
+		<div id="paneRecords" style="width:100%">
+			<form onsubmit="return false;" name="recordsForm" id="recordsForm">
+			<table border="0" cellpadding="0" cellspacing="0" style="width:100%;border-bottom:0px" role="presentation">
+			<thead></thead>
+			<tbody>
+				<tr>
+				<td nowrap="nowrap" class="filterListButton" style="white-space:nowrap;padding-left:3px;padding-right:3px;width:33%">
+					<div id="nbrRecordsView">
+						<label id="lblView" for="nbrRecords">View</label> &nbsp;
+						<select id="nbrRecords" name="nbrRecords" class="filteritem" style="width:75px" onchange="doFilter(document.forms['filterForm'],this.form,document.getElementById('paneBody'),parent,'list');">
+							<option value="25">25</option>
+							<option value="50">50</option>
+							<option value="100">100</option>
+							<option value="300">300</option>
+							<option value="500">500</option>
+							<option value="600">600</option>
+						</select>
+					</div>
+				</td>
+				<td nowrap="nowrap" class="filterListButton" style="white-space:nowrap;padding-left:3px;padding-right:3px;text-align:center;width:33%">
+					<button name="prevFilterBtn" id="prevFilterBtn" disabled="disabled" class="filterListButton" style="border:0px;margin-left:2px;margin-right:2px" type="button" role="button" title="Go To Previous Page" aria-label="Go To Previous Page" onclick="doPrevious(document.forms['filterForm'],this.form,document.getElementById('paneBody'))">Previous</button>
+					<button name="nextFilterBtn" id="nextFilterBtn" disabled="disabled" class="filterListButton" style="border:0px;margin-left:2px;margin-right:2px" type="button" role="button" title="Go To Next Page" aria-label="Go To Next Page" onclick="doNext(document.forms['filterForm'],this.form,document.getElementById('paneBody'))">Next</button>
+				</td>
+				<td nowrap="nowrap" class="filterListButton textAlignRight" style="white-space:nowrap;padding-left:3px;padding-right:3px;width:33%">
+					<span id="lblRecords">Records</span> &nbsp;
+					<span class="filterRecordNbrs">
+						<span id="beginRecNbr">1</span>
+						-
+						<span id="endRecNbr">25</span>
+					<span>
+				</td>
+				</tr>
+			</tbody>
+			</table>
+			</form>
+		</div>
+	</td></tr>
+	</table>
+</div>
+<span id="lblEndDlg" class="offscreen">End of dialog content</span>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/list.htm,v 1.1.2.60 2014/02/25 22:49:11 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

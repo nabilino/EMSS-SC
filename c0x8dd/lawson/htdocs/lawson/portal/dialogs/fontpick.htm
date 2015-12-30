@@ -1,0 +1,173 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/dialogs/fontpick.htm,v 1.2.20.1.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Font Selection</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="fontpick.js"></script>
+
+<link id="dialog" type="text/css" rel="stylesheet" href="dlg.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="lblFamily">Family</phrase>
+		<phrase id="lblStyle">Style</phrase>
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+		<phrase id="lblWeight">Weight</phrase>
+		<phrase id="lblNormal">Normal</phrase>
+		<phrase id="lblItalic">Italic</phrase>
+		<phrase id="lblBold">Bold</phrase>
+		<phrase id="lblBolder">Bolder</phrase>
+		<phrase id="lblLighter">Lighter</phrase>
+		<phrase id="lblSize">Size</phrase>
+		<phrase id="lblDecoration">Text Decoration</phrase>
+		<phrase id="lblSample">Sample</phrase>
+		<phrase id="lblStrike">strike-through</phrase>
+		<phrase id="lblUnderline">underline</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="fontInit()" onkeydown="handleKeyDown()" style="background-color:threedface">
+
+<div id="topDiv" style="position:absolute;width:100%;">
+
+<table width="100%" style="left:9;top:15;font-family:Arial;font-size:10px">
+	<tr>
+		<td id="lblFamily" width="40%" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px">Family:</td>
+		<td id="lblStyle" width="30%" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px;">Style:</td>
+		<td id="lblWeight" width="30%" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px;">Weight:</td>
+	</tr>
+	<tr>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px">
+			<select class="dlgListText" id="Font" size="5" onchange="updatelblAlpha(this)" 
+					style="position:relative;width:100%;height:expression(this.size*17);" multiple>
+				<option value="arial" selected>Arial</option>
+				<option value="book antiqua">Book Antiqua</option>
+				<option value="comic sans ms">Comic Sans MS</option>
+				<option value="courier new">Courier New</option>
+				<option value="helvetica">Helvetica</option>
+				<option value="lucida console">Lucida Console</option>
+				<option value="modern">Modern</option>
+				<option value="ms sans serif">MS Sans Serif</option>
+				<option value="news gothic mt">News Gothic MT</option>
+				<option value="serif">Serif</option>
+				<option value="sans serif">Sans Serif</option>
+				<option value="tahoma">Tahoma</option>
+				<option value="times new roman">Times New Roman</option>
+				<option value="verdana">Verdana</option>
+				<option value="wide latin">Wide Latin</option>
+			</select>
+		</td>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px">
+			<select class="dlgListText" id="Style" size="5" onchange="updatelblAlpha(this)"
+					style="position:relative;width:100%;height:expression(this.size*17);" >
+				<option value="normal" selected="true">Normal</option>
+				<option value="italic">Italic</option>
+			</select>
+		</td>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px">
+			<select class="dlgListText" id="Weight" size="5" 
+					style="position:relative;width:100%;height:expression(this.size*17);" 
+					onchange="updatelblAlpha(this)">
+				<option value="normal" selected="true">Normal</option>
+				<option value="bold">Bold</option>
+				<option value="bolder">Bolder</option>
+				<option value="lighter">Lighter</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td id="lblSize" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px">Size:</td>
+		<td id="lblDecoration" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px;">Decoration:</td>
+		<td id="lblSample" class="dlgLabel" 
+			style="position:relative;text-align:left;padding-left:4px;padding-top:4px">Sample:</td>
+	</tr>
+	<tr>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px">
+			<select id="Size" class="dlgListText" size="4"
+					style="position:relative;width:100%;height:expression(this.size*17);" 
+					onchange="updatelblAlpha(this)">
+				<option value="8pt" selected="true">8 pt</option>
+				<option value="9pt">9 pt</option>
+				<option value="10pt">10 pt</option>
+				<option value="11pt">11 pt</option>
+				<option value="12pt">12 pt</option>
+				<option value="13pt">13 pt</option>
+				<option value="14pt">14 pt</option>
+				<option value="15pt">15 pt</option>
+				<option value="16pt">16 pt</option>
+				<option value="17pt">17 pt</option>
+				<option value="18pt">18 pt</option>
+				<option value="19pt">19 pt</option>
+				<option value="20pt">20 pt</option>
+				<option value="21pt">21 pt</option>
+				<option value="22pt">22 pt</option>
+			</select>
+		</td>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px;" valign="top" border="1">
+			<input type="checkbox" id="strikethrough" onclick="strikeCheck()" border="0"></input>
+			<label id="lblStrike" for="strikethrough" style="position:relative;text-align:left;">line-through</label>
+			<br>
+			<input type="checkbox" id="underline" onclick="underlineCheck()"></input>
+			<label id="lblUnderline" for="underline" style="position:relative;text-align:left;">underline</label>
+		</td>
+		<td style="position:relative;text-align:left;padding-left:4px;padding-top:4px">
+			<div class="dlgTextBox" style="overflow:hidden;width:100%;height:55;
+					border-bottom: 1px solid #F0F0F0;
+					border-left: 1px solid #808080;
+					border-right: 1px solid #F0F0F0;
+					border-top: 1px solid #808080;">
+				<div id="lblAlpha" align="center" 
+						style="font-family:Arial;position:relative;width:100%;">Aa Bb Yy Zz</div>
+			</div>
+		</td>
+	</tr>
+	<tr><td colspan="3">&nbsp;</td></tr>
+	<tr><td colspan="3"><HR></td></tr>
+</table>
+</div>
+
+<div style="position:absolute;top:expression(document.body.clientHeight-this.offsetHeight-10);width:100%;">
+<table border="0" width="100%" cellspacing="2" style="position:relative;">
+<tr>
+	<td valign="top" align="center">
+		<input type="button" id="btnOK" class="dlgButton" style="position:relative;width:60px;" 
+				onclick="updateFont()" value="OK">
+		</input>
+		<input type="button" id="btnCancel" class="dlgButton" style="position:relative;width:60px;" 
+				onclick="window.close()" value="Cancel">
+		</input>
+	</td>
+</tr>
+</table>
+</div>
+
+</body>
+</html>

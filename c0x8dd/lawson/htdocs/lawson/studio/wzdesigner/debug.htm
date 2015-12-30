@@ -1,0 +1,42 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/wzdesigner/debug.htm,v 1.2.28.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Wizard Designer Internals</title>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="debug.js"></script>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"/>
+</head>
+<body onload="dbgInit()" onkeydown="dbgOnKeyDown(event)">
+	<textarea id="textWindow" wrap="off" onfocus="dbgTextFocus()"
+		style="position:absolute;left:0px;top:0px;width:100%;height:expression(document.body.offsetHeight-30);overflow:auto;">
+		</textarea>
+	<div style="position:absolute;top:expression(document.body.offsetHeight-25);height:25px;left:0px;">
+		<input type="button" class="dsDlgButton" id="closeBtn" value="Close" onclick="dbgClose()" style="width:60px;">
+		<input type="button" class="dsDlgButton" id="cmdWizard" value="Wizard XML" onclick="dbgLoadView('WizardXML')" style="width:60px;">
+		<input type="button" class="dsDlgButton" id="cmdForm" value="Form XML" onclick="dbgLoadView('FormXML')" style="width:60px;">
+		<input type="button" class="dsDlgButton" id="cmdHtml" value="HTML" onclick="dbgLoadView('HTML')" style="width:60px;">
+	</div>
+</body>
+</html>

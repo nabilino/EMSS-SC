@@ -1,0 +1,500 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<html>
+<HEAD>
+
+<script>
+
+function createFrames()
+{
+	var theblank = (window.location.protocol=='http:')?"about:blank":"/lawson/dot.htm" //dpb 07-25-01
+
+    document.write("<FRAMESET rows=\"10%, 90%, 0, 0, 0, 0\" border=0>")//dpb
+    //document.write("    <FRAMESET cols=\"15%,30%,*\" border=0>")
+    document.write("    <FRAMESET cols=\"25%,*,50%\" border=0>")//dpb
+    document.write("        <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"rptsel\">")
+    document.write("        <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"prtsel\">")//dpb
+    document.write("        <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"cont\">")
+    document.write("    </FRAMESET>")
+    document.write("    <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=auto NAME=\"disp\">")
+    document.write("    <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"hide\">")
+    document.write("    <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"prtlist\">")
+    document.write("    <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"tokens\">")
+    document.write("    <FRAME SRC='"+theblank+"' marginheight=0 marginwidth=0 scrolling=no NAME=\"xsl\">")
+    document.write("</FRAMESET>")
+}
+
+createFrames()
+
+var JOBOBJ     = '';
+var PRTLISTOBJ = '';
+var	XSLOBJ     = '';
+
+var	GlbJobSub  = 0;
+var	GlbPrtSub  = 0;
+var GlbViewOpt = 0;
+
+function LoadReports()
+{
+	window.rptsel.document.open();
+	window.rptsel.document.clear();
+	window.rptsel.document.close();
+
+	window.prtsel.document.open();
+	window.prtsel.document.clear();
+	window.prtsel.document.close();
+
+	window.cont.document.open();
+	window.cont.document.clear();
+	window.cont.document.close();
+
+	window.disp.document.open();
+	window.disp.document.clear();
+	window.disp.document.close();
+
+	window.hide.document.open();
+	window.hide.document.clear();
+	window.hide.document.close();
+
+	var object = '/cgi-lawson/newjoblist.exe?out=js';
+	window.open(object, "hide");
+}
+
+function DspJobs()
+{
+	JOBOBJ = self.hide
+
+	window.rptsel.document.clear()
+	window.prtsel.document.clear()
+
+	var	JobTxt = ''
+
+	JobTxt += '<html><body background=/lawson/newjobdef/reports2.jpg><form name=rptsel>';
+
+	JobTxt += '<table border=0>';
+
+    JobTxt += '<tr>';
+	JobTxt += '<td align=left valign=bottom>';
+	JobTxt += '<select name=rptsel onChange=\"parent.DspPDF(this)\">';
+
+	for (i = -1; i < JOBOBJ.NbrJobs; i++)
+	{
+		if (i == -1)
+		{
+			JobTxt += '<option value=' + i + '>Select A Report';
+			i++;
+		}
+		if (i < JOBOBJ.NbrJobs)
+		{
+			if (JOBOBJ.job[i].Description == "")
+				JobTxt += '<option value=' + i + '>' + JOBOBJ.job[i].JobName;
+			else
+				JobTxt += '<option value=' + i + '>' + JOBOBJ.job[i].Description;
+		}
+	}
+	JobTxt += '</select>';
+
+	JobTxt += '</td></tr>';
+
+	JobTxt += '</table>';
+//	JobTxt += '</td></tr></table>';
+//	JobTxt += '</td></tr></table>';
+	JobTxt += '</form></body></html>';
+
+//	alert(JobTxt);
+	window.rptsel.document.write(JobTxt)
+	window.rptsel.document.close()
+
+	window.prtsel.document.clear()
+	var	PrtTxt = ''
+	PrtTxt += '<html><body background=/lawson/newjobdef/reports2.jpg>';
+	PrtTxt += '</body></html>';
+	window.prtsel.document.write(PrtTxt)
+	window.prtsel.document.close()
+
+	window.cont.document.clear()
+	var	PrtTxt = ''
+	PrtTxt += '<html><body background=/lawson/newjobdef/reports2.jpg>';
+	PrtTxt += '<form name=cont><table border=0>' //dpb
+	PrtTxt += '<tr><td><input type=button value="New" onClick="parent.GetTokens();return false"></td>';
+	PrtTxt += '<td><input type=button value="Refresh" onClick="parent.LoadReports();return false"></td></tr>';
+	PrtTxt += '</table></body></html>';
+	window.cont.document.write(PrtTxt)
+	window.cont.document.close()
+
+	window.disp.document.clear()
+	var	PrtTxt = ''
+	PrtTxt += '<html><body><br><br><br><center><table border=0>';
+	PrtTxt += '<tr><td valign=bottom><img border=0 src=/lawson/newjobdef/insight.gif></td></tr>';
+	PrtTxt += '</tr>';
+	PrtTxt += '</body></html>';
+	window.disp.document.write(PrtTxt)
+	window.disp.document.close()
+}
+
+function DspPDF(JobSub)
+{
+	JOBOBJ = self.hide;
+
+	GlbJobSub = JobSub.options[JobSub.selectedIndex].value;
+
+	if (GlbJobSub == -1
+	||	JOBOBJ.job[GlbJobSub].Token == "RW100")
+	{
+		DspStylesheet();
+	}
+	else
+	{
+		DspStylesheet();
+
+//		var object = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].PDFUrl;
+//		window.open(object, "xsl");
+	}
+}
+
+function GetStyleSheets(JobSub)
+{
+	JOBOBJ = self.hide;
+
+	GlbJobSub = JobSub.options[JobSub.selectedIndex].value;
+
+	if (GlbJobSub == -1
+	||	JOBOBJ.job[GlbJobSub].Token == "RW100")
+	{
+		DspStylesheet();
+	}
+	else
+	{
+		var object = JOBOBJ.job[GlbJobSub].GetSSUrl;
+		window.open(object, "xsl");
+	}
+}
+
+function DspStylesheet()
+{
+	JOBOBJ = self.hide;
+	XSLOBJ = self.xsl;
+
+	j = GlbJobSub;
+
+	window.prtsel.document.open();
+	window.prtsel.document.clear();
+	window.prtsel.document.close();
+
+	window.cont.document.open();
+	window.cont.document.clear();
+	window.cont.document.close();
+
+	window.disp.document.open();
+	window.disp.document.clear();
+	window.disp.document.close();
+
+	if (j == -1)
+	{
+		//alert(j);
+		DspJobs();
+		//ShowFromJob();
+	}
+	else
+	if (JOBOBJ.job[j].NbrPrintFiles <= 1)
+	{
+		window.prtsel.document.clear()
+		var	PrtTxt = ''
+		PrtTxt += '<html><body background=/lawson/newjobdef/reports2.jpg><table border=0><tr><td valign=bottom><font color=white><b>';
+		if (JOBOBJ.job[j].NbrPrintFiles == 0)
+		{
+			PrtTxt += 'There are no print files for this job.';
+		}
+		else
+		{
+			PrtTxt += JOBOBJ.job[j].PrintFile[0].DspDateTime;
+		}
+		PrtTxt += '</b></font></td></tr></table></body></html>';
+		window.prtsel.document.write(PrtTxt)
+		window.prtsel.document.close()
+
+		window.cont.document.clear()
+		var	PrtTxt = ''
+		PrtTxt += '<html><body background=/lawson/newjobdef/reports2.jpg>';
+		PrtTxt += '</body></html>';
+		window.cont.document.write(PrtTxt)
+		window.cont.document.close()
+
+		ShowFromJob();
+	}
+	else
+	{
+		var	PrtTxt = ''
+
+		PrtTxt += '<html><body background=/lawson/newjobdef/reports2.jpg><form name=prtsel>';
+
+		PrtTxt += '<table border=0>';
+
+		PrtTxt += '<tr>';
+		PrtTxt += '<td align=center valign=bottom>';
+		PrtTxt += '<select name=prtsel onChange=\"parent.Display(this.form)\">';
+
+		for (i = 0; i < JOBOBJ.job[j].NbrPrintFiles; i++)
+		{
+			TmpTxt = '';
+			TmpTxt += JOBOBJ.job[j].PrintFile[i].Name + ' - ';
+			TmpTxt += JOBOBJ.job[j].PrintFile[i].DspDateTime;
+
+			PrtTxt += '<option value=' + i + '>' + TmpTxt;
+		}
+		PrtTxt += '</select>';
+
+		PrtTxt += '</td></tr>';
+
+		PrtTxt += '</tr></table>';
+		PrtTxt += '</form></body></html>';
+
+		window.prtsel.document.write(PrtTxt)
+		window.prtsel.document.close()
+
+		ShowFromJob();
+	}
+}
+
+function ShowFromJob()
+{
+	JOBOBJ = self.hide;
+	XSLOBJ = self.xsl;
+
+	j = GlbJobSub;
+    window.cont.document.clear();
+
+	var ContTxt = '';
+
+	ContTxt += '<html><body background=/lawson/newjobdef/reports2.jpg><form name=cont><center>';
+	ContTxt += '<table border=0><tr>';
+
+//	if (JOBOBJ.job[j].NbrPrintFiles != 0)
+//	{
+		ContTxt += '<td valign=bottom><input type=button value="View" onClick="parent.ViewOut();return false"></td>';
+		ContTxt += '<td valign=top><select name=viewsel onChange=\"parent.ViewOut()\">';
+		if (JOBOBJ.job[j].Token != "RW100")
+		{
+			ContTxt += '<option value="Text">Text';
+			ContTxt += '<option value="PDF">PDF';
+//			if (!XSLOBJ.NbrXSLStylesheets)
+//			{
+//				ContTxt += '<option value="STYLESHEET">Stylesheet';
+//			}
+//			else
+//			{
+//				for (i = 0; i < XSLOBJ.NbrXSLStylesheets; i++)
+//				{
+//					ContTxt += '<option value="' + XSLOBJ.XSLRegList[i].Name + '">' + XSLOBJ.XSLRegList[i].Name;
+//				}
+//			}
+		}
+		else
+		{
+//			ContTxt += '<option value="STYLESHEET">Stylesheet';
+			ContTxt += '<option value="PDF">PDF';
+		}
+		ContTxt += '<option value="CSV">CSV';
+		ContTxt += '</select></td>';
+		ContTxt += '<td valign=bottom><input type=button value="Run" onClick="parent.Run();return false"></td>';
+		ContTxt += '<td valign=bottom><input type=button value="Parms" onClick="parent.Parms();return false"></td>';
+		ContTxt += '<td valign=bottom><input type=button value="New" onClick="parent.GetTokens();return false"></td>';
+		ContTxt += '<td valign=bottom><input type=button value="Print" onClick="parent.Print();return false"></td>';
+/**		ContTxt += '<td valign=bottom><input type=button value="Monitor" onClick="parent.Monitor();return false"></td>';		**/
+		ContTxt += '<td valign=bottom><input type=button value="Refresh" onClick="parent.LoadReports();return false"></td>';
+//	}
+	ContTxt += '</tr></table></form></body></html>';
+
+	window.cont.document.write(ContTxt)
+	window.cont.document.close()
+
+    window.disp.document.clear();
+
+	if (JOBOBJ.job[j].NbrPrintFiles != 0)
+	{
+		if (JOBOBJ.job[j].Token == "RW100")
+			PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].SSUrl;
+		else
+			PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].PDFUrl;
+
+//		if (JOBOBJ.job[j].Token != "RW100")
+//			PrtUrl += XSLOBJ.XSLRegList[0].Source;
+
+//		alert(PrtUrl);
+//		window.open(PrtUrl, "disp");
+	}
+}
+
+function Display(PrtSub)
+{
+	JOBOBJ = self.hide
+
+	GlbPrtSub = PrtSub.prtsel.options[PrtSub.prtsel.selectedIndex].value;
+	ShowFromJob();
+}
+
+function ViewOut(ViewSub)
+{
+	XSLOBJ = self.xsl;
+
+	j = window.cont.cont.viewsel.options[window.cont.cont.viewsel.selectedIndex].value;
+	GlbViewOpt = j;
+
+    window.disp.document.clear();
+
+	if (j == "Text")
+		PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].ViewUrl;
+	else
+	if (j == "PDF")
+		PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].PDFUrl;
+	else
+	if (j == "CSV")
+		PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].CsvUrl;
+	else
+	{
+		PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].PDFUrl;
+
+//		PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].SSUrl;
+
+//		if (JOBOBJ.job[j].Token != "RW100")
+//			PrtUrl += XSLOBJ.XSLRegList[0].Source;
+	}
+//	alert(PrtUrl);
+	window.open(PrtUrl, "disp");
+}
+
+function Run()
+{
+    window.disp.document.clear();
+
+	PrtUrl = JOBOBJ.job[GlbJobSub].RunUrl;
+//	alert(PrtUrl);
+	window.open(PrtUrl, "disp");
+}
+
+function Parms()
+{
+	JOBOBJ = self.hide;
+
+    window.disp.document.clear();
+
+	LowerProd  = JOBOBJ.job[GlbJobSub].ProdLine.toLowerCase();
+	LowerToken = JOBOBJ.job[GlbJobSub].Token.toLowerCase();
+
+	if (JOBOBJ.DeskTop == 'DT_JAVA')
+		PrtUrl = "/cgi-lawson/dspjed.exe?" + JOBOBJ.job[GlbJobSub].ProdLine + "&" + JOBOBJ.job[GlbJobSub].Token;
+	else
+		PrtUrl = "/forms/" + LowerProd + "/" + LowerToken + ".htm";
+
+	window.open(PrtUrl, "disp");
+}
+
+function GetTokens()
+{
+    window.disp.document.clear();
+	window.open("/lawson/newjobdef/gettkn.htm", "disp");
+}
+
+function Print()
+{
+	window.disp.document.open();
+	window.disp.document.clear();
+	window.disp.document.close();
+
+	var object = '/cgi-lawson/dme.exe?prod=gen&file=printer&out=javascript';
+	window.open(object, "prtlist");
+}
+
+function DspPrinter()
+{
+	PRTLISTOBJ = self.prtlist
+	var	PrintTxt = ''
+
+	PrintTxt += '<html><body bgcolor=white><form name=prtsel>';
+
+	PrintTxt += '<center>';
+	PrintTxt += '<table border=0><tr><td valign=top>';
+	PrintTxt += '<table border=0><tr><td bgcolor=#aaaaaa>';
+	PrintTxt += '<table border=0>';
+
+    PrintTxt += '<tr bgcolor=#FFFFCC>';
+	PrintTxt += '<td><b>Select A Printer</b></td>';
+	PrintTxt += '<td align=left valign=bottom>';
+	PrintTxt += '<select name=prtsel>';
+
+	for (i = 0; i < PRTLISTOBJ.NbrRecs; i++)
+	{
+		PrintTxt += '<option value=' + i + '>' + PRTLISTOBJ.record[i].Printername + ' - ' + PRTLISTOBJ.record[i].Description;
+	}
+	PrintTxt += '</select>';
+
+	PrintTxt += '</td></tr>';
+
+    PrintTxt += '<tr bgcolor=FFFFCC>';
+	PrintTxt += '<td><b>Number of Copies</b></td>';
+	PrintTxt += '<td align=left valign=bottom>';
+	PrintTxt += '<input type=text size=2 value=1 name="copies">';
+	PrintTxt += '</td></tr>';
+
+	PrintTxt += '</table>';
+	PrintTxt += '</td></tr></table>';
+	PrintTxt += '</td></tr></table>';
+	PrintTxt += '<hr>';
+	PrintTxt += '<center><table border=0>';
+
+    PrintTxt += '<tr>';
+	PrintTxt += '<td valign=bottom><input type=button value="Print" onClick="parent.DoPrint();return false"></td>';
+	PrintTxt += '<td valign=bottom><input type=button value="Cancel" onClick="parent.ShowFromJob();return false"></td>';
+	PrintTxt += '</tr></table>';
+	PrintTxt += '</form></body></html>';
+
+	window.disp.document.write(PrintTxt)
+	window.disp.document.close()
+}
+
+function DoPrint()
+{
+	PRTLISTOBJ = self.prtlist
+
+	PrtSub = window.disp.prtsel.prtsel.options[window.disp.prtsel.prtsel.selectedIndex].value;
+	PrtUrl = JOBOBJ.job[GlbJobSub].PrintFile[GlbPrtSub].PrtUrl + '&_PRINTER=' + PRTLISTOBJ.record[PrtSub].Printername;
+	PrtUrl += '&_COPIES=' + window.disp.prtsel.copies.value;
+//	alert(PrtUrl);
+	window.open(PrtUrl, "disp");
+}
+
+function setToken(Prod, System, Token, Type)
+{
+    window.disp.document.clear();
+
+	LowerProd  = Prod.toLowerCase();
+	LowerToken = Token.toLowerCase();
+
+	if (JOBOBJ.DeskTop == 'DT_JAVA')
+		PrtUrl = "/cgi-lawson/dspjed.exe?" + Prod + "&" + Token;
+	else
+		PrtUrl = "/forms/" + LowerProd + "/" + LowerToken + ".htm";
+
+	window.open(PrtUrl, "disp");
+}
+
+function Monitor()
+{
+    window.disp.document.clear();
+
+	PrtUrl = "/cgi-lawson/monitor.exe?";
+	window.open(PrtUrl, "disp");
+}
+
+LoadReports()
+
+</SCRIPT>
+<body bgColor=FFCC99>
+</body>
+</html>
+
+

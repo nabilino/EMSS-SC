@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Enroll in Benefit Plan</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+parent.parent.currentmult=1
+REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+var tmp=parent.parent.determineCoverage(parseInt(REC_TYPE))
+var head=""
+var bod=""
+var flexflag=0
+var empflag=0
+var compflag=0
+var head=""
+var bod=""
+var start=parseFloat(parent.parent.SelectedPlan[29])
+var stop=parseFloat(parent.parent.SelectedPlan[31])
+var mult=""
+var temp=""
+var flex=parseFloat(parent.parent.SelectedPlan[20])
+var emp=parseFloat(parent.parent.SelectedPlan[18])
+var comp=parseFloat(parent.parent.SelectedPlan[24])
+if (isNaN(flex))
+	flex=0
+if (isNaN(emp))
+	emp=0
+if (isNaN(comp))
+	comp=0
+var flexrate=flex
+var emprate=emp
+var comprate=comp
+var ann_increment
+var ann_emp
+var ann_flex
+var ann_comp
+var CVR_BEF_AFT_FLAG=(parent.parent.SelectedPlan[39])
+var CVR_ROUND_METH=(parent.parent.SelectedPlan[40])
+var CVR_ROUND_TO=parseFloat(parent.parent.SelectedPlan[41])
+var	PRE_CONTRIB_BASIS=(parent.parent.SelectedPlan[42])
+var BN_PLAN_TYPE=(parent.parent.SelectedPlan[43])
+var BN_PLAN_CODE=(parent.parent.SelectedPlan[44])
+var CAL_SALARY=parseFloat(parent.parent.SelectedPlan[11])
+var CAL_SALARY_START=parseFloat(parent.parent.SelectedPlan[14])
+var CAL_COVERAGE=parseFloat(parent.parent.SelectedPlan[14])
+var CVR_MULT_SALARY=parseFloat(parent.parent.SelectedPlan[17])
+var BASE_MULTIPLE=parseFloat(parent.parent.SelectedPlan[17])
+var CVR_MIN_COVER=parseFloat(parent.parent.SelectedPlan[26])
+var CVR_MAX_COVER=parseFloat(parent.parent.SelectedPlan[27])
+var PRE_COST_PER_CVG=""
+if (parent.parent.SelectedPlan[56])
+	PRE_COST_PER_CVG=parseFloat(parent.parent.SelectedPlan[56])
+var EMP_PAY_FREQ=parseFloat(parent.parent.SelectedPlan[57])
+var CVR_RATE_TABLE=""
+if (parent.parent.SelectedPlan[58])
+	CVR_RATE_TABLE=parent.parent.SelectedPlan[58]
+var REDUCE_PCT=0
+if (parent.parent.SelectedPlan[59])
+	REDUCE_PCT=parseFloat(parent.parent.SelectedPlan[59]/100)
+var REDUCE_AMOUNT=0
+if (parent.parent.SelectedPlan[60])
+	REDUCE_AMOUNT=parseFloat(parent.parent.SelectedPlan[60])
+var REDUCE_METH=parent.parent.SelectedPlan[61]
+var REDUCE_ROUND_TO=parent.parent.SelectedPlan[62]
+var i=1
+function setben(flex,emp,comp,cov,mlt,i)
+{
+	parent.parent.choice=i
+	parent.parent.SelectedPlan[18]=emp
+	parent.parent.SelectedPlan[20]=flex
+	parent.parent.SelectedPlan[24]=comp
+	parent.parent.SelectedPlan[14]=cov
+	parent.parent.SelectedPlan[17]=mlt
+	parent.parent.currentmult=mlt
+	parent.parent.SelectedPlan[11]=cov
+}
+function calccost(mult,multsal,cover)
+{
+	if(PRE_CONTRIB_BASIS=="C")
+	{
+		var temp=0
+		temp=mult/parseFloat(multsal)
+		flex=flexrate*temp
+		emp=emprate*temp
+		comp=comprate*temp
+	}
+	return
+}
+function WriteLine(mult,sal)
+{
+	var line=''
+	var temp=(parseFloat(mult)/BASE_MULTIPLE)*parseFloat(sal)
+	//PT121389: impose the coverage limits before performing any multiplying and rounding
+	if (temp<CVR_MIN_COVER)
+		temp=CVR_MIN_COVER
+	if (temp>CVR_MAX_COVER)
+		temp=CVR_MAX_COVER
+	if (CVR_BEF_AFT_FLAG=="A")
+	{
+		temp=parent.parent.MultAndRound(parseFloat(temp),"Y",CVR_BEF_AFT_FLAG,CVR_ROUND_METH,CVR_ROUND_TO,0,0)
+		// coverage reduction calculation and rounding
+		if (CVR_RATE_TABLE!="")
+		{
+			if (REDUCE_PCT!=0)
+			{
+				var reducedcov=parseFloat(temp)*REDUCE_PCT
+				temp=parent.parent.MultAndRound(parseFloat(reducedcov),"Y",CVR_BEF_AFT_FLAG,REDUCE_METH,parseFloat(REDUCE_ROUND_TO),0,0)
+				if(REDUCE_AMOUNT!=0 && (REDUCE_AMOUNT > temp))
+					temp=REDUCE_AMOUNT
+			}
+			else if (REDUCE_AMOUNT!=0 && REDUCE_AMOUNT > parseFloat(temp))
+				temp=REDUCE_AMOUNT
+		}
+		// after multipling and rounding, make sure the limits are still imposed
+		if (temp<CVR_MIN_COVER)
+			temp=CVR_MIN_COVER
+		if (temp>CVR_MAX_COVER)
+			temp=CVR_MAX_COVER
+	}
+	if (PRE_COST_PER_CVG!="" && parseFloat(PRE_COST_PER_CVG)!=0)
+	{
+		ann_increment = temp/PRE_COST_PER_CVG
+		if (emprate!="")
+		{
+			ann_emp = ann_increment*emprate
+			emp = ann_emp/EMP_PAY_FREQ
+		}
+		if (flexrate!="")
+		{
+			ann_flex = ann_increment*flexrate
+			flex = ann_flex/EMP_PAY_FREQ
+		}
+		if (comprate!="")
+		{
+			ann_comp = ann_increment*comprate
+			comp = ann_comp/EMP_PAY_FREQ
+		}
+	}
+	else
+	{
+		if (temp<=CVR_MIN_COVER || temp>=CVR_MAX_COVER)
+		{
+			if (PRE_CONTRIB_BASIS=="C")
+			{
+				flex=parseFloat((flexrate/CAL_SALARY_START)*temp)
+				emp=parseFloat((emprate/CAL_SALARY_START)*temp)
+				comp=parseFloat((comprate/CAL_SALARY_START)*temp)
+			}
+		}
+		else
+			calccost(mult,CVR_MULT_SALARY,temp)
+	}
+	line+='<tr><td class="plaintablecellborder" style="text-align:center">'
+	line+='<input class="inputbox" type="radio" id="mult'+i+'" name="mult" value="'+mult+'" onclick="setben('+(flex-0)+','+(emp-0)+','+(comp-0)+','+(temp-0)+','+(mult-0)+','+i+');styleElement(this);" aria-labelledby="multHdr multLbl'+i+' covHdr covLbl'+i+' flexHdr flexLbl'+i+' empCostHdr empCostLbl'+i+' compCostHdr compCostLbl'+i+'"></td>'
+	line+='<td class="plaintablecellborder" style="text-align:center"><label id="multLbl'+i+'" for="mult'+i+'">'+mult+'</label></td>'
+	line+='<td class="plaintablecellborder" style="text-align:center"><span id="covLbl'+i+'">'+parent.parent.formatCont(temp)+'</span></td>'
+	if (parseFloat(flex)!=0 && flex!="" && !isNaN(parseFloat(flex)))
+	{
+		line+='<td class="plaintablecellborder" style="text-align:center" nowrap><span id="flexLbl'+i+'">'+parent.parent.formatCont(flex)
+		if (parent.parent.EMP_CONT_TYPE=="P")
+			line+=getSeaPhrase("PER","BEN")
+		line+='</span></td>'
+	}
+	else
+		line+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+	if (parseFloat(emp)!=0 && emp!="" && !isNaN(parseFloat(emp)))
+	{
+		line+='<td class="plaintablecellborder" style="text-align:center" nowrap><span id="empCostLbl'+i+'">'+parent.parent.formatCont(emp)
+		if (parent.parent.EMP_CONT_TYPE=="P")
+			line+=getSeaPhrase("PER","BEN")
+		line+='</span></td>'	
+	}
+	else
+		line+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+	if (parseFloat(comp)!=0 && comp!="" && !isNaN(parseFloat(comp)))
+	{
+		line+='<td class="plaintablecellborder" style="text-align:center" nowrap><span id="compCostLbl'+i+'">'+parent.parent.formatCont(comp)
+		if(parent.parent.EMP_CONT_TYPE=="P")
+			line+=getSeaPhrase("PER","BEN")
+		line+='</span></td>'
+	}
+	else
+		line+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+	line+='</tr>'
+	return line;
+}
+var continueFunc=""
+function writeit()
+{
+	setWinTitle(getSeaPhrase("ENROLL_PLAN","BEN"));
+	var precont=parent.parent.SelectedPlan[15]
+	var defaul=parent.parent.SelectedPlan[16]
+	var continueFlag=0
+	if (tmp)
+	{
+		// we have a new limit of another benefit coverage
+		if (tmp!=true)
+		{
+			// if the new coverage is less than the current max, cut the max down
+			if (tmp<CVR_MAX_COVER || isNaN(CVR_MAX_COVER)) CVR_MAX_COVER=tmp;
+			// calculate the new coverage multiple stop
+			if (tmp<CAL_SALARY*stop)
+			{
+				var calc_stop=parent.parent.Truncate(tmp/CAL_SALARY)
+				while (stop>calc_stop && (stop-CVR_MULT_SALARY)>=calc_stop)
+					stop-=CVR_MULT_SALARY
+			}
+		}
+		var mainHtml = ""
+		mult=start
+		var max=stop-start+2
+		var temp=mult
+		continueFlag=0
+		// PT103701: if the minimum coverage option exceeds the maximum coverage value,
+		// cap the coverage at the maximum and display only that one option
+		if (mult>stop) stop=mult
+		while (mult<=stop)
+		{
+			mainHtml += WriteLine(mult,CAL_COVERAGE)
+			continueFlag++
+			i++
+			mult=temp+CVR_MULT_SALARY
+			temp=mult
+		}
+		mainHtml += '</table></div></form>'
+		var costsStr = '';
+		if (!isNaN(parseFloat(parent.parent.SelectedPlan[18])) && parseFloat(parent.parent.SelectedPlan[18])>0)
+		{
+			if (precont=="P"||precont=="N"||precont=="A")
+			{
+				if (precont=="P")
+					costsStr += getSeaPhrase("ELECTBEN_3","BEN")
+				else if (precont=="A")
+					costsStr += getSeaPhrase("ELECTBEN_4","BEN")
+				else if (precont=="N")
+					costsStr += getSeaPhrase("ELECTBEN_5","BEN")
+			}
+		}
+		else
+			costsStr += getSeaPhrase("ELECTBEN_7","BEN")
+		var topHtml = '<div class="plaintablecell" style="padding:0px">'
+		if (parseInt(REC_TYPE,10) != 13)
+			topHtml += parent.header(' '+getSeaPhrase("ELECTBEN_2","BEN")+' '+costsStr)
+		else
+			topHtml += parent.header(' '+costsStr)
+		topHtml += '<form name="144" onsubmit="return false;"><div role="radiogroup">'
+		topHtml += '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_16","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'">'
+		topHtml += '<caption class="offscreen">'+getSeaPhrase("TCAP_11","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'</caption>'
+		head+='<tr><th scope="col" class="plaintableheaderborder" style="width:50px;text-align:center" nowrap>'+getSeaPhrase("SELECT","BEN")+'</th>'
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap><span id="multHdr">'+getSeaPhrase("MULTIPLE","BEN")+'</span></th>'
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap><span id="covHdr">'+getSeaPhrase("COVERAGE","BEN")+'</span></th>'
+		if (flex!=0)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap><span id="flexHdr">'+getSeaPhrase("FLEX_CR","BEN")+'</span></th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>&nbsp;</th>'
+		if (emp!=0)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap><span id="empCostHdr">'+getSeaPhrase("COST","BEN")+'</span></th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>&nbsp;</th>'
+		if (comp!=0)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap><span id="compCostHdr">'+getSeaPhrase("CO_COST","BEN")+'</span></th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>&nbsp;</th>'
+		topHtml += head + '</tr>'
+		var bottomHtml = '<div>'
+		if (!isNaN(parseFloat(parent.parent.SelectedPlan[18])) && parseFloat(parent.parent.SelectedPlan[18])>0)
+		{
+			if (precont=="P"||precont=="N"||precont=="A")
+			{
+				if (precont=="P")
+				{
+					parent.parent.setpreaft_flag("P")
+					//bottomHtml += getSeaPhrase("ELECTBEN_3","BEN")+' '
+				}
+				if (precont=="A")
+				{
+					parent.parent.setpreaft_flag("A")
+					//bottomHtml += getSeaPhrase("ELECTBEN_4","BEN")+' '
+				}
+				if (precont=="N")
+				{
+					//bottomHtml += getSeaPhrase("ELECTBEN_5","BEN")+' '
+				}
+			}
+			else if (precont!=null && precont!='' && typeof(precont)!='undefined')
+			{
+				bottomHtml += '<form onsubmit="return false;"><div role="radiogroup" aria-labelledby="howLbl">'
+				if (defaul=="P")
+				{
+					parent.parent.setpreaft_flag("P")
+					bottomHtml += '<span id="howLbl">'+getSeaPhrase("ELECTBEN_6","BEN")+'</span> '
+					bottomHtml += '<input class="inputbox" type="radio" id="pretax" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\');styleElement(this);" checked><label for="pretax">'+getSeaPhrase("PRE_TAX","BEN")+'</label>'
+					bottomHtml += '<input class="inputbox" type="radio" id="afttax" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\');styleElement(this);"><label for="afttax">'+getSeaPhrase("AFTER_TAX","BEN")+'</label>'
+				}
+				else
+				{
+					if (defaul=="A")
+					{
+						parent.parent.setpreaft_flag("A")
+						bottomHtml += '<span id="howLbl">'+getSeaPhrase("ELECTBEN_6","BEN")+'</span> '
+						bottomHtml += '<input class="inputbox" type="radio" id="pretax" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\');styleElement(this);"><label for="pretax">'+getSeaPhrase("PRE_TAX","BEN")+'</label>'
+						bottomHtml += '<input class="inputbox" type="radio" id="afttax" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\');styleElement(this);" checked><label for="afttax">'+getSeaPhrase("AFTER_TAX","BEN")+'</label>'
+					}
+					else
+					{
+						bottomHtml += '<span id="howLbl">'+getSeaPhrase("ELECTBEN_6","BEN")+'</span> '
+						bottomHtml += '<input class="inputbox" type="radio" id="pretax" name="preaft" value="pre" onclick="parent.parent.setpreaft_flag(\'P\');styleElement(this);"><label for="pretax">'+getSeaPhrase("PRE_TAX","BEN")+'</label>'
+						bottomHtml += '<input class="inputbox" type="radio" id="afttax" name="preaft" value="aft" onclick="parent.parent.setpreaft_flag(\'A\');styleElement(this);"><label for="afttax">'+getSeaPhrase("AFTER_TAX","BEN")+'</label>'
+					}
+				}
+				bottomHtml += '</div></form>'
+			}
+		}
+		else
+		{
+			if (continueFlag==0) precont="N"
+			parent.parent.setpreaft_flag("")
+			//bottomHtml += ' '+getSeaPhrase("ELECTBEN_7","BEN")+' '
+		}
+		bottomHtml += '<table border="0" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto" role="presentation">'
+		bottomHtml += '<tr><td class="plaintablecellright">'
+		// PT 150250. Pass the continueFlag which is > 0 if there are contribution options to select from.
+		bottomHtml += uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.setBenefit('"+precont+"',"+continueFlag+");return false","margin-top:10px")
+		if (parent.parent.LastDoc[parent.parent.currentdoc]!=null)
+			bottomHtml += uiButton(getSeaPhrase("PREVIOUS","BEN"),"parent.parent.document.getElementById('main').src='"+parent.parent.LastDoc[parent.parent.currentdoc]+"';parent.parent.currentdoc--;return false","margin-top:10px;margin-left:5px")
+		bottomHtml += uiButton(getSeaPhrase("EXIT","BEN"),"parent.parent.quitEnroll(parent.location);return false","margin-top:10px;margin-left:5px",null,'aria-haspopup="true"')
+		bottomHtml += '</td></tr></table>'
+		bottomHtml += '</div></div>'
+		document.getElementById("paneBody").innerHTML = topHtml + mainHtml + bottomHtml;
+		document.getElementById("paneHeader").innerHTML = getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8];
+	}
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();writeit()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.27 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_03.htm,v 1.14.2.42.2.2 2014/06/10 00:59:18 kevinct Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

@@ -1,0 +1,76 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/jobdef.htm,v 1.17.2.13.4.2.12.1.2.3 2012/08/08 12:37:18 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+	<script language="javascript" src="../servenv.js"></script>
+	<script language="javascript" src="jobdef.js"></script>
+	<script language="javascript" src="../dropdown.js"></script>
+	<script language="javascript" src="../objects/CommonDialog.js"></script>
+	<script language="javascript" src="../objects/FeedBack.js"></script>	
+	<title>Job Definition</title>
+	<link id="StyleLink" type="text/css" href="../portal.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" href="../forms/lawform.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../dropdown.css"></link>
+</head>
+
+<body onload="initJobDef()" onunload="unloadFunc()" onkeydown="handleKeyDown(event)" onresize="jobdefResize()"
+			style="display:none;overflow-x:hidden" tabIndex="-1">
+
+	<!-- Job Name: -->
+	<span id="lblJobName" class="label" onselectstart="return false" style="position:absolute;left:10px;width:155px;top:25px;text-align:right;">&nbsp;</span>
+	<input id="_f2" tp="text" knb="@mj" class="textBox" style="position:absolute;text-transform:uppercase;left:175px;width:100px;top:25px;" 
+			maxLength="10" onfocus="textFocus(this)" onblur="this.className='textBox'" 
+			onkeypress="portalWnd.edCheckJobName(event,this)" oncontextmenu="showContextMenu(event,window,this)">
+	</input>
+	<img id="selBtn_f2" class="selectButton" onselectstart="return false" style="position:absolute;left:276px;top:25px" title="Select"
+			onclick="doSelect()" src="../images/ico_form_dropselect.gif" />
+
+	<!-- Job Description: -->
+	<span id="lblJobDescription" class="label" onselectstart="return false" style="position:absolute;left:10px;width:155px;top:55px;text-align: right">&nbsp;</span>
+	<input id="_f3" class="textBox" maxLength="30" style="position:absolute;left:175px;top:55px;" onfocus="textFocus(this)" 
+			onblur="this.className='textBox'">
+	</input>
+
+	<!-- Owner Name: -->
+	<span id="lblUserName" class="label" onselectstart="return false" style="position:absolute;left:10px;width:155px;top:85px;text-align:right;">&nbsp;</span>
+	<input id="_f5" tp="text" knb="@un" class="textBox" style="position:absolute;text-transform:uppercase;left:175px;width:100px;top:85px;"		 
+			maxLength="30" onfocus="textFocus(this)" onblur="this.className='textBox'" onkeypress="portalWnd.edCheckJobName(event,this)"
+			oncontextmenu="showContextMenu(event,window,this)">
+	</input>
+	<img id="selBtn_f5" class="selectButton" onselectstart="return false" style="position:absolute;left:276px;top:85px" title="Select"
+			onclick="doSelect2()" src="../images/ico_form_dropselect.gif" />
+
+	<!-- 'detail area' header -->
+	<div onselectstart="return false" style="position:absolute;top:130px;left:0px;width:98%;height:20px;margin:6px;border-bottom: darkgray 3px solid;">
+		<span id="lblStep" class="label" style="position:absolute;left:2px;width:50px;text-align:left;">&nbsp;</span>
+		<span id="lblDataArea" class="label" style="position:absolute;left:62px;width:80px;text-align:left;">&nbsp;</span>
+		<span id="lblForm" class="label" style="position:absolute;left:152px;width:75px;text-align:left;">&nbsp;</span>
+		<span id="lblStepDescription" class="label" style="position:absolute;left:237px;width:150px;text-align:left;">&nbsp;</span>
+	</div>
+	
+	<!-- 'detail area' body -->
+	<div id="detailArea" class="scrollDiv" style="position:absolute;height:65%;top:155px;left:0px;width:98%;margin:6px;border-bottom: darkgray 1px solid;"/>
+
+</body>
+</html>

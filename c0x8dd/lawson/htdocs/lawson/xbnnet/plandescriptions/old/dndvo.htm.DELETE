@@ -1,0 +1,44 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 6.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>HL</title>
+</head>
+
+
+<body BGCOLOR="#ffffff">
+<div align="left">
+  <table border="0" width="100%">
+          <tr>
+        <td width="417" bgcolor="#065099" height="15">
+		<font face="Verdana" style="font-size: larger" color="#FFFFFF">Dental 
+		Plan Coverage</font></td>
+        <td width="81" bgcolor="#C6C6FF" align="center" height="23" valign="middle">&nbsp;</td>
+        <td width="76" bgcolor="#C6C6FF" align="center" height="23" valign="middle">
+		<a href=javascript:self.close()>Close</a>&nbsp;</td>
+    <td bgcolor="#FFD737" width="95" valign="middle" align="center"><a href=javascript:self.print()>Print</a>&nbsp;</td>&nbsp;</td>
+          </tr>
+        </table>
+</div>
+<!-- Generation of PM publication page 2 -->
+<div align="left">
+
+<table border="0" width="100%" height="46">
+  <tr>
+    <td width="44%" valign="top" align="left" height="42"><font size="2" face="Arial">St. 
+	Luke's offers Dental Plan coverage for employees.</font></td>
+  </tr>
+  </table>
+</div>
+
+<hr color="#8080FF">
+<!-- Generation of PM publication page 4 -->
+<form name="listform">
+	<p align="center"><img border="0" src="dental.gif" width="686" height="809"></p>
+</form>
+</body>
+
+</html>

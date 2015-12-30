@@ -1,0 +1,308 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforTextButton.css,v 1.1.2.9.2.2 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+ /* Infor Text Button */
+button.pushButtonStyler
+{
+  border : 0px;
+  background : transparent;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;  
+  margin : 0px;
+  padding : 0px;
+  min-width : 45px;
+  text-align : center;
+  vertical-align : middle;
+  width : auto;
+}
+button.pushButtonStyler img
+{
+  width : 100%;
+  height : 20px;
+  display : block;
+}
+.inforPushButtonLeftSide
+{
+  background : transparent url("../../images/btn-form_lft_7x20_enabled.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;
+}
+.inforPushButtonRightSide
+{
+  background : transparent url("../../images/btn-form_rt_7x20_enabled.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;
+}
+.inforPushButtonLeftSideHover
+{
+  background : transparent url("../../images/btn_lft_7x20_over.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.inforPushButtonRightSideHover
+{
+  background : transparent url("../../images/btn_rt_7x20_over.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;
+}
+.inforPushButtonLeftSideActive
+{
+  background : transparent url("../../images/btn_lft_7x20_over.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.inforPushButtonRightSideActive
+{
+  background : transparent url("../../images/btn_rt_7x20_over.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonLeftSideDisable
+{
+  background : transparent url("../../images/btn_lft_7x20_disabled.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.inforPushButtonRightSideDisable
+{
+  background : transparent url("../../images/btn_rt_7x20_disabled.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonLeftSidePress
+{
+  background : transparent url("../../images/btn_lft_7x20_press.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.inforPushButtonRightSidePress
+{
+  background : transparent url("../../images/btn_rt_7x20_press.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryLeftSide
+{
+  background : transparent url("../../images/btn_lft_7x20_enabled.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryRightSide
+{
+  background : transparent url("../../images/btn_rt_7x20_enabled.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryLeftSideHover
+{
+  background : transparent url("../../images/btn_lft_7x20_over.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryRightSideHover
+{
+  background : transparent url("../../images/btn_rt_7x20_over.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryLeftSideActive
+{
+  background : transparent url("../../images/btn_lft_7x20_over.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden;  
+}
+.inforPushButtonSecondaryRightSideActive
+{
+  background : transparent url("../../images/btn_rt_7x20_over.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;   
+}
+.inforPushButtonSecondaryLeftSidePress
+{
+  background : transparent url("../../images/btn_lft_7x20_press.png") no-repeat top left;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  overflow : hidden; 
+}
+.inforPushButtonSecondaryRightSidePress
+{
+  background : transparent url("../../images/btn_rt_7x20_press.png") no-repeat top right;
+  height : 20px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  padding-left : 7px;
+  padding-right : 7px;
+  overflow : hidden;  
+}
+.inforPushButtonContent
+{
+  white-space : nowrap;
+  color : #ffffff;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  text-align : center;
+  vertical-align : middle;
+  line-height : 20px;
+  height : 20px;
+  width : 100%;
+  margin : 0px;
+  padding : 0px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  position : relative;
+  left : 0px;
+  top : -20px;
+}
+.inforPushButtonContentSecondary
+{
+  white-space : nowrap;
+  color : #202020;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  text-align : center;
+  vertical-align : middle;
+  line-height : 20px;
+  height : 20px;
+  width : 100%;
+  margin : 0px;
+  padding : 0px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  position : relative;
+  left : 0px;
+  top : -20px;
+}
+.inforPushButtonContentDisable
+{
+  white-space : nowrap;
+  color : #999999;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  text-align : center;
+  vertical-align : middle;
+  line-height : 20px;
+  height : 20px;
+  width : 100%;
+  margin : 0px;
+  padding : 0px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  position : relative;
+  left : 0px;
+  top : -20px;
+}
+.inforPushButtonContentOver
+{
+  white-space : nowrap;
+  color : #ffffff;
+  font-family : Arial;
+  font-weight : normal;
+  font-size : 11px;
+  text-align : center;
+  vertical-align : middle;
+  line-height : 20px;
+  height : 20px;
+  width : 100%;
+  margin : 0px;
+  padding : 0px;
+  cursor : default;
+  display : -moz-inline-stack;
+  display : block;
+  position : relative;
+  left : 0px;
+  top : -20px;
+}

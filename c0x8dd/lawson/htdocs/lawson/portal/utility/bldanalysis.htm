@@ -1,0 +1,91 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/utility/bldanalysis.htm,v 1.1.2.1.18.1.2.2 2012/08/08 12:37:21 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Forms Folder Analysis</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="bldanalysis.js"></script>
+</head>
+
+<body onload="bldInit()" style="visibility:hidden;cursor:wait;" onkeydown="bldOnKeyDown(event)">
+
+	<table border="0" width="95%" style="margin:10px;">
+		<tr>
+			<td colspan="2" align="bottom">
+				<label id="lblFolder" class="xTLabel" style="position:relative;">
+					Forms Folder:&nbsp;
+				</label>
+				<label id="lblFolderName" class="xTLabel" style="position:relative;font-weight:bold;">
+					&nbsp;
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR style="height:1px;color:#6699CC"></td>
+		</tr>
+		<tr>
+			<td colspan="2" align="bottom">
+				<label id="lblIndexList" for="selIndexList" class="xTLabel" style="position:relative;">
+					<u>I</u>ndex entries missing XML files:
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td align="top" width="350px">
+				<select id="selIndexList" class="xTListText" size="8" multiple accesskey="I" 
+					style="font-family:courier new;width:340px;height:expression(this.size*17);" >
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnDeleteIndex" type="button" class="xTToolBarButton" style="width:70px;" onclick="bldOnDeleteIndex()" value="Delete"></input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" align="bottom">
+				<label id="lblFileList" for="selFileList" class="xTLabel" style="position:relative;">
+					<u>X</u>ML files missing index entries:
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td align="top">
+				<select id="selFileList" class="xTListText" size="8" multiple accesskey="X" 
+					style="font-family:courier new;width:340px;height:expression(this.size*17);" >
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnDeleteFileEntry" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" onclick="bldOnDeleteFileEntry()" value="Delete"></input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" height="20">
+				<label id="lblPDLMessage" class="xTLabel" style="position:relative;">&nbsp;</label>
+				<select id="selHiddenPDL" style="display:none;"></select>
+			</td>
+		</tr>
+	</table>
+
+</body>
+</html>

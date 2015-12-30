@@ -1,0 +1,936 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="pragma" content="No-Cache" />
+<meta http-equiv="expires" content="Mon, 01 Jan 1990 00:00:01 GMT" />
+<title>Stock Options</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/stockoptions/lib/getattach.js"></script>
+<script src="/lawson/xhrnet/stockoptions/lib/shr064.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<!-- Load any additional libraries here... -->
+<script language="JavaScript">
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize Function.
+//
+function Initialize()
+{
+	clearTimeout(Timer);
+	authenticate("frameNm='jsreturn'|funcNm='AuthenticateFinished()'|desiredEdit='EM'");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialization Complete Function.
+//
+function AuthenticateFinished()
+{
+	// Add any additional initialization routines or assignments here, including global variables.
+	//  Note: remove the "Investment Information" string found in the MainTabs array below
+	//	if it is not desired as an option on the main Grant Options tabbed window.
+	//
+	stylePage();
+
+	document.title = getSeaPhrase("STOCK_OPTIONS","ESS");
+
+	// Set the task title.
+	setTaskHeader("header",getSeaPhrase("STOCK_OPTIONS","ESS"),"Stock");
+
+	optionTabs = new uiTabSet("optionTabs",new Array(getSeaPhrase("STOCK_OPTION_GRANTS","ESS"),getSeaPhrase("SHARES_TO_EXPIRE","ESS"),getSeaPhrase("EXERCISE_HISTORY","ESS"),getSeaPhrase("INVESTMENT_INFORMATION","ESS")));
+
+	StoreDateRoutines();
+	Brokers = new BrokerObject();
+
+	showWaitAlert(getSeaPhrase("WAIT","ESS"));
+	GetStockOptionGrants("I");
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top left tabbed window - Stock Option Grants.
+//
+function PaintTopLeftWindow(onsort, sortField)
+{
+	if (onsort)
+	{
+		if (optionTabs.activetab != 2)
+		{
+			hideDetailFrames();
+		}
+		else
+		{
+			ClearExerciseHistory();
+		}
+		RePaintTopLeftWindow(onsort, sortField);
+		return;
+	}
+
+	var htmlStr = '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" width="100%" styler="list">';
+	htmlStr += '<tr><th class="plaintableheaderborderlite" style="width:25%;text-align:center">'+getSeaPhrase("EXERCISE_TYPE","ESS")+'&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("EXERCISE_PRICE","ESS")+'&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("MARKET_PRICE","ESS")+'</a>&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:27%;text-align:center">'+getSeaPhrase("BROKER","ESS")+'&nbsp;&nbsp;</th>';
+	htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("FEES","ESS")+'&nbsp;&nbsp;</th>';
+	htmlStr += '</tr></table>';
+
+	try {
+		self.historydetail.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+		self.historydetail.document.getElementById("paneBody").innerHTML = htmlStr;
+		self.historydetail.stylePage();
+		self.historydetail.setLayerSizes();
+	}
+	catch(e) {}
+
+	optionTabs.draw = true;
+	optionTabs.frame = self.topleft;
+	optionTabs.isDetail = false;
+	optionTabs.tabHtml = new Array();
+	optionTabs.tabHtml[0] = PaintStockOptionGrantTable(0, false);
+	optionTabs.tabHtml[1] = PaintStockOptionGrantTable(1, false);
+	optionTabs.tabHtml[2] = ""; //PaintStockOptionGrantTable(2, false);
+	optionTabs.tabHtml[3] = window.investinfo.document.body.innerHTML;
+	optionTabs.create();
+
+   	optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+
+	document.getElementById("topleft").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+function RePaintTopLeftWindow(onsort, sortField)
+{
+	if (!optionTabs.rendered) {
+		return;
+	}
+
+	switch (String(optionTabs.activetab)) {
+
+		// first tab
+		case "0":
+   			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			optionTabs.setTabHtml(0,PaintStockOptionGrantTable(0, false));
+			break;
+
+		// second tab
+		case "1":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			optionTabs.setTabHtml(1,PaintStockOptionGrantTable(1, false));
+			break;
+
+		// third tab
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EXERCISE_HISTORY","ESS");
+			optionTabs.setTabHtml(2,PaintStockOptionGrantTable(2, false));
+			break;
+
+		// fourth tab
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+			optionTabs.setTabHtml(window.investinfo.document.body.innerHTML);
+			break;
+
+		default:
+			break;
+	}
+
+	optionTabs.setActiveTab(optionTabs.activetab);
+    try
+    {
+    	optionTabs.frame.styleSortArrow("optionTbl" + String(Number(optionTabs.activetab)), sortField);
+	}
+	catch(e)
+	{}
+	document.getElementById("topleft").style.visibility = "visible";
+
+	removeWaitAlert();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the bottom left window - Vesting Detail.
+// Override this function, if desired.
+//
+// function PaintBottomLeftWindow() { }
+//
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the top right window - Option Detail.
+// Override this function, if desired.
+//
+// function PaintTopRightWindow(index) { }
+//
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the second bottom left window - Model Stock Options.
+//
+function PaintBottomLeft2Window(index)
+{
+	var returnVal = '<div style="padding-top:10px">';
+	returnVal += '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr><td class="fieldlabelbold" colspan="4" style="text-align:center;padding-bottom:10px;">';
+	returnVal += getSeaPhrase("ENTER_WIN_LOSS_INFO","ESS")+'</td></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("MARKET_PRICE_PER_SHARE","ESS")+'</td><td>';
+	returnVal += '<input id="mktprice" name="mktprice" type="text" size="10" ';
+	returnVal += 'maxlength="10" value=""></td>'; // onchange="parent.ValidateNumber(this,9,4,null,true)"></td>';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("NUMBER_OF_SHARES","ESS")+'</td><td>';
+	returnVal += '<input id="nbrshares" name="nbrshares" type="text" size="9" ';
+	returnVal += 'maxlength="9" value=""></tr>'; // onchange="parent.ValidateNumber(this,9,0)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("FEDERAL_TAX","ESS")+'</td><td>';
+	returnVal += '<input id="fedtax" name="fedtax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value="">'; // onchange="parent.ValidatePercent(this,5,2,null,true)">';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("SOCIAL_SECURITY","ESS")+'</td><td>';
+	returnVal += '<input id="sstax" name="sstax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value=""></tr>'; // onchange="parent.ValidatePercent(this,5,2,null,true)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">'+getSeaPhrase("STATE_TAX","ESS")+'</td><td>';
+	returnVal += '<input id="statetax" name="statetax" type="text" size="8" ';
+	returnVal += 'maxlength="8" value="">'; // onchange="parent.ValidatePercent(this,5,2,null,true)">';
+	returnVal += '<td class="fieldlabelbold">'+getSeaPhrase("MEDICARE","ESS")+'</td><td>';
+	returnVal += '<input id="medicare" name="medicare" type="text" size="8" ';
+	returnVal += 'maxlength="8" value=""></tr>'; // onchange="parent.ValidatePercent(this,5,2,null,true)"></tr>';
+	returnVal += '<tr><td class="fieldlabelbold">&nbsp;</td>'
+	returnVal += '<td>'+uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.ContinueModel("+index+");return false","margin-left:0px");
+	returnVal += uiButton(getSeaPhrase("DONE","ESS"),"parent.QuitModel();return false");
+	returnVal += '</td></tr>';
+	returnVal += '</table>';
+	returnVal += '</div>';
+
+   	self.bottomleft2.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomleft2.stylePage();
+	document.getElementById("bottomleft2").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the third bottom left window - Model Stock Options Detail.
+//
+function PaintBottomLeft3Window(index)
+{
+	var returnVal = '<div class="fieldlabelboldleft" style="padding:10px">';
+	returnVal += getSeaPhrase("SHOW_OPTION_MODEL_DETAIL","ESS")+'</div>';
+	returnVal += '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("NUMBER_OF_SHARES","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(BN334.NumberShares,true)+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("EXERCISE_COST","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.ExerciseCost,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("GRANT_PRICE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+
+	if (optionTabs.activetab == 1) {
+		returnVal += formatComma(roundValue(BN332.ToExpireRecords[index].GrantPrice,4));
+		returnVal += '</td>';
+	}
+	else
+	{
+		returnVal += formatComma(roundValue(BN332.AvailRecords[index].GrantPrice,4));
+		returnVal += '</td>';
+	}
+
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("GAIN_LOSS","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.GainLoss,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("MARKET_PRICE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.MarketSharePrice,4))+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TAXABLE_WAGES","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TaxableWages,2))+'</td></tr>';
+	returnVal += '<tr><td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TRANSACTION_VALUE","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TransactionValue,2))+'</td>';
+	returnVal += '<td class="plaintablerowheaderborder" style="width:25%">'+getSeaPhrase("TAX_AMOUNT","ESS")+'</td>';
+	returnVal += '<td class="plaintablecellborderdisplay" style="width:25%" nowrap>';
+	returnVal += formatComma(roundValue(BN334.TaxAmount,2))+'</td></tr></table>';
+	returnVal += '<table border="0" cellpadding="0" cellspacing="0" width="100%">';
+	returnVal += '<tr>'
+	returnVal += '<td style="text-align:right" colspan="4">'+uiButton(getSeaPhrase("START_OVER","ESS"),"parent.QuitModelResults();return false","margin-left:0px");
+	returnVal += uiButton(getSeaPhrase("DONE","ESS"),"parent.QuitModel();return false");
+	returnVal += '</td></tr>';
+	returnVal += '</table>';
+
+	document.getElementById("bottomleft2").style.visibility = "hidden";
+
+   	self.bottomleft3.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomleft3.stylePage();
+	document.getElementById("bottomleft3").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Content for the bottom right window - Contact Broker.
+//
+function PaintBottomRightWindow()
+{
+	var returnVal = '<div class="fieldlabelboldleft" style="position:relative;padding-right:10px;padding-left:10px;padding-top:10px;padding-bottom:15px">'
+	returnVal += getSeaPhrase("TO_CONTACT_BROKER","ESS")+'</div><br/>';
+
+	returnVal += '<div style="position:relative"><table border="0" cellpadding="0" cellspacing="0" width="100%">';
+
+	for (var i=0; i<Brokers.Contacts.length; i++)
+	{
+		returnVal += '<tr><td class="plaintablecellleft" style="width:25%;">&nbsp;</td><td class="plaintablecell" style="width:75%;">';
+		returnVal += '<a href="" onclick="parent.GetBrokerURL(\''+escape(Brokers.Contacts[i].broker,1)+'\');return false;">';
+		returnVal += Brokers.Contacts[i].name+'</a></td>';
+	}
+	returnVal += '</table></div>';
+
+   	self.bottomright.document.getElementById("paneBody").innerHTML = returnVal;
+   	self.bottomright.stylePage();
+	document.getElementById("bottomright").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+function OptionModel(index)
+{
+	// Highlight the grant record selected
+	if(activateTableRow("optionTbl"+optionTabs.activetab,index,optionTabs.frame)) {
+		// if the user has selected a different record to model, hide the detail frame
+		document.getElementById("topright").style.visibility = "hidden";
+	}
+
+	document.getElementById("bottomleft").style.visibility = "hidden";
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+
+	if (optionTabs.activetab == 1) {
+		self.bottomleft2.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		self.bottomleft2.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.AvailRecords[index].Certificate;
+	}
+
+	PaintBottomLeft2Window(index);
+
+	self.bottomright.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CONTACT_BROKER","ESS");
+
+	if (typeof(Brokers) == "undefined" || typeof(Brokers.RetrievedBrokers) == "undefined" || !Brokers.RetrievedBrokers) {
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+		GetBrokerCodes();
+	}
+	else if (Brokers.Contacts.length > 0) {
+		Brokers.RetrievedBrokers = true;
+		PaintBottomRightWindow();
+	}
+}
+
+function GetBrokerCodes()
+{
+	Brokers = new BrokerObject();
+
+	var pDMEObj 	= new DMEObject(authUser.prodline, "BNBROKER");
+	pDMEObj.out 	= "JAVASCRIPT";
+	pDMEObj.index 	= "BRKSET1";
+	pDMEObj.field 	= "broker;name";
+	pDMEObj.key 	= "";
+	pDMEObj.max 	= "600";
+	pDMEObj.func 	= "GetBrokerCodes_Done()";
+	pDMEObj.cond 	= "active";
+	pDMEObj.sortasc = "name";
+	pDMEObj.exclude = "drills;keys";
+	pDMEObj.debug 	= false;
+	DME(pDMEObj,"jsreturn2");
+}
+
+function GetBrokerCodes_Done()
+{
+	Brokers.Contacts = Brokers.Contacts.concat(window.jsreturn2.record);
+
+	if (window.jsreturn2.Next) {
+		window.jsreturn2.location.replace(window.jsreturn2.Next);
+	}
+	else if (Brokers.Contacts.length > 0) {
+		Brokers.RetrievedBrokers = true;
+		PaintBottomRightWindow();
+	}
+}
+
+function GetBrokerURL(broker)
+{
+	var loadMsg = '<html><head><title>'+getSeaPhrase("BROKER","ESS")+'</title>';
+	loadMsg += '<link rel="stylesheet" type="text/css" href="/lawson/xhrnet/ui/ui.css"/>';
+	loadMsg += '</head><body>';
+	loadMsg += '<table border="0" cellspacing="0" cellpadding="0" width="100%">';
+	loadMsg += '<tr><td>';
+	loadMsg += '<div class="fieldlabelbold" style="text-align:center;padding-top:50px;">'+getSeaPhrase("LOAD_BROKER_SITE","ESS");
+	loadMsg += '</div>';
+	loadMsg += '</td></tr>';
+	loadMsg += '</body></html>';
+
+	BrokerWin = window.open("/lawson/xhrnet/dot.htm",broker.toString().toUpperCase());
+	with (BrokerWin.document)
+	{
+		open();
+		write(loadMsg);
+		close();
+	}
+
+	var pAttachObj 	= new GETATTACHObject(authUser.prodline,"BNBROKER");
+	pAttachObj.index = "BRKSET1";
+	pAttachObj.rectype  = "U";
+	pAttachObj.key 	= "K1=" + escape(broker,1);
+	pAttachObj.out = "XML";
+	pAttachObj.opm = "T";
+	pAttachObj.data = "TRUE";
+	pAttachObj.stat = "TRUE";
+	pAttachObj.header = "TRUE";
+	pAttachObj.encode = "TEXT";
+	pAttachObj.debug = false;
+	pAttachObj.func = "GetBrokerURL_Done";
+	GETATTACH(pAttachObj,"jsreturn2");
+}
+
+function GetBrokerURL_Done()
+{
+	if (window.jsreturn2.UrlData.length)
+	{
+		var brokerURL = window.jsreturn2.UrlData[0][0];
+		if (typeof(BrokerWin) != "undefined" && !BrokerWin.closed)
+			BrokerWin.location.replace(brokerURL);
+		else BrokerWin = window.open(brokerURL);
+	}
+	else
+	{
+		if (typeof(BrokerWin) != "undefined" && !BrokerWin.closed)
+		{
+			seaAlert(getSeaPhrase("NO_BROKER_LINK","ESS"));
+			BrokerWin.close();
+		}
+		else
+			seaAlert(getSeaPhrase("NO_BROKER_LINK","ESS"));
+	}
+}
+
+function ContinueModel(index)
+{
+	BN334 = new BN334Object();
+	var formObj;
+
+	with (self.bottomleft2.document)
+	{
+		formObj = getElementById("mktprice");
+		if (ValidFormValue("number",formObj,9,4,null,true) == false) return;
+		BN334.MarketSharePrice = formObj.value;
+
+		formObj = getElementById("nbrshares");
+		if (ValidFormValue("number",formObj,9,0) == false) return; //formObj.value = "";
+		BN334.NumberShares = formObj.value;
+
+		formObj = getElementById("fedtax");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.FederalTax = formObj.value.split("%").join("");
+
+		formObj = getElementById("sstax");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.SocialSecurity = formObj.value.split("%").join("");
+
+		formObj = getElementById("statetax");
+
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.StateTax = formObj.value.split("%").join("");
+
+		formObj = getElementById("medicare");
+		if (ValidFormValue("percent",formObj,5,2,null,true) == false) return; //formObj.value = "";
+		BN334.Medicare = formObj.value.split("%").join("");
+	}
+
+	// Display a message informing the user that their numbers are in the process of being calculated.
+	if (optionTabs.activetab == 1) {
+		self.bottomleft3.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		self.bottomleft3.document.getElementById("paneHeader").innerHTML = getSeaPhrase("MODEL_STOCK_OPTIONS","ESS")+" - "+BN332.AvailRecords[index].Certificate;
+	}
+
+	showWaitAlert(getSeaPhrase("CALCULATING_ESTIMATES","ESS"));
+
+	window.lawheader.nbr = 0;
+	window.lawheader.token = "BN33.4";
+
+	var pAGSObj = new AGSObject(authUser.prodline, "BN33.4");
+	pAGSObj.event = "ADD";
+	pAGSObj.rtn = "DATA";
+	pAGSObj.longNames = "ALL";
+	pAGSObj.tds = false;
+	pAGSObj.func = "parent.ContinueModel_Done("+index+")";
+	pAGSObj.field = "FC=M&BXR-COMPANY=" + authUser.company;
+	pAGSObj.field += "&BXR-EMPLOYEE=" + authUser.employee;
+
+	if (optionTabs.activetab == 1) {
+		pAGSObj.field += "&BXR-OPT-GRANT-NBR="+BN332.ToExpireRecords[index].GrantID;
+		pAGSObj.field += "&BXR-STOCK-CTF="+BN332.ToExpireRecords[index].Certificate;
+	}
+	else {
+		pAGSObj.field += "&BXR-OPT-GRANT-NBR="+BN332.AvailRecords[index].GrantID;
+		pAGSObj.field += "&BXR-STOCK-CTF="+BN332.AvailRecords[index].Certificate;
+	}
+
+	pAGSObj.field += "&MARKET-PRICE="+BN334.MarketSharePrice;
+	pAGSObj.field += "&SHARES="+BN334.NumberShares;
+	pAGSObj.field += "&FEDERAL-TAX="+BN334.FederalTax;
+	pAGSObj.field += "&STATE-TAX="+BN334.StateTax;
+	pAGSObj.field += "&SOCIAL-SEC-TAX="+BN334.SocialSecurity;
+	pAGSObj.field += "&MEDICARE="+BN334.Medicare;
+	pAGSObj.out = "JAVASCRIPT";
+	pAGSObj.debug = false;
+	AGS(pAGSObj, "jsreturn");
+}
+
+function ContinueModel_Done(index)
+{
+	if (window.lawheader.gmsgnbr == "000")
+	{
+		PaintBottomLeft3Window(index);
+	}
+	else
+	{
+		removeWaitAlert();
+		seaAlert(window.lawheader.gmsg);
+		switch(window.lawheader.gmsgnbr)
+		{
+			default: break;
+		}
+	}
+}
+
+function GetExerciseHistory(func)
+{
+	ExerciseHist = new HistoryObject();
+	ExerciseHist.func = func;
+
+	var pDMEObj 	= new DMEObject(authUser.prodline, "BNEMPEXER");
+	pDMEObj.out 	= "JAVASCRIPT";
+	pDMEObj.index 	= "BXRSET1";
+	pDMEObj.field 	= "opt-grant-nbr;stock-ctf;exercise-date;shares-exe;exercise-cost;transac-value;gain-lost-val;"
+	pDMEObj.field   += "tax-wage-upd;emp-tax-amt;pending,xlt;exer-type,xlt;exercise-price;fair-mkt-val;"
+	pDMEObj.field   += "stock-fees;broker.name"
+	pDMEObj.key 	= authUser.company+"="+authUser.employee;
+	pDMEObj.max 	= "600";
+	pDMEObj.cond 	= "exercised";
+	pDMEObj.func 	= "GetExerciseHistory_Done()";
+	pDMEObj.exclude = "drills;keys";
+	pDMEObj.debug 	= false;
+	DME(pDMEObj,"jsreturn2");
+}
+
+function GetExerciseHistory_Done()
+{
+	ExerciseHist.Records = ExerciseHist.Records.concat(self.jsreturn2.record);
+
+	if (self.jsreturn2.Next) {
+		self.jsreturn2.location.replace(self.jsreturn2.Next);
+	}
+	else // Continue on to the next processing function
+	{
+		ExerciseHist.RetrievedHist = true;
+
+		// Make sure shares to expire are sorted by status and then by certificate.
+		if (ExerciseHist.Records.length > 0)
+		{
+			SortByProperty = "pending_xlt";
+			ExerciseHist.Records.sort(sortByAlpha);
+			SortByProperty = "stock_ctf";
+			ExerciseHist.Records.sort(sortByAlpha);
+		}
+		eval(ExerciseHist.func);
+	}
+}
+
+function HistoryDetail(index)
+{
+	// highlight the grant record selected
+	activateTableRow("optionTbl"+optionTabs.activetab,index,optionTabs.frame);
+
+	try {
+		var tmpObj = ExerciseHist.Records[index];
+
+		var htmlStr = '<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" width="100%" styler="list">';
+		htmlStr += '<tr><th class="plaintableheaderborderlite" style="width:25%;text-align:center">'+getSeaPhrase("EXERCISE_TYPE","ESS")+'&nbsp;</th>';
+		htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("EXERCISE_PRICE","ESS")+'&nbsp;</th>';
+		htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("MARKET_PRICE","ESS")+'</a>&nbsp;</th>';
+		htmlStr += '<th class="plaintableheaderborderlite" style="width:27%;text-align:center">'+getSeaPhrase("BROKER","ESS")+'&nbsp;&nbsp;</th>';
+		htmlStr += '<th class="plaintableheaderborderlite" style="width:16%;text-align:center">'+getSeaPhrase("FEES","ESS")+'&nbsp;&nbsp;</th>';
+		htmlStr += '<tr><td class="plaintablecellborder" style="width:20%;text-align:center"><span id="dtlType">'+((tmpObj.exer_type_xlt)?tmpObj.exer_type_xlt:'&nbsp;')+'</span></td>';
+		htmlStr += '<td class="plaintablecellborder" style="width:18%;text-align:center"><span id="dtlPrice">'+((tmpObj.exercise_price)?tmpObj.exercise_price:'0')+'</span></td>';
+		htmlStr += '<td class="plaintablecellborder" style="width:18%;text-align:center"><span id="dtlMktValue">'+((tmpObj.fair_mkt_val)?tmpObj.fair_mkt_val:'0')+'</span></td>';
+		htmlStr += '<td class="plaintablecellborder" style="width:26%;text-align:center"><span id="dtlBrokerName">'+((tmpObj.broker_name)?tmpObj.broker_name:'&nbsp;')+'</span></td>';
+		htmlStr += '<td class="plaintablecellborder" style="width:20%;text-align:center"><span id="dtlFees">'+((tmpObj.stock_fees)?tmpObj.stock_fees:'&nbsp;')+'</span></td>';
+		htmlStr += '</tr></table>';
+	}
+	catch(e) {}
+	
+	try {
+		self.historydetail.document.getElementById("paneBody").innerHTML = htmlStr;
+		self.historydetail.stylePage();
+	}
+	catch(e) {}	
+	fitToScreen();
+}
+
+function QuitModel()
+{
+	document.getElementById("bottomleft2").style.visibility = "hidden";
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+
+	// if there is option detail displayed, re-display the vesting detail frame
+	if (document.getElementById("topright").style.visibility == "visible") {
+		document.getElementById("bottomleft").style.visibility = "visible";
+	}
+	else {
+		document.getElementById("bottomleft").style.visibility = "hidden";
+	}
+}
+
+function QuitModelResults()
+{
+	document.getElementById("bottomleft3").style.visibility = "hidden";
+	document.getElementById("bottomleft2").style.visibility = "visible";
+}
+
+function optionTabs_OnClick(tab)
+{
+	var tabProps = tab.id.split("_");
+	var tabId = tabProps[0];
+	var tabType = tabProps[1];
+	var tabNbr = tabProps[2];
+
+	removeWaitAlert();
+
+	// remove any detail windows, if the user has selected a different tab
+	if (tabNbr != optionTabs.activetab) {
+		hideDetailFrames();
+	}
+
+	// clear the last selected table row, irrespective of the active tab
+	for (var i=0; i<optionTabs.tabs.length; i++) {
+		if (i != tabNbr) {
+			deactivateTableRows("optionTbl"+tabNbr,optionTabs.frame);
+		}
+	}
+
+	switch (tabNbr) {
+		case "0":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("STOCK_OPTION_GRANTS","ESS");
+			break;
+		case "1":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("TO_EXPIRE","ESS");
+			break;
+		case "2":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("EXERCISE_HISTORY","ESS");
+			document.getElementById("historydetail").style.visibility = "visible";
+			if (typeof(ExerciseHist) == "undefined" || typeof(ExerciseHist.RetrievedHist) == "undefined" || !ExerciseHist.RetrievedHist) {
+				showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+				setTimeout(function() { GetExerciseHistory("ShowExerciseHistory()"); }, 5);
+				return false;
+			}
+			break;
+		case "3":
+			optionTabs.frame.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INVESTMENT_INFORMATION","ESS");
+			break;
+		default:
+			break;
+	}
+	return true;
+}
+
+function ShowExerciseHistory()
+{
+	optionTabs.setTabHtml(2,PaintStockOptionGrantTable(2, false));
+	optionTabs.setActiveTab(2);
+	//setTimeout("showTabByNbr(2)",100);
+	removeWaitAlert();
+}
+
+function ClearExerciseHistory()
+{
+	try {
+		self.historydetail.document.getElementById("dtlType").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlPrice").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlMktValue").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlBrokerName").innerHTML = "&nbsp;";
+		self.historydetail.document.getElementById("dtlFees").innerHTML = "&nbsp;";
+	}
+	catch(e) {}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var topLeftFrame = document.getElementById("topleft");
+	var topRightFrame = document.getElementById("topright");
+	var bottomLeftFrame = document.getElementById("bottomleft");
+	var bottomRightFrame = document.getElementById("bottomright");
+	var bottomLeft2Frame = document.getElementById("bottomleft2");
+	var bottomLeft3Frame = document.getElementById("bottomleft3");
+	var historyDetailFrame = document.getElementById("historydetail");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentLeftWidth;
+	var contentRightWidth;
+	var contentTopHeight;
+	var contentBottomHeight;
+	var tabWidth;
+
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentLeftWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.60,10) - 7 : parseInt(winWidth*.60,10) - 23;
+		contentRightWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? parseInt(winWidth*.40,10) - 7 : parseInt(winWidth*.40,10) - 23;		
+		contentTopHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winHeight*.60,10) - 38) : (parseInt(winHeight*.60,10) - 35);
+		contentBottomHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winHeight*.40,10) - 38) : (parseInt(winHeight*.40,10) - 35);	
+		tabWidth = contentLeftWidth + 18;
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 17;
+		contentRightWidth = parseInt(winWidth*.40,10) - 17;
+		contentTopHeight = parseInt(winHeight*.60,10) - 35;
+		contentBottomHeight = parseInt(winHeight*.40,10) - 35;	
+		tabWidth = contentLeftWidth + 18;	
+	}
+	else
+	{
+		contentLeftWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winWidth*.60,10) - 7) : (parseInt(winWidth*.60,10) - 7);
+		contentRightWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winWidth*.40,10) - 12) : (parseInt(winWidth*.40,10) - 7);
+		contentTopHeight = parseInt(winHeight*.60,10) - 35;
+		contentBottomHeight = parseInt(winHeight*.40,10) - 35;		
+		tabWidth = contentLeftWidth;
+	}
+
+	topLeftFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	topLeftFrame.style.height = parseInt(winHeight*.60,10) + "px";
+	topRightFrame.style.width = parseInt(winWidth*.40,10) + "px";
+	topRightFrame.style.height = parseInt(winHeight*.60,10) + "px";	
+	bottomLeftFrame.style.top = parseInt(winHeight*.60,10) + "px";
+	bottomLeftFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	bottomLeftFrame.style.height = parseInt(winHeight*.40,10) + "px";
+	bottomRightFrame.style.top = parseInt(winHeight*.60,10) + "px";
+	bottomRightFrame.style.width = parseInt(winWidth*.40,10) + "px";
+	bottomRightFrame.style.height = parseInt(winHeight*.40,10) + "px";	
+	bottomLeft2Frame.style.top = parseInt(winHeight*.60,10) + "px";
+	bottomLeft2Frame.style.width = parseInt(winWidth*.60,10) + "px";
+	bottomLeft2Frame.style.height = parseInt(winHeight*.40,10) + "px";
+	bottomLeft3Frame.style.top = parseInt(winHeight*.60,10) + "px";
+	bottomLeft3Frame.style.width = parseInt(winWidth*.60,10) + "px";
+	bottomLeft3Frame.style.height = parseInt(winHeight*.40,10) + "px";
+	historyDetailFrame.style.top = parseInt(winHeight*.60,10) + "px";
+	historyDetailFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	historyDetailFrame.style.height = parseInt(winHeight*.40,10) + "px";			
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.topleft.onresize && self.topleft.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.topleft.onresize = null;
+	}		
+	try
+	{
+		self.topleft.document.getElementById("paneBorder").style.width = (contentLeftWidth + 10) + "px";
+		self.topleft.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.topleft.document.getElementById("paneBodyBorder").style.height = (contentTopHeight) + "px";
+		self.topleft.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.topleft.document.getElementById("paneBody").style.height = (contentTopHeight) + "px";
+	}
+	catch(e)
+	{}
+	if (self.topright.onresize && self.topright.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.topright.onresize = null;
+	}	
+	try
+	{
+		self.topright.document.getElementById("paneBorder").style.width = (contentRightWidth + 10) + "px";
+		self.topright.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.topright.document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		self.topright.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.topright.document.getElementById("paneBody").style.height = contentTopHeight + "px";		
+	}
+	catch(e)
+	{}
+	if (self.bottomleft.onresize && self.bottomleft.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.bottomleft.onresize = null;
+	}	
+	try
+	{
+		self.bottomleft.document.getElementById("paneBorder").style.width = (contentLeftWidth + 10) + "px";
+		self.bottomleft.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.bottomleft.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.bottomleft.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.bottomleft.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e)
+	{}
+	if (self.bottomleft2.onresize && self.bottomleft2.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.bottomleft2.onresize = null;
+	}	
+	try
+	{
+		self.bottomleft2.document.getElementById("paneBorder").style.width = (contentLeftWidth + 10) + "px";
+		self.bottomleft2.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.bottomleft2.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.bottomleft2.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.bottomleft2.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e)
+	{}	
+	if (self.bottomleft3.onresize && self.bottomleft3.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.bottomleft3.onresize = null;
+	}	
+	try
+	{
+		self.bottomleft3.document.getElementById("paneBorder").style.width = (contentLeftWidth + 10) + "px";
+		self.bottomleft3.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.bottomleft3.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.bottomleft3.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.bottomleft3.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e)
+	{}	
+	if (self.historydetail.onresize && self.historydetail.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.historydetail.onresize = null;
+	}	
+	try
+	{
+		self.historydetail.document.getElementById("paneBorder").style.width = (contentLeftWidth + 10) + "px";
+		self.historydetail.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.historydetail.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.historydetail.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.historydetail.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e)
+	{}	
+	if (self.bottomright.onresize && self.bottomright.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.bottomright.onresize = null;
+	}	
+	try
+	{
+		self.bottomright.document.getElementById("paneBorder").style.width = (contentRightWidth + 10) + "px";
+		self.bottomright.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.bottomright.document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		self.bottomright.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.bottomright.document.getElementById("paneBody").style.height = contentTopHeight + "px";		
+	}
+	catch(e)
+	{}	
+	try
+	{
+		setTabContentSizes("optionTabs", optionTabs.frame, tabWidth, contentTopHeight - 35);
+	}
+	catch(e)
+	{}	
+
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		topLeftFrame.style.left = "";
+		topLeftFrame.style.right = "0px";		
+		bottomLeftFrame.style.left = "";
+		bottomLeftFrame.style.right = "0px";	
+		bottomLeft2Frame.style.left = "";
+		bottomLeft2Frame.style.right = "0px";	
+		bottomLeft3Frame.style.left = "";
+		bottomLeft3Frame.style.right = "0px";		
+		historyDetailFrame.style.left = "";
+		historyDetailFrame.style.right = "0px";	
+	}
+	else
+	{	
+		topRightFrame.style.left = parseInt(winWidth*.60,10) + "px";
+		bottomRightFrame.style.left = parseInt(winWidth*.60,10) + "px";
+	}
+}
+var Timer = setTimeout("Initialize()",3000);	// Sets a timer to call the initialize function if the frameset fails to call it.
+</script>
+</head>
+<body style="width:100%;height:100%;overflow:hidden" onload="Initialize()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topleft" name="topleft" src="/lawson/xhrnet/ui/innertabpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:675px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="topright" name="topright" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:203px;height:273px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft" name="bottomleft" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft2" name="bottomleft2" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomleft3" name="bottomleft3" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="historydetail" name="historydetail" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:675px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="bottomright" name="bottomright" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:305px;left:0px;width:203px;height:191px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn2" name="jsreturn2" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="investinfo" name="investinfo" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/investinfo.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/stockoptions/lib/shr064_law.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/stockoptions/employee/shr064.htm,v 1.11.2.30 2012/07/19 13:31:59 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

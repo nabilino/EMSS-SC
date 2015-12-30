@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Applicant Competencies</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/pcodesselect.js"></script>
+<script src="/lawson/xhrnet/qualifications.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var searchStr = (window.location.search)?unescape(window.location.search):"";
+var applicant = "0";
+var Empcodes = new Array();
+var Proficiency = new Array();
+var FilteredProficiency = new Array();
+var Source = new Array();
+var Competency = new Array();
+if (searchStr)
+	applicant = getVarFromString("number",searchStr);
+
+function StartAppCompetency()
+{
+	stylePage();
+	setWinTitle(getSeaPhrase("APPLICANT_COMPETENCIES","ESS"));
+	var nextFunc = function()
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+			GetProficiencies();
+		else
+			GetPcodesSelect(authUser.prodline,"PF;SS","StorePcodes()","Active");
+	};
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function GetProficiencies()
+{
+	// Get the active record lists for Source and Proficiency (not setup as web-available).
+	GetPcodesSelect(authUser.prodline,"PF","StoreProficiencies()","Active")
+}
+
+function StoreProficiencies()
+{
+	Proficiency = PcodesInfo;
+	CalledPcodesInfo = false;
+	PcodesInfo = new Array();
+	GoToListScreen();
+}
+
+function StorePcodes()
+{
+	var PcodesObj = new Object();
+	for (var i=0; i<PcodesInfo.length; i++)
+	{
+		PcodesObj = PcodesInfo[i]
+		if (PcodesObj.type == "PF")
+			Proficiency[Proficiency.length] = PcodesObj;
+		else if (PcodesObj.type == "SS")
+			Source[Source.length] = PcodesObj;
+	}
+	CalledPcodesInfo = false;
+	PcodesInfo = new Array();
+	// Get the active record qualification list (look for web-available).
+	GetPcodesSelect(authUser.prodline,"AB;KN;OA;SK","StoreMorePcodes()","Active","web-available=3");
+}
+
+function StoreMorePcodes()
+{
+	Competency = PcodesInfo;
+	GoToListScreen();
+}
+
+function GoToListScreen(Refresh)
+{
+	Empcodes = new Array();
+    var dmeObj = new DMEObject(authUser.prodline, "EMPCODES");
+    dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "epcset1";
+	dmeObj.field = "type;code;description;subject;in-pro-flag;per-rating;date-acquired;renew-date;"
+	+ "renewal-code;renewal-code,xlt;skill-source;profic-level;date-returned;seq-nbr;hr-code.description;"
+	+ "skill-source.description;subject.description;institution.description;verified-flag";
+	dmeObj.key = authUser.company+"=AB;KN;OA;SK=1="+parseInt(applicant,10);
+	dmeObj.func = (Refresh)?"Empcodes_Finished(true)":"Empcodes_Finished(false)";
+	dmeObj.max = "600";
+    DME(dmeObj, "jsreturn");
+}
+
+function sortByDescription(obj1, obj2)
+{
+	var name1 = obj1.hr_code_description;
+	var name2 = obj2.hr_code_description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function Empcodes_Finished(Refresh)
+{
+	Empcodes = Empcodes.concat(self.jsreturn.record);
+	if (self.jsreturn.Next != "")
+		self.jsreturn.location.replace(self.jsreturn.Next)
+	else
+	{
+		Empcodes.sort(sortByDescription);
+		CompetencyListScreen(Refresh);
+	}
+}
+
+function CompetencyListScreen(Refresh)
+{
+	// Clear the right-hand-side detail frame.
+	ClearDetailScreen();
+	// Draw the list body content.  This is the table of employee qualifications.
+	var CompetencyContent = '<table id="quallist" border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+	for (var i=0; i<Empcodes.length; i++)
+	{
+		var tip = Empcodes[i].hr_code_description+' - '+getSeaPhrase("EDIT_DTL_FOR","SEA");
+		CompetencyContent += '<tr><td style="text-align:left" nowrap><a href="javascript:;" onclick="parent.QualificationClicked('+i+');return false;" title="'+tip+'">'
+		+ Empcodes[i].hr_code_description.replace(/\'/g,"\\'")+'<span class="offscreen"> - '+getSeaPhrase("EDIT_DTL_FOR","SEA")+'</span></a></td></tr>'
+	}
+	CompetencyContent += '</table><div style="width:100%;text-align:center">'
+	if (searchStr)
+	{
+		CompetencyContent += uiButton(getSeaPhrase("ADD","ESS"),"parent.AddCompetency();return false",false,"addbtn");
+		CompetencyContent += uiButton(getSeaPhrase("BACK","ESS"),"parent.CloseCompetencies();return false","margin-left:5px","closebtn");
+	}
+	else
+		CompetencyContent += uiButton(getSeaPhrase("ADD","ESS"),"parent.AddCompetency();return false",false,"addbtn");
+	CompetencyContent += '</div>'
+	// Draw the list header content.  This is the "Competency" label.
+	self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("INIT_APP_24","ESS");
+	self.left.document.getElementById("paneBody").style.overflow = "hidden";
+	if (Empcodes.length == 0)
+	{
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-left:10px;padding-top:10px">'
+		+ getSeaPhrase("QUAL_1","ESS")+'</div><p/>'+CompetencyContent
+	}
+	else
+	{
+		self.left.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;position:relative;padding-left:10px;padding-top:10px">'
+		+ getSeaPhrase("QUAL_0","ESS")+'</div><p/><div style="padding-left:35px">'+CompetencyContent+'</div>'
+	}
+	self.left.stylePage();
+	document.getElementById("left").style.visibility = "visible";
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.left.getWinTitle()]));
+	if (Refresh)
+		UpdateComplete();
+	fitToScreen();
+}
+
+function CloseCompetencies()
+{
+	parent.backToLinks();
+}
+
+function AddCompetency()
+{
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), DrawAddDetailContent);
+	else
+		DrawAddDetailContent();
+}
+
+function DrawAddDetailContent()
+{
+	// Draw the detail body content.  This is the table of employee qualifications.
+	var toolTip;
+	var CompetencyContent = '<form name="qualificationform">'
+	+ '<input type="hidden" name="qualification" value="">'
+	+ '<input type="hidden" name="type" value="">'
+	+ '<input type="hidden" name="seqnbr" value="0">'
+	+ '<input type="hidden" name="applicant" value="'+parseInt(applicant,10)+'">'
+	+ '<input type="hidden" name="fc" value="A">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" role="presentation">'
+	+ '<tr><td class="fieldlabelboldlite">'+uiRequiredFooter()+'</td><td>&nbsp;</td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="code">'+getSeaPhrase("QUAL_4","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("competency");
+		CompetencyContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="code" name="code" fieldnm="competency" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'competency\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'competency\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'+uiRequiredIcon()
+		+ '<span id="competencyDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CompetencyContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="code" name="code" onchange="parent.FillQualification(this.form);parent.FilterProficiencies(this.form);">'+BuildSelect("",Competency)+'</select>'+uiRequiredIcon()+'</td></tr>'
+	CompetencyContent += '<tr><td class="fieldlabelboldlite"><label for="proficiency">'+getSeaPhrase("QUAL_5","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="proficiency" name="proficiency">'+BuildSelect("",Proficiency)+'</select></td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></td>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("skillsource");
+		CompetencyContent += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="skillsourceDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CompetencyContent += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect("",Source)+'</select></td></tr>'
+	CompetencyContent += '<tr><td class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect("")+'</select></td></tr>'
+	//+ '<tr><td class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_8","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" size="10" maxlength="10" value=""></td></tr>'
+	+ '<tr><td class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_9","ESS")+'</label></td><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="perrating" name="perrating" size="8" maxlength="8" value=""></td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_10","ESS"));
+	CompetencyContent += '<tr><td class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_11","ESS"));
+	CompetencyContent += '<tr><td class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_11","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+	CompetencyContent += '<tr><td class="fieldlabelboldliteunderline"><label id="datereturnedLbl" for="datereturned">'+getSeaPhrase("QUAL_12","ESS")+'</label></td><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="datereturned" name="datereturned" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="datereturnedLbl datereturnedFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'datereturned\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("datereturnedFmt")+'</td></tr>'
+	//+ '<tr><td class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo("")+'</select></td></tr>'
+	+ '<tr><td>&nbsp;</td><td class="plaintablecellleft">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick(-1,\'A\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-left:5px")
+	+ '</td></tr></table></form>'
+	// Draw the detail header content.  This is the "Competencies Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = CompetencyContent;
+	self.right.stylePage();
+	document.getElementById("right").style.visibility = "visible";
+	HideListButtons();
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));	
+	fitToScreen();
+}
+
+function QualificationClicked(Index)
+{
+	var qualTbl = self.left.document.getElementById("quallist");
+	for (var i=0; i<qualTbl.rows.length; i++)
+	{
+		if (i == Index)
+			qualTbl.rows[i].className = "tablerowhighlight";
+		else
+			qualTbl.rows[i].className = "";
+	}
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){FilterProficienciesForQualClicked(Index);});
+	else
+		FilterProficienciesForQualClicked(Index);
+}
+
+function DrawCompDetailScreen(Index)
+{
+	var toolTip;
+	var cmpObj = Empcodes[Index];
+	var CompetencyHtml = '<form name="qualificationform">'
+    + '<input type="hidden" name="code" value="'+cmpObj.code+'">'
+	+ '<input type="hidden" name="type" value="'+cmpObj.type+'">'
+	+ '<input type="hidden" name="seqnbr" value="'+parseInt(cmpObj.seq_nbr,10)+'">'
+	+ '<input type="hidden" name="applicant" value="'+parseInt(applicant,10)+'">'
+	+ '<input type="hidden" name="fc" value="C">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" width="100%" summary="'+getSeaPhrase("TSUM_93","SEA")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("QUAL_28","ESS")+'</caption>'
+	+ '<tr><th scope="col" colspan="2"></th></tr>'	
+	+ '<tr><th scope="row" class="fieldlabelboldlite">'+getSeaPhrase("QUAL_4","ESS")+'</th><td class="fieldlabel" style="text-align:left" nowrap>'+cmpObj.hr_code_description+'</td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="proficiency">'+getSeaPhrase("QUAL_5","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="proficiency" name="proficiency">'+BuildSelect(cmpObj.profic_level,FilteredProficiency)+'</select></td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="skillsource">'+getSeaPhrase("QUAL_6","ESS")+'</label></th>'
+	if (emssObjInstance.emssObj.filterSelect)
+	{
+		toolTip = dmeFieldToolTip("skillsource");
+		CompetencyHtml += '<td class="plaintablecell" nowrap>'
+		+ '<input class="inputbox" type="text" id="skillsource" name="skillsource" fieldnm="skillsource" value="'+cmpObj.skill_source+'" size="10" maxlength="10" onfocus="this.select()" onkeyup="parent.dmeFieldOnKeyUpHandler(event,\'skillsource\');">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'skillsource\');" style="margin-left:5px" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		+ '<img align="top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+toolTip+'" title="'+toolTip+'"></a>'
+		+ '<span id="skillsourceDesc" style="text-align:left;width:200px" class="fieldlabel"></span></td></tr>'
+	}
+	else
+		CompetencyHtml += '<td class="plaintablecell" nowrap><select class="inputbox" id="skillsource" name="skillsource">'+BuildSelect(cmpObj.skill_source,Source)+'</select></td></tr>'
+	CompetencyHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label for="renewalcode">'+getSeaPhrase("QUAL_7","ESS")+'</label></th><td class="plaintablecell" nowrap><select class="inputbox" id="renewalcode" name="renewalcode">'+BuildRenewalSelect(cmpObj.renewal_code)+'</select></td></tr>'
+	//+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="instructor">'+getSeaPhrase("QUAL_8","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" id="instructor" name="instructor" size="10" maxlength="10" value="'+cmpObj.instructor+'"></td></tr>'
+	+ '<tr><th scope="row" class="fieldlabelboldlite"><label for="perrating">'+getSeaPhrase("QUAL_9","ESS")+'</label></th><td class="plaintablecell" nowrap><input class="inputbox" type="text" size="8" maxlength="8" id="perrating" name="perrating" value="'+cmpObj.per_rating+'"></td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+	CompetencyHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label id="dateacquiredLbl" for="dateacquired">'+getSeaPhrase("QUAL_10","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="dateacquired" name="dateacquired" value="'+cmpObj.date_acquired+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="dateacquiredLbl dateacquiredFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'dateacquired\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("dateacquiredFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_11","ESS"));
+	CompetencyHtml += '<tr><th scope="row" class="fieldlabelboldlite"><label id="renewdateLbl" for="renewdate">'+getSeaPhrase("QUAL_11","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="renewdate" name="renewdate" value="'+cmpObj.renew_date+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="renewdateLbl renewdateFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'renewdate\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("renewdateFmt")+'</td></tr>'
+	toolTip = uiDateToolTip(getSeaPhrase("QUAL_12","ESS"));
+	CompetencyHtml += '<tr><th scope="row" class="fieldlabelboldliteunderline"><label id="datereturnedLbl" for="datereturned">'+getSeaPhrase("QUAL_12","ESS")+'</label></th><td class="plaintablecell" nowrap>'
+	+ '<input class="inputbox" type="text" id="datereturned" name="datereturned" value="'+cmpObj.date_returned+'" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="datereturnedLbl datereturnedFmt">'
+	+ '<a href="javascript:;" onclick="parent.DateSelect(\'datereturned\');return false" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiDateFormatSpan("datereturnedFmt")+'</td></tr>'
+	//+ '<tr><td class="fieldlabelboldlite"><label for="cosponsored">'+getSeaPhrase("QUAL_13","ESS")+'</label></td><td  class="plaintablecell" nowrap><select class="inputbox" id="cosponsored" name="cosponsored">'+BuildYesNo(cmpObj.co_sponsored)+'</select></td></tr>'
+	+ '<tr><th scope="row">&nbsp;</th><td class="plaintablecellleft">'
+	+ uiButton(getSeaPhrase("UPDATE","ESS"),"parent.UpdateQualification_OnClick("+Index+",\'C\');return false","margin-top:10px")
+	+ uiButton(getSeaPhrase("CANCEL","ESS"),"parent.ClearDetailScreen();return false","margin-top:10px;margin-left:10px")
+	+ uiButton(getSeaPhrase("DELETE","ESS"),"parent.DeleteQualification_OnClick("+Index+");return false","margin-top:10px;margin-left:15px")
+	+ '</td></tr></table></form>'
+	// Draw the detail header content.  This is the "Competency Detail" label.
+	self.right.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","ESS");
+	self.right.document.getElementById("paneBody").innerHTML = CompetencyHtml;
+	self.right.stylePage();
+	document.getElementById("right").style.visibility = "visible";
+	HideListButtons();
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+	fitToScreen();
+}
+
+function UpdateQualification_OnClick(Index, fc)
+{
+	var qualForm = self.right.document.qualificationform;
+	// Edit the form for any required fields before passing it to the server.
+	clearRequiredField(qualForm.dateacquired);
+	clearRequiredField(qualForm.renewdate);
+	if (typeof(qualForm.datereturned) != "undefined" && qualForm.datereturned != null)
+		clearRequiredField(qualForm.datereturned);
+	if (typeof(qualForm.qualification) != "undefined" && qualForm.qualification != null) // Edits for "Add" screen
+	{
+		if (emssObjInstance.emssObj.filterSelect)
+		{
+			clearRequiredField(qualForm.code);
+			if (NonSpace(qualForm.code.value) == 0)
+			{
+				setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+				return;
+			}
+		}
+		else
+		{
+			clearRequiredField(self.right.document.getElementById("code"));
+			if (qualForm.code.selectedIndex == 0)
+			{
+				setRequiredField(self.right.document.getElementById("code"), getSeaPhrase("QUAL_33","ESS"), qualForm.code);
+				return;
+			}
+		}
+	}
+	else // Edits for "Update" screen
+	{
+		clearRequiredField(qualForm.code);
+		if (NonSpace(qualForm.code.value) == 0)
+		{
+			setRequiredField(qualForm.code, getSeaPhrase("QUAL_33","ESS"));
+			return;
+		}
+	}
+	if (NonSpace(qualForm.dateacquired.value) && !ValidDate(qualForm.dateacquired))
+		return;
+	if (NonSpace(qualForm.renewdate.value) && !ValidDate(qualForm.renewdate))
+		return;
+	if (typeof(qualForm.datereturned) != "undefined" && qualForm.datereturned != null && NonSpace(qualForm.datereturned.value) && !ValidDate(qualForm.datereturned))
+		return;
+	// Update this competency record.
+	var nextFunc = function() { Do_Cmp_Call(qualForm, "PA35.1", fc, false, false, true); };
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function Do_PA35_1_Cmp_Call_Finished()
+{
+	DisplayMessage();
+}
+
+function FilterProficienciesForQualClicked(Index)
+{
+	if (Proficiency.length > 0) 
+	{
+		var thisCode = Empcodes[Index];
+		GetCompProficiencyLevels(thisCode.type, thisCode.code, Index);
+	}
+	else 
+	{
+		FilteredProficiency = Proficiency;
+		DrawCompDetailScreen(Index);
+	}
+}
+
+function FilterProficiencies(formobj, resetToDefault)
+{
+	var code;
+	var type;
+	if (formobj.code.type == "text")
+	{
+		code = formobj.code.value;
+		type = formobj.type.value;
+		if (resetToDefault || NonSpace(code) == 0)
+		{
+			RefreshProficiencyDropDown(Proficiency);
+			return;		
+		}	
+	}
+	else 
+	{
+		if (formobj.code.selectedIndex > 0) 
+		{
+			code = Competency[formobj.code.selectedIndex-1].code;
+			type = Competency[formobj.code.selectedIndex-1].type;
+		}
+		else
+		{	
+			RefreshProficiencyDropDown(Proficiency);
+			return;
+		}
+	}
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){GetCompProficiencyLevels(type, code, -1, true);});
+	else
+		GetCompProficiencyLevels(type, code, -1, true);
+}
+
+function GetCompProficiencyLevels(Type, Code, Index, RefreshProf)
+{
+	FilteredProficiency = new Array();
+	RefreshProf = (RefreshProf) ? true : false;
+	var dmeObj = new DMEObject(authUser.prodline,"PACOMPPROF");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "pcmset1";
+	dmeObj.field = "type;code;description;proficiency.type;proficiency.code;proficiency.description";
+	dmeObj.cond	= "Active";
+	dmeObj.max = "600";
+	dmeObj.key = escape(authUser.company)+"="+escape(" ")+"="+escape(Type,1)+";DF";
+	dmeObj.func = "FilterProficiencyLevels('"+Code+"',"+Index+","+RefreshProf+")";
+	dmeObj.debug = false;
+	DME(dmeObj,"jsreturn");
+}
+
+function sortByProfDescription(obj1,obj2)
+{
+	var name1 = obj1.proficiency_description;
+	var name2 = obj2.proficiency_description;
+	if (name1 < name2)
+		return -1;
+	else if (name1 > name2)
+		return 1;
+	else
+		return 0;
+}
+
+function FilterProficiencyLevels(Code, Index, RefreshProf)
+{
+	FilteredProficiency = FilteredProficiency.concat(self.jsreturn.record);
+	if (self.jsreturn.Next)
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	else 
+	{
+		if (FilteredProficiency.length) // Proficiencies are based on competency type and (possibly) code.
+		{
+			FilteredProficiency.sort(sortByProfDescription);
+			var DefaultProficiency = new Array();
+			var Tmp = new Array();
+			for (var i=0; i<FilteredProficiency.length; i++)
+			{
+				var Desc = FilteredProficiency[i].description || FilteredProficiency[i].proficiency_description;
+				if (FilteredProficiency[i].type == "DF")
+					DefaultProficiency[DefaultProficiency.length] = new CodeDescObject(FilteredProficiency[i].proficiency_code,Desc,FilteredProficiency[i].proficiency_type);
+				if (FilteredProficiency[i].code == Code)
+					Tmp[Tmp.length] = new CodeDescObject(FilteredProficiency[i].proficiency_code,Desc,FilteredProficiency[i].proficiency_type);
+			}
+			FilteredProficiency = new Array();
+			if (Tmp.length) 
+			{
+				// Proficiencies are based on both competency type and code.
+				FilteredProficiency = Tmp;
+			}
+			else if (DefaultProficiency.length) 
+			{
+				// Proficiencies are based on competency type.
+				FilteredProficiency = DefaultProficiency;
+			}
+			else 
+			{
+				// Proficiencies are not based on competency.
+				FilteredProficiency = Proficiency;
+			}
+		}
+		else 
+		{
+			// Proficiencies are not based on competency.
+			FilteredProficiency = Proficiency;
+		}
+		if (Index != -1)
+			DrawCompDetailScreen(Index);
+	}
+	if (RefreshProf)
+		RefreshProficiencyDropDown(FilteredProficiency);
+	else if (searchStr && Index == -1)
+		parent.removeWaitAlert();	
+}
+
+function RefreshProficiencyDropDown(ProficiencyList)
+{
+	var selObj = self.right.document.qualificationform.proficiency;			
+	var selCode = selObj.options[selObj.selectedIndex].value;
+	var selIndex = 0;	
+	if (!ProficiencyList)
+		ProficiencyList = Proficiency;
+	// already set to the defaults	
+	if (ProficiencyList == Proficiency && selObj.options.length == Proficiency.length)
+		return;
+	selObj.innerHTML = "";
+	var tmpObj = self.right.document.createElement("OPTION");
+	tmpObj.value = "";
+	tmpObj.text = "";
+	if (navigator.appName.indexOf("Microsoft") >= 0)
+		selObj.add(tmpObj);
+	else
+		selObj.appendChild(tmpObj);
+	for (var j=0; j<ProficiencyList.length; j++) 
+	{
+		tmpVal = ProficiencyList[j].code;
+		tmpDesc = ProficiencyList[j].description;			
+		tmpObj = self.right.document.createElement("OPTION");
+		tmpObj.value = tmpVal;
+		tmpObj.text = tmpDesc;
+		if (navigator.appName.indexOf("Microsoft") >= 0)
+			selObj.add(tmpObj);
+		else
+			selObj.appendChild(tmpObj);
+		if (selCode == tmpVal)
+			selIndex = j+1;
+	}
+	selObj.selectedIndex = selIndex;
+	self.right.styleElement(selObj);
+	if (searchStr)
+		parent.removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.right.getWinTitle()]));
+}
+
+function DeleteQualification_OnClick(Index)
+{
+	var cmpObj = Empcodes[Index];
+	cmpObj.fc = "D";
+	cmpObj.applicant = parseInt(applicant,10);
+	// Delete this competency record.
+	var nextFunc = function() { Do_Cmp_Call(cmpObj, "PA35.1", "D", "file", false, false, true); };
+	if (searchStr)
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+	else
+		nextFunc();
+}
+
+function HideListButtons()
+{
+	try 
+	{
+		self.left.document.getElementById("addbtn").style.visibility = "hidden";
+		self.left.document.getElementById("closebtn").style.visibility = "hidden";
+	}
+	catch(e) {}
+}
+
+function ShowListButtons()
+{
+	try 
+	{
+		self.left.document.getElementById("addbtn").style.visibility = "visible";
+		self.left.document.getElementById("closebtn").style.visibility = "visible";
+	}
+	catch(e) {}
+}
+
+function ClearDetailScreen()
+{
+	document.getElementById("right").style.visibility = "hidden";
+	try 
+	{
+		var qualTbl = self.left.document.getElementById("quallist");
+		for (var i=0; i<qualTbl.rows.length; i++)
+			qualTbl.rows[i].className = "";
+	}
+	catch(e) {}
+	ShowListButtons();
+}
+
+function DisplayMessage()
+{
+	var msgnbr = parseInt(self.lawheader.gmsgnbr);
+   	if (msgnbr == 0)
+      	GoToListScreen(true);
+   	else
+   	{
+   		if (searchStr)
+   			parent.removeWaitAlert();   		
+   		parent.seaAlert(self.lawheader.gmsg, null, null, "error");
+   	}	
+}
+
+function FillQualification(formobj)
+{
+	if (formobj.code.selectedIndex > 0) 
+	{
+		formobj.qualification.value = Competency[formobj.code.selectedIndex-1].description;
+		formobj.type.value = Competency[formobj.code.selectedIndex-1].type;
+	}
+	else 
+	{
+		formobj.qualification.value = "";
+		formobj.type.value = "";
+	}
+}
+
+function ReturnDate(dte)
+{
+	self.right.document.forms["qualificationform"].elements[date_fld_name].value = dte;
+}
+
+function UpdateComplete()
+{
+	parent.seaPageMessage(getSeaPhrase("UPDATE_COMPLETE","ESS"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+}
+
+function LoadAppCompetency()
+{
+   	authenticate("frameNm='jsreturn'|funcNm='StartAppCompetency()'|desiredEdit='EM'");
+}
+
+/* Filter Select logic - start */
+function performDmeFieldFilterOnLoad(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "competency":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_4","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;type;description",
+				"AB;KN;OA;SK",
+				"act-web-comp",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		case "skillsource":
+			dmeFilter.addFilterField("code", 10, getSeaPhrase("QUAL_6","ESS"), true);
+			dmeFilter.addFilterField("description", 30, getSeaPhrase("JOB_OPENINGS_2","ESS"), false);
+			filterDmeCall(dmeFilter,
+				"jsreturn",
+				"pcodes",
+				"pcoset1",
+				"code;description",
+				"SS",
+				"active",
+				null,
+				dmeFilter.getNbrRecords(),
+				null);
+		break;
+		default: break;
+	}
+}
+
+function performDmeFieldFilter(dmeFilter)
+{
+	switch (dmeFilter.getFieldNm().toLowerCase())
+	{
+		case "competency":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;type;description",
+			"AB;KN;OA;SK",
+			"act-web-comp",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		case "skillsource":
+		filterDmeCall(dmeFilter,
+			"jsreturn",
+			"pcodes",
+			"pcoset1",
+			"code;description",
+			"SS",
+			"active",
+			dmeFilter.getSelectStr(),
+			dmeFilter.getNbrRecords(),
+			null);
+		break;
+		default: break;
+	}
+}
+
+function dmeFieldRecordSelected(recIndex, fieldNm)
+{
+	var selRec = self.jsreturn.record[recIndex];
+	var formElm;
+	switch (fieldNm.toLowerCase())
+	{
+		case "competency":
+			var oldCode = self.right.document.qualificationform.code.value;
+			formElm = self.right.document.qualificationform.qualification;
+			self.right.document.qualificationform.type.value = selRec.type;
+			self.right.document.qualificationform.code.value = selRec.code;
+			self.right.document.qualificationform.qualification.value = selRec.description;
+			self.right.document.getElementById("competencyDesc").innerHTML = selRec.description;
+			if (oldCode != selRec.code)
+				FilterProficiencies(self.right.document.qualificationform);			
+			break;
+		case "skillsource":
+			formElm = self.right.document.qualificationform.skillsource;
+			self.right.document.qualificationform.skillsource.value = selRec.code;
+			self.right.document.getElementById("skillsourceDesc").innerHTML = selRec.description;
+			break;
+		default: break;
+	}
+	try { filterWin.close(); } catch(e) {}
+	try { formElm.focus(); } catch(e) {}
+}
+
+function getDmeFieldElement(fieldNm)
+{
+	var fld = [null, null, null];
+	try
+	{
+		switch (fieldNm.toLowerCase())
+		{
+			case "competency":
+				fld = [self.right, self.right.document.qualificationform.code, getSeaPhrase("QUAL_4","ESS")];			
+				break;
+			case "skillsource":
+				fld = [self.right, self.right.document.qualificationform.skillsource, getSeaPhrase("QUAL_6","ESS")];
+				break;
+			default: break;
+		}
+	}
+	catch(e) {}
+	return fld;
+}
+
+function dmeFieldKeyUpHandler(fieldNm)
+{
+	switch (fieldNm.toLowerCase())
+	{
+		case "competency":
+			self.right.document.qualificationform.type.value = "";
+			self.right.document.qualificationform.code.value = "";
+			self.right.document.qualificationform.qualification.value = "";
+			self.right.document.getElementById("competencyDesc").innerHTML = "";
+			FilterProficiencies(self.right.document.qualificationform,true);			
+			break;
+		case "skillsource":
+			self.right.document.qualificationform.skillsource.value = "";
+			self.right.document.getElementById("skillsourceDesc").innerHTML = "";
+			break;
+		default: break;
+	}
+}
+
+function drawDmeFieldFilterContent(dmeFilter)
+{
+	var selectHtml = new Array();
+	var dmeRecs = self.jsreturn.record;
+	var nbrDmeRecs = dmeRecs.length;
+	var fieldNm = dmeFilter.getFieldNm().toLowerCase();
+	var fldObj = getDmeFieldElement(fieldNm);
+	var fldDesc = fldObj[2];	
+	switch (fieldNm)
+	{
+		case "competency":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_4","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		case "skillsource":
+			var tmpObj;
+			selectHtml[0] = '<table class="filterTable" border="0" cellspacing="0" cellpadding="0" width="100%;padding-left:5px;padding-right:5px" styler="list" summary="'+getSeaPhrase("TSUM_11","SEA",[fldDesc])+'">'
+			selectHtml[0] += '<caption class="offscreen">'+getSeaPhrase("TCAP_8","SEA",[fldDesc])+'</caption>'
+			selectHtml[0] += '<tr><th scope="col" style="width:50%">'+getSeaPhrase("QUAL_6","ESS")+'</th>'
+			selectHtml[0] += '<th scope="col" style="width:50%">'+getSeaPhrase("JOB_OPENINGS_2","ESS")+'</th></tr>'
+			for (var i=0; i<nbrDmeRecs; i++)
+			{
+				tmpObj = dmeRecs[i];
+				selectHtml[i+1] = '<tr onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false" class="filterTableRow">'
+				selectHtml[i+1] += '<td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.code) ? tmpObj.code : '&nbsp;'
+				selectHtml[i+1] += '</a></td><td style="padding-left:5px" nowrap><a href="javascript:;" onclick="dmeFieldRecordSelected(event,'+i+',\''+fieldNm+'\');return false">'
+				selectHtml[i+1] += (tmpObj.description) ? tmpObj.description : '&nbsp;'
+				selectHtml[i+1] += '</a></td></tr>'
+			}
+			if (nbrDmeRecs == 0)
+			{
+				selectHtml[1] = '<tr class="filterTableRow">'
+				selectHtml[1] += '<td style="padding-left:5px" colspan="2" nowrap>'+getSeaPhrase("NORECS","ESS")+'</td></tr>'
+			}
+			selectHtml[selectHtml.length] = '</table>'
+		break;
+		default: break;
+	}
+	dmeFilter.getRecordElement().innerHTML = selectHtml.join("");
+}
+/* Filter Select logic - end */
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentLeftWidthBorder;
+	var contentLeftWidth;	
+	var contentRightWidthBorder;
+	var contentRightWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;						
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.50) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;				
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.50) - 10;
+		contentLeftWidthBorder = contentLeftWidth;	
+		contentRightWidth = parseInt(winWidth*.50) - 10;
+		contentRightWidthBorder = contentRightWidth;			
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	leftFrame.style.width = parseInt(winWidth*.50) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.left.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.left.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+	rightFrame.style.left = parseInt(winWidth*.50) + "px";
+	rightFrame.style.width = parseInt(winWidth*.50) + "px";
+	rightFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.right.onresize = null;			
+	}
+	catch(e) {}
+	try
+	{
+		self.right.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="LoadAppCompetency()" onresize="fitToScreen()">
+	<iframe id="left" name="left" title="Main Content" level="2" tabindex="0" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:0px;height:464px;left:0%;width:375px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" title="Secondary Content" level="3" tabindex="0" class="fullcontentframe" src="/lawson/xhrnet/ui/headerpanelite.htm" style="visibility:hidden;position:absolute;top:0px;height:464px;left:375px;width:410px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/applicantcomp.htm,v 1.9.2.64.2.1 2014/03/26 13:33:16 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

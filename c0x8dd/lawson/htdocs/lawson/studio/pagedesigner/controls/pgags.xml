@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/controls/pgags.xml,v 1.1.4.1.26.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="ags" phraseId="lblAgs" img="colorwheel.gif" host="portalpage">
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="TITLE" phraseId="lblTitle" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="col" phraseId="lblLeft" readonly="0" init="100" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="row" phraseId="lblTop" readonly="0" init="100" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="50" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="50" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="border" phraseId="lblBorder" readonly="0" init="0" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="scroll" phraseId="lblScroll" readonly="0" init="1" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="zindex" phraseId="lblzIndex" readonly="0" init="0" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="ahide" phraseId="lblAutoHide" readonly="0" init="0" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="qry" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="pdl" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="pdloverride" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="sys" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="token" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="xsl" readonly="0" init="agstable.xsl" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="maxrows" readonly="0" init="1" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="nonstdda" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="fc" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="paging" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="tp" readonly="0" init="AGS" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="src" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="nm" readonly="0" init="AGS Query" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="par" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="doc" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="dseq" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="interval" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="host" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="windowoption" readonly="0" init="RTR" edit="X" draw="hide" type="simple"/>
+	<PROPERTYSET id="fields" draw="page" type="object"/>
+	<PROPERTYSET id="charttitle" draw="page" type="object"/>
+	<PROPERTYSET id="categorytitle" draw="page" type="object"/>
+	<PROPERTYSET id="valuetitle" draw="page" type="object"/>
+	<PROPERTYSET id="datapoints" draw="page" type="object"/>
+	<PROPERTYSET id="agstable" draw="page" type="object"/>
+	<PROPERTYPAGE id="proppage" htm="pagedesigner/dialogs/proppgags.htm" height="350" width="500" />
+	<EVENT id="oninit" label="OnInit" parms="" returns="" />
+	<EVENT id="onbeforeload" label="OnBeforeLoad" parms="" returns="" />
+	<EVENT id="onloadcomplete" label="OnLoadComplete" parms="" returns="" />
+	<EVENT id="onagstablerender" label="onAgsTableRender" parms="" returns="" />
+	<EVENT id="onprevious" label="OnPrevious" parms="" returns="" />
+	<EVENT id="onnext" label="OnNext" parms="" returns="" />
+	<EVENT id="onsort" label="OnSort" parms="" returns="boolean" />
+	<EVENT id="onrowclick" label="OnRowClick" parms="" returns="" />
+	<EVENT id="onopendrill" label="OnOpenDrill" parms="fldName" returns="idacall" />
+	<RULES>
+		<RULE id="minHeight" value="50"/>
+		<RULE id="minWidth" value="50"/>
+		<RULE id="isParent" value="0"/>
+		<RULE id="isChild" value="1"/>
+	</RULES>
+</CONTROL>

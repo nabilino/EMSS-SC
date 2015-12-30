@@ -1,0 +1,198 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/menuhost.htm,v 1.2.2.2.4.2.14.1.2.3 2012/08/08 12:37:26 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css">
+<style type="text/css">
+BODY
+{
+	background-color:white;
+    font-family: Tahoma, Arial;
+}
+</style>
+
+<script language="javascript" src="../servenv.js"></script>
+
+<script language="javascript">
+
+var portalWnd=null;
+var portalObj=null;
+
+//-----------------------------------------------------------------------------
+function mnuInit()
+{
+	portalWnd=envFindObjectWindow("lawsonPortal");
+	if (!portalWnd) return;
+	portalObj=portalWnd.lawsonPortal;
+
+	// load the script versions
+	envLoadWindowScriptVersions(portalWnd.oVersions,window,portalWnd);
+
+    var tkn = portalWnd.getVarFromString("_TKN", window.location.search);
+    var pdl = portalWnd.getVarFromString("_PDL", window.location.search);
+
+	var	menuXML=portalWnd.getCorrectMenu(tkn,pdl);
+	if(menuXML==null)
+		return;
+	var menus = menuXML.getElementsByTagName("menu");
+    if (!menus || menus.length < 1)
+    {
+        if (menuXML.getElementsByTagName("error").length != 0)
+        {
+            var msg = menuXML.getElementsByTagName("error")[0].getAttribute("msg");
+            portalObj.setMessage(msg);
+        }
+        return;
+    }
+
+    var len = menus.length;
+    var aryRow = new Array();
+	for	(var i=len-1; i > -1; i--)
+	{
+		tkn = menus[i].getAttribute("TOKEN");
+		var title = menus[i].getAttribute("TITLE");
+		aryRow[i] = "<tr><td style='text-align: center'>"
+            + "<input type='button' id='r" + i + "' title='"+title+" (" + tkn + ")' "
+            + "value='" + title + "' tkn='" + tkn + "' pdl='"+pdl+"' class='anchorActive' "
+            + "style='position:relative;' onclick='mnuOnClick(event,this)' "
+            + "onclick='mnuOnMouseOver(event,this)' onclick='mnuOnMouseOut(event,this)' "
+            + "onfocus='mnuOnFocus(event,this)' onblur='mnuOnBlur(event,this)' >"
+            + "</td></tr>";
+	}
+
+    var rowsJoin = aryRow.join("");
+    document.getElementById("tblSpan").innerHTML = 
+    		"<table border='0' cellspacing='0' cellpadding='2' style='width: 100%'>"
+		    + "<tbody>" + rowsJoin + "</tbody>"
+		    + "</table>";
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnClick(evt,btn)
+{
+	try {
+	    var tkn = btn.getAttribute("tkn");
+	    var pdl = btn.getAttribute("pdl");
+    	portalWnd.formTransfer(tkn,pdl);
+	} catch (e) { }
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnMouseOver(evt,btn)
+{
+	try {
+		if (btn.className == "anchorActive")
+			btn.className = "anchorHover"
+	} catch (e) { }
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnMouseOut(evt,btn)
+{
+	try {
+		if (btn.className == "anchorHover")
+			btn.className="anchorActive" 
+	} catch (e) { }
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnFocus(evt,btn)
+{
+	try {
+		btn.className = "anchorFocus";
+	} catch (e) { }
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnBlur(evt,btn)
+{
+	try {
+		btn.className = "anchorActive";
+	} catch (e) { }
+}
+
+//-----------------------------------------------------------------------------
+function mnuUnload() 
+{
+	if (typeof(portalWnd.formUnload) == "function")
+		portalWnd.formUnload();
+}
+
+//-----------------------------------------------------------------------------
+function mnuOnKeyDown(evt)
+{
+    evt = portalWnd.getEventObject(evt,window)
+    if (!evt) return false;
+
+	// check with portal for hotkey action
+	var action = portalWnd.getFrameworkHotkey(evt,"menuhost");
+	if ( !action )
+	{
+		// framework handled the keystroke
+		portalWnd.setEventCancel(evt)
+		return false;
+	}
+
+	// hotkey defined for this keystroke
+	if (action != "menuhost")
+	{
+		cntxtActionHandler(evt,action);
+		portalWnd.setEventCancel(evt)
+		return false;
+	}
+}
+
+//-----------------------------------------------------------------------------
+function cntxtActionHandler(evt,action)
+{
+	if (action==null)		// called by the portal
+	{
+		action = portalWnd.getFrameworkHotkey(evt,"menuhost");
+		if (!action || action=="menuhost")
+			return false;
+	}
+
+	var bHandled=false;
+	switch (action)
+	{
+	case "openNewWindow":
+		portalWnd.newPortalWindow();
+		bHandled=true;
+		break;
+	case "posInNavbar":
+		portalObj.tabArea.selectFirst();
+		bHandled=true
+		break;
+	}
+	return (bHandled);
+}
+</script>
+</head>
+
+<body onload="mnuInit()" onunload="mnuUnload()" onkeydown="mnuOnKeyDown(event)" tabIndex="-1">
+	<div class="scrollDiv">
+		<span id="tblSpan" style="overflow:auto;"></span>
+	</div>
+</body>
+</html>

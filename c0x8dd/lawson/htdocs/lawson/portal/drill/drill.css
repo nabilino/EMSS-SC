@@ -1,0 +1,450 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/drill/drill.css,v 1.23.2.11.4.4.24.3 2012/08/08 12:37:23 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+
+.DrillAboutText
+{
+	width:100%;
+	height:100%;
+	border:0px;
+	padding-left:3px;
+	font-size:9pt;
+	font-family: Lucida Console, Monaco, Courier New, Courier;
+	font-weight:normal;
+}
+.DrillAttachView
+{	
+	position: absolute;
+	overflow: auto;
+	padding: 0px;
+	scrollbar-base-color:#ffffff;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: white;
+	scrollbar-arrow-color: white;
+}
+.DrillBody
+{
+	background-color: white;
+	color: black;
+	font-family:Arial;
+	font-weight:normal;
+	margin: 0px;
+	font-size:10pt;
+	height: 100%;
+	overflow: hidden;
+	width: 100%;
+}
+.DrillButton
+{
+	background-color: transparent;
+	color: blue;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 9pt;
+	padding: 1px;
+	border: white 0px solid;
+	text-align: center;
+	text-decoration: underline;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+	z-index: 3;
+}
+.DrillInvisible
+{
+	visibility:hidden;
+	display:none;
+	width:100%;
+}
+.DrillHRule
+{	
+	height:2px;
+}
+.DrillLabel
+{
+    color: black;
+    cursor: normal;
+    font-family: Tahoma, Arial;
+    font-size: 9pt;
+}
+.DrillLabelSmall
+{
+    color: black;
+    cursor: normal;
+    font-family: Tahoma, Arial;
+    font-size: 8pt;
+}
+.DrillList
+{
+	position: absolute;
+	overflow: auto;
+	nowrap: true;
+	top:20px;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+}
+.DrillListFooter
+{
+	border-top:1px solid #6699CC;
+	position: absolute;
+	height: 23px;
+}
+.DrillListHeader
+{
+	top: 0px;
+	height: 20px;
+	overflow: hidden;
+}
+.DrillListHeadLeft
+{
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-weight: bold;
+	font-size: 8pt;
+	cursor: auto;
+	text-align:left;
+	vertical-align: text-bottom;
+	postion: relative;
+}
+.DrillListHeadRight
+{
+	color: black;
+	font-family: Tahoma, Arial, Helvetica;
+	font-weight: bold;
+	font-size: 8pt;
+	cursor: auto;
+	text-align:right;
+	vertical-align: text-bottom;
+	postion: relative;
+}
+.DrillListImage
+{
+	width: 16px;
+	vertical-align: text-bottom;
+}
+.DrillListView
+{	
+	position: absolute;
+	overflow: visible;
+	nowrap: true;
+}
+.DrillListViewLeft
+{
+ 	background-image: none;
+	nowrap: true;
+	text-align:left;
+	vertical-align: text-bottom;
+	font-size:8pt;
+}
+.DrillListViewRight
+{
+ 	background-image: none;
+	nowrap: true;
+	text-align:right;
+	vertical-align: text-bottom;
+	font-size:8pt;
+}
+.DrillListViewTable
+{	
+	width:100%;
+}
+.DrillMsg
+{
+	width:100%;
+	height:18px;
+	left:0px;
+	padding-left:4px;
+	padding-right:4px;
+	text-align:left;
+	font-size: 9pt;
+	font-family: Tahoma, Arial, sans-serif;
+	margin:0px;
+	overflow:visible;
+	background-color: threedface;
+	color: buttontext;
+    border-color: threedshadow threedhighlight threedhighlight threedshadow;
+	border-width: 1px;
+	border-style: solid;
+}
+.DrillMsgOuter
+{
+	width:100%;
+	left:0px;
+	position: absolute;
+	border-top: threedlightshadow 1px solid;
+}
+.DrillMsgSplitBar
+{
+	border-top: threedhighlight 1px solid;
+	border-bottom: activeborder 2px solid;
+}
+.DrillRowEven
+{
+	background-color: white;
+	color: black;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	cursor: pointer;
+	cursor: hand;
+}
+.DrillRowOdd
+{
+	background-color: white;
+	color: black;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	cursor: pointer;
+	cursor: hand;
+}
+.DrillRowSelected
+{
+	background-color: #D4DFF0;
+	color: black;
+	padding-left: 15px;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	cursor: pointer;
+	cursor: hand;
+}
+.DrillRowSelectorCell
+{
+	width: 8px;
+	background-color: white;
+	color: white;
+	border: none;
+}
+.DrillRowSelectorIE
+{
+	width: 8px;
+	height: 14px;
+	background-color: white;
+	color: white;
+	font-size: 8pt;
+	text-decoration: none;
+	cursor: pointer;
+	border: none;
+}
+.DrillRowSelectorNS
+{
+	width: 1px;
+	height: 1px;
+	background-color: white;
+	color: white;
+	font-size: 8pt;
+	text-decoration: none;
+	cursor: hand;
+	border: none;
+}
+.DrillRowUnselected
+{
+	color: black;
+	background-color: #DDDDDD;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	cursor: pointer;
+	cursor: hand;
+}
+.DrillSplitBar
+{
+	position: absolute;
+	background-color:#90AFC0;
+	padding: 0px;
+	border-width: 1px;
+	border-style: solid;
+	border-color: threedface threeddarkshadow threedface threedhighlight;
+	cursor: col-resize;
+	cursor: move;
+	width: 4px;
+	nowrap: true;
+	overflow: hidden;
+}
+.DrillTextArea
+{
+	width: 100%;
+	height: 100%;
+	font-size: 9pt;
+	font-family: Tahoma, Arial;
+	overflow:auto;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+}
+.DrillTextBox
+{
+	font-size: 9pt;
+	font-family: Tahoma, Arial;
+	overflow:auto;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+}
+.DrillTitle
+{
+	background-color:transparent;
+	color: black;
+	font-weight: bold;
+	font-variant: small-caps;
+	font-size: 10pt;
+	font-family: Tahoma, Arial;
+	margin-top: 2px;
+	padding-left: 6px;
+	text-align: left;
+}
+.DrillTitleBar
+{
+	background-color:transparent;
+	border-bottom:1px solid #6699CC;
+	left:3px;
+	width:100%;
+	height: 20px;
+}
+.DrillToolbar
+{
+	color:white;
+	width:100%;
+	height:30px;
+	position:relative;
+	background-color:white;
+}
+.DrillTreeContainerRoot
+{
+	margin-left: 2px;
+	text-indent: -2px;
+}
+.DrillTreeContainer
+{
+	margin-left: 18px;
+	text-indent: -18px;
+}
+.DrillTreeCursor
+{
+	margin-left: 2px;
+	text-indent: -2px;
+	padding-top: 3px;
+}
+.DrillTreeExpandImage
+{
+	color: black;
+	font-size: 9pt;
+	font-family: courier;
+}
+.DrillTreeImage
+{
+	margin-left: 4px;
+	margin-right: 2px;
+}
+.DrillTreeText
+{
+	background-color: transparent;
+	border: 0px;
+	color: black;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	text-align: left;
+	padding-left: 5px;
+}
+.DrillTreeTextSecure
+{
+	background-color: transparent;
+	border: 0px;
+	color: gray;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	font-style: italic;
+	text-align: left;
+	padding-left: 5px;
+	cursor:default;
+}
+.DrillTreeTextSelected
+{
+	background-color: #D4DFF0;
+	border: 0px;
+	color: black;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	text-align: left;
+	padding-left: 5px;
+}
+.DrillTreeTextUnselected
+{
+	background-color: #DDDDDD;
+	border: 0px;
+	color: black;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: tahoma, Arial;
+	text-align: left;
+	padding-left: 5px;
+}
+.DrillTreeView
+{
+	position: absolute;
+	padding-left: 3px;
+	overflow: auto;
+	nowrap: true;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: #6699CC;
+	scrollbar-arrow-color: white;
+	cursor: pointer;
+	cursor: hand;
+}
+.DrillViewContainer
+{
+	background-color:transparent;
+	right: 3px;
+	position:absolute;
+}
+.DrillViewLabel
+{
+	color: black;
+	font-weight:bold;
+	font-size: 8pt;
+	font-family: Tahoma, Arial;
+	margin-top: 2px;
+	margin-right: 4px;
+}
+.DrillViewSelect
+{
+	background-image:url('../images/ico_form_dropmenu.gif');
+	background-repeat: no-repeat;
+	border:0px;
+	background-color:transparent;
+	margin-left: 0px;
+	overflow: hidden;
+	cursor: pointer;
+	cursor: hand;
+	height: 18px;
+	width: 12px;
+}

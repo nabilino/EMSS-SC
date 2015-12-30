@@ -1,0 +1,95 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+<title>Time Entry Help</title>
+<meta name="viewport" content="width=device-width" />
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Calendar.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function OpenProgram()
+{
+	clearTimeout(Timer)
+	authenticate("frameNm='jsreturn'|funcNm='OpenTips()'|desiredEdit='EM'")
+}
+
+function OpenTips()
+{
+	document.title = getSeaPhrase("TIPS","TE")
+	var htmlBody = '';
+	var htmlHeader = '<div class="dialoglabel">'
+	try
+	{
+		htmlHeader += opener.getSeaPhrase("HELP","ESS")
+	}
+	catch(e) {}
+	htmlHeader += '</div>'
+	self.main.document.getElementById("paneHeader").innerHTML = htmlHeader;
+
+	// Default help text.
+	htmlBody = '<p class="plaintablecellbold">'+getSeaPhrase("DID_U_KNOW","TE")+'</p>'
+	htmlBody += '<p class="plaintablecell">'+getSeaPhrase("WHERE_TO_CHANGE_TIPS","TE")+'</p>'
+
+	// *************************************************************************************
+	// HOW TO CUSTOMIZE THE HELP TEXT CONTAINED IN THIS FILE:
+	// *************************************************************************************
+
+	// Text can be added here manually:
+	// (Uncomment the following line to test.)
+	// htmlBody = 'Insert your help text here.';
+
+	// Or, you can define phrases in the /lawson/xhrnet/xml/lang/enus/temsgs.xml file and reference them
+	// using the getSeaPhrase() function (for example, getSeaPhrase("MY_HELP_TEXT","TE"), where "MY_HELP_TEXT"
+	// is the name of the id attribute on the phrase tag in the temsgs.xml file.  Here are the steps to
+	// follow:
+	// 1) Add a phrase tag to the end of the temsgs.xml file, just above the </Translate> tag.  You can
+	// insert any text you wish inside the phrase tag.  The end of the file should look like this
+	// (without the comment symbols ("//") on each line):
+	// 		<phrase id="MY_HELP_TEXT">Insert your help text here.</phrase>
+	// </Translate>
+	//
+	// 2) Then, add that text to the body of this HTML file as a string in HTML format by creating a string
+	// with the getSeaPhrase("MY_HELP_TEXT","TE") function:
+	// (Uncomment the following line to test.)
+	// htmlBody = '<p class="plaintablecell">'+getSeaPhrase("MY_HELP_TEXT","TE")+'</p>';
+
+	self.main.document.getElementById("paneBody").innerHTML = htmlBody;
+	self.main.stylePage();
+	document.getElementById("main").style.visibility = "visible";
+}
+var Timer = setTimeout("OpenProgram()",3000)
+</script>
+</head>
+<frameset rows="100%,*,*" frameborder="no" border="0" onload="OpenProgram()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" style="visibility:hidden" id="main" name="main" scrolling="no" marginheight="0" marginwidth="0">
+	<frame name=jsreturn src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no">
+	<frame name=PGCONTROL src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/tips/tips.htm,v 1.9.2.14 2012/06/29 17:12:21 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

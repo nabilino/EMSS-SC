@@ -1,0 +1,216 @@
+<!-- /////////////////////////////////////////////////////////////////////////////////-->
+<!-- TimeEntry LawHeader Class File 												//-->
+<!-- Last Updated: 10/11/2000														//-->
+<!-- Version 2.0																	//-->
+<!-- Description: Will Build my TimeCard and Employee Objects for use in Time Entry //-->
+<!-- Author: Chris Klecker															//-->
+<!-- /////////////////////////////////////////////////////////////////////////////////-->
+
+<html>
+<head>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script LANGUAGE="JavaScript">
+
+var maxlines		= 31;
+var LineIndex		= 1;
+var ColIndex		= 1;
+var TimeForm		= new Array();
+var fieldcount 		= 0;
+var linecount 		= 0;
+var formlinecount 	= 0;
+var BreakOut 		= false;
+var Abort			= false;
+var gmsgnbr 		= '';
+var gmsg 			= '';
+var gfldnbr 		= '';
+var ExceptionFlag = false;
+
+function V(fld, val)
+{
+	switch(fld)
+	{
+		case "DETAIL-COUNT":		parent.TimeCardTemp.DetailCount 	= val;break;
+		case "NUMBER-USED": 		parent.TimeCardTemp.NumberUsed 		= val;break;
+		case "PPT-COMPANY": 		parent.EmployeeTemp.Company 		= val;break;
+		case "PPT-EMPLOYEE": 		parent.EmployeeTemp.EmployeeNbr 	= val;break;
+		case "FROM-DATE": 			parent.TimeCardTemp.StartDate 		= val;break;
+		case "TO-DATE": 			parent.TimeCardTemp.EndDate 		= val;break;
+		case "STATUS": 				parent.TimeCardTemp.Status 			= Number(setValue(val));break;
+		case "PT-PPT-DATE":			parent.TimeCardTemp.ProtectedDate 	= val;break;
+		case "PT-PPT-SEQ":			parent.TimeCardTemp.ProtectedSeq	= val;break;
+		case "VIEW-ID": 			parent.TimeCardTemp.View 			= Number(val);break;
+		case "EMP-OT-PAY-PLAN": 	parent.EmployeeTemp.PayPlan 		= val;break;
+		case "EMP-NAME": 			parent.EmployeeTemp.EmployeeName 	= val;break;
+		case "EMP-SALARY-CLASS": 	parent.EmployeeTemp.SalaryClass 	= val;break;
+		case "EMP-DEPARTMENT": 		parent.EmployeeTemp.DepartmentName 	= val;break;
+		case "EMP-SUPERVISOR": 		parent.EmployeeTemp.SupervisorName 	= val;break;
+		case "PPT-TIMECARD-TYPE": 	parent.TimeCardTemp.TimeCardType 	= val;break;
+		case "EMP-EMAIL-ADDRESS": 	parent.EmployeeTemp.Email			= val;break;
+		case "EMP-SUPERVISOR-EMAIL":parent.EmployeeTemp.SupervisorEmail	= val;break;
+		case "EMP-GROUP-NAME": 		parent.EmployeeTemp.GroupName		= val;break;
+		case "EMP-PAY-CODE-GROUP":	parent.EmployeeTemp.PayCodeGroupName= val;break;
+		case "EMP-EXCEPTION":		parent.TimeCardTemp.ExceptionFlag	= val;break;
+		case "DAILY":				parent.TimeCardTemp.DailyFlag		= (val == "Y") ? true : false;break;
+		case "PRINT":				parent.TimeCardTemp.PrintFlag		= (val == "Y") ? true : false;break;
+		case "MANAGER-FLAG":		parent.TimeCardTemp.ManagerFlag		= (val == "Y") ? true : false;break;
+		default: GetDetailLineInformation(fld, val)
+	}
+}
+
+function GetDetailLineInformation(fld, val)
+{
+	if(!BreakOut)
+	{
+		if(parent.TimeCardTemp.ExceptionFlag == "Y")
+		{
+			if(fld.indexOf("TRX-COLUMN-LABEL")>=0)
+			{
+				// PT 141272.  Skip blank header fields.
+				if (val == "") return;
+				formlinecount++
+				fieldcount++
+				parent.TimeCardTemp.Form[formlinecount] = new parent.ExceptionObject();
+				parent.TimeCardTemp.Form[formlinecount].Size = 52;
+			}
+
+			if(fld == "TRX-PAY-CODE" + fieldcount)
+			{
+				// if the pay code is a number, prepend a string so our form object reference in
+				// javascript is valid
+				if(!isNaN(parseFloat(val)))
+					parent.TimeCardTemp.Form[formlinecount].FormField 		= "_"+val.split("\ ").join("");
+				else
+					parent.TimeCardTemp.Form[formlinecount].FormField 		= val.split("\ ").join("");
+			}
+			else if(fld == "TRX-COLUMN-LABEL" + fieldcount)
+				parent.TimeCardTemp.Form[formlinecount].FormLabel 		= val;
+			else if(fld == "TRX-OFFSET-PAY" + fieldcount)
+				parent.TimeCardTemp.Form[formlinecount].OffsetPayCode	= Number(val);
+		}
+		else
+		{
+			if(fld.indexOf("TRF-FORM-FIELD")>=0)
+			{
+				// PT 141272.  Skip blank header fields.
+				if (val == "") return;
+				formlinecount++
+				fieldcount++
+				parent.TimeCardTemp.Form[formlinecount] 			= new parent.FormObject();
+			}
+
+			if(fld == "TRF-FORM-FIELD" + fieldcount)
+			{
+				// if the form field is a number, prepend a string so our form object reference in
+				// javascript is valid
+				if(!isNaN(parseFloat(val)))
+					parent.TimeCardTemp.Form[formlinecount].FormField 	= "_"+val.split("\ ").join("");
+				else
+					parent.TimeCardTemp.Form[formlinecount].FormField 	= val.split("\ ").join("");
+			}
+			else if(fld == "TRF-LABEL" + fieldcount)
+				parent.TimeCardTemp.Form[formlinecount].FormLabel 	= val;
+			else if(fld == "TRF-SIZE-FIELD" + fieldcount)
+				parent.TimeCardTemp.Form[formlinecount].Size 		= val;
+		}
+	}
+
+	if(fld == "PPT-TIME-SEQ1")
+	{
+		fieldcount 	= 0
+		BreakOut 	= true;
+	}
+
+	if(BreakOut && fieldcount <= 31)
+	{
+		if(fld.indexOf("PPT-TIME-SEQ") >= 0)
+		{
+			Abort = false;
+			fieldcount++
+			linecount++
+			parent.TimeCardTemp.Records[linecount] 					= new parent.RecordsObject()
+		}
+		else if (Abort)
+			return;
+
+		if(fld == "PPT-TIME-SEQ" + fieldcount)
+			parent.TimeCardTemp.Records[linecount].TimeSeq 			= val
+
+		var TimeRecordObject = parent.TimeCardTemp.Records[linecount];
+
+		if(typeof(TimeRecordObject) != 'undefined')
+		{
+			if(fld == "PPT-PAY-CODE" + fieldcount)
+			{
+				// if the pay code is a number, prepend a string so that it will match the pay code form field
+				if(!isNaN(parseFloat(val)))
+					TimeRecordObject.PayCode = "_"+val.split("\ ").join("");
+				else
+					TimeRecordObject.PayCode = val.split("\ ").join("");
+			}
+			else if(fld == "PPT-HOURS" + fieldcount)
+				TimeRecordObject.Hours = val
+			else if(fld == "PPT-DATE" + fieldcount)
+			{
+				if (parent.TimeCardTemp.EndDate != null && parent.TimeCardTemp.EndDate != "" && val > parent.TimeCardTemp.EndDate)
+				{
+					var tmpArr = new Array();
+					var tmpObj = new Object();
+					for (var i=0; i<parent.TimeCardTemp.Records.length-1; i++)
+					{
+						tmpObj = parent.TimeCardTemp.Records[i];
+						tmpArr[i] = tmpObj;
+					}
+					parent.TimeCardTemp.Records = new Array();
+					parent.TimeCardTemp.Records = tmpArr;
+					linecount--;
+					Abort = true;
+				}
+				TimeRecordObject.Date = val;
+			}
+			else if((fld == "PPT-RATE" + fieldcount) && val != "") TimeRecordObject.Rate = (val.indexOf(".") == -1) ? parseFloat(parent.MoveTrailingSignToFront(val)/10000) : parseFloat(parent.MoveTrailingSignToFront(val));
+			else if(fld == "PPT-JOB-CODE" + fieldcount)			TimeRecordObject.JobCode = val
+			else if(fld == "PPT-POSITION" + fieldcount)			TimeRecordObject.Position = val
+			else if((fld == "PPT-SHIFT" + fieldcount) && val != 0)			TimeRecordObject.Shift = val
+			else if((fld == "PPT-ACTIVITY" + fieldcount) && val != "")			TimeRecordObject.Activity = val
+			else if((fld == "PPT-ACTIVITY-DESC" + fieldcount) && val != "")	TimeRecordObject.ActivityDesc = val
+			else if(fld == "PPT-ACCT-CATEGORY" + fieldcount)	TimeRecordObject.AccountCategory = val
+			else if(fld == "PPT-GL-COMPANY" + fieldcount && val != 0)		TimeRecordObject.GlCompany = val
+			else if(fld == "PPT-ACCT-UNIT" + fieldcount)		TimeRecordObject.AccountUnit = val
+			//PT 163466
+			else if(fld == "PPT-ACCOUNT" + fieldcount && val != 0)			TimeRecordObject.GlAccount = val
+			else if(fld == "PPT-SUB-ACCOUNT" + fieldcount && val != 0)		TimeRecordObject.SubAccount = val
+			else if(fld == "PPT-PROCESS-LEVEL" + fieldcount)	TimeRecordObject.ProcessLevel = val
+			else if(fld == "PPT-DEPARTMENT" + fieldcount)		TimeRecordObject.Department = val
+			else if(fld == "PPT-SCHEDULE" + fieldcount)			TimeRecordObject.Schedule = val
+			else if(fld == "PPT-PAY-GRADE" + fieldcount)		TimeRecordObject.Grade = val
+			else if(fld == "PPT-PAY-STEP" + fieldcount && val != 0)			TimeRecordObject.Step = val
+			else if(fld == "PPT-ATTEND-CODE" + fieldcount)		TimeRecordObject.AttendanceCode = val
+			else if(fld == "PPT-OCCURRENCE" + fieldcount)		TimeRecordObject.Occurrence = val
+			else if(fld == "PPT-COMMENT" + fieldcount)			TimeRecordObject.Comment = val
+			else if(fld == "PPT-USERFIELD1" + fieldcount)		TimeRecordObject.UserField1 = val
+			else if(fld == "PPT-USERFIELD2" + fieldcount)		TimeRecordObject.UserField2 = val
+		}
+
+		if(fld == "PPT-STATUS" + fieldcount)			TimeRecordObject.Status 		= val
+		else if(fld == "PPT-USER-ID" + fieldcount)		TimeRecordObject.UserId 		= val
+		else if(fld == "PPT-PROXY-ID" + fieldcount)		TimeRecordObject.ProxyId 		= val
+		else if(fld == "PPT-MANAGER-ID" + fieldcount)	TimeRecordObject.ManagerId 		= val
+		else if(fld == "PPT-HISTORY" + fieldcount)		TimeRecordObject.History 		= val
+		else if(fld == "IS-SPLIT" + fieldcount)			TimeRecordObject.IsSplit 		= val
+		else if((fld == "COMMENTS-EXIST" + fieldcount) && val != "")	TimeRecordObject.CommentsExist 	= val
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr		= msgnbr
+	gmsg 		= msg
+	gfldnbr 	= fldnbr
+}
+
+</script>
+</head>
+</html>
+
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/employee/timeentrylaw.htm,v 1.8.2.9 2008/12/12 20:46:25 brentd Exp $ -->

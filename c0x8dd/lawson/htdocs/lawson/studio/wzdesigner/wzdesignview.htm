@@ -1,0 +1,87 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/wzdesigner/wzdesignview.htm,v 1.4.28.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<link id="dsStyle" type="text/css" href="../studio.css" rel="stylesheet"></link>
+<link id="wzStyle" type="text/css" href="wzdesigner.css" rel="stylesheet"></link>
+<?IMPORT namespace="LWSN" implementation="../workspace.htc">
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript">
+var editor = null;
+
+//-----------------------------------------------------------------------------
+function wzViewInit()
+{
+	var viewid = window.frameElement.id.replace("view_", "");
+	editor = new top.TEXT();
+	var params = window.location.search.replace("?", "");
+	params = params.split("&");
+	var mode = (params.length > 0 && params[0].length > 0) ? params[0] : "text";
+	editor.initialize(mode, window.frameElement.contentWindow.document, false);
+	var defaultView = (params.length > 1 && params[1].length > 0) ? params[1] : "n";
+	parent.dsWorkspace.registerView(viewid, editor, defaultView);
+}
+
+//-----------------------------------------------------------------------------
+function wzViewAction(action)
+{
+	top.designStudio.activeDesigner.activeDocument.helpTextAction(action);
+}
+
+//-----------------------------------------------------------------------------
+function wzViewFocus(elem)
+{
+	top.designStudio.activeDesigner.activeDocument.lastFocus=elem;
+}
+
+</script>
+</head>
+
+<body id="editorBody" class="wzdesign" onload="wzViewInit()"> 
+	<!-- main drawing area --> 	
+  	<div id="uTree" class="dsListText"                                                                                 
+  		style="position:static;left: 5px; top: 5px; width:100%; height: 70%; overflow:auto;">
+  	</div>                                                                                                                  
+
+ 	<!-- buttons for help text --> 
+	<div id="edtBtns" style="position:static;top:405px;left:0px;width:100%;">                                                                                  
+		<label style="height:20px;width:100%;" class="dsControlGroup">Step Text</label>
+		<br/>
+		<input type="button" class="dsDlgButton" id="resetBtn" value="Revert"
+ 			onclick="wzViewAction('reset')"
+			style="position:relative;left:5px;width:60px;" />                                  
+ 		<input type="button" class="dsDlgButton" id="clearBtn" value="Clear"
+ 			onclick="wzViewAction('clear')"
+			style="position:relative;left:5px;width:60px;" />                                   
+  	</div>                                                                                                                                               
+
+ 	<!-- text area for display/editing of help text --> 	                                                                                             
+  	<div id="edtFrame" style="position:relative;left:0;top:0;width:100%;height:20%;">               
+  		<textarea id="textBody" wrap="on" style="position:relative;left:5%;top:5%;width:90%;height:90%;overflow:auto;"
+			onchange="wzViewAction('change')"
+			onfocus="wzViewFocus(this)">
+  		</textarea>                                                 
+  	</div>                                                                                              
+</body>
+</html>

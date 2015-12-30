@@ -1,0 +1,337 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/officemanager/officemanager.css,v 1.8.2.4.4.6.24.2 2012/08/08 12:37:24 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+
+body
+{
+	margin:0px;
+	border:0px;
+}
+.xTBookClosed
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_bookmark_collapsed.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: pointer;
+	cursor: hand;
+	height:16px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+}
+.xTBookEmpty
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_bookmark_no-children.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:16px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+}
+.xTBookOpen
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_bookmark_children.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: pointer;
+	cursor: hand;
+	height:16px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+}
+.xTButton
+{
+	background-color: transparent;
+	border:none;
+	cursor: pointer;
+	cursor: hand;	
+	height: 20px;
+	overflow:hidden;
+	text-align: left;
+	white-space:nowrap;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt; 
+}
+.xTClearButton
+{
+	background-color: transparent;
+	border: none;
+	color: blue;
+	cursor: pointer;
+	cursor: hand;
+	font-family: Tahoma, Arial;
+	height: 20px;
+	padding: 1px;
+	text-decoration: underline;
+}
+.xTDelete
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_delete.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: hand;
+	height:15px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+	width:15px;
+}
+.xTDragHighlight
+{
+	background-color:#E1D5B0;
+	border: #666666;
+	border-style: solid;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+	padding-left:1px;
+	padding-right:1px;
+	z-index:1000;
+}
+.xTFormArea
+{
+	border:none;
+	display:block;
+	height:100%;
+	left:260px;
+	overflow:auto;
+	position:absolute;
+	scrollbar-face-color: #6699CC;
+	scrollbar-track-color: #90AFC0;
+	scrollbar-highlight-color: white;
+	scrollbar-arrow-color: white;
+	top:20px;
+}
+.xTFormTitleBar
+{	
+	background:#FFFFFF;
+	border-bottom: 1px solid #6699CC;
+	color:#000000;
+	cursor:default;
+	font-weight:bold;
+	font-size:8pt;
+	padding-left:4px;
+	padding-right:4px;
+	padding-top:1px;
+	padding-bottom:1px;
+	text-align: left;
+	white-space:nowrap;
+	width:100%;
+}
+.xTItem
+{
+	color:#000000;
+	position:relative;
+	cursor:hand;
+	font-size: 8pt;
+	text-decoration:none;
+	z-index:0;
+}
+.xTItemDisabled
+{
+	color:#000000;
+	position:relative;
+	cursor:default;
+	font-size: 8pt;
+	text-decoration:none;
+	z-index:0;
+}
+.xTItem:hover
+{
+	color:#333333;
+}
+.xTListItemHover
+{
+	background-color:#D4DFF0;
+	border:none;
+}
+.xTListItem
+{
+	border:none;
+}
+.xTLocked
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_lock_closed.gif");
+	background-position:center center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: hand;
+	height:15px;
+	margin-left:2px;
+	margin-right:5px;
+	width:15px;
+}
+.xTPlus
+{  
+	position:relative;
+	margin-top:4px; 
+	margin-bottom:3px; 
+	margin-left:3px; 
+	margin-right: 6px; 
+	background-color: #FFFFFF; 
+	border: 1px solid; 
+	font-size: 9px; 
+	color: #000000; 
+	text-align: center; 
+	height: 13px; 
+	width: 13px; 
+	font-weight: bold; 
+	border-color: #EFEFEF #CCCCCC #CCCCCC #EFEFEF; 
+	cursor: hand;
+}
+.xTPopup
+{
+	font-size: 8pt;
+}
+.xTPopupBG
+{
+	position:absolute; 
+	width:115px; 
+	height:35px; 
+	z-index:2; 
+	left: 262px; 
+	top: 27px; 
+	visibility: hidden;
+	filter:progid:DXImageTransform.Microsoft.Shadow(color='#999999', Direction=135, Strength=3);
+	background-color: #cccccc;
+	border-color: #ffffff #333333 #333333 #ffffff;
+	border-style: solid;
+	border-top-width: 1px;
+	border-right-width: 1px;
+	border-bottom-width: 1px;
+	border-left-width: 1px;
+}
+.xTPopupItem
+{
+	color: #000000;
+	background-color: #cccccc;
+}
+.xTPopupItemDim
+{
+	color: #666666;
+	background-color: #cccccc;
+}
+.xTPopupItemOver
+{
+	color:#003366;
+	background-color: #90AFC0;
+}
+.usrGrpItem
+{
+	color:#000000;
+	position:relative;
+	cursor:pointer;
+   	cursor:hand;
+	font-family: Tahoma, Arial, sans-serif;
+	font-size: 8pt;
+	text-decoration:none;
+	z-index:0;
+}
+.usrGrpItem:hover
+{
+	color:#333333;
+}
+.usrGrpItemDim
+{
+	color:#000000;
+	position:relative;
+	cursor:hand;
+	font-size:8pt;
+	text-decoration:none;
+	z-index:0;
+}
+.xTRightHeader
+{
+	padding-top:1px;
+	padding-left:3px;
+	font-weight:bold;
+	font-size:11pt;
+}
+.xTSearchField
+{
+	padding-right: 3px;
+	padding-top: 1px;
+	padding-bottom: 1px;
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	background-color: #90AFC0;
+	border: 1px solid #666666;
+	width: 85px
+}
+.xTTreeNode
+{
+	background-color:#ffffff;
+	color:#000000;
+	position:relative;
+	cursor:hand;
+	font-size: 8pt;
+	text-decoration:none;
+	border-top-width: 0px;
+	border-right-width: 0px;
+	border-bottom-width: 0px;
+	border-left-width: 0px;
+	padding-left:2px;
+	padding-right:1px;
+	z-index:0;
+}
+.xTUnlocked
+{
+	background-color:transparent;
+	background-image:url("../../images/ico_lock_open.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: hand;
+	height:18px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+	width:15px;
+}
+.xTUnspecified
+{
+	background-color:transparent;
+	background-image:url("../../images/spacer.gif");
+	background-position:right center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor: hand;
+	height:18px;
+	margin-left:2px;
+	margin-right:5px;
+	vertical-align:middle;
+	width:15px;
+}

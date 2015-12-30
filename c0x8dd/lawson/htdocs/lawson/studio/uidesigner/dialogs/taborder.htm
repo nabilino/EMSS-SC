@@ -1,0 +1,92 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/taborder.htm,v 1.3.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Field Tab Order</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></SCRIPT>
+<script language="javascript" src="taborder.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgNoInputFields">No input fields defined for current view.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="tabInit()" onunload="tabUnload()" onkeydown="tabOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+
+	<div id="divGeneral" class="dsTabPaneActive" style="border:0px;top:10px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr>
+			<td colspan="2">
+				<div id="lblTabOrder" class="dsLabel" style="position:relative;text-align:left;">Tab Order:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selFields" class="dsListText" size="8" onchange="tabOnFieldChange()"
+						style="width:200px;height:expression(this.size*24);"></select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnUp" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" 
+					onclick="tabMoveField('up')" title="Move selection up" value="Up">
+				</input>
+				<input id="btnDown" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" 
+					onclick="tabMoveField('dn')" title="Move selection down" value="Down">
+				</input>
+				<input id="btnVisual" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" 
+					onclick="tabVisualizeStart()" title="Display sequence in view window" value="Visualize...">
+				</input>
+			</td>
+		</tr>
+		<tr><td colspan="2">
+				<input id="btnRestore" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;visibility:hidden;" 
+					onclick="tabVisualizeEnd()" title="Return from sequence view" value="Return">
+				</input>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-60);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr><td colspan="2"><hr style="color:black;height:1px;"></td></tr>
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="tabUpdate()" 
+				style="position:relative;width:70px;" disabled value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="tabReturn()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

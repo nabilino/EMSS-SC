@@ -1,0 +1,94 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/logondone.htm,v 1.2.2.2.4.1.22.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Design Studio Logon Done</title>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
+<script src="servenv.js"></script>
+<script>
+
+function initLogonDone()
+{
+	var dt = new Date();
+	var t1 = Date.UTC(dt.getYear(), dt.getMonth(), dt.getDate(), dt.getHours(), 
+				dt.getMinutes(), dt.getSeconds(), dt.getMilliseconds());
+
+	var api="/servlet/Profile?PATH=" + parent.studioPath + "&section=attributes;user&t=" + t1;
+	var profileXML = parent.SSORequest(api);
+	if (!profileXML)
+	{
+		parent.displayErrorPage(parent,
+			"The Design Studio cannot load because%nthe Profile service returned an invalid xml response.");
+		return;
+	}
+
+	// check for status: httpRequest failure
+	if (profileXML.status)
+	{
+		var strMsg=parent.getHttpStatusMsg(profileXML.status);
+		parent.displayErrorPage(parent,"The Design Studio cannot load because it was unable to complete Profile " +
+			"service request.%nServer response:%n" + strMsg);
+		return;
+	}
+
+	// any servlet error messages?
+	var errors = profileXML.selectNodes("//ERROR");
+	var lenErrors = (errors ? errors.length : 0);
+	if (lenErrors)
+	{
+		var msg="The Design Studio cannot load because the Profile service returned an error:%n";
+		var bDispMsg=false;
+		for (var i=0; i < lenErrors; i++)
+		{
+			// level=0 is a warning; level=1 is usually 'serious' error:
+			// file not found is not serious (in fact expected) in studio.
+			var msgNode=errors[i].selectSingleNode("MSG");
+			if (!msgNode) continue;
+				
+			var msgText=msgNode.text;
+			if (msgText.toLowerCase().indexOf("not found") != -1)
+				continue;
+
+			if (errors[i].getAttribute("level")!="0")
+			{
+				bDispMsg=true;
+				msg += msgText+"%n";
+			}
+		}
+		if (bDispMsg)
+		{
+			parent.displayErrorPage(parent,msg);
+			return;
+		}
+	}
+
+	// success!
+	parent.studioInitialize(profileXML);
+}
+</script>
+</head>
+
+<body onload="initLogonDone()">
+</body>
+</html>

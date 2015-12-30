@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/wzdesigner/designer.xml,v 1.2.2.1.26.2 2012/08/08 12:48:48 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<DESIGNER id="wzdesigner" phraseId="lblwzdesigner" installed="y" provDir="wizards">
+	<INDEXHTM>index.htm</INDEXHTM>
+	<MENU>menu.xml</MENU>
+	<TOOLBOX>toolbox.xml</TOOLBOX>
+	<MESSAGE>msgs.xml</MESSAGE>
+	<ICON>images/wizard_whitebg.gif</ICON>
+	<VIEWS>
+		<VIEW id="design" phraseId="lblDesign" editor="TEXT" src="wzdesignview.htm" lwidth="15" rwidth="15" default="y"/>
+		<VIEW id="source" phraseId="lblSource" editor="TEXT" src="wzsourceview.htm" lwidth="0" rwidth="0"/>  
+	</VIEWS>
+	<DOCUMENTS>
+		<DOCUMENT id="wizarddoc">
+			<PROPERTIES>
+				<PROPERTY id="id" phraseId="lblName" readonly="1" init="wizardDocument" edit="X" draw="text" type="simple"/>
+			</PROPERTIES>
+			<EVENTS>
+				<EVENT id="oninit" label="OnInit" parms="" returns=""/>
+				<EVENT id="onterminate" label="OnTerminate" parms="" returns=""/>
+			</EVENTS>
+ 			<RULES>
+				<RULE id="minHeight" value="4"/>
+				<RULE id="minWidth" value="20"/>
+				<RULE id="isParent" value="1"/>
+				<RULE id="isChild" value="0"/>
+				<RULE id="singleUse" value="1"/> 
+			</RULES>
+ 			<SUBS>                                                                                     
+ 				<SUB id="erp">                                                                         
+ 					<WIZARD id="new" dialogHeight="380" dialogWidth="380">wizards/erp_new.htm</WIZARD> 
+ 				</SUB>                                                                                 
+ 			</SUBS>                                                                                    
+		</DOCUMENT>
+	</DOCUMENTS>
+</DESIGNER>

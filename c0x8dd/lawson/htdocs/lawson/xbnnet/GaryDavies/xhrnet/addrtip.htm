@@ -1,0 +1,25 @@
+<html>
+<head>
+<script>
+// Dynamically write the contents of the Home Address tips window.
+// This can be fully customized by placing content in the body of this document and
+// removing this function.
+function writeContents()
+{
+	document.title = opener.getSeaPhrase("HOME_ADDR_HELP","ESS")
+
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'
+	+ opener.getSeaPhrase("HELP","ESS")
+	+ '</div>'
+	self.main.stylePage();
+
+}
+</script>
+</head>
+<frameset rows="100%" frameborder="no" border="0" onload="writeContents()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" id="main" marginwidth="0" marginheight="0" scrolling="auto">
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/addrtip.htm,v 1.7.2.2 2008/04/30 21:24:15 brianv Exp $ -->
+

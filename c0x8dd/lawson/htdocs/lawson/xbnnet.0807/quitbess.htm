@@ -1,0 +1,86 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	var par = (parent.main) ? parent : parent.parent;
+	if (par.quitting && par.emailSummary)
+		par.emailScr(par.main,false);	
+	if (par.quitting && par.printSummary)
+		setTimeout(function() { par.printScr(par.main.printScreen); }, 500);	
+	if (par.quitting)
+		par.quitting = false;
+	var html = '<div class="plaintablecell" style="padding:0px">'
+ 	html += '<br><table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto">'
+	html += '<tr>'
+	html += '<td class="plaintableheaderborder">'+getSeaPhrase("EXIT","BEN")+'</td></tr>'
+	html += '<tr>'
+	html += '<td class="plaintablecellborder" style="border-bottom:0px">'
+	html += '<p>'+getSeaPhrase("QUIT_6","BEN")+'</p>'
+	html += '</td></tr>'
+	html += '<tr>'
+	html += '<td class="plaintablecellborder">'
+	html += '<p>'+getSeaPhrase("QUIT_3","BEN")+'</p>'
+	html += '</td></tr>'
+	html += '</tr>'
+	html += '</table>'
+	html += '<p class="textAlignRight">'
+	if (parent.main)
+	{
+		html += uiButton(getSeaPhrase("QUIT_4","BEN"), "parent.EndEnroll('YES');return false","margin-right:5px;margin-top:10px")
+		html += uiButton(getSeaPhrase("QUIT_5","BEN"), "parent.EndEnroll('NO');return false","margin-right:5px;margin-top:10px")
+	}
+	else
+	{
+		html += uiButton(getSeaPhrase("QUIT_4","BEN"), "parent.parent.EndEnroll('YES');return false","margin-right:5px;margin-top:10px")
+		html += uiButton(getSeaPhrase("QUIT_5","BEN"), "parent.parent.EndEnroll('NO');return false","margin-right:5px;margin-top:10px")
+	}
+	html += '</p>'
+	html += '</div>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("ENROLLMENT_ELECTIONS","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.35 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/quitbess.htm,v 1.20.2.18.2.1 2013/01/15 02:17:26 kevinct Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

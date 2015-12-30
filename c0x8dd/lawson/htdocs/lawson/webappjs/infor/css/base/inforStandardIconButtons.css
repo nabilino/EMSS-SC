@@ -1,0 +1,150 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforStandardIconButtons.css,v 1.1.2.8.2.3 2014/01/10 14:29:53 brentd Exp $
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* Help Icon Button */
+.inforStandardIconHelpButton
+{
+	height:20px;
+	width:22px;
+	border-width: 0px;
+	background: url(../../images/btn_help_22x20_enabled.gif) no-repeat;
+	background-position: center 50%;
+	margin: 2px 4px 0px 4px;
+	padding: 0px;	
+}
+.inforStandardIconHelpButton:hover  
+{
+	background-image: url(../../images/btn_help_22x20_over.gif);
+}
+/* Note that Active needs to be after hover in the css */
+.inforStandardIconHelpButton:active
+{
+	background-image: url(../../images/btn_help_22x20_press.gif);
+}
+.inforStandardIconHelpButton:disabled
+{
+	background-image: url(../../images/btn_help_22x20_disabled.gif);
+}
+.inforStandardIconHelpButton:disabled:hover
+{
+}
+/* Required Indicator */
+.inforRequiredIndicator 
+{
+    background-image : url("../../images/icn_required_7x7.png");
+    background-position : left top;
+    background-repeat : no-repeat;
+    float : left;
+    height : 7px;
+    margin-left : -7px;
+    padding-right : 0;
+    position : inherit;
+    left : 0px;
+    top : -1px;
+    width : 7px;
+}
+/* Expander Icons */
+.inforExpanderCollapsed
+{
+	background : transparent url("../../images/icn_collapseDown_21x21_55595c_enabled.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+ }
+.inforExpanderCollapsedOver
+{
+	background : transparent url("../../images/icn_collapseDown_21x21_55595c_over.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+}
+.inforExpanderCollapsedActive
+{
+	background : transparent url("../../images/icn_collapseDown_21x21_55595c_press.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+}
+.inforExpanderExpanded
+{
+	background : transparent url("../../images/icn_expandRight_21x21_55595c_enabled.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+}
+.inforExpanderExpandedOver
+{
+	background : transparent url("../../images/icn_expandRight_21x21_55595c_over.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+}
+.inforExpanderExpandedActive
+{
+	background : transparent url("../../images/icn_expandRight_21x21_55595c_press.png") no-repeat 0px 0px;
+	color : #000000;
+	font-family : Arial;
+	font-size : 11px;
+	font-weight : normal;	
+	height : 21px;
+	padding-top : 3px;
+	padding-left : 25px;
+	display : -moz-inline-stack;
+	display : inline-block;
+	cursor : default;
+}

@@ -1,0 +1,805 @@
+<html>
+<head>
+<script src="/lawson/portal/ExcelJS/XMLObjTree.js"></script>
+<script src="/lawson/portal/ianmLib.js"></script>
+<style type="">
+body {
+	background-color: #f0f0f0;
+}
+.reportPage {
+	xposition: relative;
+	background-color: white;
+	padding-top: 20px;
+	padding-bottom: 30px;
+	padding-left: 10px;
+	padding-right: 10px;
+	xmargin-top: 20px;
+	xmargin-bottom: 30px;
+	xmargin-left: 10px;
+	xmargin-right: 10px;
+	display: inline-block;
+}
+table {
+	font-family: Lucida Sans, Lucida Sans Unicode, Trebuchet MS, Tahoma, Arial, sans-serif;
+	font-size: 10pt;
+}
+table {
+	margin: 0px;
+	padding: 0px;
+	xborder: none collapse;
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+.fullWidth {
+	width: 100%;
+}
+th {
+	text-align: left;
+	color: #2E74B5;
+	border-bottom: solid 1px #2E74B5;
+}
+td {
+	border: 0px;
+	border-collapse: collapse;
+	xpadding: 0px;
+	xpadding: 2px;
+	xborder-left: solid 1px;
+	margin: 0px;
+
+}
+.mText {
+    font-family:verdana;
+	font-size: 100%;	
+}
+.mH1 {
+    color:blue;
+    xfont-family:verdana;
+    font-size:200%;
+    padding-top:10px;
+}
+.mTextLeft {
+	text-align: left;
+	vertical-align: top;
+}
+.mTextRight {
+	text-align: right;
+	vertical-align: top;
+}
+.mTextRight {
+	text-align: right;
+	vertical-align: top;
+}
+.mH3 {
+    xcolor:blue;
+    xfont-family:verdana;
+    font-weight: bold;
+}
+.mDetailHeader {
+	font-weight: bold;
+	xborder-bottom: 1px solid black;
+}
+.mDetailFooter {
+	font-weight: bold;
+	xborder-top: solid 1px;
+}
+.mDetailHeader td {
+	border-bottom: 1px solid black;
+}
+.mDetailFooter td{
+	border-top: 1px solid black;
+}
+.rowLevel0 {
+	xcolor: #2E74B5;
+}
+.rowLevel1 {
+	
+	background-color: blue;
+}
+.wait, .wait * { cursor: wait !important; }
+
+.hoverable {
+	font-style: italic;
+	color: #2E74B5;
+	cursor: help;
+}
+
+.drillLink {
+	xtext-decoration: underline;
+	cursor: hand;
+	color: #2E74B5;
+}
+.invis {
+	position: absolute;
+	filter:alpha(opacity=1);
+	opacity: 0.1;
+}
+.vis {
+	position: absolute;
+	filter:alpha(opacity=100);
+	opacity: 1.0;
+}
+tr.opened {
+	background-color: #eeeeee;
+}
+table.subtable {
+	xborder-left: #2E74B5 solid 1px;
+	xborder-bottom: #2E74B5 solid 1px;
+	xborder-top: #2E74B5 solid 1px;
+	xborder-right: #2E74B5 solid 1px;
+}
+table.subtable td {
+	xborder-left: none;
+	border: none collapse;
+	padding: none;
+}
+
+
+</style>
+</head>
+
+<script>
+function findFieldsIn(e)
+{
+	var fields = {}
+	var htmlNodes = getElementsByClassName('mField', e)
+	for (var f = 0; f < htmlNodes.length; f++)
+	{
+		fields[htmlNodes[f].id] = htmlNodes[f]
+	}
+	return fields
+}
+function buildVendor(params)
+{
+	return
+	var q = "PROD=DEV901&FILE=APVENMAST&INDEX=VENSET1&KEY=1=93" // params["VEND0R_GROUP"] + "+" + params.VENDOR
+	+ "&FIELD=VENDOR;VENDOR-VNAME;VENDOR-STATUS;PHONE-PREFIX;PHONE-NUM;PHONE-EXT;"
+	+ "FAX-PREFIX;FAX-NUM;FAX-EXT;TERM-CODE;TAX-EXEMPT-CD;HOLD-FLAG;E-MAIL-ADDRESS;VDR-ADDR1;VDR-ADDR2;VDR-ADDR3;"
+	+ "VDR-ADDR4;VDR-CITY-ADDR5;VDR-STATE;VDR-POSTAL;VDR-COUNTY;VDR-COUNTRY;MBL-INT-PREFIX;MOBILE-NUM;MOBILE-EXT;"
+	+ "PAY-IMM-FLAG&OUT=XML"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD']
+	}
+
+	doAjax(query, showVendorInfo)
+}
+function buildHeader(params)
+{
+	var q = "PROD=DEV901&FILE=APINVOICE&INDEX=APISET1&KEY=1000=93=V12034245" // params.COMPANY + "=" + params.VENDOR + "=" + params.INVOICE
+	+ "&FIELD=COMPANY;VENDOR;INVOICE;SUFFIX;CANCEL-SEQ;CANCEL-DATE;BATCH-NUM;"
+	+ "BATCH-DATE;VOUCHER-NBR;AUTH-CODE;PROC-LEVEL;ACCR-CODE;INVOICE-TYPE;INVOICE-DTE;PURCH-FR-LOC;"
+	+ "PO-NUMBER;PO-RELEASE;PO-CODE;DESCRIPTION;BASE-INV-AMT;BASE-ACT-AMT;TRAN-INV-AMT;REC-STATUS;"
+	+ "CREATE-DATE;DISTRIB-DATE;PAY-VENDOR;INVOICE-SOURCE;APPROVED-FLAG;MATCH-STATUS;REASON-CODE;"
+	+ "HANDLING-CODE;LOCATION;TAX-FLAG;INV-STATUS;TERMS-CD;DISC-DATE;DUE-DATE;"
+
+	+ "APVENMAST.VENDOR;APVENMAST.VENDOR-VNAME;APVENMAST.VENDOR-STATUS;APVENMAST.PHONE-PREFIX;APVENMAST.PHONE-NUM;APVENMAST.PHONE-EXT;"
+	+ "APVENMAST.FAX-PREFIX;APVENMAST.FAX-NUM;APVENMAST.FAX-EXT;APVENMAST.TERM-CODE;APVENMAST.TAX-EXEMPT-CD;APVENMAST.HOLD-FLAG;APVENMAST.E-MAIL-ADDRESS;APVENMAST.VDR-ADDR1;APVENMAST.VDR-ADDR2;APVENMAST.VDR-ADDR3;"
+	+ "APVENMAST.VDR-ADDR4;APVENMAST.VDR-CITY-ADDR5;APVENMAST.VDR-STATE;APVENMAST.VDR-POSTAL;APVENMAST.VDR-COUNTY;APVENMAST.VDR-COUNTRY;APVENMAST.MBL-INT-PREFIX;APVENMAST.MOBILE-NUM;APVENMAST.MOBILE-EXT;"
+	+ "APVENMAST.PAY-IMM-FLAG;"
+
+	+ "APDISTRIB.ACTIVITY;APDISTRIB.ACCT-CATEGORY;APDISTRIB.COMPANY;APDISTRIB.DESCRIPTION;APDISTRIB.CANCEL-SEQ;"
+	+ "APDISTRIB.DIS-ACCOUNT;APDISTRIB.DIS-ACCT-UNIT;APDISTRIB.DIS-SUB-ACCT;APDISTRIB.DIST-CODE;APDISTRIB.DIST-COMPANY;"
+	+ "APDISTRIB.DISTRIB-DATE;APDISTRIB.DIST-STATUS;APDISTRIB.DIST-TYPE;APDISTRIB.DST-REFERENCE;APDISTRIB.INVOICE-TYPE;"
+	+ "APDISTRIB.LINE-TYPE;APDISTRIB.ORIG-TRAN-AMT;APDISTRIB.ORIG-BASE-AMT;APDISTRIB.PO-CODE;APDISTRIB.PO-LINE-NBR;"
+	+ "APDISTRIB.PO-NUMBER;APDISTRIB.PO-RELEASE;APDISTRIB.POST-OPTION;APDISTRIB.PROC-LEVEL;APDISTRIB.REC-STATUS;"
+	+ "APDISTRIB.TAXABLE-AMT;APDISTRIB.SUFFIX;APDISTRIB.TO-BASE-AMT;APDISTRIB.VENDOR;"
+
+	
+	+ "&OUT=XML&XRELS=FALSE" //&XCOLS=FALSE&XKEYS=FALSE&XRELS=FALSE&XCOUNT=FALSE&XIDA=FALSE"
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD','RELRECS','RELREC', 'COL']
+	}
+
+	doAjax(query, showInvoiceInfo)
+}
+function buildApprovals(params)
+{
+	var q = "PROD=LOGAN&FILE=WFMETRICS&INDEX=WMESET2&KEY=" + params.WUNumber
+	+ "&FIELD=WORKUNIT;PROCESS-ID;END-DATE;END-TIME;STATUS;WF-RM-ID;TASK;ACTIVITY-ID;OPERATION;COMMENT;"
+	+ "	START-DATE;DUE-DATE&OUT=XML" //&SELECT=END-DATE%21%3D
+
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD','RELRECS','RELREC', 'COL']
+	}
+
+	doAjax(query, getApprovalUsers)
+
+}
+function buildMessages(params)
+{
+	var q = "PROD=LOGAN&FILE=WFMSGHDR&INDEX=WFHSET1&KEY=" + params.WUNumber
+	+ "&FIELD=WORKUNIT;WF-MESSAGE-ID;ATTACH-DATE;ATTACH-TIME;ATTACH-BY;MESSAGE-NBR;DELETE-FL;CREATED-BY;SUBJECT;"
+	+ "MESSAGEDTL.MESSAGE;MESSAGEDTL.MESSAGE-APPEND;MESSAGEDTL.MESSAGE-NBR;MESSAGEDTL.MESSAGE-SEQ&OUT=XML"
+	var query = {
+		query: "/servlet/Router/Data/Erp?" + q,
+		forcedCols: ['RECORD','RELRECS','RELREC', 'COL']
+	}
+
+	doAjax(query, getMessageUsers)
+}
+function loadPage()
+{
+	var params = parseParams()
+	//var idData = getRMData(['u0x8im00', 'u0x8zz51', 'u0x8zz52'], showID)
+	//alert(idData['u0x8zz51'])
+	buildVendor(params)
+	buildHeader(params)
+	buildApprovals(params)
+	buildMessages(params)
+	//alert(params.WUNumber)
+}
+function showID(ids)
+{
+	alert(ids['u0x8zz51'])
+}
+function processDMEData(data)
+{
+	var dme = data.DME
+	var colNames = dme.COLUMNS.COLUMN
+	var colNumByName = {}
+	var relColsNumByName = {}
+	var colsList = null;
+	for (var i = 0; i < colNames.length; i++) // add the table column headings
+	{
+		var name = colNames[i]['-dbname']
+		colNumByName[name] = i;
+		if (! colsList)
+			colsList = {}
+		colsList[i] = colNames[i]
+		if (name.indexOf('.') > 0) // relation col name
+		{
+			var relName = name.split('.')[0]
+			var relColName = name.split('.')[1]
+			if (! relColsNumByName[relName])
+			{
+				relColsNumByName[relName] = {}
+				relColsNumByName[relName].length = 0
+			}
+			relColsNumByName[relName][relColName] = relColsNumByName[relName].length ++
+		}
+	}
+	data.colNumByName = colNumByName;
+	data.colsList = colsList;
+	data.relColsNumByName = relColsNumByName
+	return data		
+}
+function updateField(fieldName, fields, colData, colDefns, fieldNum)
+{
+	var value = colData[fieldNum]
+	var field = fields[fieldName]
+	if (colDefns && colDefns[fieldName] && colDefns[fieldName].toScreen)
+	{
+		value = colDefns[fieldName].toScreen(value, colData)
+	}
+	var tn = document.createTextNode(value)
+	field.appendChild(tn)
+}
+function populateDisplayFromDME(display, data, options)
+{
+	var colDefns = (options && options.colDefns ? options.colDefns : {} )
+
+	var displayFields = findFieldsIn(display);
+	var rows = data.DME.RECORDS.RECORD
+	
+	if (options && options.panel)
+	{
+		var s = ''
+		for (var f in displayFields)
+		{
+			s += f + ":"
+			for (var r = 0; r < rows.length; r++)
+			{
+				var cols = rows[r].COLS.COL
+				if (cols[data.colNumByName[f]])
+				{
+					//var tn = document.createTextNode(cols[data.colNumByName[f]])
+					//displayFields[f].appendChild(tn)
+					updateField(f, displayFields, cols, colDefns, data.colNumByName[f])
+				}
+			}
+		}
+	}
+	else
+	{
+		var displayTemplate = display.getElementsByTagName('tr')[0].cloneNode(true)
+		var fields = getElementsByClassName('mField', displayTemplate)
+		for (var f in fields)
+		{
+			var field = fields[f]
+			while (field.firstChild) 
+				field.removeChild(field.firstChild);
+		}
+				
+		var displayTBody = display.getElementsByTagName('tbody')[1]
+		//if (! displayTBody)
+			//displayTBody = display.getElementsByTagName('tbody')[0]
+		for (var r=0; rows && r < rows.length; r++)
+		{
+			var display = displayTemplate.cloneNode(true)
+			var displayFields = findFieldsIn(display);
+	
+			var s = ''
+			for (var f in displayFields)
+			{
+				//var x = f.split('.');
+				//var rName = x[0]
+				//var cName = x[1]
+				s += f + ":"
+				var cols = rows[r].COLS.COL
+				//alert(data.relColsNumByName[rName][cName])
+				if (cols[data.colNumByName[f]])
+				{
+					updateField(f, displayFields, cols, colDefns, data.colNumByName[f])
+				}
+			}
+			//alert(s)
+			displayTBody.appendChild(display)
+			if (rows[r].RELRECS && options.showSubTable) // have a related table
+			{
+				// create a new row, containing a DIV with a new table containing the related records
+				// assume only one relation for now.
+				for (var relation in options.showSubTable)
+				{
+					var o = {
+						display: document.getElementById('messages').cloneNode(true),
+						options: options.showSubTable[relation].options
+					}
+					
+							
+					var subTable = buildDisplayFromRelation(data, r, relation, o)
+					if (subTable) // got a table
+					{
+						var tr = document.createElement('tr')
+						var td = document.createElement('td') // empty column
+						tr.appendChild(td)
+						var td = document.createElement('td')
+						tr.appendChild(td)
+						td.appendChild(subTable)
+						displayTBody.appendChild(tr)
+					}
+				}
+			}
+		}
+			
+	}
+	
+}
+function buildDisplayFromRelation(data, rowNum, relation, options)
+{
+	// return TABLE
+	//alert('buildDisplayFromRelation')
+	var display = options.display
+	var options = options.options ? options.options : null
+	
+	populateDisplayFromDMERelation(display, data, rowNum, relation, options)
+	return display.getElementsByTagName('table')[0]
+}
+function populateDisplayFromDMERelation(display, data, rowNum, relation, options)
+{
+	var displayTemplate = display.getElementsByTagName('tr')[0].cloneNode(true)
+	var fields = getElementsByClassName('mField', displayTemplate)
+	for (var f in fields)
+	{
+		var field = fields[f]
+		while (field.firstChild) 
+			field.removeChild(field.firstChild);
+	}
+	var colDefns = (options && options.colDefns ? options.colDefns : {} )
+	var displayTBody = display.getElementsByTagName('tbody')[1]
+	//alert(data.DME.RECORDS.RECORD[0].RELRECS.RELREC[0])
+	var rows = data.DME.RECORDS.RECORD[rowNum].RELRECS[0].RELREC
+	//alert(rows.length)
+	for (var r=0; r < rows.length; r++)
+	{
+		var display = displayTemplate.cloneNode(true)
+		var displayFields = findFieldsIn(display);
+
+		var s = ''
+		for (var f in displayFields)
+		{
+			var x = f.split('.');
+			var rName = x[0]
+			var cName = x[1]
+			s += f + ":"
+			var cols = rows[r].COLS.COL
+			//alert(data.relColsNumByName[rName][cName])
+			if (cols[data.relColsNumByName[rName][cName]])
+			{
+				//var tn = document.createTextNode(cols[data.relColsNumByName[rName][cName]])
+				//displayFields[f].appendChild(tn)
+				updateField(f, displayFields, cols, colDefns, data.relColsNumByName[rName][cName])
+			}
+		}
+		//alert(s)
+		displayTBody.appendChild(display)
+	}
+	
+}
+function showVendorInfo(data)
+{
+	data = processDMEData(data)
+	var headerDiv = document.getElementById("header");
+	populateDisplayFromDME(headerDiv, data, {panel: true})
+	//alert(s)
+}	
+function showInvoiceInfo(data)
+{
+	data = processDMEData(data)
+	
+	var headerDiv = document.getElementById("header"); // invoice header
+	populateDisplayFromDME(headerDiv, data, {panel: true})
+	
+	var footerDiv = document.getElementById("detailFooter"); // total
+	populateDisplayFromDME(footerDiv, data, {panel: true})
+	
+	var footerDiv = document.getElementById("footer"); // Invoice data in footer
+	populateDisplayFromDME(footerDiv, data, {panel: true})
+	
+	var options = {
+		colDefns: {
+			'APDISTRIB.DIS-SUB-ACCT': {
+				toScreen: function(x, cols) {
+					//alert(x)
+					if (x == 0)
+						return '-'
+					return x
+				}
+			}
+		}
+	}
+	var detailDiv = document.getElementById("detail"); // distribution lines
+	populateDisplayFromDMERelation(detailDiv, data, 0, 'APIDISTRIB', options)
+	//alert(s)
+}
+function getMessageUsers(data)
+{
+	data = processDMEData(data)
+	var rows = data.DME.RECORDS.RECORD
+	var ids = []
+	for (var r = 0; r < rows.length; r++)
+	{
+		ids.push(rows[r].COLS.COL[4])
+	}
+	with({data: data})
+	var fn = function(x) {
+				//var s = ''; for (var i in x) { s += i + ':' + x[i] + ', '}; alert(s) 
+				addMsgUsersToData(x, data)
+			}
+	//alert(ids.join(','))
+	getRMData(ids, fn)
+}
+function addMsgUsersToData(ids, data)
+{
+	var rows = data.DME.RECORDS.RECORD
+	for (var r = 0; r < rows.length; r++)
+	{
+		var name = ids[rows[r].COLS.COL[4]]
+		if (name)
+			rows[r].COLS.COL[4] += ", [" + name + ']'
+	}
+	
+	showMessages(data)
+}
+function getApprovalUsers(data)
+{
+	data = processDMEData(data)
+	var rows = data.DME.RECORDS.RECORD
+	var fn = function (r0,r1) {var a = parseInt(r0.COLS.COL[7].substr(2)), b = parseInt(r1.COLS.COL[7].substr(2)); return (a - b) }; 
+	
+	if (! rows)
+		return
+	
+	rows.sort(fn)
+	var ids = []
+	for (var r = 0; r < rows.length; r++)
+	{
+		ids.push(rows[r].COLS.COL[5])
+	}
+	with({data: data})
+	var fn = function(x) {
+				//var s = ''; for (var i in x) { s += i + ':' + x[i] + ', '}; alert(s) 
+				addUsersToData(x, data)
+			}
+	//alert(ids.join(','))
+	getRMData(ids, fn)
+}
+function addUsersToData(ids, data)
+{
+	var rows = data.DME.RECORDS.RECORD
+	for (var r = 0; r < rows.length; r++)
+	{
+		var name = ids[rows[r].COLS.COL[5]]
+		if (name)
+			rows[r].COLS.COL[5] += ", [" + name + ']'
+	}
+	
+	showApprovals(data)
+}
+function showApprovals(data)
+{
+	var WFMetricsRows = data.DME.RECORDS.RECORD
+
+
+	var approvalDiv = document.getElementById("approvals");
+
+	var options = {
+		colDefns: {
+			'WF-RM-ID': {
+				toScreen: function (x, cols) {
+					if (x == 'bpmsystem')
+						return ''
+					return x // '[' + x + ']'
+				},
+				//onclick: getRMData,
+				onhover: getRMData
+			},
+			'OPERATION': {
+				toScreen: function (x, cols) {
+					if (x == 'Reject' && cols[5] == 'bpmsystem')
+						return 'ESCALATED';
+					return x
+				}
+			},
+			'TASK': {
+				toScreen: function (x, cols) {
+					if (x == 'NOT_PART_OF_TASK')
+						return ''
+					return x
+				}
+			}
+		}
+	}
+	populateDisplayFromDME(approvalDiv, data, options)
+}
+function showMessages(data)
+{
+	data = processDMEData(data)
+
+	var messagesDiv = document.getElementById("messageHeaders");
+
+	var options = {
+		colDefns: {
+			"MESSAGEDTL.MESSAGE": {
+				toScreen: function (x, cols) {
+				alert(x)
+					return x.replace(/EOL/g, '\n');
+				}
+			}
+		},
+		showSubTable: {
+			'MESSAGEDTL': {
+				options: {
+					colDefns: {
+						"MESSAGEDTL.MESSAGE": {
+							toScreen: function (x, cols) {
+								return x.replace(/EOL/g, '\n');
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	populateDisplayFromDME(messagesDiv, data, options)	
+}
+//<![CDATA[(|({ID}=u0x8im00)({ID}=u0x8zz52))]]></WHERE>
+// <![CDATA[(|({ID}=u0x8im00)({ID}=u0x8zz51)({ID}=u0x8zz51)({ID}=u0x8zz52))]]>
+with ({ids:{}})
+var getRMData = function(id, callBack)
+{
+	var idList = (typeof id == "string" ? [id] : id)
+	//var whereString = "<![CDATA[(|"+xx+")]]>"
+	var clauseString = ""
+	
+	for (var i = 0; i < idList.length; i++)
+	{
+		if (! ids[idList[i]])
+		{
+			clauseString += "({ID}=" + idList[i] + ")"
+		}
+	}
+	if (clauseString)
+	{
+		var whereString = "<![CDATA[(|" + clauseString + ")]]>"
+		var url = "/rmwebapp/RMApiServlet"
+		
+		var data = '<TRANSACTION user="daServletUser" method="getRMQuery"><OBJECT><![CDATA[People]]></OBJECT>'
+		+ '<ATTRIBUTES>'
+		+ '<ATTRIBUTE><![CDATA[ID]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[LastName]]></ATTRIBUTE>'
+		+ '<ATTRIBUTE><![CDATA[FirstName]]></ATTRIBUTE>'
+		+ '</ATTRIBUTES>'
+		+ '<WHERE>' + whereString + '</WHERE>'
+		+ '</TRANSACTION>'
+	
+		var query = {
+			query: "/rmwebapp/RMApiServlet",
+			forcedCols: ['ROW', 'ROWATTR']
+		}
+		with ({callBack: callBack, ids: ids, id:id, idList: idList})
+		var fn = function(data) {
+			var objDoc = data
+			var trans = objDoc.TRANSACTION
+			var row = trans.ROWS.ROW
+			var names = {}
+			//alert(row.length)
+			for (var r =0; r < row.length; r++)
+			{
+				var name = (row[r].ROWATTR[1].VALUE + ", " + row[r].ROWATTR[2].VALUE)
+				var ID = row[r].ROWATTR[0].VALUE
+				//alert(ID + ":" + name)
+				ids[ID] = name
+			}
+			var idReturn = {}
+			for (var i = 0; i < idList.length; i++)
+			{
+				idReturn[idList[i]] = ids[idList[i]]
+				//alert(idList[i] + ":" +  ids[idList[i]])
+			}
+			
+			//alert(idList.length)
+			//return (typeof id == "string" ? ids[id] : idReturn)
+			callBack(typeof id == "string" ? ids[id] : idReturn)
+			//ids[id] = name
+			//node.title = name 
+		}
+		var objDoc = doAjax(query, fn, data)
+		//fn(objDoc)
+		return objDoc
+	}
+
+}
+
+/*
+PROD=DEV901&FILE=APVENMAST&FIELD=VENDOR;VENDOR-VNAME;VENDOR-STATUS;PHONE-PREFIX;PHONE-NUM;PHONE-EXT;FAX-PREFIX;
+FAX-NUM;FAX-EXT;TERM-CODE;TAX-EXEMPT-CD;HOLD-FLAG;E-MAIL-ADDRESS;VDR-ADDR1;VDR-ADDR2;VDR-ADDR3;VDR-ADDR4;VDR-CITY-ADDR5;
+VDR-STATE;VDR-POSTAL;VDR-COUNTY;VDR-COUNTRY;MBL-INT-PREFIX;MOBILE-NUM;MOBILE-EXT;PAY-IMM-FLAG&OUT=CSV&DELIM=~&MAX=2
+*/
+/*
+PROD=DEV901&FILE=APINVOICE&FIELD=COMPANY;VENDOR;INVOICE;SUFFIX;CANCEL-SEQ;CANCEL-DATE;BATCH-NUM;BATCH-DATE;VOUCHER-NBR;
+AUTH-CODE;PROC-LEVEL;ACCR-CODE;INVOICE-TYPE;INVOICE-DTE;PURCH-FR-LOC;PO-NUMBER;PO-RELEASE;PO-CODE;DESCRIPTION;
+BASE-INV-AMT;BASE-ACT-AMT;TRAN-INV-AMT;REC-STATUS;CREATE-DATE;DISTRIB-DATE;PAY-VENDOR;INVOICE-SOURCE;APPROVED-FLAG;
+MATCH-STATUS;REASON-CODE;HANDLING-CODE;LOCATION;TAX-FLAG;INV-STATUS&OUT=CSV&DELIM=~&MAX=2
+*/
+</script>
+<body onload="loadPage()">
+
+<!-- <img src="data:image/gif;base64,R0lGODlhDAAMAIABAP8AAP///yH5BAEKAAEALAAAAAAMAAwAAAIPhBGpeevmXpy02ouz3qkAADs=" onclick="document.getElementById('EmpNum').className = 'vis';"/> -->
+<span id="Filter"></span>
+<div id="content" class="reportPage">
+	<div id="header">
+		<table class="fullWidth">
+			<tr><td class="mTextLeft">
+					<div id="vendorDetails">
+						<div id="APVENMAST.VENDOR-VNAME" class="mField mText mH1"></div><br>
+						<div id="APVENMAST.VDR-ADDR1" class="mField mText"></div>
+						<div id="APVENMAST.VDR-ADDR2" class="mField mText"></div>
+						<div id="APVENMAST.VDR-ADDR3" class="mField mText"></div>
+						<div id="VAPVENMAST.DR-ADDR4" class="mField mText"></div>
+						<span id="APVENMAST.VDR-CITY-ADDR5" class="mField mText"></span>, <span id="VDR-STATE" class="mField mText"></span> <span id="VDR-POSTAL" class="mField mText"></span>
+						<br>
+						<div id="APVENMAST.LOCATION" class="mField mText"></div>
+					</div>
+				</td>
+				<td class="mTextRight">
+					<div id="invoiceDetails" class="mTextLeft">
+						<div class="mText mH1">Invoice</div>
+						<br>
+						<br>
+						<span id="INVOICE-DTE" class="mField mText"></span>
+						<br>
+						<br>
+						<table>
+							<tr>
+							<td>Inv #
+							<td class="mTextRight"><span id="INVOICE" class="mField mText mTextRight mH3"></span>
+							<tr>
+							<td>PO #
+							<td class="mTextRight"><span id="PO-NUMBER" class="mField mText mTextRight mH3"></span>
+						</table>
+					</div>
+				</td>
+			</tr>
+		</table>
+	</div>
+	<p>
+	<div id="detail">
+		<table class="fullWidth">
+			<tbody class="mDetailHeader">
+				<tr>
+					<td class="mTextLeft"><span id="APDISTRIB.COMPANY" class="mField mText">Company</span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.DIS-ACCT-UNIT" class="mField mText">Dept</span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.DIS-ACCOUNT" class="mField mText">Acct</span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.DIS-SUB-ACCT" class="mField mText">Sub</span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.ACTIVITY" class="mField mText">Activity</span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.ACCT-CATEGORY" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="APDISTRIB.DESCRIPTION" class="mField mText">Description</span></td>
+					<td class="mTextRight"><span id="APDISTRIB.ORIG-TRAN-AMT" class="mField mCurrency">Amount</span></td>
+				</tr>
+			</tbody>
+			<tbody class="mDetailRecords">
+			</tbody>
+			<tbody class="mDetailFooter" id="detailFooter">
+				<tr>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+					<td class="mTextRight"><span id="" class="mField mText">Total:</span></td>
+					<td class="mTextRight"><span id="TRAN-INV-AMT" class="mField mCurrency"></span></td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div id="footer">
+		<table class="fullWidth">
+			<tr>
+				<td class="mTextLeft">Terms Code: <span id="TERMS-CD" class="mField mText"></span>
+				<br>Discount Date: <span id="DISC-DATE" class="mField mText"></span>
+				<br>Due Date: <span id="DUE-DATE" class="mField mText"></span></td>
+				<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+				<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+				<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+				<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+			</tr>
+		</table>
+	</div>
+</div>
+<br>
+<div id="bpmInfo" class="reportPage">
+	<div id="approvals">
+		<div class="mText mH1">Approvals</div><br>
+		<table class="fullWidth">
+			<tbody class="mDetailHeader">
+				<tr>
+					<td class="mTextLeft"><span id="WF-RM-ID" class="mField mText">User</span></td>
+					<td class="mTextLeft"><span id="TASK" class="mField mText">(Task)</span></td>
+					<td class="mTextLeft"><span id="START-DATE" class="mField mText">Start</span></td>
+					<td class="mTextLeft"><span id="END-DATE" class="mField mText">End</span></td>
+					<td class="mTextLeft"><span id="OPERATION" class="mField mText">Action</span></td>
+					<td class="mTextLeft"><span id="" class="mField mText"></span></td>
+				</tr>
+			</tbody>
+			<tbody class="mDetailRecords">
+			</tbody>
+		</table>
+	</div>
+
+</div>
+<BR>
+<div id="" class="reportPage">
+	<div id="messageHeaders">
+		<div class="mText mH1">Messages</div><br>
+		<table class="fullWidth">
+			<tbody id="" class="mDetailHeader">
+				<tr>
+					<td class="mTextLeft"><span id="WF-MESSAGE-ID" class="mField mText">Name</span></td>
+					<td class="mTextLeft"><span id="ATTACH-DATE" class="mField mText">Date</span></td>
+					<td class="mTextLeft"><span id="ATTACH-BY" class="mField mText">By</span></td>
+				</tr>
+			</tbody>
+			<tbody id="">
+			</tbody>
+		</table>
+	</div>
+	<div id="messages">
+		<table class="fullWidth">
+			<tbody id="" class="mDetailRecords">
+				<tr>
+					<td class="mTextLeft"><span id="MESSAGEDTL.MESSAGE" class="mField mText"></span></td>
+				</tr>
+			</tbody>
+			<tbody id="">
+			</tbody>
+		</table>
+	</div>
+
+</div>
+</body>
+</html>

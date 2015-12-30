@@ -1,0 +1,76 @@
+<html>
+<head>
+<title>Benefit Handbook</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var manualDir = "/lawson/xhrnet/xml/manuals";
+function startHandBook()
+{
+	// Authenticate the user and retrieve the language preference.
+	authenticate("frameNm='jsreturn'|funcNm='displayHandBook()'|desiredEdit='EM'");
+}
+
+function displayHandBook()
+{
+	stylePage();
+	document.title = getSeaPhrase("BENEFIT_HANDBOOK","ESS");
+	setTaskHeader("header",getSeaPhrase("BENEFIT_HANDBOOK","ESS"),"Benefits");
+
+	// User's language preference in lowercase
+	var userLang = (authUser.language)?authUser.language.replace(" ","_").toLowerCase():"";
+	var userURL;
+
+	// If a handbook file exists for the user's language, load it; otherwise, load the default English version.
+	if(userLang != "" && fileExists(manualDir+"/benefit_handbook_"+userLang+".htm","text/html","text/plain"))
+	{
+		userURL = manualDir+"/benefit_handbook_"+userLang+".htm";
+	}
+	else
+	{
+		userURL = manualDir+"/benefit_handbook.htm";
+	}
+	self.main.location.replace(userURL);
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winHeight = 464;
+	var winWidth = 803;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	mainFrame.style.width = (winWidth - 10) + "px";
+	mainFrame.style.height = (winHeight - 25) + "px";
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();startHandBook()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="main" name="main" src="/lawson/xhrnet/dot.htm" style="position:absolute;height:464px;left:0px;top:32px;width:803px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/benbook.htm,v 1.5.2.10 2011/05/04 21:10:10 brentd Exp $ -->

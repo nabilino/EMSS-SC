@@ -1,0 +1,75 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/index.htm,v 1.11.2.3.26.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Design Studio</title>
+<link type="text/css" id="dsStyle" href="studio.css" rel="stylesheet" />
+<script language="javascript" src="/sso/sso.js"></script>
+<script language="javascript" src="servenv.js"></script>
+<script language="javascript" src="globals.js"></script>
+<script language="javascript" src="common.js"></script>
+<script language="javascript" src="filemgr.js"></script>
+<script language="javascript" src="persist.js"></script>
+<script language="javascript" src="studio.js"></script>
+<script language="javascript" src="menu.js"></script>
+<script language="javascript" src="controls.js"></script>
+<script language="javascript" src="editor.js"></script>
+<script language="javascript" src="colorutil.js"></script>
+<?IMPORT namespace="LWSN" implementation="menu.htc">
+<?IMPORT namespace="LWSN" implementation="menubar.htc">
+<?IMPORT namespace="LWSN" implementation="toolbox.htc">
+<?IMPORT namespace="LWSN" implementation="properties.htc">
+</head>
+
+<body onload="studioOnLoad()" onbeforeunload="studioOnBeforeUnload()" onkeydown="studioOnKeyDown()"
+	style="background-color:appworkspace;">
+
+	<!-- login area -->
+	<div id="loginDiv">
+		<iframe id="loginScr" frameborder="no" scrolling="auto" class="dsViewFrameActive" style="border:0;" src="blank.htm">
+		</iframe>
+	</div>
+
+	<!-- Menu dockable area -->
+	<div id="dockTop" style="display:none;">
+		<LWSN:MENUBAR id="dsMenu" />
+		<LWSN:MENU id="dsMenuClone" />
+	</div>
+
+	<!-- main window area -->
+	<div>
+		<!-- left dockable area (toolbox) -->
+		<span id="dockLeft" style="position:absolute;left:0;top:expression(dockTop.clientHeight+1);width:0%;height:expression(document.body.clientHeight-dockTop.clientHeight-2);background-color:threedface;overflow:auto;"></span>
+
+		<!-- workspace container -->
+		<span id="workSpace" style="display:none;position:absolute;left:expression(dockLeft.clientWidth+2);top:expression(dockTop.clientHeight+2);width:expression(document.body.clientWidth-(dockLeft.clientWidth+dockRight.clientWidth-4));height:expression(document.body.clientHeight-dockTop.clientHeight-4);background-color:appworkspace;cursor:default;">
+			<div id="minTable" style="position:absolute;top:expression(workSpace.clientHeight-minTable.clientHeight+2);left:-2px;"></div>
+		</span>
+
+		<!-- right dockable area (properties) -->
+		<span id="dockRight" style="position:absolute;left:expression(document.body.clientWidth-this.clientWidth);top:expression(dockTop.clientHeight+1);width:0%;height:expression(document.body.clientHeight-dockTop.clientHeight-2);background-color:threedface;overflow:auto;"></span>
+	</div>
+
+</body>
+</html>

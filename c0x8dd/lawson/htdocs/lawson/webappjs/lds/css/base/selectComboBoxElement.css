@@ -1,0 +1,239 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/base/selectComboBoxElement.css,v 1.6.2.4.2.4 2014/01/10 14:29:53 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* --- Combo boxes --- */
+.comboBoxButtonStyler
+{
+  background : transparent url("../../images/03_combobox_button_p_rest.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxButtonRightSideStyler
+{
+  width : 17px;
+}
+.comboBoxButtonRightSideRequiredStyler
+{
+  width : 25px;
+}
+.comboBoxButtonPressStyler
+{
+  background : transparent url("../../images/03_combobox_button_p_pres.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxButtonHoverStyler
+{
+  background : transparent url("../../images/03_combobox_button_p_over.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxSecondaryButtonStyler
+{
+  background : transparent url("../../images/03_combobox_button_s_rest.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxSecondaryButtonPressStyler
+{
+  background : transparent url("../../images/03_combobox_button_s_pres.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxSecondaryButtonHoverStyler
+{
+  background : transparent url("../../images/03_combobox_button_s_over.png") no-repeat top right;
+  height : 19px;
+  width : 17px;
+  padding : 0px;
+  margin : 0px;
+  top : 0px;
+  left : 0px;
+  vertical-align : middle;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+.comboBoxBackgroundStyler
+{
+  background : transparent url("../../images/02_input_field_box-2.png") repeat-x top left;
+  height : 19px;
+  width : 16px;
+  overflow : hidden;
+  margin-right : 1px;
+  display : -moz-inline-stack;
+  display : inline-block;
+  cursor : default;
+}
+select.comboBoxStyler
+{
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  visibility : hidden;
+  cursor : default;
+}
+ul.comboBoxStyler
+{
+  position : absolute;
+  background-color : transparent;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  margin : 0px;
+  padding : 0px;
+  display : none;
+}
+ul.comboBoxOpenStyler
+{
+  position : absolute;
+  background-color : #ffffff;
+  border : 1px solid #9b9d9f;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  margin : 0px;
+  padding : 2px 0px;
+  width : 30px;
+  height : auto;
+  display : block;
+  visibility : visible;
+  top : 0px;
+  left : 0px;
+  overflow : auto;
+  overflow-x : visible;
+  z-index : 999999999;
+  scrollbar-base-color : #c7dbe7;
+}
+ul.comboBoxOpenStyler li
+{
+  display : block;
+  position : relative;
+  margin : 0px 5px;
+  padding : 0px;
+  height : 22px;
+  width : auto;
+  overflow : visible;
+  white-space : nowrap;
+}
+ul.comboBoxOpenStyler li.comboBoxOpenStylerHover
+{
+  background : transparent url("../../images/03_combobox_highlight-2.png");
+  display : block;
+  position : relative;
+  margin : 0px 5px;
+  padding : 0px;
+  height : 22px;
+  width : auto;
+  overflow : visible;
+  white-space : nowrap;
+}
+.comboBoxTextValueStyler
+{
+  position : relative;
+  height : 22px;
+  top : 3px;
+}
+.comboBoxLeftSideStyler
+{
+  background : transparent url("../../images/03_combobox_highlight-1.png") no-repeat top left;
+  height : 22px;
+  width : 4px;
+  position : absolute;
+  visibility : hidden;
+  top : 0px;
+  left : -3px;
+}
+.comboBoxLeftSideStylerHover
+{
+  background : transparent url("../../images/03_combobox_highlight-1.png") no-repeat top left;
+  height : 22px;
+  width : 4px;
+  position : absolute;
+  visibility : visible;
+  top : 0px;
+  left : -3px;
+}
+.comboBoxRightSideStyler
+{
+  background : transparent url("../../images/03_combobox_highlight-3.png") no-repeat top right;
+  height : 22px;
+  width : 4px;
+  position : absolute;
+  visibility : hidden;
+  top : 0px;
+  right : -3px;
+}
+.comboBoxRightSideStylerHover
+{
+  background : transparent url("../../images/03_combobox_highlight-3.png") no-repeat top right;
+  height : 22px;
+  width : 4px;
+  position : absolute;
+  visibility : visible;
+  top : 0px;
+  right : -3px;
+}

@@ -1,0 +1,91 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/admin/rolemgr/SearchTab.htm,v 1.4.2.1.4.3.14.1.2.2 2012/08/08 12:37:29 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the search tab HTML -->
+<table border="0" width="95%" cellpadding="0" cellspacing="0" style="margin:15px;">
+	<tr>
+		<td colspan="2">
+			<label id="lblSrchList" for="selSrchList" class="xTLabel" 
+					style="position:relative;text-align:left;">Search menu list:
+			</label>
+	    </td>
+	</tr>
+	<tr>
+	   <td width="300px;">
+			<select id="selSrchList" class="xTListText" size="10" onchange="window.tabMgr.tabs['tabSearch'].onSelectionChange()" 
+				style="width:280px;height:expression(this.size*17);" >
+			</select>
+		</td>
+		<td valign="top" align="left">
+			<input id="btnSrchNew" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabSearch'].doNew()" value="New">
+			</input><br>
+			<input id="btnSrchRename" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabSearch'].doRename()" value="Rename">
+			</input><br>
+			<input id="btnSrchDelete" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabSearch'].doDelete()" value="Delete">
+			</input><br>
+			<input id="btnSrchUp" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+					onclick="window.tabMgr.tabs['tabSearch'].moveUpDown('up')" value="Up">
+			</input><br>
+			<input id="btnSrchDown" type="button" class="xTToolBarButton" style="width:70px;margin-top:4px;" 
+				onclick="window.tabMgr.tabs['tabSearch'].moveUpDown('down')" value="Down">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblSrchSelected" for="txtSearch" class="xTLabel" 
+					style="position:relative;">Selected menu item:
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<!-- even though the cell is 2 columns wide, if I use a larger width
+			on this textbox, this first column is sized to the width of this (IE bug!) -->
+			<input type="text" id="txtSearch" class="xTTextBox" style="position:relative;width:280px;"
+				onfocus="window.tabMgr.tabs['tabSearch'].onTextFocus(event,this)" 
+				onblur="window.tabMgr.tabs['tabSearch'].onTextBlur(event,this)" value="">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label id="lblSrchType" for="selSrchType" class="xTLabel" 
+					style="position:relative;">Search type:
+			</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<select id="selSrchType" class="xTTextBox" style="width:100px;" onchange="window.tabMgr.tabs['tabSearch'].onTypeChange(event,this)">
+				<option value="LAW_SEARCH">Lawson
+				<option value="WEB_SEARCH">Web
+			</select>
+		</td>
+	</tr>
+
+</table>

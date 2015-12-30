@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LAWXML>
+	<Translate language="frca" version="10.0">
+		<phrase id="MILITARY_SERVICE"><![CDATA[Service militaire]]></phrase>
+		<phrase id="BRANCH"><![CDATA[Succur]]></phrase>
+		<phrase id="SPECIALTY"><![CDATA[Spécialisation]]></phrase>
+		<phrase id="RANK"><![CDATA[Grad]]></phrase>
+		<phrase id="SERVICE_YEARS"><![CDATA[Années service]]></phrase>
+		<phrase id="SERVICE_MONTHS"><![CDATA[Mois service]]></phrase>
+		<phrase id="DISCHARGE_DATE"><![CDATA[Dte libération]]></phrase>
+		<phrase id="DISCHARGE_TYPE"><![CDATA[Type de libération]]></phrase>
+		<phrase id="NATIONAL_GUARD"><![CDATA[Garde nat]]></phrase>
+		<phrase id="RESERVES"><![CDATA[Réserves]]></phrase>
+		<phrase id="DISHONORABLE"><![CDATA[NonHonorable]]></phrase>
+		<phrase id="HONORABLE"><![CDATA[Honorable]]></phrase>
+		<phrase id="LESS_HONORABLE"><![CDATA[MoinsHonorable]]></phrase>
+		<phrase id="MEDICAL"><![CDATA[Médical]]></phrase>
+		<phrase id="OTHER"><![CDATA[Autre]]></phrase>
+		<phrase id="DRAFT_STATUS"><![CDATA[Statut traite]]></phrase>
+		<phrase id="RANK_ATTAINED"><![CDATA[Grade obtenu]]></phrase>
+		<phrase id="BRANCH_REQUIRED"><![CDATA[Branche requise.]]></phrase>
+		<phrase id="NO_MILITARY_RECORDS"><![CDATA[Vous n’avez aucune information sur le service militaire à afficher.]]></phrase>
+		<phrase id="CHANGE_MILITARY_RECORD"><![CDATA[Modifier information sur service militaire]]></phrase>
+		<phrase id="AIR_FORCE"><![CDATA[Armée de l’air]]></phrase>
+		<phrase id="ARMY"><![CDATA[Armée de terre]]></phrase>
+		<phrase id="COAST_GUARD"><![CDATA[Garde côtière]]></phrase>
+		<phrase id="MARINE_CORP"><![CDATA[Marine Corp]]></phrase>
+		<phrase id="NAVY"><![CDATA[Marine]]></phrase>
+		<phrase id="OTHER"><![CDATA[Autre]]></phrase>
+		<phrase id="NO_BALANCE_DETAILS"><![CDATA[Aucun détail de transaction n’existe pour ce solde.]]></phrase>
+		<phrase id="TRAN_TYPE_1"><![CDATA[Ajustement man]]></phrase>
+		<phrase id="TRAN_TYPE_2"><![CDATA[Ajustement man]]></phrase>
+		<phrase id="TRAN_TYPE_3"><![CDATA[Ajustement man]]></phrase>
+		<phrase id="TRAN_TYPE_4"><![CDATA[Ajustement man]]></phrase>
+		<phrase id="TRAN_TYPE_5"><![CDATA[Ajustement man]]></phrase>
+		<phrase id="TRAN_TYPE_11"><![CDATA[Vendu via un régime d’avantages]]></phrase>
+		<phrase id="TRAN_TYPE_12"><![CDATA[Acheté via un régime d’avantages]]></phrase>
+		<phrase id="TRAN_TYPE_21"><![CDATA[Provis]]></phrase>
+		<phrase id="TRAN_TYPE_22"><![CDATA[Affect.]]></phrase>
+		<phrase id="TRAN_TYPE_31"><![CDATA[Déplacé à un solde disponible]]></phrase>
+		<phrase id="TRAN_TYPE_32"><![CDATA[Déplacé à un solde disponible]]></phrase>
+		<phrase id="TRAN_TYPE_33"><![CDATA[Provis]]></phrase>
+		<phrase id="TRAN_TYPE_34"><![CDATA[Affect.]]></phrase>
+		<phrase id="TRAN_TYPE_35"><![CDATA[Solde reporté établi]]></phrase>
+		<phrase id="TRAN_TYPE_42"><![CDATA[Perdu en raison de limites sur solde]]></phrase>
+		<phrase id="TRAN_TYPE_43"><![CDATA[Perdu en raison de limites sur solde]]></phrase>
+		<phrase id="TRAN_TYPE_44"><![CDATA[Perdu en raison de limites reportées]]></phrase>
+		<phrase id="TRAN_TYPE_45"><![CDATA[Perdu - Expiration période de report]]></phrase>
+		<phrase id="TRAN_TYPE_46"><![CDATA[Perdu - Expiration période de report]]></phrase>
+		<phrase id="TRAN_TYPE_47"><![CDATA[Réinitialisation solde retenu (non perdu)]]></phrase>
+		<phrase id="TRAN_TYPE_48"><![CDATA[Perdu en raison de limites sur solde]]></phrase>
+		<phrase id="TRAN_TYPE_51"><![CDATA[Ajustement du partage]]></phrase>
+		<phrase id="TRAN_TYPE_52"><![CDATA[Ajustement du partage]]></phrase>
+		<phrase id="TRAN_TYPE_61"><![CDATA[Ut.]]></phrase>
+		<phrase id="TRAN_TYPE_63"><![CDATA[Pmt. itég.]]></phrase>
+		<phrase id="TRAN_TYPE_71"><![CDATA[Solde supprimé]]></phrase>
+		<phrase id="TRAN_TYPE_72"><![CDATA[Solde supprimé]]></phrase>
+		<phrase id="TRAN_TYPE_73"><![CDATA[Solde supprimé]]></phrase>
+		<phrase id="TRAN_TYPE_74"><![CDATA[Solde supprimé]]></phrase>
+		<phrase id="TRAN_TYPE_75"><![CDATA[Solde supprimé]]></phrase>
+		<phrase id="TRAN_TYPE_81"><![CDATA[Transfert depuis un autre solde]]></phrase>
+		<phrase id="TRAN_TYPE_82"><![CDATA[Transfert depuis un autre solde]]></phrase>
+		<phrase id="TRAN_TYPE_83"><![CDATA[Transfert depuis un autre solde]]></phrase>
+		<phrase id="TRAN_TYPE_84"><![CDATA[Transfert depuis un autre solde]]></phrase>
+		<phrase id="TRAN_TYPE_85"><![CDATA[Transfert depuis un autre solde]]></phrase>
+		<phrase id="TRAN_TYPE_91"><![CDATA[Détail consolidé]]></phrase>
+		<phrase id="TRAN_TYPE_92"><![CDATA[Détail consolidé]]></phrase>
+		<phrase id="TRAN_TYPE_93"><![CDATA[Détail consolidé]]></phrase>
+		<phrase id="TRAN_TYPE_94"><![CDATA[Détail consolidé]]></phrase>
+		<phrase id="TRAN_TYPE_95"><![CDATA[Détail consolidé]]></phrase>		
+		<phrase id="CONTNBR_0"><![CDATA[Numéros des autres personnes-ressources]]></phrase>
+		<phrase id="CONTNBR_1"><![CDATA[Description]]></phrase>
+		<phrase id="CONTNBR_2"><![CDATA[Numéro du contact]]></phrase>
+		<phrase id="CONTNBR_3"><![CDATA[Modifier les détails du numéro de contact]]></phrase>
+		<phrase id="CONTNBR_4"><![CDATA[Numéros du contact]]></phrase>
+		<phrase id="CONTNBR_5"><![CDATA[Pour ajouter un numéro de contact, cliquez sur le bouton « Ajouter ».]]></phrase>
+		<phrase id="CONTNBR_6"><![CDATA[Cliquez sur un type de numéro de téléphone ci-dessous pour modifier ou afficher les informations supplémentaires relatives aux numéros de contact.]]></phrase>
+		<phrase id="CONTNBR_7"><![CDATA[Type de pers.-ress.]]></phrase>
+		<phrase id="CONTNBR_8"><![CDATA[Mise à jour des détails de contact]]></phrase>
+		<phrase id="CONTNBR_9"><![CDATA[Les renseignements relatifs aux contacts ont été mis à jour.]]></phrase>
+		<phrase id="CONTNBR_10"><![CDATA[Voulez-vous vraiment supprimer ce numéro de contact?]]></phrase>
+		<phrase id="CONTNBR_11"><![CDATA[Les renseignements relatifs aux contacts ont été ajoutés.]]></phrase>
+		<phrase id="CONTNBR_12"><![CDATA[Les renseignements relatifs aux contacts ont été supprimés.]]></phrase>
+		<phrase id="CONTNBR_13"><![CDATA[Cet employé n’a indiqué aucun numéro de contact supplémentaire.]]></phrase>
+		<phrase id="CONTNBR_14"><![CDATA[Cliquez sur un type de numéro de téléphone ci-dessous pour afficher les informations supplémentaires relatives aux numéros de contact.]]></phrase>
+		<phrase id="CONTNBR_15"><![CDATA[Type de contact requis.]]></phrase>
+		<phrase id="CONTNBR_16"><![CDATA[Numéro de téléphone requis.]]></phrase>
+		<phrase id="SERVICE_DATE"><![CDATA[Date service]]></phrase>
+		<phrase id="SORT_BY_SERVICE_DATE"><![CDATA[Trier par date de service]]></phrase>
+		<phrase id="PERSONAL_EMAIL"><![CDATA[Courriel personnel]]></phrase>
+		<phrase id="WORK_CONTACTS"><![CDATA[Contacts professionnels]]></phrase>
+		<phrase id="CONTACT_DETAILS"><![CDATA[Détails personne-ressource]]></phrase>
+		<phrase id="EMPLOYEE_STATUS"><![CDATA[Statut de l'employé]]></phrase>
+		<phrase id="FTE"><![CDATA[ETP]]></phrase>
+		<phrase id="TOTAL_FTE"><![CDATA[Total ETP]]></phrase>
+		<phrase id="INVALID_SSN"><![CDATA[Le numéro d’assurance sociale entré n'est pas valide pour votre pays.]]></phrase>
+		<phrase id="PR_LOCKED_OUT"><![CDATA[Accès refusé.  Un cycle de paie est en cours.  Veuillez réessayer ultérieurement.]]></phrase>
+	</Translate>
+</LAWXML>
+<!-- Version: 8-)@(#)@@PRODNUM@.@BUILDNUM@ -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/lang/frca/Attic/seamsgs.xml,v 1.1.4.9.2.1 2012/08/24 20:01:36 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

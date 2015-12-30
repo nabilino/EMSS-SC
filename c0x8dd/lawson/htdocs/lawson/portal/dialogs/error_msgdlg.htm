@@ -1,0 +1,66 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/dialogs/Attic/error_msgdlg.htm,v 1.1.2.2.14.1.2.2 2012/08/08 12:37:24 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Portal Message</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="error_msgdlg.js"></script>
+<link id="LinkStyle" type="text/css" rel="stylesheet" href="dlg.css"></link>
+</head>
+
+<body onload="initMsgDlg()" onkeydown="msgOnKeyDown()" style="visibility:hidden;background-color:threedface;">
+		
+	<table id="msgTable" border="0" style="position:absolute;left:0;top:10px;">
+	<tr>
+	<td width="60px" align="center" valign="top">
+		<img id="imgGraphic" src=""></img>
+	</td>
+	<td align="left" valign="center">
+		<label id="lblPrompt" class="dlgLabel" style="text-align:left;overflow:visible;"></label>
+	</td>
+	</tr>
+	</table>
+
+	<!-- details area -->
+	<div id="detailsDiv" style="position:absolute;left:10;top:0;width:520px;height:320px;">
+		<hr style="width:100%;">
+		<textarea id="txtDetails" class="dlgLabel" style="text-align:left;height:300px;width:100%;overflow:auto;"></textarea>
+		<br>
+	</div>
+
+	<!-- button bar area -->
+	<div style="position:absolute;left:0;top:expression(document.body.clientHeight-30);">
+		<table id="btnTable" border="0">
+		<tr>
+		<td valign="top" align="center">
+			<input type="button" id="btnOK" class="dlgButton" onclick="onClick(this)" value="OK" style="width:70px;"></input>
+			<input type="button" id="btnDetails" class="dlgButton" onclick="onClick(this)" value="Show Details" style="width:85px;"></input>
+			<input type="button" id="btnPrint" class="dlgButton" onclick="onClick(this)" value="Print" style="width:70px;"></input>
+		</td>
+		</tr>
+		</table>
+	</div>
+
+</body>
+</html>

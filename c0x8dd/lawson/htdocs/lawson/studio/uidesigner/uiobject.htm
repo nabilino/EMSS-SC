@@ -1,0 +1,88 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/uiobject.htm,v 1.3.2.1.26.2 2012/08/08 12:48:51 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+
+<head>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="uidesigner.css"></link>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript">
+
+var editor = null;
+
+//-----------------------------------------------------------------------------
+function onload()
+{
+	var params = window.location.search.replace("?", "");
+	params = params.split("&");
+
+	var mode = (params.length > 0 && params[0].length > 0) ? params[0] : "wysiwyg";
+	var defaultView = (params.length > 1 && params[1].length > 0) ? params[1] : "n";
+							
+	editor = new top.WYSIWYG();
+	editor.initialize(mode, window.frameElement.contentWindow.document, false);
+	parent.dsWorkspace.registerView(window.frameElement.id.replace("view_", ""), editor, defaultView);
+}
+//-----------------------------------------------------------------------------
+</script>
+</head>
+
+<body id="editorBody" onload="onload()" onscroll="parent.dsWorkspace.activate(event)" 
+		style="background-color:appworkspace;cursor:default;overflow:hidden;">
+
+	<!-- title/button bar area -->
+ 	<DIV id="objTitleBar" class="uiViewToolbar" contenteditable="false" isSelectable="0" isMoveable="0" isResizable="0" 
+ 				ondblclick="parent.myObject.selectBaseObject()" onselectstart="return false;"
+ 				style="position:absolute;top:0;left:0;height:30px;width:100%;padding:0px;">
+		<table style="position:relative;margin:0;" cellpadding="0" cellspacing="0">
+		<tr>
+			<td valign="center" align="left">
+				<input type="button" id="btnParentObj" class="uiDlgButton" 
+					style="position:relative;width:80px;font-size:7pt;margin-top:2px;margin-top:4px;margin-left:4px;" 
+					value="Parent Object" title="Design view for the parent object">
+				</input>
+				<input type="button" id="btnChildObj" class="uiDlgButton" 
+					style="position:relative;width:80px;font-size:7pt;margin-top:2px;margin-top:4px;" 
+					value="Child Object" title="Design view for the selected child object" disabled>
+				</input>
+				<input type="button" id="btnObjProps" class="uiDlgButton" 
+					style="position:relative;width:80px;font-size:7pt;margin-top:2px;margin-top:4px;" 
+					value="Properties" title="Display properties of current view object">
+				</input>
+			</td>
+			<td valign="center" align="left">
+				<span>&nbsp;&nbsp;&nbsp;</span>
+				<span class="uiViewToolbarLabel" id="lblObject" align="left" style="position:relative;">Object:&nbsp;</span>
+				<span class="uiViewToolbarLabel" id="lblObjectName" align="left" style="position:relative;">name</span>
+			</td>
+		</tr>
+		</table>
+	</DIV>
+
+	<!-- main drawing area --> 	
+ 	<DIV id="objFrame" isSelectable="0" isMoveable="0" isResizable="0" contentEditable="true" 
+		style="position:absolute;overflow:auto;background-color:appworkspace;cursor:default;left:0;top:expression(objTitleBar.offsetHeight);width:100%;height:expression(document.body.offsetHeight-objTitleBar.offsetHeight);">
+ 	</DIV>
+
+</body>
+</html>

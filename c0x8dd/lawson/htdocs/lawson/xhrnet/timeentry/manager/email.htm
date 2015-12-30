@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Email</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables.
+//
+var email = "";	// address of recipient
+var EmailIsFrom = ""; // address of sender
+if (window.location.search)
+{
+	email = getVarFromString("to", window.location.search);
+	EmailIsFrom = getVarFromString("from", window.location.search);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Initialize function. Splits the prm values and places them in the appropriate variables.
+//
+function Initialize()
+{
+	authUser = null;
+	try
+	{
+		authUser = opener.authUser;	// copies the authUser object from the caller window.
+	}
+	catch(e)
+	{
+		authUser = null;
+	}
+	if (!authUser || typeof(authUser.prodline) == "undefined" || typeof(authUser.prodline) == "unknown")
+	{
+		authenticate("frameNm='jsreturn'|funcNm='ContinueInit()'|sysenv=true|desiredEdit='EM'");
+		return;
+	}
+	ContinueInit();
+}
+
+function ContinueInit()
+{
+	var title = getSeaPhrase("EMAIL","TE");
+	stylePage(true, title);
+	setWinTitle(title);
+	setWinTitle(title, self.MAIN);
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), Draw);
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Draw function. The "SendTo" box will contain the address of the recipient. If
+// the recipient does not have an address then this box will be blank to reflect that.
+//
+function Draw()
+{
+	if (email == "null") //if recipient does not have an address then set it to blank.
+		email = "";
+	var html = '<div style="width:100%;height:100%;text-align:center;padding:5px"><div styler="groupbox">'
+	html += '<form name="frmEmail" onsubmit="return false;">'
+	html += '<table align="center" border="0" cellspacing="0" cellpadding="0" style="text-align:center;width:auto" role="presentation">'
+	html += '<tr><td class="fieldlabelbold"><label for="txtTo">'+getSeaPhrase("EMAIL_ADDRESS","TE")+'</label></td><td class="plaintablecell"><input class="inputbox" type="text" size="75" maxlength="80" id="txtTo" name="txtTo" value="'+email+'"></td></tr>'
+	html += '<tr><td class="fieldlabelbold" style="white-space:nowrap">'+getSeaPhrase("SUBJECT","TE")+'</td><td class="plaintablecell">'+getSeaPhrase("TIME_ENTRY","TE")+'</td></tr>'
+	html += '<tr><td class="fieldlabelbold"><label for="txtEmail">'+getSeaPhrase("EMAIL_MESSAGE","TE")+'</label></td><td class="plaintablecell">'
+	html += '<textarea class="inputbox" cols="75" rows="14" id="txtEmail" name="txtEmail" wrap></textarea></td></tr>'
+	html += '<tr><td class="plaintablecell" colspan="2" style="text-align:center;white-space:nowrap">'
+	html += uiButton(getSeaPhrase("SEND_EMAIL","TE"),"parent.SendEmail();return false")
+	html += uiButton(getSeaPhrase("CLEAR_FORM","TE"),"parent.MAIN.document.frmEmail.txtEmail.value='';return false")
+	html += uiButton(getSeaPhrase("QUIT","TE"),"parent.close();return false")
+	html += '</td></tr></table></form></div></div>'
+	self.MAIN.document.getElementById("paneBody1").innerHTML = html;
+	self.MAIN.stylePage();
+	document.getElementById("MAIN").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.MAIN)]));
+	fitToScreen();
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Send form information to the UNIX program sendmail using the email.js object definitions
+//
+function SendEmail()
+{
+	var mailForm = self.MAIN.document.forms["frmEmail"];
+	var mailText = mailForm.elements["txtEmail"].value;
+	var SendingTo = mailForm.elements["txtTo"].value;
+	var Subject = getSeaPhrase("SUBJECT_TE","TE");
+	clearRequiredField(mailForm.elements["txtTo"]);
+	clearRequiredField(mailForm.elements["txtEmail"]);
+	if (NonSpace(SendingTo) == 0) 
+	{
+		setRequiredField(mailForm.elements["txtTo"], getSeaPhrase("ENTER_EMAIL_ADDR","TE"));	
+		return;
+	}
+	else if (NonSpace(mailText) == 0) 
+	{
+		setRequiredField(mailForm.elements["txtEmail"], getSeaPhrase("ENTER_EMAIL_MSG","TE"));
+		return;
+	}
+	if (!EmailIsFrom || EmailIsFrom == "null")
+		EmailIsFrom = SendingTo;
+	var obj = new EMAILObject(SendingTo,EmailIsFrom);
+	obj.subject = Subject;
+	obj.message = mailText;
+	showWaitAlert(getSeaPhrase("SENDING_EMAIL","TE"), function(){EMAIL(obj,"jsreturn");});
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Function that is called when the email has successfully been delivered.
+//
+function cgiEmailDone()
+{
+	removeWaitAlert();
+	seaPageMessage(getSeaPhrase("EMAIL_SENT","TE"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);	
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";	
+}
+</script>
+</head>
+<body onload="Initialize()" onresize="fitToScreen()">
+	<iframe name="MAIN" id="MAIN" title="Main Content" level="1" tabindex="0" src="/lawson/xhrnet/ui/plain.htm"  style="visibility:hidden;width:100%;height:100%" allowtransparency="yes" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/manager/email.htm,v 1.10.2.39 2014/02/19 23:04:11 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

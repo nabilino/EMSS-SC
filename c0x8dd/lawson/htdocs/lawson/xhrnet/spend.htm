@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Spending Accounts</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script language="javascript1.2" src="/lawson/webappjs/common.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/commonHTTP.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/data.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/esscommon80.js"></script>
+<script language="javascript1.2" src="/lawson/webappjs/user.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/waitalert.js"></script>
+<script language="javascript1.2" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var RSBens = new Array();
+var AnnualRSBens = new Array();
+var TmpRSBens = new Array();
+var appObj;
+
+function OpenSpendingAccounts()
+{
+	authenticate("frameNm='jsreturn'|funcNm='StartApp()'|desiredEdit='EM'");
+}
+
+function StartApp()
+{
+	stylePage();
+	var title = getSeaPhrase("SPENDING_ACCOUNTS","BEN");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Benefits");
+	showWaitAlert(getSeaPhrase("PROCESSING","BEN"), GetRSBenefits);	
+}
+
+function GetRSBenefits()
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       	setTimeout("GetRSBenefits()", 10);
+       	return;
+	}
+	var dmeObj = new DMEObject(authUser.prodline, "benefit");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "benset4";
+	dmeObj.field = "flex-plan;plan-option;plan-code;start-date;stop-date;annual-amt;bond-ded-amt;flex-plan.entry-mmdd;plan.desc";
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.00")
+		dmeObj.field += ";emp-ytd-cont";
+	else
+		dmeObj.field += ";ytd-cont"
+	dmeObj.key = parseInt(authUser.company,10)+"="+ parseFloat(authUser.employee)+"="+"RS";
+	dmeObj.max = "600";
+	dmeObj.cond = "non-waive";
+	DME(dmeObj, "jsreturn");
+}
+
+function DspBenefit()
+{
+	RSBens = RSBens.concat(self.jsreturn.record);
+	if (self.jsreturn.Next) 
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+		return;
+	}
+	AnnualRSBens = new Array();
+	// Spending Accounts Main Frame
+	var rsBenHtml = '<table id="fsaTbl" class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_25","BEN")+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("SPENDING_ACCOUNTS","BEN")+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th></tr>'
+	for (var i=0; i<RSBens.length; i++)
+	{
+		if (NonSpace(RSBens[i].flex_plan_entry_mmdd) == 0 || parseFloat(RSBens[i].flex_plan_entry_mmdd) == 0) 
+		{
+			// no flex plan is attached with this benefit - we will be using benefit's original start date and stop date
+			RSBens[i].flex_start_date = parseFloat(formjsDate(formatDME(RSBens[i].start_date)));
+			if (NonSpace(RSBens[i].stop_date) == 0)
+				RSBens[i].flex_stop_date = "00000000";
+			else
+				RSBens[i].flex_stop_date = parseFloat(formjsDate(formatDME(RSBens[i].stop_date)));
+		} 
+		else 
+		{
+			var tmpDate = parseFloat(setPlanStart(formjsDate(formatDME(RSBens[i].start_date)), RSBens[i].flex_plan_entry_mmdd));
+			RSBens[i].flex_start_date = tmpDate;
+			RSBens[i].flex_stop_date = parseFloat(setPlanStop(String(tmpDate)));
+		}
+		if (i > 0 && RSBens[i].plan_code == RSBens[i-1].plan_code && parseFloat(formjsDate(formatDME(RSBens[i].start_date))) < parseFloat(RSBens[i-1].flex_stop_date))
+		{
+		}
+		else
+			AnnualRSBens[AnnualRSBens.length] = RSBens[i];
+	}
+	// sort by descending start date so they display in ascending start date order in the reverse loop below
+	AnnualRSBens.sort(sortByDesc);
+	for (var i=AnnualRSBens.length-1,j=0; i>=0; i--,j++)
+	{
+		var tip = AnnualRSBens[i].plan_desc+' - '+getSeaPhrase("VIEW_DTL_FOR_PLAN","BEN");
+		rsBenHtml += '<tr><td class="plaintablecellborder" nowrap>'
+		+ '<a href="javascript:parent.FillDetail('+i+','+j+');" title="'+tip+'">'
+		+ ((AnnualRSBens[i].plan_desc)?AnnualRSBens[i].plan_desc:'&nbsp;')+'<span class="offscreen"> - '+getSeaPhrase("VIEW_DTL_FOR_PLAN","BEN")+'</span></a></td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((AnnualRSBens[i].flex_start_date)?FormatDte4(String(AnnualRSBens[i].flex_start_date)):'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((AnnualRSBens[i].flex_stop_date)?FormatDte4(String(AnnualRSBens[i].flex_stop_date)):'&nbsp;')+'</td></tr>'
+	}
+	rsBenHtml += '</table>'
+	try 
+	{
+		self.LEFT.document.getElementById("paneHeader").innerHTML = getSeaPhrase("FSA_BENEFITS","BEN");
+		if (RSBens.length == 0)
+			self.LEFT.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelboldleft">'+getSeaPhrase("NO_FLEX_SPND_ACNT_BEN","BEN")+'</div>';
+		else
+			self.LEFT.document.getElementById("paneBody").innerHTML = rsBenHtml;
+	}
+	catch(e) {}
+	self.LEFT.stylePage();
+	self.LEFT.setLayerSizes();
+	document.getElementById("LEFT").style.visibility = "visible";
+	// Spending Accounts Summary Frame
+	var SummaryHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_26","BEN",[""])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_22","BEN",[""])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_ANUL_CNTRIBUTION","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_YTD_CNTRIBUTION","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_REIMBRSMNT","BEN")+'</th>'		
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("REMANING_BALANC","BEN")+'</th>'	
+	+ '</tr></table>'
+	try 
+	{
+		self.SUMMARY.document.getElementById("paneHeader").innerHTML = getSeaPhrase("SUMMARY","BEN");
+		self.SUMMARY.document.getElementById("paneBody").innerHTML = SummaryHtml;
+	}
+	catch(e) {}
+	self.SUMMARY.stylePage();
+	self.SUMMARY.setLayerSizes();
+	document.getElementById("SUMMARY").style.visibility = "visible";
+	// Spending Accounts Detail Frame
+	var DetailHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_27","BEN",[""])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_23","BEN",[""])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PAY_PERIOD_AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("ANNUAL_AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("YEAR_TO_DATE","BEN")+'</th>'
+	+ '</tr></table>'
+	try 
+	{
+		self.DETAIL.document.getElementById("paneHeader").innerHTML = getSeaPhrase("DETAIL","BEN");
+		self.DETAIL.document.getElementById("paneBody").innerHTML = DetailHtml;
+	}
+	catch(e) {}
+	self.DETAIL.stylePage();
+	self.DETAIL.setLayerSizes();
+	document.getElementById("DETAIL").style.visibility = "visible";
+	// Spending Accounts Reimbursements Frame
+	var TransactionsHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_28","BEN",[""])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_24","BEN",[""])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("CHECK_NBR","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DESCRIPTION","BEN")+'</th>'
+	+ '</tr></table>'
+	try 
+	{
+		self.TRANSACTIONS.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REIMBURSEMENTS","BEN");
+		self.TRANSACTIONS.document.getElementById("paneBody").innerHTML = TransactionsHtml;
+	}
+	catch(e) {}
+	self.TRANSACTIONS.stylePage();
+	self.TRANSACTIONS.setLayerSizes();
+	document.getElementById("TRANSACTIONS").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.LEFT.getWinTitle()]));
+	fitToScreen();
+}
+
+// Descending description sort
+function sortByDesc(obj1, obj2)
+{
+	var desc1 = obj1.plan_desc;
+	var desc2 = obj2.plan_desc;
+	if (desc1 > desc2)
+		return -1;
+	else if (desc1 < desc2)
+		return 1;
+	else
+		return 0;
+}
+
+function setPlanStart(startdt,mmdd)
+{
+	var yyyy = '';
+	yyyy = parseFloat(startdt.substring(0,4));
+	Smmdd = parseFloat(startdt.substring(4,startdt.length));
+	if (Smmdd < parseFloat(mmdd))
+	{
+		yyyy--;
+	}
+	mmdd = String(parseFloat(mmdd));
+	if (mmdd.length == 3)
+	{
+		mmdd = "0" + mmdd
+	}
+	startdt = String(yyyy) + mmdd;
+	return startdt
+}
+
+function setPlanStop(startdt)
+{
+	var yr = parseFloat(startdt.substring(0,4));
+	yr++;
+	return PreviousDate(String(yr) + startdt.substring(4,8));
+}
+
+function FillDetail(recIndex,rowNbr)
+{
+	var nextFunc = function()
+	{
+		activateTableRow("fsaTbl",rowNbr,self.LEFT);
+		TmpRSBens = new Array();
+		for (var x=0; x<RSBens.length; x++)
+		{
+			if (RSBens[x].flex_start_date == AnnualRSBens[recIndex].flex_start_date && RSBens[x].plan_code == AnnualRSBens[recIndex].plan_code)
+				TmpRSBens[TmpRSBens.length] = RSBens[x];
+		}
+		var dmeObj = new DMEObject(authUser.prodline, "restrans");
+		dmeObj.out = "JAVASCRIPT";
+		dmeObj.index = "rtrset2";
+		dmeObj.field = "date;start-date;check-nbr;trans-amt;desc";
+		dmeObj.key = parseInt(authUser.company,10)+"="+parseFloat(authUser.employee)+"="+AnnualRSBens[recIndex].plan_code+"="+AnnualRSBens[recIndex].flex_start_date+"->"+AnnualRSBens[recIndex].flex_stop_date;
+		dmeObj.sortdesc = "date";
+		dmeObj.max = "600";
+		dmeObj.func="DspRestrans("+recIndex+")"
+		DME(dmeObj, "jsreturn");
+	};
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+}
+
+function DspRestrans(n)
+{
+	var RSTrans = self.jsreturn.record;
+	var TotalReimbursements = 0;
+	var TotalAnnualCont = 0;
+	var TotalYTDCont = 0;
+	var RemainingBalance = 0;
+	// Detail
+	var DetailHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_27","BEN",[AnnualRSBens[n].plan_desc])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_23","BEN",[AnnualRSBens[n].plan_desc])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("STOP_DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("PAY_PERIOD_AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("ANNUAL_AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("YEAR_TO_DATE","BEN")+'</th></tr>'
+	for (var i=0; i<TmpRSBens.length; i++)
+	{
+		DetailHtml += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'+((TmpRSBens[i].start_date)?TmpRSBens[i].start_date:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>'+((TmpRSBens[i].stop_date)?TmpRSBens[i].stop_date:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((TmpRSBens[i].bond_ded_amt)?TmpRSBens[i].bond_ded_amt:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((TmpRSBens[i].annual_amt)?TmpRSBens[i].annual_amt:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.00")
+		{
+			DetailHtml += ((TmpRSBens[i].emp_ytd_cont)?TmpRSBens[i].emp_ytd_cont:'&nbsp;')
+			TotalYTDCont += parseFloat(TmpRSBens[i].emp_ytd_cont)
+		}
+		else
+		{
+			DetailHtml += ((TmpRSBens[i].ytd_cont)?TmpRSBens[i].ytd_cont:'&nbsp;')
+			TotalYTDCont += parseFloat(TmpRSBens[i].ytd_cont)
+		}
+		DetailHtml += '</td></tr>'
+		TotalAnnualCont += parseFloat(TmpRSBens[i].annual_amt)
+	}
+	TotalAnnualCont = roundToDecimal(TotalAnnualCont,2);
+	TotalYTDCont = roundToDecimal(TotalYTDCont,2);
+	if (TmpRSBens.length > 1)
+	{
+		DetailHtml += '<tr><td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td><th scope="row" class="plaintableheaderborderlite">'+getSeaPhrase("TOTAL","BEN")+'</th>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((TotalAnnualCont)?TotalAnnualCont:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((TotalYTDCont)?TotalYTDCont:'&nbsp;')+'</td></tr>'
+	}
+	DetailHtml += '</table>'
+	try 
+	{
+		self.DETAIL.document.getElementById("paneBody").innerHTML = DetailHtml;
+	}
+	catch(e) {}
+	self.DETAIL.stylePage();
+	// Reimbursements
+	var TransactionsHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_28","BEN",[AnnualRSBens[n].plan_desc])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_24","BEN",[AnnualRSBens[n].plan_desc])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DATE","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("CHECK_NBR","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("AMOUNT","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("DESCRIPTION","BEN")+'</th></tr>'
+	var minusSign = "";
+	var tranAmt = "";
+	for (var i=0; i<RSTrans.length; i++)
+	{
+		tranAmt = RSTrans[i].trans_amt;
+		minusSign = tranAmt.indexOf("-");
+		if (minusSign != -1)
+			tranAmt = parseFloat(tranAmt)*(-1);
+		TotalReimbursements += parseFloat(tranAmt);
+		TransactionsHtml += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'+((RSTrans[i].date)?RSTrans[i].date:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((RSTrans[i].check_nbr)?RSTrans[i].check_nbr:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((tranAmt)?tranAmt:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((RSTrans[i].desc)?RSTrans[i].desc:'&nbsp;')+'</td></tr>'
+	}
+	TotalReimbursements = roundToDecimal(TotalReimbursements,2);
+	if (RSTrans.length > 1)
+	{
+		TransactionsHtml += '<tr><td class="plaintablecellborder">&nbsp;</td><th scope="row" class="plaintableheaderborderlite">'+getSeaPhrase("TOTAL","BEN")+'</th>'
+		+ '<td class="plaintablecellborderright" nowrap>'+((TotalReimbursements)?TotalReimbursements:'&nbsp;')+'</td>'
+		+ '<td class="plaintablecellborder">&nbsp;</td></tr>'
+	}
+	TransactionsHtml += '</table>'
+	if (RSTrans.length == 0)
+		TransactionsHtml = '<div class="fieldlabelboldleft">'+getSeaPhrase("NO_FLEX_SPND_ACNT_REIMBRSMNT_FOR_THIS_PLAN","BEN")+'</div>'
+	try 
+	{
+		self.TRANSACTIONS.document.getElementById("paneBody").innerHTML = TransactionsHtml;
+	}
+	catch(e) {}
+	self.TRANSACTIONS.stylePage();
+	// Summary
+	RemainingBalance = roundToDecimal(TotalYTDCont-TotalReimbursements,2);
+	var SummaryHtml = '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%" styler="list" summary="'+getSeaPhrase("TSUM_26","BEN",[AnnualRSBens[n].plan_desc])+'">'
+	+ '<caption class="offscreen">'+getSeaPhrase("TCAP_22","BEN",[AnnualRSBens[n].plan_desc])+'</caption>'
+	+ '<tr><th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_ANUL_CNTRIBUTION","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_YTD_CNTRIBUTION","BEN")+'</th>'
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("TOTL_REIMBRSMNT","BEN")+'</th>'		
+	+ '<th scope="col" class="plaintableheaderborderlite" style="text-align:center">'+getSeaPhrase("REMANING_BALANC","BEN")+'</th>'	
+	+ '</tr><tr><td class="plaintablecellborderdisplayright" nowrap><span id="dtlAnnualCont">'+((TotalAnnualCont)?TotalAnnualCont:'&nbsp;')+'</span></td>'
+	+ '<td class="plaintablecellborderdisplayright" nowrap><span id="dtlYTDCont">'+((TotalYTDCont)?TotalYTDCont:'&nbsp;')+'</span></td>'
+	+ '<td class="plaintablecellborderdisplayright" nowrap><span id="dtlReimbursements">'+((TotalReimbursements)?TotalReimbursements:'&nbsp;')+'</span></td>'
+	+ '<td class="plaintablecellborderdisplayright" nowrap><span id="dtlRemaining">'+((RemainingBalance)?RemainingBalance:'&nbsp;')+'</span></td>'
+	+ '</tr></table>';
+	try 
+	{
+		self.SUMMARY.document.getElementById("paneHeader").innerHTML = getSeaPhrase("SUMMARY","BEN");
+		self.SUMMARY.document.getElementById("paneBody").innerHTML = SummaryHtml;
+		self.SUMMARY.stylePage();
+	}
+	catch(e) {}
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.SUMMARY.getWinTitle()])+' '+getSeaPhrase("CNT_UPD_FRM","SEA",[self.DETAIL.getWinTitle()])+' '+getSeaPhrase("CNT_UPD_FRM","SEA",[self.TRANSACTIONS.getWinTitle()]));
+	fitToScreen();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var leftFrame = document.getElementById("LEFT");
+	var summaryFrame = document.getElementById("SUMMARY");
+	var detailFrame = document.getElementById("DETAIL");
+	var transactionsFrame = document.getElementById("TRANSACTIONS");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentLeftWidth;
+	var contentLeftWidthBorder;
+	var contentRightWidth;
+	var contentRightWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	var contentMiddleHeightBorder;
+	var contentMiddleHeight;
+	if (window.styler && window.styler.showInfor)
+	{		
+		contentLeftWidth = parseInt(winWidth*.40,10) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.60,10) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;			
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;		
+		contentMiddleHeight = parseInt(winHeight*.33,10) - 40;
+		contentMiddleHeightBorder = contentMiddleHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.40,10) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.60,10) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;			
+		contentMiddleHeight = parseInt(winHeight*.33,10) - 50;	
+		contentMiddleHeightBorder = contentMiddleHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.40,10) - 10;
+		contentLeftWidthBorder = contentLeftWidth;
+		contentRightWidth = parseInt(winWidth*.60,10) - 10;
+		contentRightWidthBorder = contentRightWidth;
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+		contentMiddleHeight = parseInt(winHeight*.33,10) - 40;
+		contentMiddleHeightBorder = contentMiddleHeight + 24;			
+	}
+	leftFrame.style.width = parseInt(winWidth*.40,10) + "px";
+	leftFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.LEFT.onresize && self.LEFT.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.LEFT.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.LEFT.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.LEFT.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.LEFT.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.LEFT.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.LEFT.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.LEFT.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	summaryFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	summaryFrame.style.height = parseInt(winHeight*.33,10) + "px";	
+	try
+	{
+		if (self.SUMMARY.onresize && self.SUMMARY.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.SUMMARY.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.SUMMARY.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.SUMMARY.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.SUMMARY.document.getElementById("paneBorder").style.height = contentMiddleHeightBorder + "px";
+		self.SUMMARY.document.getElementById("paneBodyBorder").style.height = contentMiddleHeight + "px";
+		self.SUMMARY.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.SUMMARY.document.getElementById("paneBody").style.height = contentMiddleHeight + "px";
+	}
+	catch(e) {}	
+	detailFrame.style.top = (parseInt(winHeight*.33,10) + 25) + "px";
+	detailFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	detailFrame.style.height = parseInt(winHeight*.33,10) + "px";	
+	try
+	{
+		if (self.DETAIL.onresize && self.DETAIL.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.DETAIL.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.DETAIL.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBorder").style.height = contentMiddleHeightBorder + "px";
+		self.DETAIL.document.getElementById("paneBodyBorder").style.height = contentMiddleHeight + "px";
+		self.DETAIL.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.DETAIL.document.getElementById("paneBody").style.height = contentMiddleHeight + "px";
+	}
+	catch(e) {}	
+	transactionsFrame.style.top = (parseInt(winHeight*.66,10) + 15) + "px";
+	transactionsFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	transactionsFrame.style.height = parseInt(winHeight*.33,10) + "px";	
+	try
+	{
+		if (self.TRANSACTIONS.onresize && self.TRANSACTIONS.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.TRANSACTIONS.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.TRANSACTIONS.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.TRANSACTIONS.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.TRANSACTIONS.document.getElementById("paneBorder").style.height = contentMiddleHeightBorder + "px";
+		self.TRANSACTIONS.document.getElementById("paneBodyBorder").style.height = contentMiddleHeight + "px";
+		self.TRANSACTIONS.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.TRANSACTIONS.document.getElementById("paneBody").style.height = contentMiddleHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		leftFrame.style.left = "";
+		leftFrame.style.right = "0px";	
+		summaryFrame.style.left = "0px";
+		detailFrame.style.left = "0px";
+		transactionsFrame.style.left = "0px";
+	}
+	else
+	{
+		summaryFrame.style.left = parseInt(winWidth*.40,10) + "px";
+		detailFrame.style.left = parseInt(winWidth*.40,10) + "px";
+		transactionsFrame.style.left = parseInt(winWidth*.40,10) + "px";
+	}		
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenSpendingAccounts()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="LEFT" name="LEFT" title="Main Content" level="2" tabindex="0" class="fullcontentframe" style="visibility:hidden;position:absolute;left:0px;width:385px;height:320px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="SUMMARY" name="SUMMARY" title="Secondary Content" level="3" tabindex="0" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:112px;top:32px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="DETAIL" name="DETAIL" title="Secondary Content" level="3" tabindex="0" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:180px;top:144px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="TRANSACTIONS" name="TRANSACTIONS" title="Secondary Content" level="3" tabindex="0" class="fullcontentframe" style="visibility:hidden;position:absolute;left:385px;width:418px;height:235px;top:324px" src="/lawson/xhrnet/ui/headerpanelite.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" class="fullcontentframe" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/spend.htm,v 1.14.2.44 2014/02/12 23:38:24 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

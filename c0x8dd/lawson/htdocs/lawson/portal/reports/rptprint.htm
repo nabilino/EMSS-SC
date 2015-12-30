@@ -1,0 +1,64 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/rptprint.htm,v 1.6.2.2.4.1.12.1.2.4 2012/08/08 12:37:18 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+	<TITLE>Print Report</TITLE>
+<script language="javascript" src="../servenv.js"></script>
+	<script language="javascript" src="rptprint.js"></script>
+	<link id="StyleLink" type="text/css" href="../forms/lawform.css" rel="stylesheet">
+</head>
+
+<body onload="initPrintDlg()" onkeydown="handleKeyDown(event)" style="visibility:hidden;" tabIndex="-1">
+	<!-- JOBOWNER -->
+	<span id="lblJobOwner" class="label" style="position:absolute; TOP:20px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="jobOwner" class="output" style="position:absolute; TOP:20px;LEFT:37%;WIDTH:25%">&nbsp;</span>
+
+	<!-- JOBNAME -->
+	<span id="lblJobName" class="label" style="position:absolute; TOP:45px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="jobName" class="output" style="position:absolute; TOP:45px;LEFT:37%;WIDTH:25%">&nbsp;</span>
+
+	<!-- FORM -->
+	<span id="lblToken" class="label" style="position:absolute; TOP:70px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="token" class="output" style="position:absolute; TOP:70px;LEFT:37%;WIDTH:25%">&nbsp;</span>
+
+	<!-- PRINTFILE -->
+	<span id="lblPrtFile" class="label" style="position:absolute; TOP:95px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="prtFile" class="output" style="position:absolute; TOP:95px;LEFT:37%;WIDTH:25%">&nbsp;</span>
+
+	<!-- PRINTERS -->
+	<span id="lblPrinter" class="label" style="position:absolute; TOP:120px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<!--select id="selPrinters" class="textbox" style="position:absolute; TOP:120px;LEFT:37%;WIDTH:25%" onchange="onPrinterChange(this.selectedIndex)"></select-->
+	<input type="text" id="selPrinters"  class="textbox" style="position:absolute;TOP:120px;LEFT:37%;WIDTH:20%" onblur="onPrinterBlur()"></input>
+	<img class=selectButton id="imgSelBtn2" style="cursor:hand;position:absolute;TOP:120px;LEFT:57%;" onclick="doPrinterSelect()" src="../images/ico_form_dropselect.gif">
+	<span id="outPrinter" class="output" style="position:absolute; TOP:120px;LEFT:64%;WIDTH:34%;OVERFLOW:hidden;text-Overflow:ellipsis">&nbsp;</span>
+	
+	<!-- COPIES -->
+	<span id="lblCopies" class="label" style="position:absolute; TOP:145px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<input id="nbrCopies" class="textbox" style="position:absolute; TOP:145px;LEFT:37%;WIDTH:6%;TEXT-ALIGN:right" type="text" onfocus="printOnFocus(this)" onblur="printOnBlur(this)" maxlength="2" edit="numeric" onkeypress="portalWnd.edCheckNumeric(event, this)" onkeyup="portalWnd.edCheckDec(event,this)"></input>
+
+	<!-- DIALOG TOOLBAR -->
+	<div id="toolBarDiv" class="toolbar" style="display:none; position:absolute; TOP:185px; WIDTH:100%;" ALIGN="center"></div>
+</body>
+</html>
+

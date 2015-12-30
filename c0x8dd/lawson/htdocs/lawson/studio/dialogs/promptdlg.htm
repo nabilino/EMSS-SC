@@ -1,0 +1,55 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/promptdlg.htm,v 1.2.28.2 2012/08/08 12:48:48 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Phrase Entry</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="promptdlg.js"></script>
+</head>
+<body onload="phInit()" onkeydown="phOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<table id="msgTable" border="0" style="margin-top:10px;">
+	<tr>
+	<td width="60px" align="center" valign="top">
+		<img id="imgGraphic" src="../images/icoprompt.gif"></img>
+	</td>
+	<td align="left" valign="top">
+		<label id="lblPrompt" class="dsLabel" style="text-align:left;overflow:visible;">Please enter </label>
+		<br>
+		<input id="txtPhrase" class="dsTextBox" style="margin-top:6px;width:350px;"></input>
+	</td>
+	</tr>
+	</table>
+	<div style="position:absolute;left:0;top:expression(document.body.clientHeight-30);">
+		<table width="100%" border="0">
+		<tr>
+		<td valign="top" align="center">
+			<input type="button" id="btnOK" class="dsButton" onclick="phOnOK()" value="OK" style="width:75px;"></input>
+			<input type="button" id="btnCancel" class="dsButton" onclick="window.close()" value="Cancel" style="width:75px;"></input>
+		</td>
+		</tr>
+		</table>
+	</div>
+</body>
+</html>

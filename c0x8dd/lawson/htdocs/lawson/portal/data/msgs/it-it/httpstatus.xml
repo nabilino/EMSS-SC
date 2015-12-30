@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/data/msgs/it-it/Attic/httpstatus.xml,v 1.1.2.2.16.2 2012/08/08 12:37:30 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<LAWXML>
+	<Translate language="itit">
+		<phrase id="100">È possibile eseguire la richiesta.</phrase>
+		<phrase id="101">Il server presenta protocolli cambiati nell'intestazione di un aggiornamento.</phrase>
+		<phrase id="200">La richiesta è stata completata.</phrase>
+		<phrase id="201">La richiesta è stata completata ed è stata creata una nuova risorsa.</phrase>
+		<phrase id="202">L'esecuzione della richiesta è stata accettata ma non completata.</phrase>
+		<phrase id="203">I metadati restituiti nell'intestazione di entità non sono il gruppo definitivo disponibile sul server di origine.</phrase>
+		<phrase id="204">La richiesta è stata eseguita dal server ma non è disponibile alcuna nuova informazione.</phrase>
+		<phrase id="205">La richiesta è stata completata. Il programma client deve reimpostare la visualizzazione del documento che ha provocato l'invio della richiesta per consentire all'utente d'iniziare facilmente un'altra azione.</phrase>
+		<phrase id="206">Nel server la richiesta parziale di ottenimento della risorsa è stata completata.</phrase>
+		<phrase id="300">Impossibile decidere cosa restituire.</phrase>
+		<phrase id="301">La risorsa richiesta è stata assegnata a un nuovo URI (Uniform Resource Identifier) permanente. In futuro ogni riferimento alla risorsa deve essere fatto usando uno degli URI restituiti.</phrase>
+		<phrase id="302">La risorsa richiesta risiede temporaneamente in un URI diverso.</phrase>
+		<phrase id="303">La risposta alla richiesta può trovarsi in un URI diverso e deve essere recuperata usando un verbo GET HTTP sulla risorsa stessa.</phrase>
+		<phrase id="304">La risorsa richiesta non è stata modificata.</phrase>
+		<phrase id="305">Per accedere alla risorsa richiesta, è necessario usare il proxy indicato nel campo della posizione.</phrase>
+		<phrase id="307">La richiesta reindirizzata mantiene lo stesso verbo HTTP. Comportamento HTTP/1.1.</phrase>
+		<phrase id="400">Impossibile elaborare la richiesta in quanto la sintassi non è valida.</phrase>
+		<phrase id="401">La risorsa richiesta necessita dell'autenticazione da parte dell'utente.</phrase>
+		<phrase id="402">Attualmente non implementata nel protocollo HTTP.</phrase>
+		<phrase id="403">La richiesta è stata ricevuta da server ma è stata rifiutata.</phrase>
+		<phrase id="404">Impossibile trovare risultati corrispondenti all'URI richiesto.</phrase>
+		<phrase id="405">Il verbo HTTP utilizzato non è consentito.</phrase>
+		<phrase id="406">Impossibile trovare risposte accettabili per il client.</phrase>
+		<phrase id="407">Autenticazione proxy richiesta.</phrase>
+		<phrase id="408">Il server ha raggiunto il timeout in attesa della richiesta.</phrase>
+		<phrase id="409">Impossibile completare la richiesta a causa di un conflitto con lo stato corrente della risorsa. Inviare nuovamente la richiesta con più informazioni.</phrase>
+		<phrase id="410">La risorsa richiesta non è più disponibile nel server e non è disponibile alcun indirizzo di inoltro.</phrase>
+		<phrase id="411">Il server rifiuta di accettare la richiesta senza una lunghezza del contenuto definita.</phrase>
+		<phrase id="412">La precondizione indicata in uno o più campi dell'intestazione della richiesta è risultata non valida quando testata nel server.</phrase>
+		<phrase id="413">Impossibile eseguire la richiesta in quanto l'entità supera le dimensioni previste dal server.</phrase>
+		<phrase id="414">Impossibile eseguire la richiesta in quanto l'URI della richiesta supera le dimensioni previste dal server.</phrase>
+		<phrase id="415">Impossibile eseguire la richiesta in quanto l'entità è in un formato non supportato dalla risorsa richiesta dal metodo.</phrase>
+		<phrase id="449">Inviare nuovamente la richiesta dopo aver eseguito le modifiche necessarie.</phrase>
+		<phrase id="500">Nel server si è verificata una condizione inattesa che ha impedito il completamento della richiesta.</phrase>
+		<phrase id="501">La funzione necessaria per eseguire la richiesta non è supportata dal server.</phrase>
+		<phrase id="502">Nel server, gateway o proxy è stata inviata una risposta non valida dal server upstream interrogato per eseguire la richiesta.</phrase>
+		<phrase id="503">Il server è temporaneamente in overload.</phrase>
+		<phrase id="504">La richiesta è scaduta in attesa del gateway.</phrase>
+		<phrase id="505">Il protocollo HTTP della versione usata nel messaggio di richiesta non è supportato dal server.</phrase>
+	</Translate>
+</LAWXML>

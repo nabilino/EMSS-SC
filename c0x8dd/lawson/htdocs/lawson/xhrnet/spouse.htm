@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="No-Cache">
+<title>Spouse Employment Change</title>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/statesuscan.js"></script>
+<script src="/lawson/xhrnet/instctrycdselect.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var pgmType = (window.location.search)?unescape(window.location.search):"";
+var SpouseForm = new Object();
+var prm = 0;
+
+if (pgmType)
+{
+	switch (getVarFromString("type",pgmType))
+	{
+		case "0": prm = 0; break; // spouse changed employers
+		case "1": prm = 1; break; // spouse is no longer employed
+		case "2": prm = 2; break; // spouse is now employed
+	}
+}
+
+function OpenSpouse()
+{
+	authUser = null;
+	try
+	{
+		// Check if a parent or opener document has already done an authenticate,
+		// otherwise go get the webuser info.
+		if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+		{
+			authUser = parent.authUser;
+			if (typeof(parent.EmpInfo) != "undefined" && parent.EmpInfo != null)
+				EmpInfo = parent.EmpInfo;
+		}
+		else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+		{
+			authUser = opener.authUser;
+			if (typeof(opener.EmpInfo) != "undefined" && opener.EmpInfo != null)
+				EmpInfo = opener.EmpInfo;
+		}
+	}
+	catch(e)
+	{
+		authUser = null;
+		EmpInfo = new Array();
+		CalledEmpInfo = false;		
+	}
+	if (!authUser)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='InitSpouse()'|officeObjects=true|desiredEdit='EM'");
+		return;
+	}
+	InitSpouse();
+}
+
+function InitSpouse()
+{
+	stylePage();
+	setWinTitle(parent.getSeaPhrase("CHG_EMP","ESS"));
+	StoreDateRoutines();	
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){GrabStates('GetCountryCodes()');});
+}
+
+function GetCountryCodes()
+{
+	GetInstCtryCdSelect(authUser.prodline,"DrawSpouseScreen()");
+}
+
+function DrawSpouseScreen()
+{
+	var toolTip;
+	var SpouseContent = uiRequiredFooter()
+	+ '<form name="spouseform">';
+    if (prm == 1) // Spouse is no longer employed
+	{
+    	toolTip = uiDateToolTip(parent.getSeaPhrase("SPOUSE_TERMINATION_DATE","ESS"));
+		SpouseContent += '<table border="0" cellspacing="0" cellpadding="0" role="presentation">'
+		+ '<tr style="padding-top:5px"><td class="fieldlabelbold" style="width:60%;vertical-align:top"><label id="termdateLbl" for="termdate">'+parent.getSeaPhrase("SPOUSE_TERMINATION_DATE","ESS")+'</label></td>'
+		+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="termdate" name="termdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="termdateLbl termdateFmt">'
+		+ '<a href="javascript:parent.DateSelect(\'termdate\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiRequiredIcon()+'<br/>'+uiDateFormatSpan("termdateFmt")+'</td></tr>'
+		toolTip = uiDateToolTip(parent.getSeaPhrase("FORMER_INSURANCE_STOP_DATE","ESS"));
+		SpouseContent += '<tr><td class="fieldlabelbold" style="width:60%;padding-top:10px;vertical-align:top"><label id="datecoverLbl" for="datecover">'+parent.getSeaPhrase("FORMER_INSURANCE_STOP_DATE","ESS")+'</label></td><td class="plaintablecell">'
+		+ '<input class="inputbox" type="text" id="datecover" name="datecover" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="datecoverLbl datecoverFmt">'
+		+ '<a href="javascript:parent.DateSelect(\'datecover\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("datecoverFmt")+'</td></tr>';
+  	}
+	else // Spouse has employment
+	{
+		var hdrLbl = parent.getSeaPhrase("NEW_HEALTH_COVERAGE","ESS");
+		toolTip = uiDateToolTip(parent.getSeaPhrase("NEW_JOB_START_DATE","ESS"));
+		SpouseContent += '<table border="0" cellspacing="0" cellpadding="0" role="presentation">'
+		+ '<tr style="padding-top:5px"><td class="fieldlabelbold" style="width:45%;vertical-align:top"><label id="startdateLbl" for="startdate">'+parent.getSeaPhrase("NEW_JOB_START_DATE","ESS")+'</label></td>'
+		+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="startdate" name="startdate" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="startdateLbl startdateFmt">'
+		+ '<a href="javascript:parent.DateSelect(\'startdate\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiRequiredIcon()+'<br/>'+uiDateFormatSpan("startdateFmt")+'</td></tr>'
+    	+ '<tr><td class="fieldlabelboldleft" style="padding:15px" colspan="3">'+hdrLbl+'</td></tr>'
+    	toolTip = uiDateToolTip(parent.getSeaPhrase("COVERAGE_START_DATE","ESS"));
+    	SpouseContent += '<tr><td class="fieldlabelbold" style="width:45%;vertical-align:top"><label id="covbeginLbl" for="covbegin"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("COVERAGE_START_DATE","ESS")+'</label></td><td class="plaintablecell">'
+		+ '<input class="inputbox" type="text" id="covbegin" name="covbegin" value="" size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)" aria-labelledby="covbeginLbl covbeginFmt">'
+		+ '<a href="javascript:parent.DateSelect(\'covbegin\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a><br/>'+uiDateFormatSpan("covbeginFmt")+'</td></tr>'
+		+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="spouseemp"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("EMPLOYER_NAME","ESS")+'</label></td>'
+        + '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="spouseemp" name="spouseemp" value="" size="30" maxlength="30" onfocus="this.select()">'+uiRequiredIcon()+'</td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="addr1"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("ADDRESS_1_ONLY","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="addr1" name="addr1" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="addr2"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("ADDRESS_2_ONLY","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="addr2" name="addr2" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="addr3"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("ADDRESS_3_ONLY","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="addr3" name="addr3" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="addr4"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("ADDRESS_4_ONLY","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="addr4" name="addr4" value="" size="30" maxlength="30" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="city"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("CITY_OR_ADDR_5","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="city" name="city" value="" size="18" maxlength="18" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="state"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("HOME_ADDR_6","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><select class="inputbox" id="state" name="state">'+BuildStateSelect("")+'</select></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="zip"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("HOME_ADDR_7","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="zip" name="zip" value="" size="10" maxlength="10" onfocus="this.select()"></td></tr>'
+       	+ '<tr><td class="fieldlabelbold" style="width:45%"><label for="country"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("COUNTRY_ONLY","ESS")+'</label></td>'
+	   	+ '<td class="plaintablecell" nowrap><select class="inputbox" id="country" name="country">'+DrawInstCtryCdSelect("")+'</select></td></tr>'
+        + '<tr><td class="fieldlabelbold" style="width:45%"><label for="wkphonenbr"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("WORK_PHONE_ONLY","ESS")+'</label></td>'
+ 	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="wkphonenbr" name="wkphonenbr" value="" size="15" maxlength="15" onfocus="this.select()"></td></tr>'
+ 		+ '<tr><td class="fieldlabelbold" style="width:45%"><label id="wkctrycd" for="wkphonecntry" title="'+parent.getSeaPhrase("COUNTRY_CODE_HELP_TEXT","ESS")+'"><span class="offscreen">'+hdrLbl+'&nbsp;</span>'+parent.getSeaPhrase("WORK_PHONE_CNTRY_CODE_ONLY","ESS")+'<span class="offscreen">&nbsp;'+parent.getSeaPhrase("COUNTRY_CODE_HELP_TEXT","ESS")+'</span></label></td>'
+	   	+ '<td class="plaintablecell" nowrap><input class="inputbox" type="text" id="wkphonecntry" name="wkphonecntry" value="" size="3" maxlength="3" onfocus="this.select()"></td></tr>';
+    }
+	SpouseContent += '<tr><td>&nbsp;</td><td class="plaintablecell" nowrap>'
+	+ uiButton(parent.getSeaPhrase("UPDATE","ESS"),"parent.UpdateSpouseEmployment();return false","margin-top:10px")
+	+ uiButton(parent.getSeaPhrase("CANCEL","ESS"),"parent.CancelSpouseEmployment();return false","margin-top:10px;margin-left:5px")
+	+ '</td></tr></table>';
+	try 
+	{
+		if (prm == 1)
+			self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("NOT_EMP","ESS");
+		else
+			self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("NEW_EMP","ESS");
+		self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:10px">'+SpouseContent+'</div>'
+	}
+	catch(e) {}
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+	document.getElementById("MAIN").style.visibility = "visible";
+	stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();	
+}
+
+function CancelSpouseEmployment()
+{
+	self.MAIN.document.spouseform.reset();
+	try 
+	{
+		parent.document.getElementById("right").style.visibility = "hidden";
+	}
+	catch(e) {}
+}
+
+function UpdateSpouseEmployment()
+{
+   	SpouseForm = self.MAIN.document.spouseform;
+  	if (prm == 1) // Spouse is no longer employed
+   	{
+   		clearRequiredField(SpouseForm.termdate);
+   		if (NonSpace(SpouseForm.termdate.value) == 0)
+  	  	{
+  	  		setRequiredField(SpouseForm.termdate, parent.getSeaPhrase("TERMINATION_DATE_REQUIRED","ESS"));
+  		 	return;
+  	  	}
+  	  	else if (ValidDate(SpouseForm.termdate) == false)
+  	  		return;
+	  	if (NonSpace(SpouseForm.datecover.value) == 0)
+	     	SpouseForm.dateneeded = SpouseForm.termdate.value;
+	  	else
+	  		SpouseForm.dateneeded = SpouseForm.datecover.value;
+		SpouseForm.spouse_cov = " ";
+   	}
+   	else // Spouse has employment
+   	{
+   		clearRequiredField(SpouseForm.startdate);
+   		clearRequiredField(SpouseForm.spouseemp);
+ 		if (NonSpace(SpouseForm.startdate.value) == 0)
+  	  	{
+  	  		setRequiredField(SpouseForm.startdate, parent.getSeaPhrase("NEW_JOB_START_DATE_REQUIRED","ESS"));
+  		 	return;
+  	  	}
+  	  	else if (ValidDate(SpouseForm.startdate) == false)
+  	  		return;
+  	  	if (NonSpace(SpouseForm.spouseemp.value) == 0)
+  	  	{
+  	  		setRequiredField(SpouseForm.spouseemp, parent.getSeaPhrase("EMPLOYER_NAME_REQUIRED","ESS"));
+		 	return;
+  	  	}
+	  	if (NonSpace(SpouseForm.covbegin.value) == 0)
+	  	{
+	     	SpouseForm.dateneeded = SpouseForm.startdate.value;
+		 	SpouseForm.spouse_cov = "N";
+	  	}
+	  	else
+	  	{
+	     	SpouseForm.dateneeded = SpouseForm.covbegin.value;
+		 	SpouseForm.spouse_cov = "Y";
+	  	}
+      	if (typeof(SpouseForm.state) != "undefined")
+			SpouseForm.spstate = SpouseForm.state.options[SpouseForm.state.selectedIndex].value;
+		else
+			SpouseForm.spstate = " ";
+		if (typeof(SpouseForm.country) != "undefined")
+			SpouseForm.spcountry = SpouseForm.country.options[SpouseForm.country.selectedIndex].value;
+		else
+			SpouseForm.spcountry = " ";
+   	  	if (SpouseForm.spouseemp.value == "") SpouseForm.spouseemp.value = " ";
+   	  	if (SpouseForm.addr1.value == "") SpouseForm.addr1.value = " ";
+   	  	if (SpouseForm.addr2.value == "") SpouseForm.addr2.value = " ";
+   	  	if (SpouseForm.addr3.value == "") SpouseForm.addr3.value = " ";
+   	  	if (SpouseForm.addr4.value == "") SpouseForm.addr4.value = " ";
+   	  	if (SpouseForm.city.value == "") SpouseForm.city.value = " ";
+   	  	if (SpouseForm.zip.value == "") SpouseForm.zip.value = " ";
+   	  	if (SpouseForm.wkphonecntry.value == "") SpouseForm.wkphonecntry.value = " ";
+   	  	if (SpouseForm.wkphonenbr.value == "") SpouseForm.wkphonenbr.value = " ";
+	}
+   	var agsObj = new AGSObject(authUser.prodline, "ES10.1");
+    agsObj.event = "ADD";
+    agsObj.rtn = "MESSAGE";
+    agsObj.longNames = "ALL";
+    agsObj.tds = false;
+    agsObj.field = "FC=A"
+	+ "&FSH-COMPANY=" + parseInt(authUser.company,10)
+	+ "&FSH-EMPLOYEE=" + parseInt(authUser.employee,10)
+	+ "&FSH-FAMILY-STATUS=" + escape("SPS CHANGE")
+	+ "&FSH-EFFECT-DATE=" + formjsDate(formatDME(SpouseForm.dateneeded))
+	+ "&FSH-BENEFIT-UPDATE=N"
+    agsObj.func = "parent.DspMsgES10()";
+	agsObj.debug = false;
+	startProcessing(parent.getSeaPhrase("HOME_ADDR_42","ESS"), function(){AGS(agsObj, "jsreturn");});
+}
+
+function ProcessHR11()
+{
+    var agsObj = new AGSObject(authUser.prodline, "HR11.1");
+    agsObj.event = "CHANGE";
+    agsObj.rtn = "MESSAGE";
+    agsObj.longNames = "ALL";
+    agsObj.tds = false;
+    agsObj.field = "FC=C"
+	+ "&EMP-COMPANY=" + parseInt(authUser.company,10)
+	+ "&EMP-EMPLOYEE=" + parseInt(authUser.employee,10)
+	+ "&EFFECT-DATE=" + ymdtoday
+	+ "&XMIT-HREMP-BLOCK=1000000000"
+	+ "&XMIT-REQDED=1"
+	+ "&PT-BYPASS-PERS-ACT=1";
+	if (prm != 1) // Spouse has employment
+   	{
+	 	agsObj.field += "&PEM-HL-COV-PROOF=" + escape(SpouseForm.spouse_cov)
+	 	+ "&PEM-SPOUSE-EMP=" + escape(SpouseForm.spouseemp.value)
+		+ "&PEM-SP-EMP-ADDR1=" + escape(SpouseForm.addr1.value)
+		+ "&PEM-SP-EMP-ADDR2=" + escape(SpouseForm.addr2.value)
+		+ "&PEM-SP-EMP-ADDR3=" + escape(SpouseForm.addr3.value)
+		+ "&PEM-SP-EMP-ADDR4=" + escape(SpouseForm.addr4.value)
+		+ "&PEM-SP-EMP-CITY=" + escape(SpouseForm.city.value)
+		+ "&PEM-SP-EMP-STATE=" + escape(SpouseForm.spstate)
+		+ "&PEM-SP-EMP-ZIP=" + escape(SpouseForm.zip.value)
+		+ "&PEM-SP-EMP-COUNTRY=" + escape(SpouseForm.spcountry)
+		+ "&PEM-SP-EMP-PH-CNTR=" + escape(SpouseForm.wkphonecntry.value)
+		+ "&PEM-SP-EMP-PH-NBR=" + escape(SpouseForm.wkphonenbr.value);
+  	}
+   	else
+   	{
+       	agsObj.field += "&PEM-HL-COV-PROOF=" + escape(" ")
+		+ "&PEM-HL-VERIFY-DT=" + escape(" ")
+		+ "&PEM-DN-COV-PROOF=" + escape(" ")
+		+ "&PEM-DN-VERIFY-DT=" + escape(" ")
+		+ "&PEM-SPOUSE-EMP=" + escape(" ")
+		+ "&PEM-SP-EMP-ADDR1=" + escape(" ")
+		+ "&PEM-SP-EMP-ADDR2=" + escape(" ")
+		+ "&PEM-SP-EMP-ADDR3=" + escape(" ")
+		+ "&PEM-SP-EMP-ADDR4=" + escape(" ")
+		+ "&PEM-SP-EMP-CITY=" + escape(" ")
+		+ "&PEM-SP-EMP-STATE=" + escape(" ")
+		+ "&PEM-SP-EMP-ZIP=" + escape(" ")
+		+ "&PEM-SP-EMP-COUNTRY=" + escape(" ")
+		+ "&PEM-SP-EMP-PH-CNTR=" + escape(" ")
+		+ "&PEM-SP-EMP-PH-NBR=" + escape(" ");
+ 	}
+  	agsObj.func = "parent.DspMsgHR11()";
+	agsObj.debug = false;
+   	AGS(agsObj, "jsreturn");
+}
+
+function DspMsgES10()
+{
+ 	if (parseInt(self.lawheader.gmsgnbr,10) == 0)
+    	ProcessHR11();
+ 	else
+ 	{
+ 		stopProcessing();
+ 		parent.seaAlert(self.lawheader.gmsg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+	}
+}
+
+function DspMsgHR11()
+{
+	stopProcessing();
+ 	if (parseInt(self.lawheader.gmsgnbr,10) == 0)
+ 	{
+ 		removeHelpIcon();
+ 		parent.seaPageMessage(parent.getSeaPhrase("UPDATE_COMPLETE","ESS"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+   		parent.toggleFrame("right", false);
+   		parent.toggleFrame("relatedtask", false);
+   		parent.toggleFrame("fullrelatedtask", false);  
+   		parent.toggleFrame("left", true);
+		parent.left.location.replace("/lawson/xhrnet/spouse1.htm?date="+escape(formjsDate(formatDME(SpouseForm.dateneeded)),1));
+  	}
+	else
+		parent.seaAlert(self.lawheader.gmsg, getSeaPhrase("CONTACT_HR","SEA"), null, "error");
+}
+
+function OpenHelpDialog()
+{
+	if (isEnwisenEnabled())
+		openEnwisenWindow("id=SPOUSE_EMPLOYMENT");
+	else
+		openHelpDialogWindow("/lawson/xhrnet/spousetip.htm");
+}
+
+function ReturnDate(date)
+{
+   self.MAIN.document.forms[0].elements[date_fld_name].value = date;
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;	
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenSpouse()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;left:0%;top:0px;width:400px;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/spouse.htm,v 1.12.2.63.2.1 2014/03/14 20:20:52 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

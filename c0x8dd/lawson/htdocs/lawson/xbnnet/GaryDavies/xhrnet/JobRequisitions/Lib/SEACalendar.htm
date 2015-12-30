@@ -1,0 +1,135 @@
+<html>
+<head>
+<title>Calendar</title>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script language="Javascript">
+
+var imgURL 	= "/lawson/xhrnet/images/";
+var prm		= window.location.hash.substring(1);
+var authUser = opener.authUser;
+
+function DisplayLawsonCalendar(month, day, year)
+{
+	day = (String(day).length == 1) ? "0" + day : day;
+	month = (String(month).length == 1) ? "0" + month : month;
+
+	var SkinLink = ChooseSkin("antartica");
+
+	var firstDay = new Date(year, month-1, 1, 8);
+	var startDay = firstDay.getDay();
+	var nDays = daysinmonth[Number(month)];
+	var column = 0;
+	var today = new Date();
+	var thisDay = today.getDate();
+	var thisMonth = today.getMonth() + 1;
+	var thisYear = today.getFullYear();
+	var classStr = "rowodd";
+
+	var page = '<html><head><link href="'+SkinLink+'" rel="stylesheet" type="text/css"/>'
+		page += '<body onBlur="self.focus();"><div align=center>'
+		page += '<table width=100% border=0 cellspacing=0 cellpadding=0 align=center><tr><td width=10>'
+		page += '<a href="" onClick="parent.DisplayLawsonCalendar'
+		page += (Number(month) == 1) ? '(12,'+Number(day)+','+(Number(year)-1)+')' : '('+(Number(month)-1)+','+Number(day)+','+Number(year)+')';
+		page += ';return false;"><img border=0 src="' + imgURL + 'l_tri.gif"></a><td align=center width=110>';
+		page += '<font color=blue size=4><b>' + theMonth[Number(month)] + '</b></font><td width=10>';
+		page += '<a href="" onClick="parent.DisplayLawsonCalendar'
+		page += (Number(month) == 12) ? '(1,'+Number(day)+','+(Number(year)+1)+')' : '('+(Number(month)+1)+','+Number(day)+','+Number(year)+')';
+		page += ';return false;"><img border=0 src="' + imgURL + 'blue_tri.gif"></a><td width=10>';
+		page += '<a href="" onClick="parent.DisplayLawsonCalendar('+Number(month)+','+Number(day)+','+(Number(year)-1)+');return false;">';
+		page += '<img border=0 src="' + imgURL + 'l_tri.gif"></a><td align=center width=50>';
+		page += '<font color=blue size=4><b>' + Number(year) + '</b></font><td width=10>';
+		page += '<a href="" onClick="parent.DisplayLawsonCalendar('+Number(month)+','+Number(day)+','+(Number(year)+1)+');return false;">';
+		page += '<img border=0 src="' + imgURL + 'blue_tri.gif"></a></table>';
+		page += '<p>'
+		page += '<table width=100% border=1 cellspacing=0 cellpadding=3 align=center><tr>'
+		page += '<td class="rowheader">'+camefrom.getSeaPhrase("SU","ESS")+'</td><td class="rowheader">'+camefrom.getSeaPhrase("MO","ESS")+'</td><td class="rowheader">'+camefrom.getSeaPhrase("TU","ESS")+'</td><td class="rowheader">'+camefrom.getSeaPhrase("WE","ESS")
+		page += '</td><td class="rowheader">'+camefrom.getSeaPhrase("TH","ESS")+'</td><td class="rowheader">'+camefrom.getSeaPhrase("FR","ESS")+'</td><td class="rowheader">'+camefrom.getSeaPhrase("SA","ESS");
+		page += '<tr>';
+
+	for (var i=0; i<startDay; i++)
+	{
+		page += '<td class="'+classStr+'"> &nbsp;</td>'
+		column++;
+	}
+
+	for (var i=1, j=0; i<=nDays; i++)
+	{
+		if (column >= 7)
+		{
+			column = 0;
+			page += '</tr><tr>';
+			j++;
+			classStr = (j%2) ? "roweven" : "rowodd";
+		}
+
+		if ((i == day) && (i == thisDay) && (month == thisMonth) && (year == thisYear))
+			classStr = "cellhighlighted"
+		else
+			classStr = (j%2) ? "roweven" : "rowodd";
+
+		page += '<td class="'+classStr+'">'
+		page += '<a style="text-decoration:none;" href="" onClick="parent.ReturnDay('+i+','+Number(month)+','+year+');return false;">' +i+ '</a></td>'
+
+		column++;
+	}
+	if (column > 0)
+	{
+		for (var i = column; i < 7; i++)
+		{
+			if ((i == day) && (i == thisDay) && (month == thisMonth) && (year == thisYear))
+				classStr = "cellhighlighted"
+			else
+				classStr = (j%2) ? "roweven" : "rowodd";
+
+			page += '<td class="'+classStr+'">&nbsp;</td>'
+		}
+	}
+
+	page += '</font></table></div></body>';
+
+	self.CONTROLITEM.document.open();
+	self.CONTROLITEM.document.write(page);
+	self.CONTROLITEM.document.close();
+}
+
+function ReturnDay(day, month, year)
+{
+	var month = (String(month).length == 1) ? "0" + String(month) : String(month);
+	var day = (String(day).length == 1) ? "0" + String(day) : String(day);
+
+	if (window.opener)
+	{
+		window.opener.ReturnDate(FormatDte4(String(year) + String(month) + String(day)));
+		self.close();
+	}
+}
+
+function LoadCalendar()
+{
+	Initialize_DateRoutines();
+
+	var today = new Date();
+	var thisDay = today.getDate();
+	var thisMonth = today.getMonth() + 1;
+	var thisYear = today.getFullYear();
+
+	thisDay = (String(thisDay).length == 1) ? "0" + thisDay : thisDay;
+	thisMonth = (String(thisMonth).length == 1) ? "0" + thisMonth : thisMonth;
+
+	var prmArray = prm.split(",");
+	if(prmArray.length>1)
+		DisplayLawsonCalendar(prmArray[0], prmArray[1], prmArray[2]);
+	else
+		DisplayLawsonCalendar(thisMonth, thisDay, thisYear);
+}
+
+</script>
+</head>
+<frameset rows="100%,*" frameborder=no border=0 onLoad="LoadCalendar();">
+	<frame src="/lawson/xhrnet/dot.htm" name="CONTROLITEM" marginwidth="8" marginheight="14" scrolling="auto" noresize>
+	<frame src="/lawson/xhrnet/dot.htm" name="jsreturn" marginwidth="0" marginheight="0" scrolling="no" noresize>
+</frameset>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/JobRequisitions/Lib/SEACalendar.htm,v 1.4.4.1 2004/11/12 21:19:09 brentd Exp $ -->

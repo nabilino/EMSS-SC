@@ -1,0 +1,214 @@
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/enwisen/Attic/offboarding.htm,v 1.1.2.3.4.1 2011/09/09 18:46:33 brentd Exp $ -->
+<!--
+	Proprietary Program Material
+	This material is proprietary to Lawson Software, and is not to be
+	reproduced or disclosed except in accordance with software contract
+	provisions, or upon written authorization from Lawson Software.
+
+	Copyright (c) 2005-2006 by Lawson Software. All Rights Reserved.
+	Saint Paul, Minnesota
+-->
+
+<HTML>
+<HEAD>
+<meta name="viewport" content="width=device-width" />
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Data.js"></script>
+<script src="/lawson/webappjs/javascript/objects/UserManager.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<!--script src="/sso/sso.js"></script-->
+<script>
+//-----------------------------------------------------------------------------
+function offboarding_init()
+{
+	// what version of IOS are we running on?
+	if (!iosFileInstance || !iosFileInstance.iosHandler || (iosFileInstance.iosHandler.getIOS() == null && !iosFileInstance.iosHandler.calledWhat))
+	{
+		if (!iosFileInstance)
+			iosFileInstance = window;
+		if (!iosFileInstance.iosHandler)	
+			iosFileInstance.iosHandler = new IOSHandler();
+		iosFileInstance.iosHandler.createIOS();
+		setTimeout("offboarding_init()", 5);
+		return;			
+	}
+		
+	if (iosFileInstance.iosHandler.getIOS() == null || iosFileInstance.iosHandler.getIOSVersionNumber() == null)
+	{
+		setTimeout("offboarding_init()", 5);
+		return;
+	}
+	
+	if (iosFileInstance.iosHandler.getIOSVersionNumber() >= "9.0")
+	{
+		if (!iosFileInstance.iosHandler.isSSOFileLoaded())
+		{
+			iosFileInstance.iosHandler.loadSSOFile();
+			setTimeout("offboarding_init()", 5);
+			return;
+		}
+	}
+	else
+	{
+		alert("ERROR: You must be running Lawson System Foundation version 9.0.0 or newer to access Enwisen.");
+		if (opener)
+		{
+			self.close();
+		}
+		return;		
+	}
+		
+	// get user profile data	
+	getUserProfileData();		
+	
+	if (isEnwisenEnabled())
+	{		
+		if (!emssObj.employeeGroups)
+		{
+			alert("ERROR: To access Offboarding, you must configure EMSS to send employee groups to Enwisen in emss_config.xml.");
+			return;
+		}		
+		getLawsonEmployeeGroups();	
+	}
+	else
+	{
+		alert("ERROR: Access to Enwisen has not been enabled in emss_config.xml.");
+	}
+}
+
+//-----------------------------------------------------------------------------
+function getUserProfileData()
+{
+	// get user values from the Profile servlet - use the cached object if we can find and reference it
+	try
+	{
+		if (parent.authUser && parent.authUser.webuser)
+		{
+			userObj = parent.authUser;
+			setAuthUserData(parent.authUser);	
+		}
+		else if (opener && opener.authUser && opener.authUser.webuser)
+		{
+			userObj = opener.authUser;
+			setAuthUserData(opener.authUser);	
+		}		
+		else
+		{
+			// a cached user profile object cannot be found - call the Profile servlet to get the user values
+			makeUserProfileCall();
+		}
+	}
+	catch(e)
+	{
+		// an error occurred trying to get a cached user profile object - call the Profile servlet to get the user values
+		makeUserProfileCall();	
+	}
+}
+
+function setAuthUserData(authObj)
+{
+	if (typeof(authUser) != "object" || !authUser)
+		authUser = authObj;
+}
+
+//-----------------------------------------------------------------------------
+function makeUserProfileCall()
+{	
+	userObj = new UserManager(UserManager.TECHNOLOGY_900, SSORequest, false);
+	if (userObj.errorMsg)
+		return;
+	
+	if (!userObj.webuser)	
+		userObj.webuser = userObj.id;
+	
+	setAuthUserData(userObj);
+}
+
+//-----------------------------------------------------------------------------
+function getLawsonEmployeeGroups()
+{
+	if (!userObj && userObj.prodline && userObj.company && userObj.employee)
+	{
+		alert("ERROR: Could not find employee information.");
+		return null;
+	}
+	
+	dataObj = new DataObject(window, DataObject.TECHNOLOGY_900, SSORequest, storeLawsonEmployeeGroups);
+	dataObj.setParameter("PROD", userObj.prodline);
+	dataObj.setParameter("FILE", "PGEMPLOYEE");
+	dataObj.setParameter("INDEX", "PGESET2");
+	dataObj.setParameter("FIELD", "group-name");
+	dataObj.setParameter("KEY", userObj.company + "=" + userObj.employee);
+	dataObj.setParameter("MAX", "600");
+	dataObj.setParameter("OTMMAX", "1");
+	dataObj.setParameter("XRELS", "FALSE");
+	dataObj.setParameter("XKEYS", "FALSE");
+	dataObj.setParameter("XIDA", "FALSE");	
+	
+	if (dataObj.callData() == null)
+		return;
+}
+
+//-----------------------------------------------------------------------------
+function storeLawsonEmployeeGroups()
+{
+	var empGroups = new Array();
+	
+	var nbrGroups = dataObj.getNbrRecs();
+	if (nbrGroups > 0)
+	{
+		var groupName = "";		
+		for (var i=0; i<nbrGroups; i++)
+		{	
+			var record = dataObj.getRecord(i);
+			var groupName = record.getFieldValue("group-name");
+			empGroups[i] = groupName.toUpperCase();
+		}		
+	}
+	
+	// check if employee belongs to an Offboarding group
+	var isAdmin = isMemberOfGroup(empGroups, emssObj.offboardingAdminGroups);
+	var isDay1Term = isMemberOfGroup(empGroups, emssObj.offboardingDay1TermGroups);
+	var alias = null;
+	
+	if (isDay1Term)
+		alias = "offboard";
+	else if (isAdmin)
+		alias = "adminoffboarding";
+	else
+	{
+		alert("ERROR: You do not have access to Offboarding.  You must belong to an Offboarding employee group.  Please contact your HR administrator.");
+		return;
+	}	
+	self.location.replace("enwisen.htm?alias=" + alias);
+}
+
+//-----------------------------------------------------------------------------
+function isMemberOfGroup(assignedGroups, otherGroups)
+{
+	var len1 = assignedGroups.length;
+	var len2 = otherGroups.length;
+	var i = 0;
+	var found = false;
+	if (len1 == 0 || len2 == 0)
+		return false;
+	while (i < len1 && !found)
+	{
+		var j = 0;
+		while (j < len2 && !found)
+		{
+			if (assignedGroups[i].toUpperCase() == otherGroups[j].toUpperCase())
+				found = true;
+			j++;
+		}
+		i++;
+	}
+	return found;
+}
+</script>
+</HEAD>
+
+<BODY onload="offboarding_init()">
+</BODY>
+</HTML>

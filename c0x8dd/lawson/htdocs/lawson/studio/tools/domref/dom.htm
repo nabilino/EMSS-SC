@@ -1,0 +1,46 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/tools/domref/dom.htm,v 1.2.2.1.4.2.16.2 2012/08/08 12:48:54 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Lawson Portal Objects Viewer</title>
+<link id="StyleLink" type="text/css" rel="stylesheet"  href="dom.css" />
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script src="dom.js" language="javascript"></script>
+<script src="domtree.js" language="javascript"></script>
+</head>
+
+<body onload="loadDomView()" topmargin="0">
+	<table width="100%" style="table-layout:fixed;" height="100%" cellpadding="0" cellspacing="0">
+	<colgroup><col width="260px"/><col width="75%"/></colgroup>
+	<tr>
+		<td id="treeTD" valign="top">
+			<div id="treeDiv" class="treeDiv" onselectstart="return false;" onkeydown="onTreeKeyDown()"></div>
+		</td>
+		<td id="listTD" valign="top">
+			<div id="listDiv" class="listDiv" onselectstart="return false;"></div>
+		</td>
+	</tr>
+	</table>
+</body>
+</html>

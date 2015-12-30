@@ -1,0 +1,63 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/jobsubmit.htm,v 1.12.2.5.4.4.14.1.2.3 2012/08/08 12:37:18 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<HEAD>
+<title>Submit Job</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="jobsubmit.js"></script>
+<script language="javascript" src="../dropdown.js"></script>
+<link id="StyleLink" type="text/css" href="../forms/lawform.css" rel="stylesheet">
+<link id="StyleLink" type="text/css" href="../dropdown.css" rel="stylesheet">
+</HEAD>
+
+<BODY style="visibility:hidden" onkeydown="handleKeyDown(event)" onload="init()" tabIndex="-1" onkeyup = "autoComplete(event)">
+	<!-- JOBNAME -->
+	<span id="lblJobName" class="label" style="position:absolute; TOP:20px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="jobName" class="output" style="position:absolute; TOP:20px;LEFT:37%;WIDTH:25%">&nbsp;</span>
+
+	<!-- USERNAME -->
+	<span id="lblUserName" class="label" style="position:absolute; TOP:45px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span id="userName" class="output" style="position:absolute; TOP:45px;LEFT:37%;WIDTH:50%">&nbsp;</span>
+
+<span id="jobQueueParam">
+	<!-- QUEUE -->
+	<span id="lblJobQueue" class="label" style="position:absolute; TOP:70px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<input id="jobQueue" class="textbox" type="text" style="position:absolute; TOP:70px;LEFT:37%;WIDTH:25%;text-transform:uppercase;" onfocus="fieldFocus(this)" onblur="fldOnBlur(this);"></input>
+	<button class="selectButton" tabIndex="-1" style="position:absolute;TOP:70px;LEFT:62%;background-image:url('../images/ico_form_dropmenu.gif');background-repeat:no-repeat;border:0px;background-color:transparent" onclick="showQueues()">&nbsp;</button>
+	<!-- DATE -->
+	<span id="lblStartDate" class="label" style="position:absolute; TOP:95px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<input id="startDate" class="textbox" style="position:absolute; TOP:95px;LEFT:37%;WIDTH:25%" type="text" maxlength="10" edit="date" onfocus="fieldFocus(this)" onblur="fldOnBlur(this);" onkeypress="portalWnd.onCalKeyPress(event)"></input>
+	<button class="selectButton" tabIndex="-1" style="position:absolute;TOP:95px;LEFT:62%;background-image:url('../images/ico_form_calendar.gif');background-repeat:no-repeat;border:0px;background-color:transparent;"  onclick="showCalendar(window,'startDate')">&nbsp;</button>	
+	<!-- TIME -->
+	<span id="lblStartTime" class="label" style="position:absolute; TOP:120px;LEFT:10%;WIDTH:25%">&nbsp;</span>
+	<span style="position:absolute; TOP:120px;LEFT:37%">
+		<input id="startTime" class="textbox" style="position:relative" type="text" size="8" maxlength="4" edit="numeric" onfocus="fieldFocus(this)" onblur="fldOnBlur(this);" onkeypress="portalWnd.edCheckNumeric(event,this)"></input>&nbsp;
+		<span class="output" style="position:relative; color:gray; font-style:italic;font-size:9pt;font-family:Tahoma,Verdana,Arial,sans-serif"> (hhmm) </span>
+	</span>
+</span>
+
+	<!-- DIALOG TOOLBAR -->
+	<div id="toolBarDiv" class="toolbar" style="display:none; position:absolute; TOP:160px; WIDTH:100%;" ALIGN="center"></div>
+</BODY>
+</HTML>

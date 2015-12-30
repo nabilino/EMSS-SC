@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Direct Deposit Help</title>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var winParams = (window.location.search)?unescape(window.location.search):"";
+var FullAchFlag;
+var PartialAchFlag;
+var view;
+var NumberOfAccountsOpen;
+var Prenote;
+var DefaultAccount;
+var NumberOfRulesAccounts;
+var Country;
+
+if (winParams)
+{
+	FullAchFlag = eval(getVarFromString("full",winParams));
+	PartialAchFlag = eval(getVarFromString("partial",winParams));
+	view = getVarFromString("view",winParams);
+	NumberOfAccountsOpen = getVarFromString("count",winParams);
+	Prenote = eval(getVarFromString("prenote",winParams));
+	DefaultAccount = eval(getVarFromString("default",winParams));
+	NumberOfRulesAccounts = getVarFromString("accounts",winParams);
+	Country = getVarFromString("country",winParams);
+}
+
+function Others(Country)
+{
+	if (typeof(Country) == "undefined" || Country == null || !Country)
+		Country = "US"
+	this.Country = Country
+	if (Country == "CA")
+	{
+		this.NumberOfAccounts = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_263","DD")+"</span><br/>"+
+			opener.getSeaPhrase("DD_474","DD")+"<p>"+opener.getSeaPhrase("DD_475","DD")
+		this.DepositAll = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_274","DD")+"</span><br/>"+
+			opener.getSeaPhrase("DD_476","DD")+"<p>"+opener.getSeaPhrase("DD_477","DD")+"<p>"+opener.getSeaPhrase("DD_475","DD")
+	}
+	else
+	{
+		this.NumberOfAccounts = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_263","DD")+"</span><br/>"+
+			opener.getSeaPhrase("DD_474","DD")+"<p>"+opener.getSeaPhrase("DD_478","DD")
+		this.DepositAll = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_274","DD")+"</span><br/>"+
+			opener.getSeaPhrase("DD_476","DD")+"<p>"+opener.getSeaPhrase("DD_477","DD")+"<p>"+opener.getSeaPhrase("DD_478","DD")
+	}
+	this.ReOrder = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_235","DD")+"</span><br/>"+opener.getSeaPhrase("DD_479","DD")+"<p>"+opener.getSeaPhrase("DD_480","DD")
+	this.CreateADefault = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_288","DD")+"</span><br/>"+opener.getSeaPhrase("DD_475","DD")
+	this.DepositAll2 = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_289","DD")+"</span><br/>"+opener.getSeaPhrase("DD_481","DD")
+}
+
+function FullAch(Country)
+{
+	if (typeof(Country) == "undefined" || Country == null || !Country)
+		Country = "US"
+	this.Country = Country
+	this.NumberOfAccounts = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_263","DD")+"</span><br/>"+opener.getSeaPhrase("DD_482","DD")
+	this.Amount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_174","DD")+"</span><br/>"+opener.getSeaPhrase("DD_483","DD")
+	this.AmountDefault = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_174","DD")+"</span><br/>"+opener.getSeaPhrase("DD_484","DD")
+	if (Country == "CA")
+	{
+		this.DefaultAccount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_305","DD")+"</span><br/>"+opener.getSeaPhrase("DD_475","DD")
+		this.PreNotification = ""
+		this.BankName = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_162","DD")+"</span><br/>"+opener.getSeaPhrase("DD_485","DD")
+		this.TypeOfAccount = ""
+		this.AccountDescription = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_248","DD")+"</span><br/>"+opener.getSeaPhrase("DD_486","DD")
+		this.RoutingAccountNumbers = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_315","DD")+"</span><br/>"+opener.getSeaPhrase("DD_487","DD")+"<p>"+opener.getSeaPhrase("DD_488","DD")
+		this.AccountNumberBankNameChange = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_331","DD")+"</span><br/>"+opener.getSeaPhrase("DD_489","DD")
+	}
+	else
+	{
+		this.DefaultAccount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_305","DD")+"</span><br/>"+opener.getSeaPhrase("DD_478","DD")
+		this.PreNotification = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_337","DD")+"</span><br/>"+opener.getSeaPhrase("DD_490","DD")
+		this.BankName = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_164","DD")+"</span><br/>"+opener.getSeaPhrase("DD_491","DD")
+		this.TypeOfAccount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_349","DD")+"</span><br/>"+opener.getSeaPhrase("DD_492","DD")
+		this.AccountDescription = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_36","DD")+"</span><br/>"+opener.getSeaPhrase("DD_532","DD")
+		this.RoutingAccountNumbers = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_355","DD")+"</span><br/>"+opener.getSeaPhrase("DD_493","DD")+"<p>"+opener.getSeaPhrase("DD_494","DD")
+		this.AccountNumberBankNameChange = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_362","DD")+"</span><br/>"+opener.getSeaPhrase("DD_495","DD")
+	}
+	this.DefaultExample = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_366","DD")+"</span><br/>"+opener.getSeaPhrase("DD_496","DD")+"<p>"+opener.getSeaPhrase("DD_497","DD")
+	this.DepositSequence = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_381","DD")+"</span><br/>"+opener.getSeaPhrase("DD_498","DD")
+	this.DepositAmountPercent = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_389","DD")+"</span><br/>"+opener.getSeaPhrase("DD_499","DD")+"<p>"+opener.getSeaPhrase("DD_500","DD")
+	this.ChangeAmount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_400","DD")+"</span><br/>"+opener.getSeaPhrase("DD_501","DD")
+}
+
+function PartialAch(Country)
+{
+	if (typeof(Country) == "undefined" || Country == null || !Country)
+		Country = "US"
+	this.Country = Country
+	this.NumberOfAccounts = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_263","DD")+"</span><br/>"+opener.getSeaPhrase("DD_482","DD")
+	this.Amount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_174","DD")+"</span><br/>"+opener.getSeaPhrase("DD_405","DD")
+	this.DefaultAccount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_305","DD")+"</span><br/>"+opener.getSeaPhrase("DD_502","DD")+"<p>"+opener.getSeaPhrase("DD_504","DD")
+	this.DefaultExample = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_414","DD")+"</span><br/>"+opener.getSeaPhrase("DD_503","DD")
+	this.DepositSequence = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_381","DD")+"</span><br/>"+opener.getSeaPhrase("DD_498","DD")
+	if (Country == "CA")
+	{
+		this.PreNotification = ""
+		this.BankName = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_162","DD")+"</span><br/>"+opener.getSeaPhrase("DD_505","DD")
+		this.RoutingAccountNumbers = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_315","DD")+"</span><br/>"+opener.getSeaPhrase("DD_487","DD")+"<p>"+opener.getSeaPhrase("DD_488","DD")
+		this.TypeOfAccount = ""
+		this.AccountDescription = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_248","DD")+"</span><br/>"+opener.getSeaPhrase("DD_486","DD")
+		this.AccountNumberBankNameChange = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_331","DD")+"</span><br/>"+opener.getSeaPhrase("DD_489","DD")
+	}
+	else
+	{
+		this.PreNotification = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_337","DD")+"</span><br/>"+opener.getSeaPhrase("DD_490","DD")
+		this.BankName = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_164","DD")+"</span><br/>"+opener.getSeaPhrase("DD_491","DD")
+		this.RoutingAccountNumbers = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_355","DD")+"</span><br/>"+opener.getSeaPhrase("DD_493","DD")+"<p>"+opener.getSeaPhrase("DD_494","DD")
+		this.TypeOfAccount = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_349","DD")+"</span><br/>"+opener.getSeaPhrase("DD_492","DD")
+		this.AccountDescription = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_36","DD")+"</span><br/>"+opener.getSeaPhrase("DD_532","DD")
+		this.AccountNumberBankNameChange = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_362","DD")+"</span><br/>"+opener.getSeaPhrase("DD_495","DD")
+	}
+	this.DepositAmountPercent = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_389","DD")+"</span><br/>"+opener.getSeaPhrase("DD_499","DD")+"<p>"+opener.getSeaPhrase("DD_500","DD")
+	this.ReOrder = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_235","DD")+"</span><br/>"+opener.getSeaPhrase("DD_479","DD")+"<p>"+opener.getSeaPhrase("DD_480","DD")
+	this.DepositAmountPercentDefault = "<br/><p><span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_389","DD")+"</span><br/>"+opener.getSeaPhrase("DD_506","DD")
+}
+
+function Misc()
+{
+	this.EffectiveDate = "<span class='helpwindowtableheader' style='display:block'>"+opener.getSeaPhrase("DD_428","DD")+"</span><br/>"+opener.getSeaPhrase("DD_507","DD")
+	this.Header = '<p>'
+}
+
+function SelectTips(FullAchFlag, PartialAchFlag, view, NumberOfAccountsOpen, Prenote, DefaultAccount, NumberOfRulesAccounts, Country)
+{
+	if (FullAchFlag)
+	{
+		switch (view)
+		{
+			case "list": return DisplayListForFullAch(NumberOfRulesAccounts, Prenote, Country);
+			case "add": return DisplayAddForFullAch(DefaultAccount, Country);
+			case "change": return DisplayChangeForFullAch(DefaultAccount, Country);
+			case "enteringaccounts" : return DisplayFullEnteringAccounts(Country);
+			case "reorder": return DisplayReorder(NumberOfAccountsOpen, Country);
+			case "default": return DisplayDefaultFullAch(NumberOfRulesAccounts, Country);
+			case "selectdefault": return DisplaySelectDefaultFullAch(NumberOfRulesAccounts, Country);
+			case "changeautoroute": return DisplayAutoRouteFullAch(DefaultAccount, Country);
+			case "selectnewdefault": return DisplaySelectNewDefaultFullAch(NumberOfRulesAccounts, Country);
+		}
+	}
+	else if (PartialAchFlag)
+	{
+		switch (view)
+		{
+			case "list": return DisplayListForPartialAch(NumberOfRulesAccounts, Prenote, Country);
+			case "add": return DisplayAddForPartialAch(DefaultAccount, Country);
+			case "change": return DisplayChangeForPartialAch(DefaultAccount, Country);
+			case "enteringaccounts": return DisplayPartialEnteringAccounts(NumberOfRulesAccounts, Country);
+			case "reorder": return DisplayReorder(NumberOfAccountsOpen, Country);
+			case "selectdefault": return DisplaySelectDefaultPartialAch(NumberOfRulesAccounts, Country);
+			case "default": return DisplayDefaultPartialAch(Country);
+			case "selectnewdefault": return DisplaySelectNewDefaultPartialAch(NumberOfRulesAccounts, Country);
+			case "changeautoroute": return DisplayAutoRoutePartialAch(DefaultAccount, Country);
+		}
+	}
+	else
+		return DisplayAuthTips(Country);
+	return "";
+}
+
+function DisplayListForFullAch(NumberOfRulesAccounts, Prenote, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.NumberOfAccounts
+	if (Country == "CA")
+		strHtml += FullAchObject.AccountDescription
+	else
+	{	
+		strHtml += FullAchObject.AccountDescription
+		strHtml += FullAchObject.TypeOfAccount
+	}			
+	strHtml += FullAchObject.Amount
+	if (NumberOfRulesAccounts > 1)
+	{
+		strHtml += FullAchObject.DefaultAccount
+		strHtml += FullAchObject.DefaultExample
+		strHtml += FullAchObject.DepositSequence
+	}
+	if (Prenote)
+		strHtml += FullAchObject.PreNotification
+	return strHtml;
+}
+
+function DisplayListForPartialAch(NumberOfRulesAccounts, Prenote, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var PartialAchObject = new PartialAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	if (NumberOfRulesAccounts > 1)
+		strHtml += PartialAchObject.NumberOfAccounts
+	if (Country == "CA")
+		strHtml += PartialAchObject.AccountDescription
+	else
+	{	
+		strHtml += PartialAchObject.AccountDescription
+		strHtml += PartialAchObject.TypeOfAccount
+	}	
+	strHtml += PartialAchObject.Amount
+	if (NumberOfRulesAccounts > 1)
+		strHtml += PartialAchObject.DefaultAccount
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	if (NumberOfRulesAccounts > 1)
+	{
+		strHtml += PartialAchObject.DefaultExample
+		strHtml += PartialAchObject.DepositSequence
+	}
+	if (Prenote)
+		strHtml += PartialAchObject.PreNotification
+	return strHtml;
+}
+
+function DisplayAddForFullAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += FullAchObject.BankName
+	if (Country == "CA")
+		strHtml += FullAchObject.AccountDescription
+	else
+	{
+		strHtml += FullAchObject.AccountDescription
+		strHtml += FullAchObject.TypeOfAccount
+	}
+	if (!DefaultAccount)
+		strHtml += FullAchObject.DepositAmountPercent
+	else
+		strHtml += FullAchObject.AmountDefault
+	strHtml += FullAchObject.RoutingAccountNumbers
+	return strHtml;
+}
+
+function DisplayAddForPartialAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var PartialAchObject = new PartialAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	strHtml += PartialAchObject.BankName
+	if (Country == "CA")
+		strHtml += PartialAchObject.AccountDescription
+	else
+	{
+		strHtml += PartialAchObject.AccountDescription
+		strHtml += PartialAchObject.TypeOfAccount
+	}
+	if (!DefaultAccount)
+		strHtml += PartialAchObject.DepositAmountPercent
+	else
+		strHtml += PartialAchObject.DepositAmountPercentDefault
+	strHtml += PartialAchObject.RoutingAccountNumbers
+	return strHtml;
+}
+
+function DisplayChangeForFullAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	strHtml += FullAchObject.AccountNumberBankNameChange
+	if (Country == "CA")
+		strHtml += FullAchObject.AccountDescription
+	else
+	{
+		strHtml += FullAchObject.TypeOfAccount
+		strHtml += FullAchObject.AccountDescription
+	}
+	if (!DefaultAccount)
+		strHtml += FullAchObject.DepositAmountPercent
+	else
+		strHtml += FullAchObject.ChangeAmount
+	return strHtml;
+}
+
+function DisplayChangeForPartialAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var PartialAchObject = new PartialAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	strHtml += PartialAchObject.AccountNumberBankNameChange
+	if (Country == "CA")
+		strHtml += PartialAchObject.AccountDescription
+	else
+	{
+		strHtml += PartialAchObject.TypeOfAccount
+		strHtml += PartialAchObject.AccountDescription
+	}
+	if (!DefaultAccount)
+		strHtml += PartialAchObject.DepositAmountPercent
+	else
+		strHtml += FullAchObject.ChangeAmount
+	return strHtml;
+}
+
+function DisplayDefaultPartialAch(Country)
+{
+	var strHtml = "";
+	var PartialAchObject = new PartialAch(Country)
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	var OtherObject = new Others(Country)
+	strHtml += MiscObject.Header
+	strHtml += PartialAchObject.DefaultAccount
+	strHtml += FullAchObject.DefaultExample
+	strHtml += PartialAchObject.DepositSequence
+	return strHtml;
+}
+
+function DisplayDefaultFullAch(NumberOfRulesAccounts, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	var OtherObject = new Others(Country)
+	strHtml += MiscObject.Header
+	strHtml += OtherObject.CreateADefault
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	return strHtml;
+}
+
+function DisplayFullEnteringAccounts(Country)
+{
+	var strHtml = "";
+	var OtherObject = new Others(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += OtherObject.NumberOfAccounts
+	return strHtml;
+}
+
+function DisplayPartialEnteringAccounts(NumberOfRulesAccounts, Country)
+{
+	var strHtml = "";
+	var OtherObject = new Others(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	if (NumberOfRulesAccounts > 1)
+		strHtml += OtherObject.DepositAll
+	else
+		strHtml += OtherObject.DepositAll2
+	return strHtml;
+}
+
+function DisplayReorder(NumberOfAccounts, Country)
+{
+	var strHtml = "";
+	var OtherObject = new Others(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	if (NumberOfAccounts > 1)
+		strHtml += OtherObject.ReOrder
+	else
+		strHtml += OtherObject.CreateADefault
+	return strHtml;
+}
+
+function DisplaySelectDefaultFullAch(NumberOfRulesAccounts, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += FullAchObject.DefaultAccount
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	return strHtml;
+}
+
+function DisplaySelectDefaultPartialAch(NumberOfRulesAccounts, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += FullAchObject.DefaultAccount
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	return strHtml;
+}
+
+function DisplaySelectNewDefaultFullAch(NumberOfRulesAccounts, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += FullAchObject.DefaultAccount
+	if (NumberOfRulesAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	return strHtml;
+}
+
+function DisplaySelectNewDefaultPartialAch(NumberOfAccounts, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += FullAchObject.DefaultAccount
+	if(NumberOfAccounts > 1)
+		strHtml += FullAchObject.DefaultExample
+	return strHtml;
+}
+
+function DisplayAutoRouteFullAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	if (!DefaultAccount)
+		strHtml += FullAchObject.DepositAmountPercent
+	return strHtml;
+}
+
+function DisplayAutoRoutePartialAch(DefaultAccount, Country)
+{
+	var strHtml = "";
+	var FullAchObject = new FullAch(Country)
+	var MiscObject = new Misc()
+	strHtml += MiscObject.Header
+	strHtml += MiscObject.EffectiveDate
+	if (!DefaultAccount)
+		strHtml += FullAchObject.DepositAmountPercent
+	return strHtml;
+}
+
+function DisplayAuthTips(Country)
+{
+	var strHtml = "";
+	if (typeof(Country) == "undefined" || Country == null || !Country)
+		Country = "US"
+	strHtml += '<p style="text-align:center;font-weight:bold">'+opener.getSeaPhrase("DD_436","DD")+'</p>'
+	strHtml += '<p><p><br/><p style="font-weight:bold">'+opener.getSeaPhrase("DD_437","DD")+'<br/>'
+	strHtml += opener.getSeaPhrase("DD_508","DD")
+	strHtml += opener.getSeaPhrase("DD_509","DD")
+	if (Country == "CA")
+		strHtml += opener.getSeaPhrase("DD_443","DD")
+	else
+		strHtml += opener.getSeaPhrase("DD_444","DD")
+	strHtml += opener.getSeaPhrase("DD_510","DD")
+	return strHtml;
+}
+
+// Dynamically write the contents of the Home Address tips window.
+// This can be fully customized by placing content in the body of this document and removing this function.
+function writeContents()
+{
+	setWinTitle(opener.getSeaPhrase("DD_HELP","DD"));
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'+opener.getSeaPhrase("HELP","DD")+'</div>';
+	self.main.document.getElementById("paneBody").innerHTML = SelectTips(FullAchFlag,PartialAchFlag,view,NumberOfAccountsOpen,Prenote,DefaultAccount,NumberOfRulesAccounts,Country);
+	self.main.stylePage();
+	fitToScreen();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("main");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 15;
+		contentWidthBorder = contentWidth + 10;	
+		contentHeight = winHeight - 30;
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = contentWidth + 17;	
+		contentHeight = winHeight - 45;	
+		contentHeightBorder = contentHeight + 40;		
+	}
+	else
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = contentWidth + 10;	
+		contentHeight = winHeight - 45;
+		contentHeightBorder = contentHeight + 35;			
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";	
+	try
+	{
+		if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.main.onresize = null;
+	}
+	catch(e) {}
+	try
+	{
+		self.main.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = contentWidthBorder + "px";
+		self.main.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = contentHeightBorder + "px";
+		self.main.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="writeContents()" onresize="fitToScreen()">
+	<iframe id="main" name="main" title="Main Content" level="1" tabindex="0" style="position:absolute;top:0px;height:500px;left:0px;width:803px" src="/lawson/xhrnet/ui/helpheaderpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/directdeposit/ddhelp.htm,v 1.2.2.22.2.1 2014/02/28 14:29:35 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

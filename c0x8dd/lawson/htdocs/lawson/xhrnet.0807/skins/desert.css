@@ -1,0 +1,348 @@
+BODY
+{
+	background-color: #CDC9A5;
+}
+
+A
+{
+	color: black;
+}
+
+A:hover
+{
+	color:#B9D3EE;
+}
+
+.nounderline
+{
+	text-decoration: none;
+}
+
+.flatwindow
+{
+	position:absolute;
+	border:1px #104E8B solid;
+	background-color:#FFFACD;
+}
+
+.3DWindow
+{
+	position:absolute;
+	border:1px #104E8B outset;
+	background-color:#FFFACD;
+}
+
+.ButtonWindow
+{
+	position:relative;
+}
+
+.app
+{
+	background-color: #CDC9A5;
+	color: #000000;
+	link-color: #104E8B;
+	vlink-color: #FFFACD;
+	alink-color: #B9D3EE;
+}
+
+.rowheader
+{
+	background-color: #B9D3EE;
+	color: white;
+	font-family: Arial;
+	font-weight: bold;
+	font-size: 14pt;
+	text-align: center;
+}
+
+.roweven
+{
+	background-color: #CDC9A5;
+	font-family: Arial;
+	font-size: 12pt;
+	text-align: center;
+}
+
+.cellhighlighted
+{
+	background-color: #B0C4DE;
+	font-family: Arial;
+	font-size: 12pt;
+	font-weight:bold;
+	text-align: center;
+}
+
+.rowodd
+{
+	background-color: #FFFACD;
+	font-family: Arial;
+	font-size: 12pt;
+	text-align: center;
+}
+
+SELECT
+{
+	border: #104E8B 1px inset;
+	background-color: white;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+INPUT.singleborder
+{
+	border: #104E8B 1px inset;
+	background-color: white;
+	color: black;
+	font-family: Arial;
+	font-size: 10pt;	
+}
+
+.nonactiveTextbox
+{
+	border: #B0C4DE 1px inset;
+	background-color: white;
+	color: black;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+.activeTextbox
+{
+	border: #B0C4DE 1px inset;
+	background-color: #CDC9A5;
+	color: black;
+	font-family: Arial;
+	font-size: 10pt;
+}
+
+.noborder
+{
+	border: 0px;
+}
+
+.titlebar  
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	height: 20px;
+	background-color: #104E8B;
+	color: #B9D3EE;
+	font-family: Arial;
+	padding: 0px;
+	margin: 1px;
+}
+
+.titlebarcontents 
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	padding: 0px;
+	margin: 0px;
+	color: #B9D3EE;
+	font-size: 11pt;
+	font-weight: bold;
+}
+
+.header
+{
+	position: relative;
+	width: 100%;
+	font-family: Arial;
+}
+
+.headercontents
+{
+	position: relative;
+	width: 99%;
+	font-family: Arial;
+}
+
+.main
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	background-color: #FFFACD;
+	color: black;
+	font-family:Arial;
+	font-size: 10pt;
+}
+
+.maincontents
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	overflow: auto;
+	scrollbar-face-color: #CDC9A5;
+	scrollbar-shadow-color: #CDC9A5;
+}
+
+.maincontentsN6
+{
+	position: relative;
+	top: 0px;
+	left: 3px;
+	width: 98.5%;
+	overflow: auto;
+	margin: 0px, 0px, 0px, 0px;
+	padding: 0px, 0px, 0px, 0px;
+	scrollbar-face-color: #CDC9A5;
+	scrollbar-shadow-color: #CDC9A5;
+}
+
+.footer
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 35px;
+	bottom: 0px;
+	margin: 0px, 0px, 0px, 0px;
+	background-color: #FFFACD;
+	color: black;
+	font-family:Arial;
+	font-size: 10pt;
+}
+
+.footercontents
+{
+	position: relative;
+	top: 0px;
+	left: 0px;
+	width: 100%;
+	height: 35px;
+	margin: 0px 0px 0px 0px;
+	padding: 3px, 3px, 0px, 0px;
+	align: center;
+	font-weight: bold;
+}
+
+.footercontentsN6
+{
+	position: relative;
+	align: center;
+	top: 3px;
+	left: 0px;
+	width: 100%;
+	height: 35px;
+	margin: 0px 0px 0px 0px;
+	padding: 0px 0px 0px 0px;
+	font-weight: bold;
+}
+
+.button
+{
+	padding: 2px 4px 2px 4px;
+	border: #FFFACD 2px outset;
+	color: #000000;	
+	font-weight: bold;
+	font-size: 10pt;
+	font-family: arial;
+	text-align: center;
+}
+
+.buttondisabled
+{
+	padding: 2px 4px 2px 4px;
+	border: #FFFACD 2px outset;
+	color: #A0A0A0;	
+	font-weight: bold;
+	font-size: 10pt;
+	font-family: arial;
+	text-align: center;
+}
+
+.closeicon
+{
+	color: #B9D3EE;
+	font-size:11pt;
+	font-weight:bold;	
+}
+
+.labelheader
+{
+	font-size:11pt;
+	font-weight:bold;
+}
+
+.labelnormal
+{
+	font-size:10pt;
+	font-weight:normal;
+}
+
+.mainbuttons  
+{
+	position: absolute;
+	bottom: 10px;
+	left: 0px;
+	width: 100%;
+	height: 20px;
+	padding: 0px 0px 0px 0px;
+	margin: 0px 0px 0px 0px;
+	font-family: Arial;
+}
+
+.mainbuttonscontents
+{
+	position: relative;
+	width: 100%;
+	height: 20px;
+	top: 2px;	
+	left: 0px;
+	padding: 0px 0px 0px 10px;
+	margin: 0px 0px 0px 0px;
+	color: #B9D3EE;
+	font-size: 11pt;
+	font-weight: bold;
+}
+
+.alert
+{
+	display: block;
+	font-family: arial;
+	font-size: 18pt;
+	font-weight: bold;
+	text-align: center;
+	vertical-align: center;
+}
+
+.outline
+{
+	display: inline;
+	border: #000000 1px solid;
+}
+
+.nooutline
+{
+	display: inline;
+	border: #B9D3EE 0px solid;
+}
+/* Version: 8-)@(#)@10.00.02.00.29 */
+/* $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/skins/desert.css,v 1.2.6.3 2012/06/29 17:12:09 brentd Exp $ */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>myBC Introduction</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script>
+var FirstName;
+var Dept
+var DeptName;
+var ProcLvl;
+var PLName;
+var Position;
+var PosDesc;
+var JobCode;
+var JobDesc;
+
+
+function OpenPage()
+{
+	showWaitAlert("Please wait");	
+	authenticate("frameNm='jsreturn'|funcNm='GetEmpInfo()'|officeObjects=true|desiredEdit='EM'");
+}
+
+function GetEmpInfo()
+{
+	stylePage();
+	//setWinTitle("Your new myBusinessConnect (myHR) Personal Information");
+   	var object = new DMEObject(authUser.prodline, "EMPLOYEE");
+      	object.out   = "JAVASCRIPT";
+	object.index = "EMPSET1";
+	object.field = "first-name;process-level;department;position;job-code;department.name;position.description;process-level.name;job-code.description"
+	object.key   = parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10)
+	object.func  = "SetEmpInfo()";
+   	DME(object, "jsreturn");
+}
+
+function SetEmpInfo()
+{
+	if (jsreturn.NbrRecs != 0) {
+		FirstName = jsreturn.record[0].first_name;
+		Dept = jsreturn.record[0].department;
+		DeptName = jsreturn.record[0].department_name;
+		ProcLvl = jsreturn.record[0].process_level;
+		PLName = jsreturn.record[0].process_level_name;
+		Position = jsreturn.record[0].position;
+		PosDesc = jsreturn.record[0].position_description;
+		JobCode = jsreturn.record[0].job_code;
+		JobDesc = jsreturn.record[0].job_code_description;
+	}
+   	var object = new DMEObject(authUser.prodline, "PAEMPPOS");
+      	object.out   = "JAVASCRIPT";
+	object.index = "PEPSET1";
+	object.field = "pos-level;process-level;department;position;job-code;jobcode.description;department.name;position.description;process-level.name"
+	object.key   = parseInt(authUser.company,10) +"="+ parseInt(authUser.employee,10)+"=2->99"
+	object.select = "EFFECT-DATE>="+ymdtoday+"&(END-DATE=|END-DATE>"+ymdtoday+")"
+	object.func  = "DrawScreen()";
+   	DME(object, "jsreturn");
+}
+
+function DrawScreen()
+{
+	var PageContent = '<font size="+1" face="Arial">'
+	PageContent += '<img src="/lawson/xhrnet/images/mybc3.jpg" style="width:200px;height:32px"><br>'
+	PageContent += '<center><strong>New <i>my</i>BC Access & <i>Your</i> Personal Position Information</center></strong></font><br><br>'
+	PageContent += '<font size="-1"  face="Arial">Dear '+FirstName+', (Employee ID# '+authUser.employee+'),<br><br>'
+	PageContent += "Throughout the month of December, you’ve heard about the implementation of myBusinessConnect (<i>my</i>BC) taking place in January 2015. For the first time, Human Resources, Finance, and Supply Chain will be one integrated system across all St. Luke's sites. This will streamline many processes for you and your leaders, as well as strengthen our Health System.</font><br><br>"
+	PageContent += '<font face="Arial" color="red"><center><strong>Please read the following information carefully as it holds the keys to your smooth transition to this new system.</center></strong></font><br><br>'
+	PageContent += '<font size="-1" face="Arial">The first thing you should know is that the <strong>new <i>my</i>BusinessConnect (<i>my</i>BC) application will be available starting January 5</strong>. You may access the application from either the new desktop icon (see image below) or from your computer Start menu as <strong><i>my</i>BC Infor Lawson</strong>.<br><br>'
+	PageContent += "Note: Elmore facilities can access <i>my</i>BC from the Elmore Intranet site in addition to the <i>my</i>BC icon. Elmore facilities won't have <i>my</i>BC Infor Lawson added to their computer Start menu at this time.  Saltzer facilities can access <i>my</i>BC from www.stlukesonline.org > For Employees > <i>my</i>BC.</font><br><br>"
+	PageContent += '<font size="+1" face="Arial"><center><strong>New <i>my</i>BC Icon</strong><br><br>'
+	PageContent += '<img src="/lawson/xhrnet/images/mybcicon.jpg" style="width:45px;height:64px"></center></font><br><br>'
+	PageContent += '<font size="-1" face="Arial">In order to prepare for this change, access to <i>my</i>HR and Lawson 9.0.1.9 from your desktop icons and computer Start menu will be removed at the end of the day on January 3. <strong>For all of your <i>my</i>HR and Lawson 9.0.1.9 needs, please use the new <i>my</i>BusinessConnect application starting January 5, not before.</strong></font><br><br>'
+	PageContent += '<font size="+1" face="Arial"><center><strong>Old <i>my</i>HR and Lawson Icons</strong><br><br>'
+	PageContent += '<img src="/lawson/xhrnet/images/myhricon.jpg" style="width:97px;height:62px"></center><br><br>'
+	PageContent += '<center><strong>Say Goodbye to Different User Names</strong></center></font><br><br>'
+	PageContent += '<font size="-1" face="Arial">On January 5, when all three systems combine under <i>my</i>BC, you will be able to access the new <i>my</i>BC application with only <strong>one user name and password</strong>. Follow these log-in in instructions:<br>'
+	PageContent += '<ul>'
+	PageContent += "<li>Your new user name will be your St. Luke's System User Name (i.e., smithj)</li>"
+	PageContent += '<li>Your new password will be "ess" plus the last 5 digits of your social security number. For example, if your social security number is 123-45-6789, your password will be "ess56789." For security reasons, it’s important that you change your password once you have logged into <i>my</i>BusinessConnect.</li>'
+	PageContent += '</ul></font><br><br>'
+	PageContent += '<font size="+1" face="Arial"><strong>In order to access the new <i>my</i>BusinessConnect application, you will need to reboot your workstation on January 5. If after rebooting, you do not see the <i>my</i>BC icon on your desktop please reboot your workstation again. If a second try fails, contact the HelpDesk (details below).</strong></font><br><br>'
+	PageContent += '<font size="+1" face="Arial" color="red"><strong><center>The following position information below pertains only to you</center></strong></font><br><br>'
+	PageContent += '<font size="-1" face="Arial"><strong>Starting in January, new numbers will replace the numbers you have used previously</strong>. This includes your position numbers for any documents or requests, including payroll and time entry, employee expense and mileage reimbursement, as well as IT help requests.  <strong>Please keep this email handy as you will need this information prior to accessing <i>my</i>BC</strong>.  You also can find this position information at <i>my</i>BC > <i>my</i>HR Employee Self-Service > <i>my</i>BC Data. </font><br><br>'
+	PageContent += '<font size="+1" face="Arial"><strong><u>Your Primary Position</u></strong><br>'
+	PageContent += 'HR Process Level = '+ProcLvl+', '+PLName+'<br>'
+	PageContent += 'Home Department = '+Dept+', '+DeptName+'<br>'
+	PageContent += 'Job Code = '+JobCode+', '+JobDesc+'<br>'
+	PageContent += 'Position Code = '+Position+', '+PosDesc+'<br><br>'
+	for (var i=0;i<jsreturn.NbrRecs;i++) {
+		PageContent += '<strong><u>Your Alternate '+jsreturn.record[i].pos_level+' Position</u></strong><br>'
+		PageContent += 'Alternate Process Level = '+jsreturn.record[i].process_level+', '+jsreturn.record[i].process_level_name+'<br>'
+		PageContent += 'Alternate Department = '+jsreturn.record[i].department+', '+jsreturn.record[i].department_name+'<br>'
+		PageContent += 'Alternate Job Code = '+jsreturn.record[i].job_code+', '+jsreturn.record[i].jobcode_description+'<br>'
+		PageContent += 'Alternate Position = '+jsreturn.record[i].position+', '+jsreturn.record[i].position_description+'<br><br>'
+	}
+	PageContent += 	'</font>'
+	PageContent += '<font size="-1" face="Arial">Please remember, if you need additional numbers/codes not listed above, use the <a href="http://inside.slrmc.org/mybusinessconnect/crosswalk.php" target="_new">myBusinessConnect Crosswalk Lookup Tools</a>'
+	PageContent += " available on Inside St. Luke's and <i>my</i>BC.<br><br>"
+	PageContent += 'If you have trouble logging into <i>my</i>BC on or after January 5, please contact the HelpDesk at helpdesk@slhs.org or 208-381-4357. Thank you for your support!<br><br>'
+	PageContent += 'Sincerely<br>'
+	PageContent += 'The <i>my</i>BusinessConnect Team<br><br>'
+
+	//self.MAIN.document.getElementById("paneHeader").innerHTML = "Your new myBusinessConnect (myHR) Personal Information"
+	self.MAIN.document.getElementById("paneBody").innerHTML = PageContent;
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+	removeWaitAlert();	
+	fitToScreen();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;			
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		document.getElementById("dialog").style.left = "";
+		document.getElementById("dialog").style.right = "20px";
+	}		
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenPage()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:5px;top:0px;width:100%;height:100%" frameborder="no" marginwidth="0" marginheight="0" scrolling="yes"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+

@@ -1,0 +1,231 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/colorpick.htm,v 1.2.28.2 2012/08/08 12:48:47 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Color Picker</title>
+<link id="dialogColor" type="text/css"  rel="stylesheet" href="../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="tab0">Web Safe</phrase>
+		<phrase id="tab1">Predefined</phrase>
+		<phrase id="tab2">RGB</phrase>
+		<phrase id="tab3">Hex</phrase>
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+	</Translate>
+</XML>
+<style type="text/css">
+.pane
+{
+	position: absolute;
+	height: 20px;
+	overflow: hidden;
+	padding: 2px;
+	text-align: center;
+	width: 30px;
+	border-bottom: 1px solid #F0F0F0;
+	border-left: 1px solid #808080;
+	border-right: 1px solid #F0F0F0;
+	border-top: 1px solid #808080;
+}
+.cb14
+{
+	cursor: default;
+	height: 14px;
+	margin: 1px;
+	overflow: hidden;
+	width: 14px;
+	border-bottom: 1px solid #F0F0F0;
+	border-left: 1px solid #808080;
+	border-right: 1px solid #F0F0F0;
+	border-top: 1px solid #808080;
+}
+.cb20
+{
+	cursor: default;
+	height: 14px;
+	margin: 1px;
+	overflow: hidden;
+	width: 20px;
+	border-bottom: 1px solid #F0F0F0;
+	border-left: 1px solid #808080;
+	border-right: 1px solid #F0F0F0;
+	border-top: 1px solid #808080;
+}
+</style>
+
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="../colorutil.js"></script>
+<script language="javascript" src="colorpick.js"></script>
+
+</head>
+
+<body onload="initColorPicker()" onkeydown="handleKeyDown()" 
+		style="display:none;background-color:threedface;font-family:Arial,sans-serif;font-size:10px;">
+<form name="colorpickerForm">
+	<!-- RGB related objects -->
+	<div id="tab2" class="dsTabButtonInactive" style="left:150px;top:6px;width:75px;height:20px;z-index:99;" 
+			onclick="showPanel(2)">RGB</div>
+		<div id="panel2" class="dsTabPaneInactive" style="left: 0px; top: 25px;">
+			<!-- red in decimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:15px;width:30px;" onmousedown="modifyColor(-10,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:15px;width:30px;" onmousedown="modifyColor(-1,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currDecRed" class="pane" style="left: 75px; top: 15px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:15px;width:30px;" onmousedown="modifyColor(1,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:15px;width:30px;" onmousedown="modifyColor(10,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 15px;width: 30px;" type="text" name="dRed" onblur="(IsGoodDec(this.value)) ? changeColor(true) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+
+			<!-- green in decimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:40px;width:30px;" onmousedown="modifyColor(0,-10,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:40px;width:30px;" onmousedown="modifyColor(0,-1,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currDecGreen" class="pane" style="left: 75px; top: 40px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:40px;width:30px;" onmousedown="modifyColor(0,1,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:40px;width:30px;" onmousedown="modifyColor(0,10,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 40px;width: 30px;" type="text" name="dGreen" onblur="(IsGoodDec(this.value)) ? changeColor(true) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+
+			<!-- blue in decimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:65px;width:30px;" onmousedown="modifyColor(0,0,-10)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:65px;width:30px;" onmousedown="modifyColor(0,0,-1)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currDecBlue" class="pane" style="left: 75px; top: 65px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:65px;width:30px;" onmousedown="modifyColor(0,0,1)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:65px;width:30px;" onmousedown="modifyColor(0,0,10)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 65px;width: 30px;" type="text" name="dBlue" onblur="(IsGoodDec(this.value)) ? changeColor(true) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+		</div>
+
+	<!-- Hex related objects -->
+	<div id="tab3" class="dsTabButtonInactive" style="left:225px;top:6px;width:75px;height:20px;z-index:99;" onclick="showPanel(3)">Hex</div>
+		<div id="panel3" class="dsTabPaneInactive" style="left: 0px; top: 25px;">
+			<!-- red in hexadeimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:15px;width:30px;" onmousedown="modifyColor(-16,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:15px;width:30px;" onmousedown="modifyColor(-1,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currHexRed" class="pane" style="left: 75px; top: 15px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:15px;width:30px;" onmousedown="modifyColor(1,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:15px;width:30px;" onmousedown="modifyColor(16,0,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 15px;width: 30px;" type="text" name="hRed" onblur="(IsGoodHex(this.value)) ? changeColor(false) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+
+			<!-- green in hexadeimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:40px;width:30px;" onmousedown="modifyColor(0,-16,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:40px;width:30px;" onmousedown="modifyColor(0,-1,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currHexGreen" class="pane" style="left: 75px; top: 40px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:40px;width:30px;" onmousedown="modifyColor(0,1,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:40px;width:30px;" onmousedown="modifyColor(0,16,0)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 40px;width: 30px;" type="text" name="hGreen" onblur="(IsGoodHex(this.value)) ? changeColor(false) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+
+			<!-- blue in hexadeimal -->
+			<input type="button" class="dsButton" style="position: absolute;left:5px;top:65px;width:30px;;" onmousedown="modifyColor(0,0,-16)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-10"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:40px;top:65px;width:30px;" onmousedown="modifyColor(0,0,-1)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="-1"></input>
+			<div id="currHexBlue" class="pane" style="left: 75px; top: 65px;"></div>
+			<input type="button" class="dsButton" style="position: absolute;left:110px;top:65px;width:30px;" onmousedown="modifyColor(0,0,1)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+1"></input>
+			<input type="button" class="dsButton" style="position: absolute;left:145px;top:65px;width:30px;" onmousedown="modifyColor(0,0,16)" 
+				onmouseout="clearTimeout(timer)" onmouseup="clearTimeout(timer)" value="+10"></input>
+			<input class="dsTextBox" style="left: 190px; top: 65px;width: 30px;" type="text" name="hBlue" onblur="(IsGoodHex(this.value)) ? changeColor(false) : setColor(gebi('colorDisplay').style.backgroundColor)" onselectstart="window.event.cancelBubble = true; return true"><br>
+		</div>
+
+	<!-- Web Safe Colors related objects -->
+	<div id="tab0" class="dsTabButtonActive" style="left:0px;top:6px;width:75px;height:20px;z-index:99;" 
+				onclick="showPanel(0)">Web Safe</div>
+		<div id="panel0" class="dsTabPaneActive" style="left: 0px; top: 25px;">
+			<script language="javascript">
+			try {
+				var parentWin=wndArguments[0]
+				if (!parentWin.colorTable1)
+				{
+					var c = ''
+					var clrs = new Array()
+					for(var i = 0; i < 256; i+=51)
+						for(var j = 0; j < 256; j+=51)
+							for(var k = 0; k < 256; k+=51)
+								clrs[clrs.length] = HexValue(i + '') + HexValue(j + '') + HexValue(k + '')
+					for(var i in clrs)
+					{	title = '#' + clrs[i];
+						if(pdc[clrs[i]])
+							title += ', ' + pdc[clrs[i]]
+						c += '<span class="cb14" style="background-color:#' + clrs[i] + ';" onclick="setColor(\'' + clrs[i] + '\');"'
+							+' ondblclick="setColor(\'' + clrs[i] + '\');setReturnValue()" title="' + title + '"></span>'
+					}
+					parentWin.colorTable1=c
+				}
+				document.write(parentWin.colorTable1)
+			} catch (e) { }
+			</script>
+		</div>
+
+	<!-- Predefined Colors related objects -->
+	<div id="tab1" class="dsTabButtonInactive" style="left:75px;top:6px;width:75px;height:20px;z-index:99;" 
+				onclick="showPanel(1)">Predefined</div>
+		<div id="panel1" class="dsTabPaneInactive" style="left: 0px; top: 25px;">
+			<script language="javascript">
+			try {
+				var parentWin=wndArguments[0]
+				if (!parentWin.colorTable2)
+				{
+					var c = ''
+					var clrs = new Array()
+					for(var i in pdc)
+						clrs[clrs.length] = i
+					for(var i in clrs)
+						c += '<span class="cb20" style="background-color:#' + clrs[i] + ';" onclick="setColor(\'' + clrs[i] + '\');"'
+							+' ondblclick="setColor(\'' + clrs[i] + '\');setReturnValue()" title="' + pdc[clrs[i]] + '"></span>'
+					parentWin.colorTable2=c
+				}
+				document.write(parentWin.colorTable2)
+			} catch (e) { }
+			</script>
+		</div>
+
+	<!-- Output related objects -->
+	<div id="panel4" class="dsTabPaneActive" style="left: 0px; top: 232px; height: 30px;">
+		<div id="colorDisplay" class="pane" style="position:absolute;left: 5px; top: 5px; width: 100px;"></div>
+		<input type="button" id="btnOK" class="dsButton" style="position:absolute;left: 130px; top: 5px; width: 50px;" 
+			onclick="setReturnValue()" value="OK"></input>
+		<input type="button" id="btnCancel" class="dsButton" style="position:absolute;left: 185px; top: 5px; width: 50px;" 
+			onclick="window.close()" value="Cancel"></input>
+	</div>
+</form>
+
+</body>
+</html>

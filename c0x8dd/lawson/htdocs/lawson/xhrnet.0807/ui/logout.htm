@@ -1,0 +1,66 @@
+<html>
+	<head>
+		<meta name="viewport" content="width=device-width" />
+		<meta http-equiv="Expires" content="0">
+		<meta http-equiv="pragma" content="no-cache">
+		<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+		<title>Logged Out of Lawson</title>
+        <link id="StyleLink" type="text/css" rel="stylesheet" href="/sso/login.css"></link>
+		<script src="/sso/domain.js"></script>
+		<script src="/sso/sso.js"></script>
+		<script src="/sso/login.js"></script>
+		<script src="/sso/version.js"></script>
+		<style type="text/css">
+		body
+		{
+			font-family: Arial, Helvetica;
+			color: #000000;
+			background-color: #ffffff;
+			background-image: none;
+			background-repeat: repeat-y;
+			margin: 0px;
+			visibility: hidden;
+		}
+		</style>
+		<script>
+		function initLogout()
+		{
+			browser = new SSOBrowser();
+			if (browser.isIE)
+				document.getElementById("imgDiv").style.filter = "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='/lawson/webappjs/images/login.png',sizingMethod='scale')";
+			else
+				document.getElementById("imgDiv").style.backgroundImage = "url('/lawson/webappjs/images/login.png')";
+		}
+		</script>
+	</head>
+	<body onload="initLogout();sizeLogin();try{getVersionInfo();}catch(e){}" onresize="sizeLogin();setFocus();" onunload="pageClosing()">
+    <div id="imgDiv" style="position:absolute;width:468px;height:368px;"></div>
+    <div id="bgDiv" style="position:absolute;width:468px;height:368px;">
+        <div id="fieldsDiv" style="position:absolute;left:71px;top:195px;width:320px;text-align:center;">You have been logged out.</div>
+		<div id="lwsnCpyDiv" class="smallFont" style="position:absolute;left:15px;top:363px;width:452px;">Copyright &copy; 2012 Infor. All rights reserved. www.infor.com</div>
+		<div id="lwsnVerDiv" class="smallFont" style="position:absolute;left:0px;top:363px;width:447px;text-align:right;"></div>
+	</div>
+	</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/ui/Attic/logout.htm,v 1.1.2.7 2012/07/25 22:03:12 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

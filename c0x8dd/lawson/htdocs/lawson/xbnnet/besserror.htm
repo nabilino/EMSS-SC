@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Benefits Enrollment Error</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script>
+function initProgram()
+{
+	setWinTitle(getSeaPhrase("ERROR_3","BEN"));
+	parent.startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), startProgram);
+}
+function startProgram()
+{
+	var Desc = '<div class="plaintablecell" style="padding:0px">'
+	Desc += '<br/><table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" role="presentation">'
+	Desc += '<tr><td class="plaintableheaderborder">'+getSeaPhrase("WARNING","BEN")+'</td></tr>'
+	Desc += '<tr><td class="plaintableheadertallwhite"><p>'
+// MOD BY BILAL - Prior customization
+//	Desc += getSeaPhrase("NHBULLETIN_22","BEN")
+	Desc += '<font size=+3>Your benefits have NOT been saved due to an error.<br/>'
+		+ 'Please click the Continue button below, and try to enroll again by going back to step 3 - Enroll Now.</font>'
+            + '<hr/>'
+            + '<p>This error can be avoided by using the Internet Explorer 7-9 web browser.'
+            + ' Your work computer likely has version 6, so if you have version 7 at home, we encourage you to complete online enrollment from home.'
+            + ' The web site address to use to enroll from home is: http://www.stlukesonline.org/myHR </p>'
+            + '<p>If you do not have Internet Explorer 7 available to you at home, please call the Benefits hotline and they will find additional help for you.</p>'
+            + '<p>Benefits Services phone numbers: Treasure Valley (381-6180), Magic Valley (737-2135), Wood River (727-8487)</p>'
+// END OF MOD
+	if (parent.parent.emailSummary || parent.parent.printSummary) 
+	{
+		Desc += '<br/><br/>'
+		if (parent.parent.emailSummary && parent.parent.emailaddress)
+			Desc += getSeaPhrase("EMAIL_SENT_TO","BEN")+' '+parent.parent.emailaddress+'<br/><br/>'
+		if (parent.parent.printSummary)
+		{
+			Desc += getSeaPhrase("WAIT_PRINT","BEN")+' '
+			if (parent.parent.opener || parent.parent.rule_type == "F")
+				Desc += getSeaPhrase("PRINT_COMP_DONE_EXIT","BEN")			
+		}
+	}	
+	Desc += '</p></td></tr></table>'	
+	Desc += '<p class="textAlignRight">'
+	if (parent.parent.opener || parent.parent.rule_type == "F")
+		Desc += uiButton(getSeaPhrase("DONE","BEN"), "parent.parent.EndEnroll('YES');return false", "margin-right:5px;margin-top:10px");
+	Desc += '</p></div>'
+	document.getElementById("paneBody").innerHTML = Desc;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("ERROR_3","BEN");
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	checkNotifications();
+	parent.fitToScreen();
+}
+function checkNotifications()
+{
+	if (parent.parent.emailSummary)
+		parent.parent.emailScr(parent.parent.main,true);
+	if (parent.parent.printSummary)
+		setTimeout(function() { parent.parent.printScr(parent.parent.main.printScreen); }, 500);
+}
+</script>
+</head>
+<body onload="setLayerSizes();initProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/besserror.htm,v 1.19.2.32 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

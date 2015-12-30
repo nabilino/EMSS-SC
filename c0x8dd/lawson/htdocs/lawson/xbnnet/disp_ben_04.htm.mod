@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Enroll in Benefit Plan</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+var maxPlansElected = false;
+if (parent.plangroup>1 || (parent.plangroup==1 && (parent.GrpPlans[0][1]!=parent.parent.CurrentBens[parent.parent.planname][1]
+|| parent.GrpPlans[0][2]!=parent.parent.CurrentBens[parent.parent.planname][2])))
+{
+	var noOfPlan = 0;
+	for (var i=1; i<parent.parent.EligPlans.length; i++)
+	{
+		if (parent.parent.EligPlans[i][8] == parent.parent.EligPlanGroups[parent.parent.CurrentPlanGroup][0] && parent.parent.selectedPlanInGrp[i] == true)
+			noOfPlan++;
+	}
+	//PT 160142
+	if (noOfPlan < parent.parent.EligPlanGroups[parent.parent.CurrentPlanGroup][1])
+		parent.button3 = 1;
+	else
+		maxPlansElected = true;
+}
+var currentcov=0
+var increment=0
+var increment=0
+var newempcost=0 //18
+var newcompcost=0 //24
+var newflxcost=0 //20
+var max=0
+var min=0
+var PRE_CONTRIB_BASIS=parent.parent.SelectedPlan[42]
+if (parent.parent.SelectedPlan[18]!="")
+	newempcost=parseFloat(parent.parent.SelectedPlan[18])
+if (parent.parent.SelectedPlan[24]!="")
+	newcompcost=parseFloat(parent.parent.SelectedPlan[24])
+if (parent.parent.SelectedPlan[20]!="")
+	newflxcost=parseFloat(parent.parent.SelectedPlan[20])
+if (parent.parent.CurrentBens[parent.parent.planname][8]!="")
+	currentcov=parseFloat(parent.parent.CurrentBens[parent.parent.planname][8])
+if (parent.parent.SelectedPlan[35]!="")
+	increment=parseFloat(parent.parent.SelectedPlan[35])
+if (parent.parent.SelectedPlan[34]!="")
+   	max=parseFloat(parent.parent.SelectedPlan[34])
+if (parent.parent.SelectedPlan[33]!="")
+	min=parseFloat(parent.parent.SelectedPlan[33])
+//Added for fix for a benefit with a limit based on another benefit and the max
+//coverage is being returned as 0, thus preventing the Keep These Benefits" link
+//from appearing
+if (max==0)
+{
+	var percent = parent.parent.SelectedPlan[36];
+	var sTemp = percent.substr(0, percent.length - 1)
+	var sSign = percent.substr(percent.length - 1, percent.length)
+	percent = parseFloat(sSign + sTemp) / 100;
+	if (parent.parent.ELSalary)
+		max = Number(parent.parent.ELSalary) * (Number(percent)/100)
+}
+if (PRE_CONTRIB_BASIS=="C")
+{
+	if (currentcov%increment==0)
+	{
+		if (parseFloat(currentcov)>=min && (max==0 || parseFloat(currentcov)<=max))
+		{
+			newempcost=parent.parent.roundToPennies(parseFloat(currentcov)/parseFloat(increment)*newempcost)
+			newcompcost=parent.parent.roundToPennies(parseFloat(currentcov)/parseFloat(increment)*newcompcost)
+			newflxcost=parent.parent.roundToPennies(parseFloat(currentcov)/parseFloat(increment)*newflxcost)
+			parent.button1=1
+		}
+	}
+}
+else
+	parent.button1=1
+parent.button2=1
+function startProgram()
+{
+	setWinTitle(getSeaPhrase("ENROLL_PLAN","BEN"));
+	var addlStr = '';
+	var html = '';
+	var head=''
+	var bod=''
+	var bod1=''
+	var bod2=''
+	var bod3=''
+	head+='<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_12","BEN",[parent.parent.CurrentBens[parent.parent.planname][5]])+'">'
+	head+='<caption class="offscreen">'+getSeaPhrase("TCAP_11","BEN",[parent.parent.CurrentBens[parent.parent.planname][5]])+'</caption>'
+	head+='<tr><th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("AS_OF","BEN")+'</th>'
+	//GDD  01/19/15  Change justify from center to left for COVERAGE
+	head+='<th scope="col" class="plaintableheaderborder" style="text-align:left" nowrap>'+getSeaPhrase("COVERAGE","BEN")+'</th>'
+	bod+='<tr><td class="plaintablecellborder" style="text-align:center">'+parent.parent.currentdate+'</td><td class="plaintablecellborderright" style="text-align:left">'+parent.parent.formatCont(parent.parent.CurrentBens[parent.parent.planname][8])+'</td>'
+	bod2+='<tr><td class="plaintablecellborder" style="text-align:center">'+parent.parent.newdate+'</td><td class="plaintablecellborderright" style="text-align:left">'+parent.parent.formatCont(parent.parent.CurrentBens[parent.parent.planname][8])+'</td>'
+	bod3+='<tr><td class="plaintablecellborder" style="text-align:center">&nbsp;</td><td class="plaintablecellborderright">&nbsp;</td>'
+	if (parent.flxcost!=0 || newflxcost!=0)
+	{
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+		bod+='<td class="plaintablecellborderright" style="text-align:left">'+parent.parent.formatCont(parent.flxcost)+'</td>'
+		bod2+='<td class="plaintablecellborderright">'+parent.parent.formatCont(newflxcost)+'</td>'
+		bod3+='<td class="plaintablecellborder">&nbsp;</td>'
+	}
+	if (parent.empcost!=0 || newempcost!=0)
+	{
+		//GDD  01/19/15  Remove colspan  2 and change justify from center to right add blank column.
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:right" nowrap>'+getSeaPhrase("COST","BEN")+'</th><th>&nbsp.</th>'
+		if (parent.parent.CurrentBens[parent.parent.planname][13] == "B")
+		{
+			if (parent.empcst1!=0)
+				bod+='<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.empcst1)+'</td><td class="plaintablecellborder" nowrap>&nbsp;'+parent.parent.displayTaxable("P")+'</td>'	
+			else
+			{
+				if (parent.empcst2!=0)
+					bod+='<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.empcst2)+'</td><td class="plaintablecellborder" nowrap>&nbsp;'+parent.parent.displayTaxable("A")+'</td>'	
+				else
+					bod+='<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'											
+			}
+			if (parent.empcst1!=0 && parent.empcst2!=0)
+				bod3+='<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.empcst2)+'</td><td class="plaintablecellborder" nowrap>&nbsp;'+parent.parent.displayTaxable("A")+'</td>'	
+			else
+				bod3+='<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'								
+		}
+		else
+		{	
+			bod+='<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.empcost)+'</td><td class="plaintablecellborder">&nbsp;'
+			if (parent.empcost!=0)
+				bod+=parent.parent.displayTaxable(parent.taxable)
+			bod+='</td>'
+			bod3+='<td class="plaintablecellborder">&nbsp;</td><td class="plaintablecellborder">&nbsp;</td>'	
+		}
+		bod2+='<td class="plaintablecellborderright">'+parent.parent.formatCont(newempcost)+'</td><td class="plaintablecellborder">&nbsp;'
+		if (newempcost!=0)
+		{
+			if (parent.parent.CurrentBens[parent.parent.planname][13] == "B" && parent.parent.SelectedPlan[16])
+				bod2+=parent.parent.displayTaxable(parent.parent.SelectedPlan[16]);
+			else
+				bod2+=parent.parent.displayTaxable(parent.taxable);
+		}
+		bod2+='</td>'	
+	}
+	if (parent.compcost!=0 || newcompcost!=0)
+	{
+		//GDD  01/19/15  change justify from center to right for CO_COST
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:right" nowrap>'+getSeaPhrase("CO_COST","BEN")+'</th>'
+		bod+='<td class="plaintablecellborderright">'+parent.parent.formatCont(parent.compcost)+'</td>'
+		bod2+='<td class="plaintablecellborderright">'+parent.parent.formatCont(newcompcost)+'</td>'
+		bod3+='<td class="plaintablecellborderright">&nbsp;</td>'
+	}
+	head+='</tr>'
+	bod+='</tr>'
+	bod2+='</tr>'
+	bod3+='</tr>'
+	html += '<form name="options">'
+	html += head
+	html += bod
+	if (parent.empcst1!=0 && parent.empcst2!=0 && parent.parent.CurrentBens[parent.parent.planname][13] == "B")
+		html += bod3;
+	if (parent.parent.CurrentBens[parent.parent.planname][14]=="N")
+	{
+		parent.button1 = 0;
+		parent.button2 = 0;
+		// PT 150929. Plan is no longer available; do not allow change of dependents only.
+		parent.button5 = 0;
+		parent.parent.CurrentEligPlan = "";
+		addlStr += getSeaPhrase("DISPBEN_4","BEN")+' ';
+	}
+	else
+	{
+		if (parent.button1==0) 
+		{
+			// PT 150929. Coverage level is no longer available; do not allow change of dependents only.
+			parent.button5 = 0;
+			addlStr += getSeaPhrase("DISPBEN_28","BEN")+' ';
+		} 
+		else 
+		{
+			if (newflxcost==0) newflxcost=''
+			if (newempcost==0) newempcost=''
+			if (newcompcost==0) newcompcost=''
+			parent.parent.setpreaft_flag(parent.parent.SelectedPlan[16])
+			if (parent.parent.BenefitRules[0]=="A")
+				html += bod2;
+		}
+	}
+	html += '</table><br/>'
+	html += parent.parent.writeDepPortion(null, parent.parent.CurrentBens[parent.parent.planname][5])
+	if (parent.flxcost!=0 || parent.empcost!=0 || parent.compcost!=0)
+		addlStr += parent.parent.costdivisor+' ';
+	//PT118701: check if plan has already been elected
+	for (var i=1;i<parent.parent.EligPlans.length;i++)
+	{
+    	if (parent.parent.EligPlans[i][1]==parent.parent.CurrentBens[parent.parent.planname][1] && parent.parent.EligPlans[i][2]==parent.parent.CurrentBens[parent.parent.planname][2])
+		{
+			if (parent.parent.selectedPlanInGrp[i]) 
+			{
+				parent.button1 = 0;
+				parent.button2 = 0;
+				addlStr += getSeaPhrase("ALREADY_ELECTED","BEN")+' ';
+				break;
+			}
+		}
+	}
+	if (maxPlansElected) 
+	{
+		parent.button1 = 0;
+		parent.button2 = 0;
+		parent.button5 = 0;
+		addlStr += getSeaPhrase("MAX_PLAN","BEN")+' ';
+	}
+	parent.parent.SelectedPlan[51] = parent.parent.CurrentBens[parent.parent.planname][11]
+	parent.parent.SelectedPlan[15] = parent.parent.CurrentBens[parent.parent.planname][13]
+	parent.parent.SelectedPlan[20] = newflxcost
+	parent.parent.SelectedPlan[24] = newcompcost
+	parent.parent.SelectedPlan[18] = newempcost
+	parent.parent.SelectedPlan[17] = currentcov
+	html += '<div role="radiogroup">'
+	html += '<table class="plaintableborder" cellspacing="0" cellpadding="0" border="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_13","BEN",[parent.parent.CurrentBens[parent.parent.planname][5]])+'">'
+	html += '<caption class="offscreen">'+getSeaPhrase("TCAP_12","BEN",[parent.parent.CurrentBens[parent.parent.planname][5]])+'</caption>'
+	html += '<tr><th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("SELECT","BEN")+'</th>'
+	//GDD  01/19/15  Change justify from center to left or OPTION
+	html += '<th scope="col" class="plaintableheaderborder" style="width:100%;text-align:left">'+getSeaPhrase("OPTION","BEN")+'</th></tr>'
+	//GDD  01/22/15 Do not show this option if Suppl Ins and PILB selected.
+	if (!parent.parent.gHasPilbPlan)
+	if (parent.button1!=0 && parent.parent.CurrentEligPlan!="" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][12]=="Y") 
+	{
+		html += '<tr><td class="plaintablecellborder" style="text-align:center">'
+		html += '<input type="radio" id="option0" name="option" value="0" onclick="styleElement(this);"></td>'
+		html += '<td class="plaintablecellborder"><label for="option0">'+getSeaPhrase("DISPBEN_23","BEN")+'</label></td></tr>'
+	}
+	//GDD  01/20/15  Do not show this option for Spouse Suppl Ins
+	if (!parent.parent.gHasPilbPlan && parent.parent.CurrentBens[parent.parent.planname][2] != parent.parent.gSpouseSupLife)
+	if (parent.button5!=0 && parent.parent.CurrentEligPlan!="" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][12]=="Y" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][17]==1) 
+	{
+		html += '<tr><td class="plaintablecellborder" style="text-align:center">'
+		html += '<input type="radio" id="option2" name="option" value="2" onclick="styleElement(this);"></td>'
+		html += '<td class="plaintablecellborder"><label for="option2">'+getSeaPhrase("DISPBEN_27","BEN")+'</label></td></tr>'
+	}
+	//GDD  01/22/15 Do not show this option if Suppl Ins and PILB selected.
+	if (!parent.parent.gHasPilbPlan)
+	if (parent.button2!=0 && parent.parent.CurrentEligPlan!="" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][12]=="Y" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][17]==1) 
+	{
+		html += '<tr><td class="plaintablecellborder" style="text-align:center">'
+		html += '<input type="radio" id="option1" name="option" value="1" onclick="styleElement(this);"></td>'
+		html += '<td class="plaintablecellborder"><label for="option1">'+getSeaPhrase("DISPBEN_24","BEN")+'</label></td></tr>'
+	}
+	if (parent.button3!=0 && (parent.parent.CurrentEligPlan=="" || (parent.parent.EligPlans[parent.parent.CurrentEligPlan][14]=="Y" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][17]==1))) 
+	{
+		html += '<tr><td class="plaintablecellborder" style="text-align:center">'
+		html += '<input type="radio" id="option3" name="option" value="3" onclick="styleElement(this);"></td>'
+		html += '<td class="plaintablecellborder"><label for="option1">'+getSeaPhrase("DISPBEN_25","BEN")+'</label></td></tr>'
+	}
+	//GDD  01/19/15  Remove Stop option
+	//if (parent.button4!=0 && parent.parent.CurrentEligPlan!="" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][14]=="Y" && parent.parent.EligPlans[parent.parent.CurrentEligPlan][17]==1) 
+	//{
+	//	html += '<tr><td class="plaintablecellborder" style="text-align:center">'
+	//	html += '<input type="radio" id="option4" name="option" value="4" onclick="styleElement(this);"></td>'
+	//	html += '<td class="plaintablecellborder"><label for="option4">'+getSeaPhrase("DISPBEN_26","BEN")+'</label></td></tr>'
+	//}
+	html += '</table></div><p class="textAlignRight">'
+	//GDD  01/22/15   Add additional comments for Suppl Life for Open Enrollment only
+	if (parent.parent.rule_type != "N" && !parent.parent.gHasPilbPlan && (parent.parent.CurrentBens[parent.parent.planname][2] == parent.parent.gSpouseSupLife || parent.parent.CurrentBens[parent.parent.planname][2] == parent.parent.gEmpSupLife))  {
+		html += '<div id="supplcmt" sytle="text-align:left"><p>If you are currently enrolled in supplemental life insurance to yourself and/or your spouse, you are able to increase your election up to an additional $20,000 for '
+		html += 'and $10,000 for spouse without having to provide evidence of insurability. If you are not currently enrolled or have been previously denied, you are not eligible for any additional coverage without going through evidence of insurability</p></div><br>'
+        }
+	//GDD  end of change
+	html += uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.parseChoice(this.form);return false","margin-right:5px;margin-top:10px")
+	html += uiButton(getSeaPhrase("EXIT","BEN"),"parent.parent.quitEnroll(parent.location);return false","margin-right:5px;margin-top:10px",null,'aria-haspopup="true"')
+	html += '</p></form>'
+ 	bod1 += parent.header(addlStr);
+	var page = '<div class="plaintablecell" style="padding:0px">'
+	page += bod1
+	page += html
+	page += '</div>'
+	document.getElementById("paneBody").innerHTML = page;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("ENROLLMENT_ELECTIONS","BEN")+' - '+parent.parent.CurrentBens[parent.parent.planname][32];
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	parent.fitToScreen();
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/disp_ben_04.htm,v 1.14.2.50 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

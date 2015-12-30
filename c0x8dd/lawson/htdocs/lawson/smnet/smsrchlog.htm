@@ -1,0 +1,72 @@
+<HTML>
+<!--
+#-------------------------------------------------------------------------------------
+# Copyright (c) 2005 Siemens Medical Solutions Health Services Corporation.
+# All rights reserved. This software is proprietary to Siemens.
+# It is protected by copyright laws in the US and abroad, and is licensed for use
+# by customers only in strict accordance with the license agreement governing its use.
+#-------------------------------------------------------------------------------------
+# Module:	smsrchlog.htm
+#
+# Description:	Information on the selection Criteria used for the utility logs
+#
+# Notes:
+#
+# History:      Date	 Who	Charm/comment
+#               -------- ------	-------------
+#               01/27/05 jdg3	Original version
+#               02/17/05 jdg3	Changed example to EDI Maintenance
+#-------------------------------------------------------------------------------------
+-->
+
+<HEAD>
+	<link id="StyleLink" type="text/css" href="smstyle.css" rel="stylesheet">
+</HEAD>
+
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+
+<SPAN class=smWelcome>Utility Log Selection Criteria</SPAN>
+<hr size="2" width="95%" align="left">
+
+<ul>
+<li><b>Show Me:</b></li>
+<ul>
+<li>Selecting <b>All User ID Maintenance, All System Maintenance,</b> or <b>All ASP Tools</b> will produce a report
+consisting of the subset of functions listed below each option.</li>
+<li>Selecting a specific function will produce a report consisting only of activity for that function.</li>
+<ul>
+<li>Example: Select <b>EDI Maintenance</b> to produce a report of all EDI Maintenance activity. This will include stopping and starting the EDI CommServer and the EDI E-Mail Notifier along with changes to the E-Mail notification list.</li>
+</ul>
+</ul>
+<p></p>
+<li><b>From Date:</b></li>
+<ul>
+<li>Date must be in mm/dd/yyyy format</li>
+<li>Select the <img src="/lawson/smnet/images/show-calendar.gif"> to display a calendar you can use to select the date.</li>
+</ul>
+<p></p>
+<li><b>To Date:</b></li>
+<ul>
+<li>Date must be in mm/dd/yyyy format</li>
+<li>The <b>To Date</b> field must be greater than or equal to the <b>From Date</b> field.</li>
+<li>Select the <img src="/lawson/smnet/images/show-calendar.gif"> to display a calendar you can use to select the date.</li>
+</ul>
+<p></p>
+<li><b>Performed By:</b></li>
+<ul>
+<li>Enter a User ID to produce a report of the selected function performed by that user.</li>
+</ul>
+<p></p>
+<li><b>Message Text Search:</b></li>
+<ul>
+<li><b>Message Text Search</b> can be used to find an EXACT match (case insensitive) of a string in the message text.</li>
+<ul>
+<li>Example: Enter a user id to produce a report of any activity done to that particular user id.</li>
+<li>Example: Enter "web server" when selecting "Add User" to produce a report of only Web Server Add User activity</li>
+</ul>
+</ul>
+</ul>
+
+
+</HTML>
+

@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>Direct Deposit</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<meta http-equiv="Pragma" content="No-Cache">
+<meta http-equiv="Expires" content="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Direct Deposit</title>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/xhrnet/prlockout.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/directdeposit/jslib/directdepositlib.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var per="%";
+var parentTask="";
+var appObj;
+if (fromTask)
+	parentTask = getVarFromString("from",fromTask);
+
+function BankAccountObject(bnk_acct_nbr, ach_option, prenote_option, bnk_acct_nbr2)
+{
+	this.bnk_acct_nbr = bnk_acct_nbr;
+	this.ach_option = ach_option;
+	this.prenote_option = prenote_option;
+	if (bnk_acct_nbr2)
+		this.bnk_acct_nbr2 = bnk_acct_nbr2;
+}
+
+// Authenticate the web user.
+function OpenProgram()
+{
+	authenticate("frameNm='jsreturn'|funcNm='InitDirectDeposit()'|sysenv=true|desiredEdit='EM'");
+}
+
+function AfterLockout(dlgWnd)
+{
+	if (parentTask != "" && parentTask != "main")
+		CloseDirectDeposit();
+}
+
+function InitDirectDeposit()
+{
+	StoreDateRoutines();
+	prodline = authUser.prodline;
+	company	= authUser.company;
+	employee = authUser.employee;
+	try 
+	{
+		if (fromTask)
+			parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), GetEmployeeInfo);
+		else
+			GetEmployeeInfo();
+	}
+	catch(e)
+	{
+		 GetEmployeeInfo();
+	}
+	try
+	{
+		if (fromTask)
+			parent.document.getElementById(window.name).style.visibility = "visible";
+	}
+	catch(e){}	
+}
+
+// Load the user's employee data.
+function GetEmployeeInfo()
+{	
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+	// if you call getAppVersion() right away and the IOS object isn't set up yet,
+	// then the code will be trying to load the sso.js file, and your call for
+	// the appversion will complete before the ios version is set
+	if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+	{
+       	setTimeout(function(){ GetEmployeeInfo(); }, 10);
+       	return;
+	}
+	if (parent.emssObjInstance.emssObj.payrollLockout && (appObj && appObj.getLongAppVersion() != null && appObj.getLongAppVersion().toString() >= "09.00.01.09"))		
+	{
+		if (isPRLockedOut("D", authUser.company, authUser.employee))
+		{
+			parent.removeWaitAlert();
+			parent.seaAlert(getSeaPhrase("PR_LOCKED_OUT","SEA"),"",null,"error",AfterLockout);			
+			if (!parent.styler.showLDS && !parent.styler.showInfor)
+				AfterLockout();
+			return;
+		}	
+	}
+	var empfields = "label-name-1;first-name;last-name;process-level;email-address;addr1;addr2;city;state;zip;country-code;auto-deposit;company.name;work-country;process-level.name";
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00")
+		empfields += ";email-personal";
+	GetEmpInfo(prodline,company,employee,"employee",empfields,"DspEmployeeInfo()");
+}
+
+// Store employee data in recordset Employee and load the PR System rules.
+function DspEmployeeInfo()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		Employee = EmpInfo;
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "10.00.00" && parent.emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+			Employee.email_address = EmpInfo.email_personal;
+		if (parentTask == "main") 
+		{
+			var title;
+			if (Employee.work_country == "UK") 
+			{
+				title = getSeaPhrase("DD_222","DD");
+				parent.setTaskHeader("header",title,"Pay");
+			}
+			else 
+			{
+				title = getSeaPhrase("DD_83","DD");
+				parent.setTaskHeader("header",title,"Pay");
+			}
+			setWinTitle(title, parent);
+		}
+		// Provide an edit so that only clients with a US or CA work country have access to the Direct Deposit task.
+		if (Employee.work_country != "US" && Employee.work_country != "CA" && Employee.work_country != "UK")
+		{
+			parent.seaAlert(getSeaPhrase("DD_1","DD")+"\n"+getSeaPhrase("DD_2","DD"), null, null, "error");
+			CloseProgram();
+			return;
+		}
+		var msg = (Employee.work_country == "UK") ? getSeaPhrase("DD_3","DD") : getSeaPhrase("DD_4","DD");
+		var	obj = new DMEObject(prodline,"prsystem");
+		obj.out	= "JAVASCRIPT";
+		obj.index = "prsset1";
+		obj.field = "bank-code";
+		obj.max	= "1";
+		obj.key	= parseInt(company,10)+"="+escape(Employee.process_level);
+		obj.func = "DspPrSystem()";
+		obj.debug = false;
+		if (fromTask)
+			parent.showWaitAlert(msg, function(){DME(obj,"jsreturn");});
+		else
+			DME(obj,"jsreturn");
+	}
+	else
+	{
+		if (fromTask)
+			parent.removeWaitAlert();
+		var msg = (Employee.work_country == "UK") ? getSeaPhrase("DD_6","DD") : getSeaPhrase("DD_5","DD");
+		parent.seaAlert(msg+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+getSeaPhrase("DD_7","DD"), null, null, "error");
+		CloseProgram();
+	}
+}
+
+// Store the prsystem bank code used to associate the bank account info with cash account info.
+function DspPrSystem()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		PrSystem = self.jsreturn.record[0];
+		var obj = new DMEObject(prodline,"bankfile");
+		obj.out = "JAVASCRIPT";
+		obj.index = "bflset1";
+		obj.field = "bnk-acct-nbr;bank-account.ach-option;bank-account.prenote-option;"
+		+ "bnk-acct-nbr2;bank-account2.ach-option;bank-account2.prenote-option";
+		obj.max = "1";
+		obj.key	= parseInt(company,10)+"="+escape(PrSystem.bank_code);
+		obj.func = "DspBankAccount()";
+		obj.debug = false;
+		DME(obj,"jsreturn");
+	}
+	else
+	{
+		if (fromTask)
+			parent.removeWaitAlert();		
+		var msg = (Employee.work_country == "UK") ? getSeaPhrase("DD_6","DD") : getSeaPhrase("DD_5","DD");
+		parent.seaAlert(msg+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+getSeaPhrase("DD_8","DD"), null, null, "error");
+		CloseProgram();
+	}
+}
+
+// Store the prenotification flag in recordset BankAccount and load the employee's direct deposit accounts.
+function DspBankAccount()
+{
+	if (self.jsreturn.NbrRecs)
+	{
+		var bankRec = self.jsreturn.record[0];
+		if (bankRec.bank_account_ach_option == "Y" || bankRec.bank_account2_ach_option == "Y" || bankRec.bank_account_ach_option == "B" || bankRec.bank_account2_ach_option == "B")
+		{
+			if (bankRec.bank_account_ach_option == "Y" || bankRec.bank_account_ach_option == "B")
+				BankAccount = new BankAccountObject(bankRec.bnk_acct_nbr,bankRec.bank_account_ach_option,bankRec.bank_account_prenote_option);
+			else
+				BankAccount = new BankAccountObject(bankRec.bnk_acct_nbr2,bankRec.bank_account2_ach_option,bankRec.bank_account2_prenote_option);
+			GetSystemRules();
+			return;
+		}
+	}
+	var msg1 = getSeaPhrase("DD_5","DD");
+	var msg2 = getSeaPhrase("DD_9","DD");
+	if (Employee.work_country == "UK")
+	{
+		msg1 = getSeaPhrase("DD_6","DD");
+		msg2 = getSeaPhrase("DD_10","DD");
+	}
+	// If we get this far, we either have no bank account record, or ACH is not set up for the user's process level.
+	if (fromTask)
+		parent.removeWaitAlert();	
+	parent.seaAlert(msg1+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+msg2, null, null, "error");
+	CloseProgram();
+}
+
+function GetSystemRules()
+{
+	var sysCompany = company.toString();
+	for (var i=sysCompany.length; i<4; i++)
+		sysCompany = "0" + sysCompany;
+	var obj = new DMEObject(prodline,"sysrules");
+	obj.out = "JAVASCRIPT";
+	obj.field = "task;system;key1;alphadata1;";
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.01")
+		obj.field += "alphadata2;";
+	obj.field += "alphadata3;alphadata4;alphadata5;numeric1;email-address";
+	obj.key = "AUTODEPOSIT=PR="+sysCompany;
+	obj.max	= "1";
+	obj.func = "DspRules()";
+	obj.debug = false;
+	DME(obj,"jsreturn");
+}
+
+// Store PR System rules in recordset SysRules and load the prenotification flag.
+function DspRules()
+{
+	var msg1 = getSeaPhrase("DD_5","DD");
+	var partialMsg = getSeaPhrase("DD_11","DD");
+	var fullMsg = getSeaPhrase("DD_13","DD");
+	if (Employee.work_country == "UK")
+	{
+		msg1 = getSeaPhrase("DD_6","DD");
+		partialMsg = getSeaPhrase("DD_12","DD");
+		fullMsg = getSeaPhrase("DD_14","DD");
+	}
+	if (self.jsreturn.NbrRecs)
+	{
+		Rules = self.jsreturn.record[0];
+		Rules.notify = Rules.alphadata4; // set the payroll email option from alphadata4
+		Rules.notifyee = Rules.alphadata5; // set the ee email option from alphadata5
+		Rules.company_accts = (Rules.numeric1)?parseInt(Rules.numeric1,10):0;
+		Rules.partial_ach = (!NonSpace(Rules.alphadata3))?"Y":Rules.alphadata3;
+		Rules.waive_receipt = "N";
+		if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.01")
+		{
+			if (NonSpace(Rules.alphadata2) > 0)
+				Rules.waive_receipt = Rules.alphadata2;
+		}
+		if (Rules.partial_ach == "N" && Employee.auto_deposit == "P")
+		{
+			if (fromTask)
+				parent.removeWaitAlert();			
+			parent.seaAlert(msg1+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+partialMsg, null, null, "error");
+			CloseProgram();
+		}
+		// PT 121559
+		//else if (Rules.partial_ach == "Y" && Employee.auto_deposit == "Y")
+		//{
+		//	if (fromTask)
+		//		parent.removeWaitAlert();			
+		//	parent.seaAlert(msg1+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+fullMsg, null, null, "error");
+		//	CloseProgram();
+		//}
+		else
+			GetAccounts();
+	}
+	else
+	{
+		if (fromTask)
+			parent.removeWaitAlert();		
+		parent.seaAlert(msg1+"\n"+getSeaPhrase("DD_2","DD")+"\n\n"+getSeaPhrase("DD_15","DD"), null, null, "error");
+		CloseProgram();
+	}
+}
+
+// Load the employee's direct deposit accounts.
+function GetAccounts(action,notify)
+{
+	AchDistNbrFree = new Array();
+	AchOrderNbrFree = new Array();
+	maxDistPtr = 0;
+	maxOrderPtr = 0;
+	freeOrderPtr = 1;
+	// If we are refreshing the account list following an account add, make sure the add window gets closed.
+	CloseAddAccountWindows();
+	for (var i=1; i<=MAXACCOUNTS; i++)
+	{
+		AchDistNbrFree[i] = true;
+		AchOrderNbrFree[i] = true;		
+	}
+    var obj = new DMEObject(prodline,"emachdepst");
+    obj.out = "JAVASCRIPT";
+	obj.index = "eadset1";
+	obj.field = "ach-dist-nbr;ach-dist-order;ebank-id;ebnk-acct-nbr;account-type,xlt;bank-roll-no;"
+	+ "net-percent;deposit-amt;description;check-desc;beg-date;end-date;default-flag;"
+	+ "account-type;ded-cycle;country-code;ca-inst-nbr;ca-transit-nbr;employee.auto-deposit";
+	if (Employee.work_country == "UK")
+		obj.field += ";payable-to";
+	if (appObj && appObj.getAppVersion() != null && appObj.getAppVersion().toString() >= "09.00.01")
+		obj.field += ";print-rcpt";
+	obj.key	= parseInt(company,10) + "=" + parseInt(employee,10);
+	obj.max = "" + (MAXACCOUNTS+1);
+	if (action || notify)
+	{
+		if (action && !notify)
+			obj.func = "DspAccounts('"+action+"')";
+		else if (!action && notify)
+			obj.func = "DspAccounts('',true)";
+		else
+			obj.func = "DspAccounts('"+action+"',true)";
+	}
+	else
+		obj.func = "DspAccounts()";
+	obj.sortasc = "ach-dist-order";
+	obj.debug = false;
+	DME(obj,"jsreturn");
+}
+
+// Store direct deposit accounts in recordset DepositAccounts and proceed to main tabular display.
+function DspAccounts(action,notify)
+{
+	Accounts = new AccountObj();
+	CLEARDEFAULTS = false;
+	// Initialize the flags for resetting the auto deposit field on HR11.
+	CLEARFLAG = false;
+	SETFLAG = false;
+	if (self.jsreturn.NbrRecs)
+	{
+		var EmpACHFlag = self.jsreturn.record[0].employee_auto_deposit;
+		if (EmpACHFlag == "N" || !NonSpace(EmpACHFlag))
+			SETFLAG = true;
+	}
+	else if (Employee.auto_deposit == "N" || !NonSpace(Employee.auto_deposit))
+		SETFLAG = true;
+	var AcctList = Accounts.Hash; // List of accounts by country
+	// Initialize an account list for the employee's work country
+	Accounts.Countries[Accounts.Countries.length] = Employee.work_country;
+	AcctList[Employee.work_country] = new AccountsHash(Employee.work_country);
+	for (var i=0; i<self.jsreturn.NbrRecs; i++)
+	{
+		var acct_country = self.jsreturn.record[i].country_code.toString();
+		// Treat accounts with blank country codes as "US"
+		if (typeof(acct_country) == "undefined" || !NonSpace(acct_country))
+			acct_country = "US";
+		// Separate the direct deposit accounts by country code.
+		if (!AcctList[acct_country] || typeof(AcctList[acct_country]) == "undefined")
+		{
+			Accounts.Countries[Accounts.Countries.length] = acct_country;
+			AcctList[acct_country] = new AccountsHash(acct_country);
+		}
+		var thisCtry = AcctList[acct_country];
+		var index = thisCtry.Recs.length;
+		var thisAcct = new Object();
+		thisCtry.Recs[index] = self.jsreturn.record[i];
+		thisAcct = thisCtry.Recs[index];
+		thisAcct.isNew = false;
+		thisAcct.isTouched = false;
+		var distNo = parseInt(thisAcct.ach_dist_nbr,10);
+		var orderNo = parseInt(thisAcct.ach_dist_order,10);
+		thisAcct.ach_dist_nbr = distNo;
+		thisAcct.ach_dist_order = orderNo;
+		thisAcct.beg_date = (NonSpace(thisAcct.beg_date)) ? thisAcct.beg_date : " ";
+		thisAcct.end_date = (NonSpace(thisAcct.end_date)) ? thisAcct.end_date : " ";
+		thisAcct.print_rcpt = (thisAcct.print_rcpt) ? thisAcct.print_rcpt : " ";
+		// Keep track of the largest distribution number assigned by PR12.
+		if (distNo > maxDistPtr)
+			maxDistPtr = distNo;
+		AchOrderNbrFree[orderNo] = false; // Flag this ACH-DIST-ORDER as used.
+		AchDistNbrFree[distNo] = false; // Flag this ACH-DIST-NBR as used.
+		if (orderNo > maxOrderPtr)
+			maxOrderPtr = orderNo;
+		// Store the account based on whether it is active (open) or inactive (closed).
+		if (thisAcct.ach_dist_order > 0 && NonSpace(thisAcct.beg_date) && (!NonSpace(thisAcct.end_date) || formjsDate(formatDME(thisAcct.end_date)) > ymdtoday)
+		&& HasDedCycle(acct_country,index))
+		{
+			Accounts.totalOpen++;
+			if (thisAcct.default_flag == "Y")
+			{
+				thisCtry.DefaultAccount[0] = thisAcct;
+				thisCtry.defaultAcctPtr = thisAcct.ach_dist_nbr;
+			}
+			else
+			{
+				thisCtry.OpenAccounts[thisCtry.OpenAccounts.length] = thisAcct;
+				if (thisAcct.net_percent > 0)
+					thisCtry.totalPercent += parseFloat(thisAcct.net_percent);
+			}
+		}
+		else
+		{
+			Accounts.totalClose++;
+			thisCtry.ClosedAccounts[thisCtry.ClosedAccounts.length] = thisAcct;
+			// Queue up any inactive accounts that have the default flag set to "Y" so that we can reset those flags before the user's first update (to avoid PR12 edits).
+			if (thisAcct.default_flag == "Y" && thisAcct.ach_dist_order > 0)
+			{
+				CLEARDEFAULTS = true;
+				thisAcct.default_flag = "N";
+				thisAcct.ach_dist_order = 0;
+				if (!NonSpace(thisAcct.end_date))
+					thisAcct.end_date = fmttoday;
+				thisCtry.DefaultQueue[thisCtry.DefaultQueue.length] = thisAcct;
+			}
+		}
+	}
+	Accounts.sysAvailable = Accounts.sysLimit - (Accounts.totalOpen + Accounts.totalClose);
+	// Always place the default account last in the list of open accounts, if one exists. Provide totals for both available accounts per country.
+	for (var i=0; i<Accounts.Countries.length; i++)
+	{
+		var thisCtry = AcctList[Accounts.Countries[i]];
+		thisCtry.OpenAccounts = thisCtry.OpenAccounts.concat(thisCtry.DefaultAccount);
+		thisCtry.openCount = thisCtry.OpenAccounts.length;
+		thisCtry.closeCount = thisCtry.ClosedAccounts.length;
+		thisCtry.compAvailable = Rules.company_accts - thisCtry.openCount;
+		if (Accounts.sysAvailable < thisCtry.compAvailable)
+			thisCtry.acctAvailable = Accounts.sysAvailable;
+		else
+			thisCtry.acctAvailable = AcctList[Accounts.Countries[i]].compAvailable;
+	}
+	if (action || notify)
+	{
+		if (action && notify)
+			DspDeposits(action,true);
+		else if (action && !notify)
+			DspDeposits(action,false);
+		else if (!action && notify)
+			DspDeposits("",true);
+	}
+	else
+	    DspDeposits("",false);
+}
+
+// Check if an account has a deduction cycle defined.
+function HasDedCycle(country,index)
+{
+	var cycle_obj = "";
+	for (var i=1; i<10; i++)
+	{
+		cycle_obj = eval('Accounts.Hash["'+country+'"].Recs['+index+'].ded_cycle_'+i);
+		if (NonSpace(cycle_obj)) return true;
+	}
+	// If we get this far, all cycle fields were blank.
+	return false;
+}
+
+// Close all windows and show initial splash screen.
+function CloseProgram()
+{
+	if (fromTask)
+		parent.removeWaitAlert();
+	try { CloseWindows(); } catch(e) {}
+	CloseDirectDeposit();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var listFrame = document.getElementById("list");
+	var detailFrame = document.getElementById("detail");
+	var chgDetailFrame = document.getElementById("chgdetail");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentTopHeightBorder;
+	var contentTopHeight;
+	var contentBottomHeightBorder;
+	var contentBottomHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;	
+		contentTopHeight = parseInt(winHeight*.50,10) - 65;
+		contentTopHeightBorder = contentTopHeight + 30;
+		contentBottomHeight = parseInt(winHeight*.50,10) - 35;
+		contentBottomHeightBorder = contentBottomHeight + 30;		
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;	
+		contentTopHeight = parseInt(winHeight*.50,10) - 75;	
+		contentTopHeightBorder = contentTopHeight + 30;
+		contentBottomHeight = parseInt(winHeight*.50,10) - 45;	
+		contentBottomHeightBorder = contentBottomHeight + 30;		
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;	
+		contentTopHeight = parseInt(winHeight*.50,10) - 60;
+		contentTopHeightBorder = contentTopHeight + 24;
+		contentBottomHeight = parseInt(winHeight*.50,10) - 35;
+		contentBottomHeightBorder = contentBottomHeight + 24;			
+	}
+	listFrame.style.width = winWidth + "px";
+	listFrame.style.height = parseInt(winHeight*.50,10) + "px";
+	try
+	{
+		if (self.list.onresize && self.list.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.list.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.list.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.list.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.list.document.getElementById("paneBorder").style.height = contentTopHeightBorder + "px";
+		self.list.document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		self.list.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.list.document.getElementById("paneBody").style.height = contentTopHeight + "px";
+	}
+	catch(e) {}
+	detailFrame.style.top = (parseInt(winHeight*.50,10) - 30) + "px";
+	detailFrame.style.width = winWidth + "px";
+	detailFrame.style.height = parseInt(winHeight*.50,10) + "px";	
+	try
+	{
+		if (self.detail.onresize && self.detail.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.detail.onresize = null;	
+	}
+	catch(e) {}
+	try
+	{
+		self.detail.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.detail.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.detail.document.getElementById("paneBorder").style.height = contentBottomHeightBorder + "px";
+		self.detail.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.detail.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.detail.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e) {}	
+	chgDetailFrame.style.top = (parseInt(winHeight*.50,10) - 30) + "px";
+	chgDetailFrame.style.width = winWidth + "px";
+	chgDetailFrame.style.height = parseInt(winHeight*.50,10) + "px";	
+	try
+	{
+		if (self.chgdetail.onresize && self.chgdetail.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.chgdetail.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.chgdetail.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.chgdetail.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.chgdetail.document.getElementById("paneBorder").style.height = contentBottomHeightBorder + "px";
+		self.chgdetail.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.chgdetail.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.chgdetail.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="OpenProgram()" onresize="fitToScreen()">
+	<iframe id="list" name="list" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;position:absolute;left:0px;width:750px;top:0px;height:225px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="detail" name="detail" title="Secondary Content" level="3" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="visibility:hidden;position:absolute;left:0px;width:750px;top:225px;height:250px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="chgdetail" name="chgdetail" title="Secondary Content" level="3" tabindex="0" src="/lawson/xhrnet/ui/headerpanehelplite.htm" style="visibility:hidden;position:absolute;left:0px;width:423px;top:225px;height:250px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/directdeposit/ddheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="email" name="email" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/directdeposit/directdeposit.htm,v 1.13.2.57 2014/02/20 20:04:50 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

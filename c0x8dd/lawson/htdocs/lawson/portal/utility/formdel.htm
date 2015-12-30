@@ -1,0 +1,81 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/utility/formdel.htm,v 1.6.2.4.18.1.2.2 2012/08/08 12:37:22 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<TITLE>Rebuild Forms Index</TITLE>
+
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="../objects/FeedBack.js"></SCRIPT>
+<SCRIPT language="javascript" src="formdel.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+
+</HEAD>
+
+<BODY tabIndex="-1" onload="frmInit()" onunload="frmOnUnload()" style="visibility:hidden" 
+		onkeydown="frmOnKeyDown(event)" onresize="frmOnResize()">
+
+	<table border="0" cellspacing="8" style="width:500px;margin:10px;">
+		<td width="50%">
+			<label class="xTLabel" id="lblPDL" for="selPDL"
+					style="position:relative;text-align:left;">Productline:
+			</label>
+		<br/>
+			<select id="selPDL"
+					style="position:relative;width:90%;font-family:tahoma;font-size:8pt;">
+			</select>
+		</td>
+		<td width="50%">
+			<label class="xTLabel" id="lblFormFilter" for="txtForm"
+					style="position:relative;text-align:left;">Form Filter:
+			</label>
+		<br/>
+			<input type="text" id="txtForm" class="xTTextBox" style="width:90%;"
+				onfocus="portalWnd.cmnOnTextboxFocus(event,this)" onblur="portalWnd.cmnOnTextboxBlur(event,this)">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<input type="button" id="btnFind" class="xTToolBarButton" value="Find" onclick="frmOnFindClick()"
+				style="position:relative;width:70px;">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<label class="xTLabel" id="lblSelectForm" for="selForms"
+					style="position:relative;text-align:left;">Select Custom Form:
+			</label>
+			<br/>
+			<select id="selForms" size="10"
+				style="position:relative;height:260px;width:95%;font-family:courier new;font-size:8pt;">
+			</select>
+			<br/>
+			<input type="text" id="txtFile" style="visibility:hidden;"></input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

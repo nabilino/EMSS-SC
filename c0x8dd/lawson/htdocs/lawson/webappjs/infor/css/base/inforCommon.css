@@ -1,0 +1,92 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/infor/css/base/inforCommon.css,v 1.1.2.8.2.3 2014/02/18 16:42:35 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/ 
+/* Common Css.
+----------------------------------*/
+/* Style the Placehodler (Inline Help)*/ 
+::-webkit-input-placeholder {
+   color: #999999;
+   font-size: 9px;
+  font-style: italic;
+}
+
+:-moz-placeholder {
+   color: #999999;
+   font-size: 9px;
+   font-style: italic;
+}
+
+/* A HyperLink  */
+.inforHyperlink {
+    border-bottom-style: dotted;
+    border-bottom-width: 1px;
+    color: #000000 !important;
+    font-family: Arial;
+    font-size: 11px;
+    line-height: 12px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.inforHyperlink.default {
+    font-weight: bold;
+}
+
+/*Style the Color of the Bottom Dashed Line */
+.inforHyperlink:link, .inforHyperlink:visited {
+    border-bottom-color: #000000 !important;
+}
+
+/*Mouse Over States -> Same as the focus and active */
+.inforHyperlink:hover, .inforHyperlink:active, .inforHyperlink:focus {
+    border-bottom-color:  #000000 !important;
+	color:  #000000 !important;
+}
+
+/* A Field Label */
+.inforLabel{
+    float: left;
+    font-family: Arial, Helvetica;
+    font-size: 11px;
+    color: #555555;
+    margin-top: -1px;
+	padding: 7px 6px 0px 0px;
+	text-align: right;
+	display: inline-block;
+	white-space: pre;
+    min-width: 5%;
+	width: 8%;
+}
+
+/* Get Rid of Browser Padding. */
+body{
+	margin:0; 
+	padding:0;
+	font-family: Arial, Helvetica;
+}
+.inforOffScreen
+{
+	position: absolute;
+	width: auto;
+	left: -9999px;	
+}

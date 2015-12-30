@@ -1,0 +1,304 @@
+<html>
+<head>
+<script>
+
+var gmsgnbr = ''
+var gmsg = ''
+var gfldnbr = ''
+
+var token = ''
+var nbr = 0
+
+function V(fldnbr, val)
+{
+    if (!val || Number(val) == 0)
+    	return
+
+	switch(token)
+	{
+		case "BN33.2": V_BN332(fldnbr, val); break;
+		case "BN33.3": V_BN333(fldnbr, val); break;
+		case "BN33.4": V_BN334(fldnbr, val); break;
+		case "HS10.1": V_HS101(fldnbr, val); break;
+		default: V_BN332(fldnbr, val); break;
+	}
+}
+
+function V_BN332(fldnbr, val)
+{
+	var i = fldnbr.search(/\d/);
+
+	// this is a header record
+	if (i == -1  || fldnbr.substring(0,3) == "PT-")
+	{
+		switch(fldnbr)
+		{
+			case "BEG-COMPANY": parent.BN332.Company = val; break;
+			case "BEG-EMPLOYEE": parent.BN332.Employee = val; break;
+			case "PT-OPT-GRANT-NBR": parent.BN332.NextGrantNbr = val; break;
+			case "PT-STOCK-CTF": parent.BN332.NextStockCertificate = val; break;
+			default: break;
+		}
+	}
+	else // this is a detail record
+	{
+		var detailNbr = parseInt(Number(fldnbr.substring(i,fldnbr.length)),10);
+		fldnbr = fldnbr.substring(0,i);
+
+		if (detailNbr == (nbr+1))
+		{
+			if (fldnbr != "BEG-OPT-GRANT-NBR")
+				return;
+			parent.BN332.Records[parent.BN332.Records.length] = new parent.BN332.Rec();
+			nbr = detailNbr;
+		}
+		else if (detailNbr != nbr)
+			return;
+
+		switch(fldnbr)
+		{
+			case "BEG-OPT-GRANT-NBR": parent.BN332.Records[parent.BN332.Records.length-1].GrantID = val; break;
+			case "BEG-GRANT-DATE": parent.BN332.Records[parent.BN332.Records.length-1].GrantDate = val; break;
+			case "BEG-STOCK-CTF": parent.BN332.Records[parent.BN332.Records.length-1].Certificate = val; break;
+			case "CURR-VESTED-PCT": parent.BN332.Records[parent.BN332.Records.length-1].PercentVested = parseFloat(setValue(val,2)); break;
+			case "BEG-SHARES-GRANTED": parent.BN332.Records[parent.BN332.Records.length-1].SharesGranted = parseFloat(val); break;
+			case "TOT-AVAILABLE": parent.BN332.Records[parent.BN332.Records.length-1].AvailableShares = parseFloat(val); break;
+			case "BEG-GRANT-PRICE": parent.BN332.Records[parent.BN332.Records.length-1].GrantPrice = parseFloat(setValue(val,4)); break;
+			case "BEG-EXP-DATE": parent.BN332.Records[parent.BN332.Records.length-1].ExpireDate = val; break;
+			case "TOT-VESTED": parent.BN332.Records[parent.BN332.Records.length-1].VestedShares = parseFloat(val); break;
+			case "TOT-UNVESTED": parent.BN332.Records[parent.BN332.Records.length-1].UnvestedShares = parseFloat(val); break;
+			case "TOT-EXERCISED": parent.BN332.Records[parent.BN332.Records.length-1].ExercisedShares = parseFloat(val); break;
+			case "TOT-FORFEITED": parent.BN332.Records[parent.BN332.Records.length-1].ForfeitedShares = parseFloat(val); break;
+			case "TOT-EXPIRED": parent.BN332.Records[parent.BN332.Records.length-1].ExpiredShares = parseFloat(val); break;
+			case "BSG-WEB-AVAILABLE": parent.BN332.Records[parent.BN332.Records.length-1].WebAvailable = val; break;
+			case "BSG-WEB-AVAIL-SUPV": parent.BN332.Records[parent.BN332.Records.length-1].SupervisorWebAvailable = val; break;
+			default: break;
+		}
+	}
+}
+
+function V_BN333(fldnbr, val)
+{
+	var i = fldnbr.search(/\d/);
+
+	// this is a header record
+	if (i == -1 || fldnbr.substring(0,3) == "PT-")
+	{
+		switch(fldnbr)
+		{
+			case "BEG-COMPANY": parent.BN333.Company = val; break;
+			case "BEG-EMPLOYEE": parent.BN333.Employee = val; break;
+			case "BEG-OPT-GRANT-NBR": parent.BN333.GrantID = val; break;
+			case "BEG-STOCK-CTF": parent.BN333.Certificate = val; break;
+			case "PT-TABLE-I2": parent.BN333.NextRecordNbr = val; break;
+			default: break;
+		}
+	}
+	else // this is a detail record
+	{
+		var detailNbr = parseInt(Number(fldnbr.substring(i,fldnbr.length)),10);
+		fldnbr = fldnbr.substring(0,i);
+
+		if (detailNbr == (nbr+1))
+		{
+			if (fldnbr != "DATE")
+				return;
+			parent.BN333.Records[parent.BN333.Records.length] = new parent.BN333.Rec();
+			nbr = detailNbr;
+		}
+		else if (detailNbr != nbr)
+			return;
+
+		switch(fldnbr)
+		{
+			case "DATE": parent.BN333.Records[parent.BN333.Records.length-1].Date = fixDate(val); break;
+			case "PERCENT": parent.BN333.Records[parent.BN333.Records.length-1].Percent = parseFloat(setValue(val,2)); break;
+			case "BEG-SHARES-GRANTED": parent.BN333.Records[parent.BN333.Records.length-1].CumulativeShares = parseFloat(val); break;
+			case "INC-PERCENT": parent.BN333.Records[parent.BN333.Records.length-1].PeriodPercent = parseFloat(setValue(val,2)); break;
+			case "INC-SHARES": parent.BN333.Records[parent.BN333.Records.length-1].PeriodShares = parseFloat(val); break;
+			default: break;
+		}
+	}
+}
+
+function V_BN334(fldnbr, val)
+{
+	var i = fldnbr.search(/\d/);
+
+	// this is a header record
+	if (i == -1)
+	{
+		switch(fldnbr)
+		{
+			case "BXR-COMPANY": parent.BN334.Company = val; break;
+			case "BXR-EMPLOYEE": parent.BN334.Employee = val; break;
+			case "BXR-OPT-GRANT-NBR": parent.BN334.GrantID = val; break;
+			case "BXR-STOCK-CTF": parent.BN334.Certificate = val; break;
+			case "MARKET-PRICE": parent.BN334.MarketSharePrice = parseFloat(setValue(val,4)); break;
+			case "SHARES": parent.BN334.NumberShares = parseFloat(val); break;
+			case "FEDERAL-TAX": parent.BN334.FederalTax = parseFloat(val); break;
+			case "STATE-TAX": parent.BN334.StateTax = parseFloat(val); break;
+			case "SOCIAL-SEC-TAX": parent.BN334.SocialSecurity = parseFloat(val); break;
+			case "MEDICARE": parent.BN334.Medicare = parseFloat(val); break;
+			case "BXR-TRANSAC-VALUE": parent.BN334.TransactionValue = parseFloat(setValue(val,2)); break;
+			case "BXR-EXERCISE-COST": parent.BN334.ExerciseCost = parseFloat(setValue(val,2)); break;
+			case "BXR-GAIN-LOST-VAL": parent.BN334.GainLoss = parseFloat(setValue(val,2)); break;
+			case "BXR-TAX-WAGE-UPD": parent.BN334.TaxableWages = parseFloat(setValue(val,2)); break;
+			case "BXR-EMP-TAX-AMT": parent.BN334.TaxAmount = parseFloat(setValue(val,2)); break;
+			default: break;
+		}
+	}
+	else // this is a detail record
+	{
+		var detailNbr = parseInt(Number(fldnbr.substring(i,fldnbr.length)),10);
+		fldnbr = fldnbr.substring(0,i);
+
+		switch(fldnbr)
+		{
+			default: break;
+		}
+	}
+}
+
+function V_HS101(fldnbr, val)
+{
+	var i = fldnbr.search(/\d/);
+
+	// this is a header record
+	if (i == -1 || fldnbr.substring(0,3) == "PT-")
+	{
+		switch(fldnbr)
+		{
+			case "PT-FC": parent.HS10.NextFC = val; break
+			case "PT-PTF-EMPLOYEE": parent.HS10.NextEmployee = val; break
+			case "PT-HSU-CODE": parent.HS10.NextSupvCode = val; break
+			case "PT-HSU-OP-CODE": parent.HS10.NextSupvOpCode = val; break;
+			default: break;
+		}
+	}
+	else // this is a detail record
+	{
+		var detailNbr = parseInt(Number(fldnbr.substring(i,fldnbr.length)),10);
+		fldnbr = fldnbr.substring(0,i);
+
+		if (detailNbr == (nbr+1))
+		{
+			if (fldnbr != "PTF-EMPLOYEE")
+				return;
+			parent.HS10.Records[parent.HS10.Records.length] = new parent.HS10.Rec();
+			nbr = detailNbr;
+		}
+		else if (detailNbr != nbr)
+			return;
+
+		switch(fldnbr)
+		{
+			case "PTF-EMPLOYEE": parent.HS10.Records[parent.HS10.Records.length-1].Employee = parseInt(val,10); break;
+			case "PTF-FULL-NAME": parent.HS10.Records[parent.HS10.Records.length-1].FullName = val; break;
+			default: break;
+		}
+	}
+}
+
+function DataReturned(fldnbr,msgnbr,msg)
+{
+	gmsgnbr = msgnbr
+	gmsg = msg
+	gfldnbr 	= fldnbr
+}
+
+function fixDate(fldval)
+{
+	if (fldval == "")
+		return fldval
+	if (fldval.indexOf(parent.authUser.date_separator) == -1)
+		return fldval
+	return parent.formjsDate(fldval)
+}
+
+function setValue(nbr, dec)
+{
+	var num = nbr.toString();
+	var negative = false;
+
+	// number is already formatted or needs no formatting; exit.
+	if (((num.charAt(num.length-1) != "+") && (num.charAt(num.length-1) != "-")) || (num.indexOf(".") != -1))
+		return num;
+
+	if (num.indexOf("-") != -1 && num.indexOf("-") != 0)
+		negative = true;
+
+	num = FormatDecimalField(parseFloat(num).toString(), dec);
+
+	if (negative)
+		num = "-" + num;
+
+	return num;
+}
+
+function FormatDecimalField(fldval,decimals)
+{
+	if (fldval.charAt(fldval.length - 1) == "+" || fldval.charAt(fldval.length - 1) == "-")
+		fldval = fldval.substring(0,fldval.length - 1);
+	var fmtval = "";
+	var nonzero = false;
+
+	for (var i=0; i<fldval.length; i++)
+	{
+		if (fldval.charAt(i) >= 0 && fldval.charAt(i) <= 9)
+		{
+			if (nonzero)
+			{
+				fmtval += fldval.charAt(i);
+			}
+			else
+			if (fldval.charAt(i) != "0")
+			{
+				nonzero = true;
+				fmtval += fldval.charAt(i);
+			}
+		}
+	}
+	if (fmtval.length > 0)
+	{
+		if (decimals == 4)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+			if (fmtval.length == 2)
+				fmtval = "00" + fmtval;
+			if (fmtval.length == 3)
+				fmtval = "0" + fmtval;
+		}
+		if (decimals == 3)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+			if (fmtval.length == 2)
+				fmtval = "00" + fmtval;
+		}
+		if (decimals == 2)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+		}
+	}
+
+	if (fmtval.length > 0)
+	{
+		var x = fmtval.length - decimals;
+		fmtval = fmtval.substring(0,x) + "." + fmtval.substring(x,fmtval.length);
+	}
+
+	if(decimals == 0)
+		fmtval += "00";
+
+	return fmtval;
+}
+
+</script>
+</head>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/stockoptions/lib/shr064_law.htm,v 1.1.6.2 2005/10/03 14:13:21 andrewv Exp $ -->
+

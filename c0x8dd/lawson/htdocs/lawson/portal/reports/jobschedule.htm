@@ -1,0 +1,83 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/Attic/jobschedule.htm,v 1.1.2.13.4.8.6.1.2.3 2012/08/08 12:37:19 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+	<title>Job Schedule</title>
+	<script language="javascript" src="../servenv.js"></script>
+	<script language="javascript" src="../dropdown.js"></script>
+	<script language="javascript" src="jobschedule.js"></script>
+	<script language="javascript" src="../objects/table.js"></script>
+	<script language="javascript" src="../objects/FeedBack.js"></script>	
+	<script language="javascript" src="../objects/Timer.js"></script>
+	<link id="StyleLink" type="text/css" href="../portal.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" href="../forms/lawform.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" href="../objects/table.css" rel="stylesheet">
+	<link id="StyleLink" type="text/css" rel="stylesheet" href="../dropdown.css"></link>
+</head>
+
+<body style="visibility:hidden" onload="init()" onresize="jobScheduleResize()" onunload="unloadFunc()" onkeydown="handleKeyDown(event)" tabIndex="-1">
+<nobr>
+	<div id="titleBar" style="position:absolute;top:15px;left:10px;width:98%;">
+		<span id="lblUserName" class="label" style="padding:2px;left: 0px;top:0px;width: 100px;text-Align:right" onselectstart="return false;">User Name</span>
+		<input id="_f2" class="textbox" style="left: 105px;width: 100px" maxLength="30" knb="@un" oncontextmenu="showUserContextMenu(event, window, this)" onfocus="jobScheduleFocus(this)" onblur="jobScheduleBlur(this)"  />
+		<img id="selBtn_f2" class="selectButton" style="left: 206px;" onclick="doSelect()" onselectstart="return false;" title="Select" src="../images/ico_form_dropselect.gif" />
+		<label id="_f3" class="output" knb="@ln" style="left:225px;width:300px;">&nbsp</label>
+		<span id="autoInqContainer" style="position:absolute;border: 1px solid lightGrey;right:10px;width:155px;height:17px">
+			<input id="autoInq" type="checkbox" style="left:0px;width:20px;vertical-align:top;height:17px" autoInq="0" onclick="doAutoRefresh(this)">
+			<label id="lblAutoInq" for="autoInq" class="label" style="padding:2px;left:25px;width:110px;text-Align:left;height:16px" onselectstart="return false;">Auto Refresh</label>
+			<img id="autoInqBtn" type="button" class="selectButton" style="left:136px;display:none;height:17px" onselectstart="return false;" src="../images/ico_arrow_spin.gif" />
+			<input type="button" id="autoInqReadyBtn" class="ptRefreshButton" style="position:absolute;left:136px;display:none;height:17px" onclick="doInquire()" title="New job detected. Click to refresh list." value=""/>&nbsp;
+		</span>
+	</div>
+</nobr>	
+
+	<div class="tabContainer" id="tabContainer" style="position:absolute;left:10px;width:95%;top:46px;height:24px;">
+		<div class="activeTab" id="divactive" onclick="setFilter('active')">
+			<button id="btnactive" onmouseover="this.className='tabButtonOver'" tabIndex=-1 onmouseout="this.className=''" isTabLabel="1">Active
+			</button>
+		</div>
+		<div class="" id="divwaiting" onclick="setFilter('waiting')">
+			<button id="btnwaiting" onmouseover="this.className='tabButtonOver'" tabIndex=-1 onmouseout="this.className=''">Waiting
+			</button>
+		</div>
+		<div class="" id="divcomplete" onclick="setFilter('complete')">
+			<button id="btncomplete" onmouseover="this.className='tabButtonOver'" tabIndex=-1 onmouseout="this.className=''">Completed
+			</button>
+		</div>
+	</div>
+	<img id="imgTabBottom" style="display:inline;z-index:100;left:11px;width:55px;position:absolute;top:70px;height:1px" src="../images/ico_tab_bottom_active.gif">
+	<div id="jobScheduleContainer" style="position:absolute;top:70px;left:10px;width:95%;border:#736552 1px solid;" >
+		<div id="jobScheduleTable" oncontextmenu="showContextMenu(event, window)"></div>
+		<table id="footer" style="BORDER-TOP:#6699cc 1px solid;visibility:hidden;margin-left:10px;width:90%;">
+		<tr>
+			<td width="20%"/>&nbsp;</td>
+			<td width="20%" align="right"><input id="btnPageUp" type="button" hidefocus class="anchorActive" style="position:relative" value="Previous" onclick="pageUp()" onfocus="jobScheduleFocus(this)" onblur="jobScheduleBlur(this)" onmouseover="jobScheduleMouseOver(this)" onmouseout="jobScheduleMouseOut(this)"></td>
+			<td width="20%"/>&nbsp;</td>
+			<td width="20%" align="left"><input id="btnPageDn" type="button" hidefocus class="anchorActive" style="position:relative" value="Next" onclick="pageDown()" onfocus="jobScheduleFocus(this)" onblur="jobScheduleBlur(this)" onmouseover="jobScheduleMouseOver(this)" onmouseout="jobScheduleMouseOut(this)"></td>
+			<td width="20%"/>&nbsp;</td>
+		</tr>
+		</table>
+	</div>
+</body>
+</html>

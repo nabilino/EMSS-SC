@@ -1,0 +1,36 @@
+<HTML><HEAD>
+	<link id="StyleLink" type="text/css" href="/lawson/smnet/smstyle.css" rel="stylesheet">
+<TITLE>Reset User Password</TITLE></HEAD><BODY>
+<IMG SRC="/lawson/smnet/images/l_petrol_8.gif" BORDER="0" vspace="8" align="right" margin-bottom="10">
+<SPAN class=smWelcome>Update User</SPAN>
+<hr size="2" width="90%" align="left">
+<p>Administrators use this form to update a Users Information. <BR>
+ Enter a userid and press "Lookup" to see the User Information.
+</p>
+
+  <script language="javascript">
+  <!--
+
+
+  //
+  // This function verifies data before submit.
+  //
+  function isConfirmed(form)
+  {
+	if (form.userid.value == "") {
+		alert("You must specify a userid to Lookup")
+		form.userid.focus()
+		return false
+	}
+	return true
+  }
+  //-->
+  </script>
+
+<form action="/cgi-lawson/velupdateuser.cgi" method="GET">
+	<label for="userid" class="smLabel"><b>Userid:</b></label></td>
+	<input id="userid" type="text" name="userid" size=12 maxlength=12></td>
+	<input type="submit" value="Lookup" name="Lookup" onClick="return isConfirmed(this.form)"></td>
+              <input type="hidden" value="Lookup" name="Lookup"></td>
+</form>
+</body></html>

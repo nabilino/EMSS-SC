@@ -1,0 +1,50 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/drill/Attic/GenSearchTab.htm,v 1.1.2.2.4.1.14.1.2.2 2012/08/08 12:37:23 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+
+<!-- the search tab HTML -->
+<table border="0" cellpadding="4" cellspacing="0" width="552px" style="table-layout:fixed;">
+	<tr>
+		<td align="left" valign="bottom" width="100px" height="23px">&nbsp;</td>
+		<td align="left" valign="bottom" width="125px" style="border-bottom:#EEEEEE solid 2px;">
+			<label id="lblFindField" for="selFindField" class="xTLabelForm">Find Field</label>
+		 </td>
+		<td align="left" valign="bottom" width="20px" style="border-bottom:#EEEEEE solid 2px;">&nbsp;</td>
+		<td align="left" valign="bottom" width="262px" style="border-bottom:#EEEEEE solid 2px;">
+			<label id="lblFindValue" for="selGenField" class="xTLabelForm">Find Value</label>
+		</td>
+		<td align="left" valign="bottom" width="45px">&nbsp;</td>
+	</tr>
+	<tr>
+		<td align="left">&nbsp;</td>
+		<td id="genSelect" align="left"></td>
+		<td align="center" class="xTLabelForm"> = </td>
+		<td align="left">
+			<input class="xTTextBox" type="text" id="txtFindValue"
+				onfocus="window.tabMgr.tabs['tabGenSearch'].onFocus(event,this)"
+				onblur="window.tabMgr.tabs['tabGenSearch'].onBlur(event,this)">
+			</input>
+		</td>
+		<td align="left">&nbsp;</td>
+	</tr>
+</table>

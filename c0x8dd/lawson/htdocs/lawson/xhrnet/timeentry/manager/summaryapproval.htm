@@ -1,0 +1,1277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Manager Summary Approval</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/email.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/timeentry/lib/mgrtimeentrylib.js"></script>
+<script src="/lawson/xhrnet/timeentry/Skins/Ocean/Template.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Calendar.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script language="JavaScript">
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Global Variables
+//
+var planCode = "";
+var payPlanStart = "";
+var commentIndex = -1;
+if (window.location.search)
+{
+	planCode = getVarFromString("plancode", window.location.search);
+	payPlanStart = getVarFromString("startdate", window.location.search);
+}
+var PlanCode;
+var Reports;
+var LastReports;
+var bChangesMade = false;
+var bShowStatusMsg = false;
+var bUpdatingSummary = false;
+var bNextPrevPeriod = false;
+var hs04DetailLines = 80;
+var appObj;
+
+function OpenProgram()
+{
+	// Exit if lawheader is not defined
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{	
+		stopProcessing();
+		return;
+	}	
+	Reports = null;
+	LastReports = null;
+	authenticate("frameNm='jsreturn'|funcNm='InitManagerApproval()'|sysenv=true|desiredEdit='EM'");
+}
+
+function InitManagerApproval()
+{
+	stylePage();
+	self.printFm.stylePage();
+	var title = getSeaPhrase("SUMMARY_APPROVAL","TE");
+	setWinTitle(title);
+	setTaskHeader("header", title, "TimeEntry");
+	setHelpRollover();
+	document.getElementById("paneBorder").style.visibility = "visible";	
+	var nextFunc;
+	if (payPlanStart != "")
+		nextFunc = function(){StartManagerApproval(payPlanStart, false);};
+	else
+		nextFunc = function(){StartManagerApproval("", false);};
+	startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), nextFunc);		
+}
+
+function StartManagerApproval(Start, MoreRecords)
+{
+	if (Reports == null)
+	{
+		Reports = new ReportsObject(authUser.company, authUser.employee)
+		self.lawheader.formlinecount = -1;
+	}
+	self.lawheader.linecount = 0;
+	self.lawheader.UpdateType = "HS22.1";
+	var obj = new AGSObject(authUser.prodline, "HS22.1");
+	obj.evt	= "ADD";
+	obj.rtn	= "DATA";
+	obj.longNames = true;
+	obj.lfn	= "ALL";
+	obj.tds	= false;
+	if (arguments.length > 1 && arguments[1])
+		obj.field = "FC=%2B";
+	else
+		obj.field = "FC=I";
+	obj.field += "&HSU-COMPANY="+parseInt(authUser.company, 10);
+	obj.field += "&HSU-EMPLOYEE="+parseInt(authUser.employee, 10);
+	obj.field += "&OT-PLAN-CODE="+planCode;
+	if (Start != "")
+		obj.field += "&PYT-PAY-PER-START="+Start;
+	if (arguments.length > 1 && arguments[1])
+	{
+		obj.field += "&LAST-EMPLOYEE="+Reports.LastEmployee;
+	  	obj.field += "&LAST-HSU-CODE="+Reports.LastHsuCode;
+	  	obj.field += "&LAST-LAST-NAME="+escape(Reports.LastLastName);
+	  	obj.field += "&LAST-FIRST-NAME="+escape(Reports.LastFirstName);
+  		obj.field += "&LAST-MIDDLE-INIT="+escape(Reports.LastMiddleInit);
+	}
+	Reports.LastEmployee = "";
+	Reports.LastHsuCode = "";
+	Reports.LastLastName = "";
+	Reports.LastFirstName = "";
+	Reports.LastMiddleInit = "";
+	obj.func = "parent.FinishedHS22Call('"+Start+"')";
+	obj.debug = false;
+	AGS(obj,"jsreturn");
+}
+
+function FinishedHS22Call(Start)
+{
+	// Exit if the lawheader frame is not loaded.
+	if (typeof(self.lawheader.gmsgnbr) == "undefined")
+	{
+		stopProcessing();
+		return;
+	}	
+	if (self.lawheader.gmsgnbr == "000")
+	{
+		if (self.lawheader.gmsg == "More records exist, use PageDown" || (Reports.LastEmployee && Reports.LastEmployee != 0) || Reports.LastHsuCode || Reports.LastLastName || Reports.LastFirstName || Reports.LastMiddleInit)
+		{
+			StartManagerApproval(Start, true);
+			return;
+		}
+		else
+		{
+            var refreshData = function()
+            {
+            	bShowStatusMsg = false;
+            	bUpdatingSummary = false;
+				PaintSummaryScreen();
+            }
+            if (bShowStatusMsg)
+            {    	
+                stopProcessing();   
+    			var alertResponse = seaPageMessage(getSeaPhrase("STATUS_UPDATED","TE"), "", "info", null, refreshData, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+    			if (typeof(alertResponse) == "undefined" || alertResponse == null)
+    			{	
+    				if (seaPageMessage == window.alert)
+    					refreshData();
+    				return;
+    			}      		
+            }
+            refreshData();
+		}
+	}
+	else
+	{
+		Reports = LastReports;
+        bShowStatusMsg = false;
+        bUpdatingSummary = false;
+        var nextFunc = (bNextPrevPeriod) ? null : SummaryApprovalDone;
+		stopProcessing();
+		messageDialog = new window.stylerWnd.DialogObject("/lawson/webappjs/", null, window.styler, true);
+		messageDialog.pinned = true;
+		messageDialog.messageBox(self.lawheader.gmsg, "ok", "question", window, false, "", nextFunc);		
+	}
+	bNextPrevPeriod = false;
+}
+
+function PaintSummaryScreen()
+{
+	GetTimeCardView(Reports.View);
+	PaintHeaders(true);
+	PaintMainBodyOfSummaryApproval();
+	bChangesMade = false;
+	fncSaveChanges = "";
+}
+
+function PaintMainBodyOfSummaryApproval()
+{
+	var args = arguments;
+	try
+	{
+		self.MAIN.document.getElementById("paneBody2").innerHTML = "";
+	}
+	catch(e)
+	{
+		setTimeout(function() { PaintMainBodyOfSummaryApproval.apply(this, args); }, 5);
+		return;
+	}
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+	{
+		if (!appObj)
+			appObj = new AppVersionObject(authUser.prodline, "HR");
+		// if you call getAppVersion() right away and the IOS object isn't set up yet,
+		// then the code will be trying to load the sso.js file, and your call for
+		// the appversion will complete before the ios version is set
+		if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+		{
+	       	setTimeout(function(){PaintMainBodyOfSummaryApproval.apply(this, args);}, 10);
+	       	return;
+		}		
+		if (!appObj || appObj.getAppVersion() == null || appObj.getAppVersion().toString() < "10.00.00")
+			emssObjInstance.emssObj.emailAddressType = "work";
+	}	
+	// If the ProcessFlow service was found, trigger the flow.  Otherwise use the email CGI program.
+	var techVersion = (iosHandler && iosHandler.getIOSVersionNumber() >= "09.00.00") ? ProcessFlowObject.TECHNOLOGY_900 : ProcessFlowObject.TECHNOLOGY_803;
+	var httpRequest = (typeof(SSORequest) == "function") ? SSORequest : SEARequest;
+	var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+	pfObj.setEncoding(authUser.encoding);
+	pfObj.showErrors = false;
+	var msgData = [Reports.PlanCodeDescription,dteDay(Reports.PeriodStart)+', '+FormatDte3(Reports.PeriodStart),dteDay(Reports.PeriodEnd)+', '+FormatDte3(Reports.PeriodEnd)];
+	var html = '<form name="frmStatus" onsubmit="return false;">'
+	html += '<div style="width:100%;text-align:center">'
+	html += '<table border="0" cellpadding="0" cellspacing="0" class="tabletimeentry" style="width:100%;text-align:center;margin-left:auto;margin-right:auto" styler="list" styler_drilldown="false" styler_edit="true" summary="'+getSeaPhrase("TSUM_8","TE",msgData)+'">'
+	html += '<caption class="offscreen">'+getSeaPhrase("TCAP_6","TE",msgData)+'</caption>'
+	html += '<tr class="plaintablecellboldnopadding">'
+	html += '<th scope="col" style="width:90px;text-align:center" styler_edit="true">'+getSeaPhrase("COMMENTS_LOWER","TE")+'</th>'
+	html += '<th scope="col" style="width:auto" styler_edit="true" nowrap="nowrap">'+getSeaPhrase("NAME","TE")+'</th>'
+	html += '<th scope="col" style="width:80px;text-align:center">'+getSeaPhrase("TIMECARD_TYPE","TE")+'</th>'
+	html += '<th scope="col" style="width:80px;text-align:center">'+getSeaPhrase("SUBMITTED_HOURS","TE")+'</th>'
+	html += '<th scope="col" style="width:auto;text-align:center" styler_edit="true" nowrap="nowrap">'+getSeaPhrase("DETAIL","TE")+'</th>'
+	html += '<th scope="col" style="width:100px;text-align:center">'+getSeaPhrase("STATUS_ONLY","TE")+'</th></tr>'
+	var len = Reports.Detail.length;
+	for (var i=0; i<len; i++)
+	{
+		if (Reports.Detail[i].CommentsExist == 1)
+			NoCommentsIconImage.src = ExistingCommentsIcon;
+		else
+			NoCommentsIconImage.src = NoCommentsIcon;
+		var toolTip = getSeaPhrase("OPEN_COMMENTS_FOR_EMP","TE",[Reports.Detail[i].FullName]);
+		html += '<tr class="plaintablecellnopadding">'
+		html += '<td style="width:90px;text-align:center">'
+		html += '<a href="javascript:;" onclick="parent.ViewTimeCardComments('+i+');return false;" onmouseover="parent.CommentIconMouseOver(1,\''+i+'\');return true;" onfocus="parent.CommentIconMouseOver(1,\''+i+'\');return true;" '
+		html += 'onmouseout="parent.CommentIconMouseOver(0,\''+i+'\');return true;" onblur="parent.CommentIconMouseOver(0,\''+i+'\');return true;" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		html += '<img styler="documenticon" src="'+NoCommentsIconImage.src+'" border="0" width="32" height="32" '
+		html += 'default_icon="'+NoCommentsIcon+'" active_icon="'+ExistingCommentsIcon+'" name="comment'+i+'" id="comment'+i+'" alt="'+toolTip+'" title="'+toolTip+'" aria-haspopup="true"></a></td>'
+		html += '<td style="width:auto" nowrap>'
+		var emailTo = Reports.Detail[i].Email;
+		if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+			emailTo = Reports.Detail[i].EmailPersonal;
+		if (!emssObjInstance.emssObj.processFlowsEnabled)
+			html += '<a href="javascript:;" onclick="parent.EmailClicked('+i+');return false;" '
+		else
+			html += '<a href="mailto:'+emailTo+'" ';
+		var empName = Reports.Detail[i].FullName;
+		toolTip = empName+' - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA");
+		html += 'id="empName'+i+'" title="'+toolTip+'" aria-haspopup="true">'+empName+'<span class="offscreen"> - '+getSeaPhrase("SEND_EMAIL_TO_X","SEA")+'</span></a></td>'
+		html += '<td style="width:80px;text-align:center">'+Reports.Detail[i].TimecardTypeDesc+'</td>'
+		html += '<td style="width:80px;text-align:center">'+Reports.Detail[i].TotalHours+'&nbsp;</td>'
+		toolTip = Reports.Detail[i].FullName+' - '+getSeaPhrase("VIEW_FOR_EMP","TE");
+		html += '<td style="width:auto;text-align:center;vertical-align:middle" nowrap>'
+		html += '<a href="javascript:;" onclick="parent.DetailClicked('+i+');return false;" title="'+toolTip+'" aria-label="'+toolTip+'">'
+		switch (parseFloat(Reports.Detail[i].Status))
+		{
+			case -1:
+				toolTip = Reports.Detail[i].FullName+getSeaPhrase("NOT_ENTERED_CARD","TE");
+				html += '<img style="vertical-align:middle" styler="multipleentrydetailicon" image_color="-1" src="'+DrillAroundIcon1+'" border="0" alt="'+toolTip+'" title="'+toolTip+'">';
+				break;
+			case 0:
+				toolTip = Reports.Detail[i].FullName+getSeaPhrase("NOT_SUBMITTED_CARD","TE");
+				html += '<img style="vertical-align:middle" styler="multipleentrydetailicon" image_color="0" src="'+DrillAroundIcon2+'" border="0" alt="'+toolTip+'" title="'+toolTip+'">';
+				break;
+			default:
+				toolTip = Reports.Detail[i].FullName+getSeaPhrase("SUBMITTED_CARD","TE");
+				html += '<img style="vertical-align:middle" styler="multipleentrydetailicon" image_color="1" src="'+DrillAroundIcon3+'" border="0" alt="'+toolTip+'" title="'+toolTip+'">';
+				break;
+		}
+		html += '</a></td>'
+		if (Reports.Detail[i].Status >= 1 && Reports.Detail[i].Status < 5 && !LockedOut)
+			html += '<td style="width:100px;vertical-align:middle" styler_edit="true">'+StatusDropDown(Reports.Detail[i].Status,i)+'</td>'
+		else if (LockedOut && Reports.Detail[i].Status < 5)
+		{
+			html += '<td style="width:100px;text-align:center;vertical-align:middle">'
+			switch (parseInt(Reports.Detail[i].Status,10))
+			{
+				case 0: html += getSeaPhrase("NOT_ENTERED","TE"); break
+				case 1: html += getSeaPhrase("SUBMITTED","TE"); break;
+				case 2: html += getSeaPhrase("APPROVED","TE"); break;
+				case 3: html += getSeaPhrase("HELD","TE"); break;
+				case 4: html += getSeaPhrase("REJECTED","TE"); break;
+			}
+			html += '</td>'
+		}
+		else if (Reports.Detail[i].Status >= 5)
+		{
+			html += '<td style="width:100px;text-align:center;vertical-align:middle">'
+			switch (parseInt(Reports.Detail[i].Status,10))
+			{
+				case 5:	html += getSeaPhrase("HISTORICAL_1","TE"); break; // Entered (Historical)
+				case 6:	html += getSeaPhrase("HISTORICAL_2","TE"); break; // Submitted (Historical)
+				case 7:	html += getSeaPhrase("HISTORICAL_3","TE"); break; // Approved (Historical)
+				case 8:	html += getSeaPhrase("HISTORICAL_4","TE"); break; // On Hold (Historical)
+				case 9:	html += getSeaPhrase("HISTORICAL_5","TE"); break; // Rejected (Historical)
+				default: html += getSeaPhrase("HISTORICAL_ONLY","TE"); break;
+			}
+			html += '</td>'
+		}
+		else
+			html += '<td style="width:100px;text-align:center;vertical-align:middle">&nbsp;</td>';
+		html += '</tr>';
+	}
+	html += '</table></div></form>';
+	html += GetButtonFrameInformation(Reports.View);
+	var divObj = self.MAIN.document.getElementById("paneBody2");
+	divObj.innerHTML = html;
+	self.MAIN.stylePage();
+	setWinTitle(getSeaPhrase("SUMMARY_TIMECARDS","TE"), self.MAIN);
+	// if the comment icons have been restyled, update the global references
+	if (len > 0 && self.MAIN.document.getElementById("comment0"))
+	{	
+		var cmtImg = self.MAIN.document.getElementById("comment0");		
+		var defaultIcon = cmtImg.getAttribute("default_icon");
+		var activeIcon = cmtImg.getAttribute("active_icon");
+		if (defaultIcon && NoCommentsIcon != defaultIcon)
+		{  		
+			NoCommentsIcon = defaultIcon;
+			NoCommentsOverIcon = defaultIcon;
+		}
+		if (activeIcon && ExistingCommentsIcon != activeIcon)
+		{
+			ExistingCommentsIcon = activeIcon;
+			ExistingCommentsOverIcon = activeIcon;
+		}	
+	}	
+	document.getElementById("MAIN").style.visibility = "visible";
+	stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle(self.MAIN)]));
+	fitToScreen();
+	try
+	{
+		if (opener)
+			opener.close();
+	}
+	catch(e) {}
+}
+
+function ViewTimeCardComments(Index)
+{
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){OpenTimeCardComments(Index);});
+}
+
+function OpenTimeCardComments(Index)
+{
+	if (typeof(authUser.prodline) == "unknown")
+	{
+		authenticate("frameNm='jsreturn'|funcNm='OpenTimeCardComments("+Index+")'|sysenv=true|desiredEdit='EM'")
+		return;
+	}
+	commentIndex = Index;
+	var iconElm = self.MAIN.document.getElementById("comment"+Index);
+	if (iconElm && iconElm.src.indexOf(ExistingCommentsOverIcon) >= 0)
+	{
+		var obj = new DMEObject(authUser.prodline,"empcomment");
+		obj.out = "JAVASCRIPT";
+		obj.index = "ecmset1";
+		obj.field = "date";
+		obj.max = 1;
+		obj.key = authUser.company+"="+Reports.Detail[Index].Employee+"=TR="+Reports.PeriodStart+"->"+Reports.PeriodEnd;
+		obj.func = "TimeCardCommentsFinished("+Index+")";
+		obj.debug = false;
+		DME(obj,"jsreturn");
+	}
+	else
+		OpenComments(Reports.PeriodStart, Reports.Detail[Index].Employee);	
+}
+
+function TimeCardCommentsFinished(Index)
+{
+	OpenComments(formjsDate(formatDME(self.jsreturn.record[0].date)), Reports.Detail[Index].Employee);
+}
+
+function CommentsWindow_Closed()
+{
+	// TODO: add logic to update icons
+}
+
+function ToggleCommentSwitch()
+{
+	var commentElm = self.MAIN.document.getElementById("comment0");
+	if (commentElm)
+	{
+		NoCommentsIcon = commentElm.getAttribute("default_icon");
+		ExistingCommentsIcon = commentElm.getAttribute("active_icon");
+	}
+	var NewDate = Reports.PeriodStart;
+	LastReports = Reports;
+	Reports = null;
+	startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), function(){StartManagerApproval(NewDate);});
+}
+
+function StatusDropDown(status,Index)
+{
+	var arg = '<select class="inputbox" style="width:120px" name="cmbStatus'+Index+'" onchange="parent.bChangesMade=true;">';
+	arg += (status == 1) ? '<option value="1" selected></option>' : '<option value="1"></option>';
+	arg += (status == 2) ? '<option value="2" selected>'+getSeaPhrase("APPROVED","TE")+'</option>' : '<option value="2">'+getSeaPhrase("APPROVED","TE")+'</option>';
+	arg += (status == 3) ? '<option value="3" selected>'+getSeaPhrase("HOLD","TE")+'</option>' : '<option value="3">'+getSeaPhrase("HOLD","TE")+'</option>';
+	arg += (status == 4) ? '<option value="4" selected>'+getSeaPhrase("REJECTED","TE")+'</option>' : '<option value="4">'+getSeaPhrase("REJECTED","TE")+'</option>';
+	arg += '</select>';
+	return arg;
+}
+
+function PreviousPeriod_Summary()
+{
+	if (bChangesMade)
+		SaveChanges("GotoPreviousPeriod_Summary()", "Summary");
+	else
+		GotoPreviousPeriod_Summary();
+}
+
+function GotoPreviousPeriod_Summary()
+{
+	bNextPrevPeriod = true;
+	var NewDate = PreviousDate(Reports.PeriodStart);
+	LastReports = Reports;
+	Reports = null;
+	startProcessing(getSeaPhrase("LOADING_PRE_PERIOD","TE"), function(){StartManagerApproval(NewDate);});
+}
+
+function NextPeriod_Summary()
+{
+	if (bChangesMade)
+		SaveChanges("GotoNextPeriod_Summary()", "Summary");
+	else
+		GotoNextPeriod_Summary();
+}
+
+function GotoNextPeriod_Summary()
+{
+	bNextPrevPeriod = true;
+	var NewDate = NextDate(Reports.PeriodEnd);
+	LastReports = Reports;
+	Reports = null;
+	startProcessing(getSeaPhrase("LOADING_NEXT_PERIOD","TE"), function(){StartManagerApproval(NewDate);});
+}
+
+function HeaderCalendar_Summary(wnd, elm, evt)
+{
+	if (bChangesMade)
+		SaveChanges(function(){GotoHeaderCalendar_Summary(wnd,elm,evt);}, "Summary");
+	else
+		GotoHeaderCalendar_Summary(wnd,elm,evt);
+}
+
+function GotoHeaderCalendar_Summary(wnd,elm,evt)
+{
+	bChangesMade = false;
+	date_fld_name = "5";
+	DropDownCalendar(wnd, elm, evt);
+}
+
+function ReturnDate(date)
+{
+	switch (date_fld_name)
+	{
+		case "2": ReturnCommentsDate(formjsDate(formatDME(date))); break;
+		case "5": ReturnCalendarDate(formjsDate(formatDME(date))); break;
+		default : break;
+	}
+}
+
+function ReturnCalendarDate(dte)
+{
+	if (getDteDifference(dte, Reports.PeriodStart) <= 0 && getDteDifference(dte, Reports.PeriodEnd) >= 0)
+	{
+		//seaAlert(getSeaPhrase("PAY_PERIOD_LOADED","TE"), null, null, "alert");
+		return;
+	}
+	LastReports = Reports;
+	Reports = null;
+	startProcessing(getSeaPhrase("LOADING_NEW_PERIOD","TE"), function(){StartManagerApproval(dte);});
+}
+
+function StartSummaryUpdate()
+{
+	var args = arguments;
+	startProcessing(getSeaPhrase("UPDATING_SUMMARY","TE"), function(){SummaryUpdate.apply(this, args);});
+}
+
+function SummaryUpdate()
+{
+	var Index = 0;
+	if (arguments.length > 0)
+	{
+		if (typeof(authUser.prodline) == "unknown")
+		{
+			authenticate("frameNm='jsreturn'|funcNm='SummaryUpdate(\""+arguments[0]+"\")'|sysenv=true|desiredEdit='EM'");
+			return;
+		}
+		if (isNaN(parseInt(arguments[0],10)))
+			Index = 0;
+		else
+			Index = parseInt(arguments[0],10)+1;
+	}
+	else
+	{
+		if (typeof(authUser.prodline) == "unknown")
+		{
+			authenticate("frameNm='jsreturn'|funcNm='SummaryUpdate()'|sysenv=true|desiredEdit='EM'")
+			return;
+		}
+		Index = 0;
+	}
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+	{
+		if (!appObj)
+			appObj = new AppVersionObject(authUser.prodline, "HR");
+		// if you call getAppVersion() right away and the IOS object isn't set up yet,
+		// then the code will be trying to load the sso.js file, and your call for
+		// the appversion will complete before the ios version is set
+		if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+		{
+			var args = arguments;
+	       	setTimeout(function(){SummaryUpdate.apply(this, args)}, 10);
+	       	return;
+		}		
+		if (!appObj || appObj.getAppVersion() == null || appObj.getAppVersion().toString() < "10.00.00")
+			emssObjInstance.emssObj.emailAddressType = "work";
+	}
+	// If the ProcessFlow service was found, trigger the flow.  Otherwise use the email CGI program.
+	var pfEmailAry = new Array();
+	var techVersion = (iosHandler && iosHandler.getIOSVersionNumber() >= "09.00.00") ? ProcessFlowObject.TECHNOLOGY_900 : ProcessFlowObject.TECHNOLOGY_803;
+	var httpRequest = (typeof(SSORequest) == "function") ? SSORequest : SEARequest;
+	var pfObj = new ProcessFlowObject(window, techVersion, httpRequest, "EMSS");
+	pfObj.setEncoding(authUser.encoding);
+	pfObj.showErrors = false;
+	var len = Reports.Detail.length;
+	for (var i=Index; i<len; i++)
+	{
+		var originalStatus = Reports.Detail[i].Status;
+		if (originalStatus >= 1 && originalStatus < 5 && !LockedOut)
+		{
+			var statusForm = self.MAIN.document.forms["frmStatus"];
+			var statusDropDown = statusForm.elements["cmbStatus" + i];
+			var selectedIndex = statusDropDown.selectedIndex;
+			var Status = statusDropDown.options[selectedIndex].value;
+
+			if (Status >= 1 && Status <= 4 && Status != originalStatus)
+			{
+				if (Status == 4 && emssObjInstance.emssObj.teManagerRejectEmail)
+				{
+					if (!emssObjInstance.emssObj.processFlowsEnabled)
+					{
+						SendEmail("reject", i);
+						return;
+					}
+					else
+						pfEmailAry[i] = "r";
+				}
+				if (Status == 2 && emssObjInstance.emssObj.teManagerApproveEmail)
+				{
+					if (!emssObjInstance.emssObj.processFlowsEnabled)
+					{
+						SendEmail("approve", i);
+						return;
+					}
+					else
+						pfEmailAry[i] = "a";
+				}
+			}
+		}
+	}
+	if (emssObjInstance.emssObj.processFlowsEnabled)
+	{
+		// Process Flow can only handle up to 15 variables in a work unit.  Split up the direct reports into multiple
+		// sets of data and send a chunk of data to each work unit required.  Send up to 60 direct reports per work unit.
+		var rptsAry = new Array();
+		for (var rptIndex in pfEmailAry)
+		{
+			var empNbr = String(Reports.Detail[rptIndex].Employee);
+			var action = String(pfEmailAry[rptIndex]);
+			var itemStr = empNbr + "=" + action;
+			var len = rptsAry.length;
+			if (len == 0)
+			{
+				rptsAry[len] = "";
+				len = rptsAry.length;
+			}
+			var newLen = rptsAry[len - 1].length + itemStr.length;
+			if (rptsAry[len - 1] != "")
+				newLen = newLen + 1; // count semicolon separator
+			// WFWK.1 VARIABLE-VALUE field has a limit of 45 characters
+			if (newLen <= 45)
+			{
+				if (rptsAry[len - 1] != "")
+					rptsAry[len - 1] += ";";
+				rptsAry[len - 1] += itemStr;
+			}
+			else
+				rptsAry[len] = itemStr;
+		}
+		// We can only send up to 11 variables that contain direct reports, since we are also sending the company,
+		// employee, emailFormat, and role variables.  Trigger as many flows as necessary to process every direct report status change.
+		var nbrFlows = Math.ceil(rptsAry.length / 11);
+		var rptsIndex = 0;
+		if (nbrFlows > 0)
+		{
+			var nextFunc = function()
+			{
+				for (var j=0; j<nbrFlows; j++)
+				{
+					var flowObj = pfObj.setFlow("EMSSTimeEntChg", Workflow.SERVICE_EVENT_TYPE, Workflow.ERP_SYSTEM,
+								authUser.prodline, authUser.webuser, null, "");
+					flowObj.addVariable("company", String(authUser.company));
+					flowObj.addVariable("employee", String(authUser.employee));
+					flowObj.addVariable("role", "summary");
+					flowObj.addVariable("emailFormat", String(emssObjInstance.emssObj.emailFormat)+","+String(emssObjInstance.emssObj.emailAddressType));
+					var k = rptsIndex;
+					var l = 1;
+					while (k < rptsIndex + 11)
+					{
+						if (k < rptsAry.length)
+							flowObj.addVariable("reports" + l, rptsAry[k]);
+						else
+							flowObj.addVariable("reports" + l, "");
+						k++;
+						l++;
+					}
+					rptsIndex += 11;
+					pfObj.triggerFlow();
+				}
+				stopProcessing();
+			};
+			startProcessing(getSeaPhrase("SENDING_EMPLOYEE_EMAIL_NOTICE","TE"), nextFunc);
+		}
+	}
+	// PT 147795. Pass the index of the first record to update in the Reports.Detail array.
+	startProcessing(getSeaPhrase("UPDATING_SUMMARY","TE"), function(){SummaryUpdate_PartII(0);});
+}
+
+function SummaryUpdate_PartII(i)
+{
+	if (!appObj)
+		appObj = new AppVersionObject(authUser.prodline, "HR");
+    bUpdatingSummary = true;
+	if (!i)
+		i = 0;
+	var index, Status;
+	var obj = new AGSObject(authUser.prodline,"HS04.1");
+	obj.event = "CHANGE";
+	obj.rtn = "DATA";
+	obj.longNames = true;
+	obj.lfn	= "ALL";
+	obj.debug = false;
+	obj.field = "FC=C&COMPANY="+escape(parseFloat(authUser.company))
+	+ "&FROM-DATE="+escape(Reports.PeriodStart)
+	+ "&TO-DATE="+escape(Reports.PeriodEnd)
+	if (appObj && (appObj.getAppVersion() != null) && (appObj.getAppVersion().toString() >= "09.00.00"))
+		obj.field += "&PPT-USER-ID=W" + authUser.employee;
+	var j = 1; // detail row counter; count from 1..hs04DetailLines
+	var len = Reports.Detail.length;
+	while ((i < len) && (j <= hs04DetailLines))
+	{
+		if (Reports.Detail[i].Status >= 1 && Reports.Detail[i].Status <= 4 && !LockedOut)
+		{
+			var statusForm = self.MAIN.document.forms["frmStatus"];
+			var statusDropDown = statusForm.elements["cmbStatus" + i];
+			index = statusDropDown.selectedIndex;
+			Status = statusDropDown.options[index].value;
+			obj.field += "&EMPLOYEE"+j+"="+escape(Reports.Detail[i].Employee)
+			+ "&STATUS"+j+"="+escape(Status);
+			j++;
+		}
+		i++;
+	}
+	obj.dtlField = "EMPLOYEE;STATUS";
+	if (i < len)
+		obj.func = "parent.SummaryUpdate_PartII("+i+")";
+	else
+		obj.func = "parent.SummaryUpdateFinished()";
+	if (j > 1)
+		AGS(obj,"jsreturn");
+	else
+		SummaryUpdateFinished();
+}
+
+function SummaryUpdateFinished()
+{
+	var PeriodStart = Reports.PeriodStart;
+	var AskToSaveChanges = (bChangesMade && fncSaveChanges) ? true : false;
+	bChangesMade = false;
+    bShowStatusMsg = true;
+	if (AskToSaveChanges)
+	{
+		SaveChangesDone();
+		stopProcessing();
+	}
+	else
+	{
+		Reports = null;
+		LastReports = null;
+		startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), function(){StartManagerApproval(PeriodStart);});
+	}
+}
+
+var EmailType = null;
+var EmailIndex = 0;
+var EmailWindow = null;
+function EmailClicked(Index, EmailTo)
+{	
+	EmailIndex = Index;
+	var emailTo = Reports.Detail[Index].Email;
+	var emailFrom = Reports.Email;
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+	{
+		emailTo = Reports.Detail[Index].EmailPersonal;
+		emailFrom = Reports.EmailPersonal;			
+	}	
+	if (EmailTo)
+		emailTo = EmailTo; 
+	if (styler && (styler.showLDS || styler.showInfor || styler.showInfor3) && typeof(window["DialogObject"]) == "function")
+	{
+		messageDialog = new window.DialogObject("/lawson/webappjs/", null, styler, true);
+		messageDialog.pinned = true;
+		messageDialog.getPhrase = function(phrase)
+		{
+			if (!phrase || (phrase.indexOf("<") != -1 && phrase.indexOf(">") != -1))
+				return phrase;
+			if (!userWnd && typeof(window["findAuthWnd"]) == "function")
+				userWnd = findAuthWnd(true);
+	        if (userWnd && userWnd.getSeaPhrase)
+	        {
+				var retStr = userWnd.getSeaPhrase(phrase.toUpperCase(), "TE");
+				return (retStr != "") ? retStr : phrase;
+			}
+			else
+			    return phrase;         
+		}
+		messageDialog.doReturn = function(wnd)
+		{
+			wnd = wnd || window;
+			EmailWindow = wnd;
+			if (this.styler == null || !this.styler.showInfor3)
+			{	
+				EmailWindow.seaAlert = wnd.parent.seaConfirm;
+				EmailWindow.seaConfirm = wnd.parent.seaConfirm;			
+			}		
+		}
+		messageDialog.initDialog = function(wnd)
+		{
+			wnd = wnd || window;
+			var clearFunc = function()
+			{
+				wnd.document.forms["frmEmail"].elements["txtEmail"].value = '';
+			}			
+			if (this.styler != null && this.styler.showInfor3)
+			{
+				EmailWindow = wnd;
+				this.setButtons([
+					{id: "yes", name: "yes", text: this.getPhrase("SEND_EMAIL"), click: null},
+					{id: "clear", name: "clear", text: this.getPhrase("CLEAR_FORM"), click: clearFunc},
+					{id: "cancel", name: "cancel", text: this.getPhrase("QUIT"), click: null}				
+				]);				
+			}	
+			else
+			{	
+				var btnClear = this.addButton("btnClear", "clear", "CLEAR", wnd, clearFunc);
+				this.translateButton("btnClear", "CLEAR", wnd);
+				wnd.accessKeyToBtn = new Array();
+			}
+		}		
+		messageDialog.styleDialog = function(wnd)
+		{		
+			wnd = wnd || window;
+			if (typeof(wnd["styler"]) == "undefined" || wnd.styler == null)
+				wnd.stylerWnd = findStyler(true);
+			if (!wnd.stylerWnd)
+				return;			
+			if (this.styler == null)
+			{
+				this.styler = new wnd.stylerWnd.StylerBase();
+				this.styler.showLDS = styler.showLDS;
+				this.styler.showInfor = styler.showInfor;
+				if (this.pinned && typeof(parent["SSORequest"]) != "undefined")
+					this.styler.httpRequest = parent.SSORequest;
+				else if (typeof(wnd["SSORequest"]) != "undefined")
+					this.styler.httpRequest = wnd.SSORequest;	
+			}
+			wnd.styler = this.styler;
+			wnd.StylerBase = wnd.stylerWnd.StylerBase;
+			wnd.StylerEMSS = wnd.stylerWnd.StylerEMSS;
+			wnd.StylerBase.webappjsURL = "/lawson/webappjs";
+			// if showInfor3, the dialog is in the main window, which should already have the CSS loaded
+			if (wnd.styler.showInfor)
+			{
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/infor/css/emss/infor.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/infor/css/base/inforHidden.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/infor/css/base/inforTextArea.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/infor/css/base/inforTextbox.css");			
+			}
+			else if (wnd.styler.showLDS)
+			{
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/lds/css/emss/lds.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/lds/css/base/hiddenElement.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/lds/css/base/textAreaElement.css");
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/lds/css/base/textbox.css");
+			}
+			if (wnd.styler.showInfor && wnd.styler.textDir == "rtl") 
+			{
+				var htmlObjs = wnd.styler.getLikeElements(wnd, "html");
+				for (var i=0; i<htmlObjs.length; i++) 
+				{
+				    htmlObjs[i].setAttribute("dir", wnd.styler.textDir);
+				}
+				wnd.styler.loadEnableCssFile(wnd, wnd.StylerBase.webappjsURL + "/infor/css/base/inforRTL.css");	
+			}							
+			wnd.styler.modifyDOM(wnd);	
+		}		
+		messageDialog.translationAry = new Array();
+		messageDialog.translationAry["btnYes"] = "SEND_EMAIL";
+		messageDialog.translationAry["btnClear"] = "CLEAR_FORM";
+		messageDialog.translationAry["btnCancel"] = "QUIT";
+		messageDialog.translateButton = function(btn, phrase, wnd)
+		{	
+			wnd = wnd || window;
+		    if (typeof(btn) == "string")
+		    {	
+		    	if (typeof(this.translationAry) != "undefined" && this.translationAry)
+		    		phrase = this.translationAry[btn];
+		        btn = wnd.document.getElementById(btn);		        
+		    }
+		    else if (typeof(btn) == "object")
+		    {
+		    	if (typeof(this.translationAry) != "undefined" && this.translationAry)
+		    		phrase = this.translationAry[btn.getAttribute("id")];	    	
+		    }
+		    if (!btn || !phrase)	
+		        return;
+		    btn.value = this.getPhrase(phrase);
+		    if (btn.innerText != null)	
+		        btn.innerText = btn.value;
+		    else if (btn.textContent != null)
+		        btn.textContent = btn.value;
+		    else
+		    	btn.innerHTML = btn.value;
+		}
+		var html = '<div class="panewrapper" style="width:100%;text-align:center;padding:5px">'
+		html += '<form name="frmEmail" onsubmit="return false;">'
+		html += '<table align="center" border="0" cellspacing="0" cellpadding="0" style="width:auto;margin-left:auto;margin-right:auto" role="presentation">'
+		html += '<tr><td class="fieldlabelbold"><label for="txtTo">'+getSeaPhrase("EMAIL_ADDRESS","TE")+'</label></td><td class="plaintablecell"><input styler="textbox" class="inputbox" type="text" size="75" maxlength="80" id="txtTo" name="txtTo" value="'+emailTo+'"></td></tr>'
+		html += '<tr><td class="fieldlabelbold" style="white-space:nowrap">'+getSeaPhrase("SUBJECT","TE")+'</td><td class="plaintablecell">'+getSeaPhrase("TIME_ENTRY","TE")+'</td></tr>'		
+		html += '<tr><td class="fieldlabelbold"><label for="txtEmail">'+getSeaPhrase("EMAIL_MESSAGE","TE")+'</label></td><td class="plaintablecell">'
+		html += '<textarea styler="textarea" class="inputbox" style="width:auto;height:auto" cols="75" rows="14" id="txtEmail" name="txtEmail" wrap></textarea></td></tr>'
+		html += '</table></form></div>'
+		var msgReturn = messageDialog.messageBox(html, "okcancel", "none", window, false, "", EmailActionTaken, null, false);	
+		if (typeof(msgReturn) == "undefined")
+			return;
+		EmailActionTaken(msgReturn);		
+	}
+	else
+		EmailWindow = window.open("/lawson/xhrnet/timeentry/manager/email.htm?to="+escape(emailTo,1)+"&from="+escape(emailFrom,1), "EMAIL", "width=650,height=350,toolbar=no,status=no,resizable=yes");
+}
+
+function EmailActionTaken(msgWin)
+{
+	switch (msgWin.returnValue)
+	{
+		case "yes": //send
+		case "ok":
+			EmailEmployee();
+			break;
+		case "cancel": //cancel
+		case "close":
+			break;	
+	}
+}
+
+function EmailEmployee()
+{
+	var mailForm = EmailWindow.document.forms["frmEmail"];
+	var mailText = mailForm.elements["txtEmail"].value;
+	var SendingTo = mailForm.elements["txtTo"].value;
+	var Subject = getSeaPhrase("SUBJECT_TE","TE");
+	var EmailIsFrom = Reports.Email;
+	clearRequiredField(mailForm.elements["txtTo"]);
+	clearRequiredField(mailForm.elements["txtEmail"]);
+	if (NonSpace(SendingTo) == 0) 
+	{
+		if (styler && (styler.showLDS || styler.showInfor || styler.showInfor3) && typeof(window["DialogObject"]) == "function")
+			seaAlert(getSeaPhrase("ENTER_EMAIL_ADDR","TE"), "", null, null, function(){EmailClicked(EmailIndex);}, false);
+		else
+			setRequiredField(mailForm.elements["txtTo"], getSeaPhrase("ENTER_EMAIL_ADDR","TE"));
+		return;
+	}
+	else if (NonSpace(mailText) == 0) 
+	{
+		if (styler && (styler.showLDS || styler.showInfor || styler.showInfor3) && typeof(window["DialogObject"]) == "function")	
+			seaAlert(getSeaPhrase("ENTER_EMAIL_MSG","TE"), "", null, null, function(){EmailClicked(EmailIndex,SendingTo);}, false);
+		else
+			setRequiredField(mailForm.elements["txtEmail"], getSeaPhrase("ENTER_EMAIL_MSG","TE"));
+		return;
+	}
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")	
+		EmailIsFrom = Reports.EmailPersonal;
+	if (!EmailIsFrom)
+		EmailIsFrom = SendingTo;
+	EmailType = "Employee";
+	EmailTimer = setTimeout("cgiEmailDone()", 3000);
+	var obj = new EMAILObject(SendingTo,EmailIsFrom);
+	obj.subject = Subject;
+	obj.message = mailText;
+	startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){EMAIL(obj,"jsreturn");});
+}
+
+function SummaryApprovalDone()
+{
+	if (bChangesMade)
+		SaveChanges("FinishSummaryApproval()", "Summary");
+	else
+		FinishSummaryApproval();
+}
+
+function FinishSummaryApproval()
+{
+	stopProcessing();
+	try
+	{
+		if (opener)
+			window.close();
+		else if (window.name == "DETAIL")
+		{
+			if (parent != self && parent.opener)
+				parent.close();
+			else
+				self.location = "/lawson/xhrnet/timeentry/employee/timeentrysplash.htm";
+		}
+		else
+			self.location = "/lawson/xhrnet/timeentry/employee/timeentrysplash.htm";
+	}
+	catch(e)
+	{
+		self.location = "/lawson/xhrnet/timeentry/employee/timeentrysplash.htm";
+	}
+}
+
+function BackToPayPlanList()
+{
+	if (bChangesMade)
+		SaveChanges("BackToList()", View);
+	else
+		BackToList();
+}
+
+function BackToList()
+{
+	if (typeof(parent["CloseDetailFrame"]) == "function")
+		parent.CloseDetailFrame();
+	else
+	{
+		var strUrl = "/lawson/xhrnet/timeentry/manager/manager.htm?type=summary";
+		self.location.replace(strUrl);
+	}
+	try
+	{
+		if (opener)
+			self.close();
+	}
+	catch(e) {}
+}
+
+function DetailClicked(Index)
+{
+    if (bUpdatingSummary)
+    	return;
+	if (bChangesMade)
+		SaveChanges("GotoDetailClicked("+Index+")", "Summary");
+	else
+		GotoDetailClicked(Index);
+}
+
+function GotoDetailClicked(Index)
+{
+	var dtlUrl;
+	if (Reports.Detail[Index].TimecardTypeDesc == "Exception")
+		dtlUrl = "/lawson/xhrnet/timeentry/exception/exception.htm?type=period&index="+Number(Index)+"&summary=yes";
+	else
+		dtlUrl = "/lawson/xhrnet/timeentry/employee/timeentry.htm?type=period&index="+Number(Index)+"&summary=yes";
+	document.getElementById("header").style.visibility = "hidden";
+	setWinTitle(getSeaPhrase("EMP_TIME_CARD","TE"), self.DETAIL);
+	self.DETAIL.location.replace(dtlUrl);
+	document.getElementById("DETAIL").style.visibility = "visible";
+}
+
+function CloseDetailFrame(dtlUrl)
+{
+	if (dtlUrl)
+	{
+		var queryStr = dtlUrl.substring(dtlUrl.indexOf("?"), dtlUrl.length);
+		planCode = getVarFromString("plancode", queryStr);
+		payPlanStart = getVarFromString("startdate", queryStr);
+		document.getElementById("MAIN").style.visibility = "hidden";
+		try
+		{
+			self.MAIN.document.getElementById("paneBody1").innerHTML = "";
+			self.MAIN.document.getElementById("paneBody2").innerHTML = "";
+		}
+		catch(e) {}
+		Reports = null;
+		LastReports = null;
+		var nextFunc;
+		if (payPlanStart != "")
+			nextFunc = function(){StartManagerApproval(payPlanStart, false);};
+		else
+			nextFunc = function(){StartManagerApproval("", false);};
+		startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), nextFunc);
+	}
+	document.getElementById("DETAIL").style.visibility = "hidden";
+	self.DETAIL.location.replace("/lawson/xhrnet/dot.htm");
+	document.getElementById("header").style.visibility = "visible";
+}
+
+function ResizeWindow()
+{
+	if (typeof(Reports) != "undefined")
+	{
+		var PeriodStart = Reports.PeriodStart;
+		Reports = null;
+		LastReports = null;
+		var nextFunc;
+		if (typeof(PeriodStart) != "undefined")
+			nextFunc = function(){StartManagerApproval(PeriodStart);};
+		else
+			nextFunc = function(){StartManagerApproval("");};
+		startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), nextFunc);	
+	}
+	else
+	{
+		Reports = null;
+		LastReports = null;
+		startProcessing(getSeaPhrase("LOADING_SUMMARY_APPROVAL","TE"), function(){StartManagerApproval("");});
+	}
+}
+
+var EmailTimer;
+var __DetailIndex;
+
+function SendEmail(type, Index)
+{
+	var mailText = "";
+	switch (type)
+	{
+		case "reject": mailText = Reports.EmployeeName+getSeaPhrase("CARD_RETURNED_FOR_REVIEW","TE"); break;
+		case "approve": mailText = Reports.EmployeeName+getSeaPhrase("CARD_JUST_APPROVED","TE"); break;
+	}
+	var Sender	= Reports.Email
+	var SendingTo = Reports.Detail[Index].Email
+	var Subject = "Time Entry"
+	if (Reports.EmailPersonal == null)
+		emssObjInstance.emssObj.emailAddressType = "work";
+	if (emssObjInstance.emssObj.emailAddressType.toString().toLowerCase() == "personal")
+	{
+		if (!appObj)
+			appObj = new AppVersionObject(authUser.prodline, "HR");
+		// if you call getAppVersion() right away and the IOS object isn't set up yet,
+		// then the code will be trying to load the sso.js file, and your call for
+		// the appversion will complete before the ios version is set
+		if (iosHandler.getIOS() == null || iosHandler.getIOSVersionNumber() == null)
+		{
+			var args = arguments;
+			setTimeout(function(){SendEmail.apply(this, args);}, 10);
+			return;
+		}		
+		if (!appObj || appObj.getAppVersion() == null || appObj.getAppVersion().toString() < "10.00.00")
+			emssObjInstance.emssObj.emailAddressType = "work";
+		else
+		{
+			Sender = Reports.EmailPersonal;
+			SendingTo = Reports.Detail[Index].EmailPersonal;			
+		}
+	}
+	__DetailIndex = Index
+	if (typeof(Sender) == "undefined" || Sender == null || !Sender)
+		Sender = SendingTo
+	if (SendingTo)
+	{
+		EmailType = "Status";
+		EmailTimer = setTimeout("cgiEmailDone()", 3000);
+		var obj = new EMAILObject(SendingTo,Sender);
+		obj.subject = Subject;
+		obj.message = mailText;
+		startProcessing(getSeaPhrase("SENDING_EMPLOYEE_EMAIL_NOTICE","TE"), function(){EMAIL(obj,"jsreturn");});
+	}
+	else
+	{
+		stopProcessing();
+		var nextFunc = function()
+		{
+			startProcessing(getSeaPhrase("UPDATING_SUMMARY","TE"), function(){SummaryUpdate(__DetailIndex);});
+		};
+		var alertResponse = seaAlert(getSeaPhrase("EMPLOYEE_EMAIL_NOT_AVAILABLE","TE"), "", null, "error", nextFunc);
+		if (typeof(alertResponse) == "undefined" || alertResponse == null)
+		{	
+			if (seaAlert == window.alert)
+				nextFunc();
+			return;
+		}		
+		nextFunc();
+	}
+}
+
+function Unload()
+{
+	if (typeof(Calendar) != "undefined")
+	{
+		if (typeof(Calendar.calendarWindow) != "undefined" && !Calendar.calendarWindow.closed)
+			Calendar.calendarWindow.close();
+	}
+	try
+	{
+		if (typeof(Comments) != "undefined")
+		{
+			if (typeof(Comments.commentsWindow) != "undefined" && !Comments.commentsWindow.closed)
+				Comments.commentsWindow.close();
+		}
+	}
+	catch(e) {}
+	if (typeof(TipsWin) != "undefined" && !TipsWin.closed)
+		TipsWin.close();
+}
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+//
+// Function that is called when the email has successfully been delivered.
+//
+function cgiEmailDone()
+{
+	try { clearTimeout(EmailTimer); } catch(e) {}
+	if (EmailType == "Employee")
+	{
+		stopProcessing();
+		seaPageMessage(getSeaPhrase("EMAIL_SENT","TE"), null, null, "info", null, true, getSeaPhrase("APPLICATION_ALERT","SEA"), true);
+	}	
+	else
+		SummaryUpdate(__DetailIndex);
+	EmailType = null;
+}
+
+function OpenHelpDialog()
+{
+	openHelpDialogWindow("/lawson/xhrnet/timeentry/tips/tips.htm");
+}
+
+function fitToScreen()
+{
+	setLayerSizes();
+	setDetailFrameSize();
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var headerHeight = 40;
+	var outerPane = self.MAIN.document.getElementById("outerPane");
+	var paneBody1 = self.MAIN.document.getElementById("paneBody1");
+	var paneBody2 = self.MAIN.document.getElementById("paneBody2");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var tblFrame = document.getElementById("MAIN");
+	tblFrame.style.height = (winHeight - headerHeight) + "px";
+	tblFrame.style.width = (winWidth - 20) + "px";
+	var paneBorder = document.getElementById("paneBorder");
+	paneBorder.style.height = (winHeight - headerHeight) + "px";
+	paneBorder.style.width = (winWidth - 10) + "px";
+	if (outerPane)
+	{
+		if (window.styler && window.styler.showInfor3)
+		{
+			outerPane.removeAttribute("styler");
+			outerPane.style.paddingTop = "10px";
+		}	
+		else
+			outerPane.setAttribute("styler", "groupbox");
+		outerPane.style.marginTop = "1px";
+		outerPane.style.width = "100%";
+	}
+	if (paneBody1 && paneBody2)
+	{
+		paneBody2.setAttribute("tabindex", "0");
+		paneBody2.style.overflow = "auto";
+		paneBody2.style.width = "100%";
+		if (winHeight > (paneBody1.offsetHeight + headerHeight + 32))
+			paneBody2.style.height = (winHeight - paneBody1.offsetHeight - headerHeight - 32) + "px";
+	}
+}
+
+function setDetailFrameSize()
+{
+	if (navigator.appName.indexOf("Microsoft") >= 0)
+		return;
+	var frameObj = document.getElementById("DETAIL");
+    var frameWidth = 803;
+    var frameHeight = 600;
+    if (window.innerWidth)
+    {
+        // non-IE browsers
+        frameWidth = window.innerWidth;
+        frameHeight = window.innerHeight;
+    }
+    else if (document && document.documentElement && document.documentElement.clientWidth)
+    {
+        // IE 6+ in "standards compliant mode"
+        frameWidth = document.documentElement.clientWidth;
+        frameHeight = document.documentElement.clientHeight;
+    }
+    else if (document && document.body && document.body.clientWidth)
+    {
+        // IE 6 in "quirks mode"
+		frameWidth = document.body.clientWidth;
+		frameHeight = document.body.clientHeight;
+    }
+    frameObj.style.width = frameWidth;
+    frameObj.style.height = frameHeight;
+}
+</script>
+</head>
+<body class="panecontents" onload="fitToScreen();OpenProgram()" style="overflow:hidden" onresize="fitToScreen()" onunload="Unload();">
+<iframe id="header" name="header" title="Header" level="1" tabindex="0" src="/lawson/xhrnet/ui/header.htm" style="visibility:visible;position:absolute;height:34px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+<iframe id="DETAIL" name="DETAIL" title="Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:0px;left:0px;width:100%;height:100%;z-index:999" marginwidth="0" marginheight="0" scrolling="no" frameborder="no" src="/lawson/xhrnet/dot.htm"></iframe>
+<div id="paneBorder" class="panebordertimeentry" style="position:absolute;top:34px;left:0px;visibility:hidden;height:560px;overflow:hidden">
+	<table id="paneTable" border="0" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr style="height:16px" styler="hidden">
+	<td>
+		<table border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+		<tr>
+		<td>
+			<img id="paneHelpIcon" border="0" class="helpicon" alt="Help" title="Help" onclick="OpenHelpDialog()" src="/lawson/xhrnet/ui/images/ico_help_6699cc.gif" onmouseover="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-over.gif'" onfocus="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-over.gif'" onmousedown="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-down.gif'" onkeydown="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc-down.gif'" onmouseout="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc.gif'" onblur="this.src='/lawson/xhrnet/ui/images/ico_help_6699cc.gif'">
+			<div id="paneHeader" class="paneheadertimeentry" width="100%" height="100%" role="heading" aria-level="1">&nbsp;</div>
+		</td>
+		</tr>
+		</table>
+	</td>
+	</tr>
+	<tr><td style="padding-left:5px">
+		<iframe name="MAIN" id="MAIN" title="Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;position:relative;width:100%;height:500px" allowtransparency="yes" marginwidth="0" marginheight="0" frameborder="0" scrolling="no"></iframe>
+	</td></tr>
+	<tr><td>
+		<iframe name="printFm" title="Empty" src="/lawson/xhrnet/ui/plain.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="jsreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+		<iframe name="lawheader" title="Empty" src="/lawson/xhrnet/timeentry/manager/managerlaw.htm" style="visibility:hidden;width:0px;height:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/timeentry/manager/summaryapproval.htm,v 1.16.2.127.2.1 2014/03/04 21:42:55 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

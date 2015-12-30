@@ -1,0 +1,2328 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Performance Management</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"> </script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"> </script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"> </script>
+<script src="/lawson/xhrnet/careermanagement/lib/getattach.js"></script>
+<script src="/lawson/xhrnet/perfUtils.js"></script>
+<script>
+//NOTE: The DISPLAY_REVIEWS_WITHIN_DAYS setting has been moved to the xhrnet/xml/config/emss_config.xml file.
+var fromTask = (window.location.search) ? unescape(window.location.search) : "";
+var parentTask = "";
+//var perfScoreNeedsCalculate = false;
+var highlightedReviewSeqNbr = -1;
+var goalScoreHash = new Array();
+var commentHash = new Array();
+var commentRecords;
+var commentDtlLines;
+var reviewRecords = new Array();
+var goalScoreRecords;
+var reviewTypes;
+var directReports;
+var authUser;
+var empNbr = null;
+var empName = null;
+var reportSelect;
+var gotLockOutData = false;
+var lockOutFlag = null;
+var lockOutFromDate = null;
+var lockOutToDate = null;
+var reviewIndex = -1;
+
+function loadPerformanceMgmt() 
+{
+	if (fromTask) 
+	{
+		parentTask = getVarFromString("from", fromTask);
+		if (parentTask == "directreports") 
+		{
+			empNbr = getVarFromString("number", fromTask);
+			empName = getVarFromString("name", fromTask);
+		}
+	}
+
+	if ((parentTask == "") || (parentTask == "directreports")) 
+	{
+		authenticate("frameNm='jsreturn'|funcNm='initialSetup()'|officeObjects=true|desiredEdit='EM'");
+	} 
+	else 
+	{
+		authenticate("frameNm='jsreturn'|funcNm='initialSetup()'|desiredEdit='EM'");
+	}
+}
+
+function initialSetup() 
+{
+	stylePage();
+	// Set the task title.
+	var taskTitle = getSeaPhrase("PERFORMANCE_MANAGEMENT", "ESS");
+	document.title = taskTitle;
+
+	// capture a click outside of the Goal Score Detail frame
+	document.onclick = hideGoalScoreDetails;
+	self.header.document.onclick = hideGoalScoreDetails;
+	self.top1.document.onclick = hideGoalScoreDetails;
+	self.left.document.onclick = hideGoalScoreDetails;
+	self.right.document.onclick = hideGoalScoreDetails;
+
+	if (fromTask && (parentTask == "directreports")) 
+	{
+		parent.header.document.onclick = hideGoalScoreDetails;
+		document.getElementById("top1").style.visibility = "hidden";
+	} 
+	else if (fromTask && (parentTask != "")) 
+	{
+		setTaskHeader("header", taskTitle, "Perf Management");
+		document.getElementById("relatedlinks").style.visibility = "hidden";
+		document.getElementById("top1").style.visibility = "visible";
+	} 
+	else 
+	{
+		setTaskHeader("header", taskTitle, "Perf Management");
+		document.getElementById("top1").style.visibility = "visible";
+	}
+
+	initRelatedLinks();
+	initSortFields();
+	directReports = new Array();
+
+	if (fromTask && (parentTask == "directreports")) 
+	{
+		directReports[0] = new self.lawheader.DirRptObj();
+		directReports[0].employee = empNbr;
+		directReports[0].full_name = empName;
+		displayTop(false);
+	} 
+	else if (fromTask && (parentTask == "goalmgmt")) 
+	{
+		directReports = opener.directReports;
+   		if (!directReports.length) 
+   		{
+      		seaAlert(getSeaPhrase("NO_DIRECT_REPORTS","ESS"));
+   	  		return;
+   		}
+   		var reportSelect = opener.directReport;
+   		var selectedReport = reportSelect.options[reportSelect.selectedIndex].value;
+		displayTop(true, selectedReport);
+	} 
+	else if (fromTask && (parentTask == "careermgmt")) 
+	{
+		var dr = opener.DirectReports;
+		var drLen = dr.length;
+		var drObj;
+
+		for (var i=0; i<drLen; i++) 
+		{
+			drObj = new self.lawheader.DirRptObj();
+			drObj.employee = dr[i].code;
+			drObj.full_name = dr[i].description;
+			directReports[i] = drObj;
+		}
+   		if (!directReports.length) 
+   		{
+      		seaAlert(getSeaPhrase("NO_DIRECT_REPORTS","ESS"));
+   	  		return;
+   		}
+		var reportSelect = opener.GetSelectFormObject("main", "DirectReports", "cmbDirectReports");
+		if (reportSelect) 
+		{
+   			var selectedReport = reportSelect.options[reportSelect.selectedIndex].value;
+			displayTop(true, selectedReport);
+		}
+		else 
+		{
+			displayTop(true);
+		}
+	} 
+	else 
+	{
+		getDirectReports();
+	}
+}
+
+function getDirectReports() 
+{
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+	}
+
+	var agsObj = new AGSObject(authUser.prodline, "HS10.1");
+   	agsObj.event = "ADD";
+    agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+   	agsObj.field = "FC=I"
+		+ "&HSU-COMPANY=" + escape(parseInt(authUser.company,10))
+		+ "&HSU-EMPLOYEE=" + escape(parseInt(authUser.employee,10));
+
+	if (self.lawheader.pg) 
+	{
+  	  	agsObj.field += "&PT-FC=" + escape(self.lawheader.PT_FC)
+	  		+ "&PT-PTF-EMPLOYEE=" + escape(parseInt(self.lawheader.PT_PTF_EMPLOYEE,10));
+	  	if (NonSpace(self.lawheader.PT_HSU_CODE)) 
+	  	{
+			agsObj.field += "&PT-HSU-CODE=" + escape(self.lawheader.PT_HSU_CODE);
+		}
+	  	if (NonSpace(self.lawheader.PT_HSU_OP_CODE)) 
+	  	{
+			agsObj.field += "&PT-HSU-OP-CODE=" + escape(self.lawheader.PT_HSU_OP_CODE);
+  		}
+  	}
+
+	agsObj.func	= "parent.storeDirectReports()";
+	updatetype = "RPT";
+  	AGS(agsObj, "jsreturn");
+}
+
+function storeDirectReports() 
+{
+ 	directReports = directReports.concat(self.lawheader.e); // save this page of reports.
+
+	// Retrieve more reports, if they exist.  This ensures that we will have
+	// all reports before we display.
+   	if (self.lawheader.pg) 
+   	{
+   		getDirectReports();
+   	} 
+   	else 
+   	{
+   		if (fromTask) 
+   		{
+   			parent.removeWaitAlert();
+   		} 
+   		else 
+   		{
+ 			removeWaitAlert();
+		}
+   		if (!directReports.length) 
+   		{
+      		seaAlert(getSeaPhrase("NO_DIRECT_REPORTS","ESS"));
+   	  		return;
+   		}
+		displayTop(true);
+	}
+}
+
+function displayTop(isVisible, selectedReport) 
+{
+	self.top1.document.getElementById("paneHeader").innerHTML = getSeaPhrase("REVIEWS", "ESS");
+
+	try 
+	{
+		if (directReports.length == 0) 
+		{
+			self.top1.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold">' + getSeaPhrase("NO_DIRECT_REPORTS", "ESS") + '</div>';
+		} 
+		else 
+		{
+			var htmlStr = '<form name="topForm" id="topForm" onsubmit="return false;">';
+			htmlStr += '<table border="0" cellspacing="0" cellpadding="0" style="padding-top:5px">';
+			htmlStr += '<thead></thead>';
+			htmlStr += '<tbody>';
+			htmlStr += '<tr>';
+			htmlStr += '<td class="fieldlabelboldleft" style="padding-left:10pxv"><label for="directReport">' + getSeaPhrase("SELECT_DIRECT_REPORT", "ESS") + '</label></td>';
+			htmlStr += '<td class="fieldlabelboldleft" style="padding-left:10px;padding-right:10px"><label for="reviewType">' + getSeaPhrase("SELECT_REVIEW_TYPE", "ESS") + '</label></td>';
+			htmlStr += '<td class="fieldlabel" style="vertical-align:top;padding-right:5px;padding-top:5px"><div style="padding-right:15px">'+uiRequiredIcon()+getSeaPhrase("REQUIRED","ESS")+'</div></td>';
+			htmlStr += '</tr>';
+			htmlStr += '<tr>';
+			htmlStr += '<td class="plaintablecell" style="padding-left:10px;padding-right:10px;white-space:nowrap" id="reportsCell" nowrap="nowrap"><select class="inputbox" name="directReport" id="directReport" onchange="parent.hideListAndDetail()">';
+			if (isVisible) 
+			{
+				if (typeof(selectedReport) != "undefined") 
+				{
+					htmlStr += drawReportsSelect(directReports, selectedReport);
+				} 
+				else 
+				{
+					htmlStr += drawReportsSelect(directReports);
+				}
+			} 
+			else 
+			{
+				htmlStr += drawReportsSelect(directReports, directReports[0].employee);
+			}
+			htmlStr += '</select>' + uiRequiredIcon() + '</td>';
+			htmlStr += '<td class="plaintablecell" style="padding-left:10px;padding-right:10px;white-space:nowrap" id="reviewTypeCell" nowrap="nowrap"><select class="inputbox" name="reviewType" id="reviewType" onchange="parent.hideListAndDetail()">' ;
+			if (isVisible) 
+			{
+				htmlStr += drawReviewTypeSelect();
+			} 
+			else 
+			{
+				var reviewTypes = new Array(
+					new dropdownObject("overdue_and_upcoming", getSeaPhrase("OVERDUE_AND_UPCOMING", "ESS"))
+				);
+				htmlStr += drawReviewTypeSelect(reviewTypes, "overdue_and_upcoming");
+			}
+			htmlStr += '</select>'+uiRequiredIcon()+'</td>';
+			htmlStr += '<td id="continueButton" class="plaintablecell" style="vertical-align:top;white-space:nowrap" nowrap="nowrap">';
+			htmlStr += uiButton(getSeaPhrase("CONTINUE", "ESS"),"parent.continueClicked();return false","margin-top:0px;margin-right:5px");
+			htmlStr += '</td>';
+			htmlStr += '</tr>';
+			htmlStr += '</tbody>';
+			htmlStr += '</table>';
+			htmlStr += '</form>';
+			self.top1.document.getElementById("paneBody").innerHTML = htmlStr;
+		}
+	} catch(e) {}
+
+	self.top1.stylePage();
+	if (isVisible) 
+	{
+		document.getElementById("top1").style.visibility = "visible";
+	} 
+	else 
+	{
+		continueClicked();
+	}
+	if (fromTask) 
+	{
+		parent.removeWaitAlert();
+	} 
+	else 
+	{
+		removeWaitAlert();
+	}
+	fitToScreen();
+}
+
+function continueClicked() 
+{
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+	var reviewTypeSelect = self.top1.document.forms["topForm"].elements["reviewType"];
+	var whichView = "current";
+
+	if (reportSelect.selectedIndex <= 0) 
+	{
+		setRequiredField(self.top1.document.getElementById("reportsCell"));
+		seaAlert(getSeaPhrase("PLEASE_SELECT_DIRECT_REPORT", "ESS"));
+		return;
+	} 
+	else 
+	{
+		clearRequiredField(self.top1.document.getElementById("reportsCell"));
+	}
+
+	if (reviewTypeSelect.selectedIndex <= 0) 
+	{
+		setRequiredField(self.top1.document.getElementById("reviewTypeCell"));
+		seaAlert(getSeaPhrase("PLEASE_SELECT_REVIEW_TYPE", "ESS"));
+		return;
+	} 
+	else 
+	{
+		clearRequiredField(self.top1.document.getElementById("reviewTypeCell"));
+		whichView = reviewTypeSelect.options[reviewTypeSelect.selectedIndex].value;
+	}
+
+	openView(whichView);
+}
+
+function openView(whichView) 
+{
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+	}
+	highlightedReviewSeqNbr = -1;
+	document.getElementById("right").style.visibility = "hidden";
+	hideGoalScoreDetails();
+	if ((parentTask == "") || (parentTask == "directreports")) 
+	{
+		displayRelatedLinks();
+	}
+	if ((whichView == "completed" || whichView == "all") && !gotLockOutData) 
+	{
+		lookUpLockOutData(whichView);
+	} 
+	else 
+	{
+		getReviews(whichView);
+	}
+}
+
+function lookUpLockOutData(whichView) 
+{
+	var alphaCompany = authUser.company.toString();
+	var companyLen = alphaCompany.length;
+	for (var i=companyLen; i<4; i++) 
+	{
+		alphaCompany = "0" + alphaCompany;
+	}
+
+	var dmeObj		= new DMEObject(authUser.prodline, "sysrules");
+	dmeObj.out 		= "JAVASCRIPT";
+	dmeObj.index 	= "syrset1";
+	dmeObj.field 	= "numeric1;date1;date2";
+    dmeObj.key      = "MSSLPM=PA="+ alphaCompany;
+	dmeObj.max		= "1";
+	dmeObj.func 	= "storeLockOutData('"+whichView+"')";
+	dmeObj.debug	= false;
+	DME(dmeObj, "jsreturn");
+}
+
+function storeLockOutData(whichView) 
+{
+	var lockOutRecord = self.jsreturn.record;
+
+	if (lockOutRecord.length > 0) 
+	{
+		lockOutFlag = lockOutRecord[0].numeric1;
+		lockOutFromDate = lockOutRecord[0].date1;
+		lockOutToDate = lockOutRecord[0].date2;
+	}
+
+	gotLockOutData = true;
+	getReviews(whichView);
+}
+
+function displayRelatedLinks() 
+{
+	var strBuffer = new Array();
+	var overdueReviewExists = false;
+	var reviewIndexHighlighted = -1;
+
+	strBuffer[0] = '<div style="padding-top:5px;text-align:center">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" align="center" style="width:100%;margin-left:auto;margin-right:auto">'
+
+	if (relatedLinks.length > 0) 
+	{	
+		for (var i=0; i<relatedLinks.length; i++) 
+		{
+			strBuffer[i+1] = '<tr><td class="plaintablecell">'
+			+ '<a href="javascript:void(0);" onclick="parent.launchRelatedLink('+i+');">'
+			+ relatedLinks[i].name
+			+ '</a>'
+			+ '</td></tr>';
+		}
+	} 
+	else 
+	{
+		strBuffer[1] = '<tr><td class="plaintablecell">'
+		+ getSeaPhrase("NO_RELATED_LINK_ACCESS", "ESS")
+		+ '</td></tr>';
+	}
+
+	strBuffer[strBuffer.length] = '</table></div>';
+
+	self.relatedlinks.document.getElementById("paneHeader").innerHTML = getSeaPhrase("RELATED_LINKS", "ESS");
+	self.relatedlinks.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+	self.relatedlinks.stylePage();
+	self.relatedlinks.setLayerSizes();
+	document.getElementById("relatedlinks").style.visibility = "visible";
+	fitToScreen();
+}
+
+function getReviews(whichView) 
+{
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+	
+	if (reportSelect.selectedIndex == 0) 
+	{
+		setRequiredField(self.top1.document.getElementById("reportsCell"));
+		seaAlert(getSeaPhrase("PLEASE_SELECT_DIRECT_REPORT", "ESS"));
+	} 
+	else 
+	{
+		clearRequiredField(self.top1.document.getElementById("reportsCell"));
+		reviewRecords = new Array();
+		var dmeObj 		= new DMEObject(authUser.prodline, "review");
+		dmeObj.out 		= "JAVASCRIPT";
+		dmeObj.index 	= "revset2";
+		dmeObj.field  	= "code;review-type.description;sched-date;description;actual-date;by-employee;label-name;"
+						+ "model-name;percentile;perf-score;perf-weighting;goal-score;goal-weighting;total-score;"
+						+ "rating;rating.description;rev-schedule;next-review;next-rev-code;seq-nbr;em-comments.seq-nbr";
+		dmeObj.key 		= Number(authUser.company) + "=" + Number(reportSelect.options[reportSelect.selectedIndex].value);
+		dmeObj.debug 	= false;
+		dmeObj.otmmax  	= "1";
+		dmeObj.max		= "600";
+		dmeObj.func = "storeReviews('"+whichView+"')";
+
+		switch (whichView) 
+		{
+			case "current":
+				dmeObj.cond = "scheduled";
+				break;
+			case "overdue":
+				dmeObj.cond = "overdue";
+				break;
+			case "completed":
+				dmeObj.index = "revset4";
+				dmeObj.cond = "completed";
+				break;
+			case "overdue_and_upcoming":
+				dmeObj.cond = "scheduled";
+				dmeObj.select = "sched-date<=" + getDateDaysFrom(ymdtoday, emssObjInstance.emssObj.reviewsWithinDays);
+				break;
+		}
+		setTimeout(function () { DME(dmeObj, "jsreturn"); }, 10);
+	}
+}
+
+function storeReviews(whichView) 
+{
+	reviewRecords = reviewRecords.concat(self.jsreturn.record);
+	displayReviews(whichView);
+}
+
+function displayReviews(whichView,sort,sortDirection) 
+{
+	var strBuffer = new Array();
+	var overdueReviewExists = false;
+	var reviewIndexHighlighted = -1;
+
+	strBuffer[0] = '<table id="reviewTbl" class="plaintableborder" style="margin-left:auto;margin-right:auto" border="0" cellspacing="0" cellpadding="0" width="100%" align="center" styler="list">'
+	+ '<tr><th class="plaintableheaderborder" style="text-align:center">' + getSeaPhrase("REVIEW_TYPE", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center">' + getSeaPhrase("CLASSIFICATION", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="#" onclick="parent.displayReviewsView(\'sched_date\',\''+whichView+'\');return false;">' + getSeaPhrase("SCHEDULE_DATE", "ESS") + '</a></th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center" styler_click="StylerEMSS.onClickColumn" styler_init="StylerEMSS.initListColumn"><a class="columnsort" href="#" onclick="parent.displayReviewsView(\'actual_date\',\''+whichView+'\');return false">' + getSeaPhrase("COMPLETE_DATE", "ESS") + '</a></th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center">' + getSeaPhrase("PERFORMANCE_RANKING", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center">' + getSeaPhrase("OVERALL_SCORE", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborder" style="text-align:center">' + getSeaPhrase("OVERALL_RATING", "ESS") + '</th>'
+	+ '</tr>'
+
+	for (var i=0; i<reviewRecords.length; i++) 
+	{
+		var x = i + 1;
+
+		if ((reviewIndexHighlighted == -1) && (highlightedReviewSeqNbr != -1) && (highlightedReviewSeqNbr == Number(reviewRecords[i].seq_nbr))) 
+		{
+			reviewIndexHighlighted = i;
+		}
+
+	   	if (overDueReview(reviewRecords[i].actual_date, reviewRecords[i].sched_date)) 
+	   	{
+	   		overdueReviewExists = true;
+	   		strBuffer[x] = '<tr><td class="plaintablecellborderredfont" style="color:#ff0000">'
+	   		strBuffer[x] += '<a href="#" style="color:#ff0000" onclick="parent.editWindow(' + i + ');parent.doRowFormatting(' + i + ');return false;">' + ((reviewRecords[i].review_type_description) ? reviewRecords[i].review_type_description : reviewRecords[i].code) + '</a> *';
+	   	} 
+	   	else 
+	   	{
+			strBuffer[x] = '<tr><td class="plaintablecellborder">'
+			strBuffer[x] += '<a href="#" onclick="parent.editWindow(' + i + ');parent.doRowFormatting(' + i + ');return false;">' + ((reviewRecords[i].review_type_description) ? reviewRecords[i].review_type_description : reviewRecords[i].code) + '</a>';
+		}
+
+		strBuffer[x] += '<td class="plaintablecellborder" style="text-align:center">' + ((reviewRecords[i].description) ? reviewRecords[i].description : '&nbsp;') + '</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center">' + ((reviewRecords[i].sched_date) ? reviewRecords[i].sched_date : '&nbsp;') + '</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center">' + ((reviewRecords[i].actual_date) ? reviewRecords[i].actual_date : '&nbsp;') + '</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center">' + truncateNumeric(reviewRecords[i].percentile, 2) + '</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center">' + truncateNumeric(reviewRecords[i].total_score, 2) + '</td>'
+		+ '<td class="plaintablecellborder" style="text-align:center" nowrap>' + ((reviewRecords[i].rating_description) ? reviewRecords[i].rating_description : '&nbsp;') + '</td>'
+		+ '</tr>'
+	}
+
+	if (reviewRecords.length == 0) 
+	{
+		strBuffer[1] = '<tr><td class="fieldlabelleft" colspan="7">'
+		+ getSeaPhrase("NO_REVIEWS", "ESS")
+		+'</td></tr>'
+		+'</table>'
+		+ '<table border="0" cellspacing="0" cellpadding="0" align="center" style="width:100%;margin-left:auto;margin-right:auto">'
+		+ '<tr><td class="plaintablecell">'
+		+ uiButton(getSeaPhrase("ADD_REVIEW", "ESS"), "parent.addWindow();return false", false, "margin-top:5px");
+
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			strBuffer[strBuffer.length] = uiButton(getSeaPhrase("CLOSE", "ESS"), "parent.closePerformanceMgmt();return false", "margin-top:5px;margin-left:5px", "closebtn");
+		}
+		strBuffer[strBuffer.length] = '</td></tr>';
+	} 
+	else 
+	{
+		strBuffer[strBuffer.length] = '</table>'
+		+'<table border="0" cellspacing="0" cellpadding="0" align="center" style="width:100%;margin-left:auto;margin-right:auto">'
+		+'<tr><td class="plaintablecell"'
+		if (!overdueReviewExists) 
+		{
+			strBuffer[strBuffer.length] = ' colspan="7"'
+		} 
+		else 
+		{
+			strBuffer[strBuffer.length] = ' colspan="4"'
+		}
+
+		strBuffer[strBuffer.length] = '>'
+		+ uiButton(getSeaPhrase("ADD_REVIEW", "ESS"), "parent.addWindow();return false", "margin-top:5px");
+
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			strBuffer[strBuffer.length] = uiButton(getSeaPhrase("CLOSE", "ESS"), "parent.closePerformanceMgmt();return false", "margin-top:5px;margin-left:5px", "closebtn");
+		}
+
+		strBuffer[strBuffer.length] = '</td>';
+
+		if (overdueReviewExists) 
+		{
+			strBuffer[strBuffer.length] = '<td class="plaintablecellred textAlignRight" colspan="3">* ' + getSeaPhrase("OVERDUE_REVIEW", "ESS") + '</td>';
+		}
+		strBuffer[strBuffer.length] = '</tr>';
+	}
+
+	strBuffer[strBuffer.length] = '</table>';
+
+	switch (whichView) 
+	{
+		case "current":
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CURRENT_REVIEWS", "ESS");
+			break;
+		case "overdue":
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("OVERDUE_REVIEWS", "ESS");
+			break;
+		case "completed":
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("COMPLETED_REVIEWS", "ESS");
+			break;
+		case "overdue_and_upcoming":
+			reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("PERFORMANCE_REVIEWS_FOR", "ESS")
+				+ " " + reportSelect.options[reportSelect.selectedIndex].text;
+			break;
+		default:
+			self.left.document.getElementById("paneHeader").innerHTML = getSeaPhrase("ALL_REVIEWS", "ESS");
+			break;
+	}
+
+	self.left.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+
+	if (fromTask) 
+	{
+		parent.removeWaitAlert();
+	} 
+	else 
+	{
+		removeWaitAlert();
+	}
+	if (reviewIndexHighlighted != -1) 
+	{
+		doRowFormatting(reviewIndexHighlighted);
+	}
+	self.left.stylePage();
+	self.left.setLayerSizes();
+	document.getElementById("left").style.visibility = "visible";
+
+	if (sort != null) 
+	{
+		self.left.styleSortArrow("reviewTbl", sort, sortDirection);
+	}
+	fitToScreen();
+}
+
+function hideListAndDetail() 
+{
+	hideGoalScoreDetails();
+	closeView("right");
+	closeView("left");
+	closeView("relatedlinks");
+}
+
+function closePerformanceMgmt() 
+{
+	try 
+	{
+		parent.document.getElementById("review").style.visibility = "hidden";
+		parent.document.getElementById("main").style.visibility = "visible";
+	} catch(e) {}
+}
+
+function displayReviewsView(sortBy, whichView) 
+{
+	dmeSortFields.setRecords(sortBy, reviewRecords);
+	reviewRecords = dmeSortFields.sort(sortBy);
+	displayReviews(whichView,sortBy,dmeSortFields.getDirection(sortBy));
+}
+
+function doRowFormatting(i) 
+{
+	activateTableRow("reviewTbl", i, self.left, false, true);
+	var reviewRecord = reviewRecords[i];
+	highlightedReviewSeqNbr = Number(reviewRecord.seq_nbr);
+}
+
+function undoRowFormatting() 
+{
+	deactivateTableRows("reviewTbl", self.left, false, true);
+	highlightedReviewSeqNbr = -1;
+}
+
+function addWindow() 
+{
+	undoRowFormatting();
+	editWindow();
+}
+
+function editWindow(i, highlightPerfScore) 
+{
+	var strBuffer = new Array();
+	var strBuffer2 = new Array();
+	var reviewRecord;
+	var isChg = (typeof(i) != "undefined") ? true : false;
+	var isLockedOut = false;
+
+	if (isChg) 
+	{
+		reviewRecord = reviewRecords[i];
+		isLockedOut = lockedOutReview(reviewRecord.actual_date);
+	}
+
+	var showPerfWeighting = (isChg && (Number(reviewRecord.perf_score) != 0)) ? true : false;
+	var showGoalWeighting = (isChg && (Number(reviewRecord.goal_score) != 0)) ? true : false;
+
+	strBuffer[strBuffer.length] = '<form name="detailform" onsubmit="return false;"><table border="0" cellspacing="0" cellpadding="0" width="100%">'
+	+ '<tr style="padding-top:5px"><th class="fieldlabelboldliteleft">' + getSeaPhrase("REVIEW_TYPE", "ESS") + '</th>'
+
+	if (isChg) 
+	{
+		strBuffer[strBuffer.length] = '<td class="plaintablecell" style="padding-top:3px;padding-bottom:3px" nowrap="">'
+		+ reviewRecord.review_type_description
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="10" size="10" name="reviewType" id="reviewType" value="'
+		+ reviewRecord.code
+		+ '" onfocus="this.select()" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer[strBuffer.length] = '<td class="plaintablecell" nowrap=""><input class="inputbox" type="text" maxlength="10" size="10" name="reviewType" id="reviewType" value="'
+		+ ((isChg) ? reviewRecord.code : '')
+		+ '" onfocus="this.select()" onkeyup="parent.blankOutDescription(\'reviewTypeDesc\')">'
+		+ '<a href="javascript:parent.openDmeFieldFilter(\'reviewtype\')" style="margin-left:5px">'
+		+ '<img style="vertical-align:top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+		+ uiRequiredIcon()
+		+ '<span class="fieldlabelleft" style="overflow:hidden;text-overflow:ellipsis;width:110px" id="reviewTypeDesc">'
+		+ ((isChg) ? reviewRecord.review_type_description : '')
+		+ '</span></td></tr>\n';
+	}
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("CLASSIFICATION", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type="text" maxlength="30" size="30" name="description" id="description" value="'
+	+ ((isChg) ? reviewRecord.description.toString().replace(/"/g,'&quot;') : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' onfocus="this.select()"></td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("SCHEDULE_DATE", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type=text name="scheduleDate" id="scheduleDate" value="'
+	+ ((isChg) ? formatDME(reviewRecord.sched_date) : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.DateSelect(\'scheduleDate\')"'
+		+ ' onmouseover="window.status=\'' + getSeaPhrase("DISPLAY_CAL", "ESS").replace(/\'/g,"\\'") + '\';return true"'
+  		+ ' onmouseout="window.status=\'\';return true">'
+  		+ uiCalendarIcon() + '</a>' + uiDateFormatSpan() + uiRequiredIcon()
+  	}
+  	strBuffer[strBuffer.length-1] += ((isChg) ? '<a href="javascript:parent.openReviewDocument(' + i + ')" style="margin-left:5px">' + getSeaPhrase("DOCUMENTATION", "ESS") + '</a>' : '')
+  	+ '</td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("REVIEW_DATE", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type=text name="reviewDate" id="reviewDate" value="'
+	+ ((isChg) ? formatDME(reviewRecord.actual_date) : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.DateSelect(\'reviewDate\')"'
+		+ ' onmouseover="window.status=\'' + getSeaPhrase("DISPLAY_CAL", "ESS").replace(/\'/g,"\\'") + '\';return true"'
+  		+ ' onmouseout="window.status=\'\';return true">'
+  		+ uiCalendarIcon() + '</a>' + uiDateFormatSpan()
+  	}
+  	strBuffer[strBuffer.length-1] += '</td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("REVIEWER", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type=text name="reviewer" id="reviewer" value="'
+	+ ((isChg && (Number(reviewRecord.by_employee) != 0)) ? Number(reviewRecord.by_employee) : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' size="9" maxlength="9" onfocus="this.select()" onchange="parent.validateNumeric(this, 9, 0)" onkeyup="parent.blankOutDescription(\'reviewerDesc\')">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.openDmeFieldFilter(\'reviewer\')" style="margin-left:5px">'
+		+ '<img style="vertical-align:top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	}
+
+	strBuffer[strBuffer.length-1] += '<span class="fieldlabelleft" style="overflow:hidden;text-overflow:ellipsis;width:110px" id="reviewerDesc">'
+	+ ((isChg && (Number(reviewRecord.by_employee) != 0)) ? reviewRecord.label_name : '')
+	+ '</span></td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("MODEL_NAME", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type="text" maxlength="10" size="10" name="modelName" id="modelName" value="'
+	+ ((isChg) ? reviewRecord.model_name.toString().replace(/"/g,'&quot;') : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' onfocus="this.select()"></td></tr>\n';
+
+	if (isChg) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("PERFORMANCE_RANKING", "ESS") + '</th>'
+		+ '<td class="plaintablecell" nowrap="">'
+		+ truncateNumeric(reviewRecord.percentile, 2)
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfRanking" id="perfRanking" value="'
+		+ truncateNumeric(reviewRecord.percentile, 2)
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfRanking" id="perfRanking" value="'
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	if (isChg) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("PERFORMANCE_SCORE", "ESS") + '</th>'
+		+ '<td class="plaintablecell" style="padding-top:3px;padding-bottom:3px" nowrap="">'
+		+ truncateNumeric(reviewRecord.perf_score, 2)
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfScore" id="perfScore" value="'
+		+ truncateNumeric(reviewRecord.perf_score, 2)
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfScore" id="perfScore" value="'
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	if (showPerfWeighting) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("PERFORMANCE_WEIGHTING", "ESS") + '</th>'
+		+ '<td class="plaintablecell" style="padding-top:3px;padding-bottom:3px" nowrap="">'
+		+ ((isChg) ? truncateNumeric(reviewRecord.perf_weighting, 2) : '')
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfWeighting" id="perfWeighting" value="'
+		+ ((isChg) ? truncateNumeric(reviewRecord.perf_weighting, 2) : '')
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="perfWeighting" id="perfWeighting" value="'
+		+ ((isChg) ? truncateNumeric(reviewRecord.perf_weighting, 2) : '')
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	if (isChg) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("GOAL_SCORE", "ESS") + '</th>'
+		+ '<td id="goalScoreCell" class="plaintablecell" style="padding-top:3px;padding-bottom:3px" nowrap="">'
+		+ truncateNumeric(reviewRecord.goal_score, 2)
+		+ '&nbsp;<a href="javascript:parent.openGoalScoreDetails(' + i + ')" style="margin-left:5px">' + getSeaPhrase("GOAL_SCORE_DETAIL", "ESS") + '</a>'
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="goalScore" id="goalScore" value="'
+		+ truncateNumeric(reviewRecord.goal_score, 2)
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="goalScore" id="goalScore" value="'
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	if (showGoalWeighting) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("GOAL_WEIGHTING", "ESS") + '</th>'
+		+ '<td class="plaintablecell" style="padding-top:3px;padding-bottom:3px" nowrap="">'
+		+ ((isChg) ? truncateNumeric(reviewRecord.goal_weighting, 2) : '')
+		+ '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="goalWeighting" id="goalWeighting" value="'
+		+ ((isChg) ? truncateNumeric(reviewRecord.goal_weighting, 2) : '')
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">'
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="goalWeighting" id="goalWeighting" value="'
+		+ ((isChg) ? truncateNumeric(reviewRecord.goal_weighting, 2) : '')
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	if (isChg) 
+	{
+		strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("OVERALL_PERF_SCORE", "ESS") + '</th>'
+		+ '<td class="plaintablecell" nowrap=""><input type="text" maxlength="6" size="6" name="overallPerfScore" id="overallPerfScore" value="'
+		+ truncateNumeric(reviewRecord.total_score, 2) + '"'
+		+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+		+ ' onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)">'
+		//+ uiButton(getSeaPhrase("CALCULATE_PERF_SCORE", "ESS"), "parent.calculatePerfScore();return false", "margin-top:0px;margin-bottom:0px;margin-right:0px;margin-left:3px")
+		+ '</td></tr>\n';
+	} 
+	else 
+	{
+		strBuffer2[strBuffer2.length] = '<input class="inputboxdisabled" type="hidden" maxlength="6" size="6" name="overallPerfScore" id="overallPerfScore" value="'
+		+ '" onfocus="this.select()" onchange="parent.validateNumeric(this, 6, 2)" disabled="disabled">\n';
+	}
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("OVERALL_RATING", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type="text" maxlength="10" size="10" name="rating" id="rating" value="'
+	+ ((isChg) ? reviewRecord.rating : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' onfocus="this.select()" onkeyup="parent.blankOutDescription(\'ratingDesc\')">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.openDmeFieldFilter(\'rating\')" style="margin-left:5px">'
+		+ '<img style="vertical-align:top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	}
+
+	strBuffer[strBuffer.length-1] += '<span class="fieldlabelleft" style="overflow:hidden;text-overflow:ellipsis;width:110px" id="ratingDesc">'
+	+ ((isChg) ? reviewRecord.rating_description : '')
+	+ '</span></td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">'+getSeaPhrase("REVIEW_COMMENTS","ESS") + '</th>'
+
+	+ '<td class="plaintablecell" nowrap=""><textarea type=text name="reviewComments" id="reviewComments" value="" rows="4" cols="31"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" readonly' : ' class="inputbox"')
+	+ ' onfocus="this.select()"></textarea>'
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("REVIEW_SCHEDULE", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap="">'
+	+ '<span id="scheduleCell"><select name="schedule" id="schedule"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"') + '>'
+	+ ((isChg) ? drawScheduleSelect(reviewRecord.rev_schedule) : drawScheduleSelect())
+	+ '</select></span>'
+	+ '</td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("JOB_PROFILE_16", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type=text name="nextReviewDate" id="nextReviewDate" value="'
+	+ ((isChg) ? formatDME(reviewRecord.next_review) : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' size="10" maxlength="10" onfocus="this.select()" onchange="parent.ValidateDate(this)">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.DateSelect(\'nextReviewDate\')"'
+		+ ' onmouseover="window.status=\'' + getSeaPhrase("DISPLAY_CAL", "ESS").replace(/\'/g,"\\'") + '\';return true"'
+  		+ ' onmouseout="window.status=\'\';return true">'
+  		+ uiCalendarIcon() + '</a>' + uiDateFormatSpan()
+  	}
+  	strBuffer[strBuffer.length-1] += '</td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteleft">' + getSeaPhrase("JOB_PROFILE_17", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap=""><input type="text" maxlength="10" size="10" name="nextReviewType" id="nextReviewType" value="'
+	+ ((isChg) ? reviewRecord.next_rev_code : '') + '"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"')
+	+ ' onfocus="this.select()" onkeyup="parent.blankOutDescription(\'nextReviewTypeDesc\')">'
+	if (!isLockedOut) 
+	{
+		strBuffer[strBuffer.length-1] += '<a href="javascript:parent.openDmeFieldFilter(\'nextreviewtype\')" style="margin-left:5px">'
+		+ '<img style="vertical-align:top" src="/lawson/xhrnet/ui/images/ico_form_dropmenu.gif" border="0" alt="'+getSeaPhrase("SELECT_VALUE","ESS")+'"></a>'
+	}
+
+	strBuffer[strBuffer.length-1] += '<span class="fieldlabelleft" style="overflow:hidden;text-overflow:ellipsis;width:110px" id="nextReviewTypeDesc"></span></td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><th class="fieldlabelboldliteunderlineleft">' + getSeaPhrase("JOB_PROFILE_18", "ESS") + '</th>'
+	+ '<td class="plaintablecell" nowrap="">'
+	+ '<span id="scheduleNextReviewCell"><select name="scheduleNextReview" id="scheduleNextReview"'
+	+ ((isLockedOut) ? ' class="inputboxdisabled" disabled="disabled"' : ' class="inputbox"') + '>'
+	+ drawScheduleNextReviewSelect()
+	+ '</select></span>'
+	+ '</td></tr>\n';
+
+	strBuffer[strBuffer.length] = '<tr><td>&nbsp;</td><td class="plaintablecell">';
+
+	if (isChg) 
+	{
+		if (!isLockedOut) 
+		{
+			strBuffer[strBuffer.length] = uiButton(getSeaPhrase("UPDATE", "ESS"), "parent.updateReview(" + i + ");return false", "margin-top:5px");
+		}
+	} 
+	else 
+	{
+		strBuffer[strBuffer.length] = uiButton(getSeaPhrase("ADD", "ESS"), "parent.updateReview();return false", "margin-top:5px");
+	}
+
+	strBuffer[strBuffer.length] = uiButton(getSeaPhrase("CANCEL","ESS"), "parent.closeView('right');return false", "margin-top:5px;margin-left:5px");
+
+	if (isChg && !isLockedOut) 
+	{
+		strBuffer[strBuffer.length] = uiButton(getSeaPhrase("DELETE","ESS"), "parent.deleteReview(" + i + ");return false", "margin-top:5px;margin-left:15px");
+	}
+
+	strBuffer[strBuffer.length] = '</td>'
+	+ '</table>'
+	+ strBuffer2.join("")
+	+ '</form>'
+	+ uiRequiredFooter();
+
+	self.right.document.getElementById("paneHeader").innerHTML = (isChg) ? getSeaPhrase("EDIT_REVIEW", "ESS") : getSeaPhrase("ADD_REVIEW", "ESS");
+	self.right.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+	self.right.document.getElementById("paneBodyBorder").onscroll = positionGoalScoreDetail;
+	self.right.stylePage();
+	self.right.setLayerSizes();
+	document.getElementById("right").style.visibility = "visible";
+	fitToScreen();
+
+	if (highlightPerfScore) 
+	{
+		try 
+		{
+			var formData = self.right.document.forms["detailform"];
+			setRequiredField(formData.elements["overallPerfScore"]);
+		} catch(e) {}
+	}
+
+	if (isChg && typeof(reviewRecord.Rel_em_comments) != "undefined") 
+	{
+		getReviewComments(i);
+	}
+}
+
+function openReviewDocument(i) 
+{
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	}
+	launchReviewDocument(i);
+}
+
+function getReviewComments(i) {
+
+	var reviewRecord = reviewRecords[i];
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+
+	var keyVal = Number(reportSelect.options[reportSelect.selectedIndex].value) + ";" + Number(reviewRecord.seq_nbr);
+
+	if (!commentHash[keyVal]) 
+	{
+		if (fromTask) 
+		{
+			parent.showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+		} 
+		else 
+		{
+			showWaitAlert(getSeaPhrase("WAIT", "ESS"));
+		}
+		commentRecords = new Array();
+		var dmeObj = new DMEObject(authUser.prodline, "pacomments");
+		dmeObj.out = "XML";
+		dmeObj.index = "pacset1";
+		dmeObj.field = "cmt-text";
+		dmeObj.key = Number(authUser.company) + "=0=RV=" + Number(reportSelect.options[reportSelect.selectedIndex].value)
+					+ "=" + escape(" ") + "=" + escape(" ") + "=" + Number(reviewRecord.seq_nbr);
+		dmeObj.max = "600";
+		dmeObj.func = "getMoreReviewComments(" + i + ",'" + keyVal + "')";
+
+		setTimeout(function () { DME(dmeObj, "jsreturn"); }, 10);
+	} 
+	else 
+	{
+		commentRecords = commentHash[keyVal];
+		setReviewComments(keyVal);
+	}
+}
+
+function getMoreReviewComments(i, keyVal) 
+{
+	var cmtRecs = self.jsreturn.record; //   Add a reference to the comment array.
+	var nbrRecs = cmtRecs.length;
+	var blankLine = new Array();
+	var foundNonBlankLine = false;
+
+	for (var i=0; i<nbrRecs; i++) 
+	{
+		var cmtText = cmtRecs[i].cmt_text;
+
+		//  Added code to handle carriage returns and trailing spaces.
+		// A carriage return gets returned from DME as a single comment line containing only
+		// an empty string.  Convert it back to a carriage return so it will get formatted
+		// properly in the text area.
+		if (cmtText == "") 
+		{
+			// Retain carriage returns.  If the carriage return is not at the beginning of
+			// the comments or at the end, add an additional carriage return in order to
+			// preserve the paragraph break.
+			cmtText = unescape("%0D%0A");
+			blankLine[commentRecords.length] = true; // store a flag that this line is blank
+		} 
+		else 
+		{
+			foundNonBlankLine = true;
+		}
+
+		// Store the line of comment text in the commentRecords array.  Make sure any escaped double
+		// quote or backslash characters appear correctly in the text area.
+		commentRecords[commentRecords.length] = cmtText.replace(/\\\\"/g,'"').replace(/\\\\/g,'\\');
+
+		// If the current line does not start with white space, append a space character to the
+		// end of the previous line so that words do not run together in the text area.  This is
+		// necessary because DME trims the whitespace off of the end of each line.
+		if (commentRecords.length > 1) 
+		{
+			var thisLine = commentRecords[commentRecords.length-1];
+			var prevLine = commentRecords[commentRecords.length-2];
+			if ((thisLine.charAt(0) != " ")
+			&& (!blankLine[commentRecords.length-2])
+			&& (prevLine.length < HR90_DTL_FIELD_SIZE)) 
+			{
+				commentRecords[commentRecords.length-2] += " ";
+			}
+		}
+
+	}
+
+	if (self.jsreturn.Next) 
+	{
+		self.jsreturn.location.replace(self.jsreturn.Next);
+	} 
+	else 
+	{
+		commentHash[keyVal] = commentRecords;
+		setReviewComments(keyVal);
+		if (fromTask) 
+		{
+			parent.removeWaitAlert();
+		} 
+		else 
+		{
+			removeWaitAlert();
+		}
+	}
+}
+
+// Returns true if there are only blank comment lines left at the end of the comment
+// array.  That is, cmtRecs[i] ... cmtRecs[cmtRecs.length-1] are all blank lines.
+function atCommentEnd(i, cmtRecs) 
+{
+	var atEnd = true;
+	while (atEnd && (i < cmtRecs.length)) 
+	{
+		if (cmtRecs[i].cmt_text != "") 
+		{
+			atEnd = false;
+		}
+		i++;
+	}
+	return atEnd;
+}
+
+function setReviewComments(keyVal) 
+{
+	var dtlForm = self.right.document.forms["detailform"];
+	dtlForm.elements["reviewComments"].value = commentRecords.join("");
+}
+
+function calculatePerfScore() 
+{
+	var detailForm = self.right.document.forms["detailform"];
+	var totalScore;
+	var goalScore;
+	var perfScore;
+
+	goalScore = Number(detailForm.elements["goalScore"].value) * Number(detailForm.elements["goalWeighting"].value);
+	perfScore = Number(detailForm.elements["perfScore"].value) * Number(detailForm.elements["perfWeighting"].value);
+	totalScore = goalScore + perfScore;
+
+	self.right.document.forms["detailform"].elements["overallPerfScore"].value = formatNumeric(totalScore, 2);
+	seaAlert(getSeaPhrase("SCORE_CALCULATED", "ESS"));
+}
+
+function doesPerfScoreNeedCalculate() 
+{
+	var detailForm = self.right.document.forms["detailform"];
+	var totalScore = detailForm.elements["overallPerfScore"].value;
+	var goalScore = detailForm.elements["goalScore"].value;
+	var perfScore = detailForm.elements["perfScore"].value;
+	var goalWeighting = detailForm.elements["goalWeighting"].value;
+	var perfWeighting = detailForm.elements["perfWeighting"].value;
+
+	// is at least one of the score or weighting fields not blank?
+	if (((NonSpace(goalScore) > 0) && (Number(goalScore) > 0))
+	|| ((NonSpace(goalWeighting) > 0) && (Number(goalWeighting) > 0))
+	|| ((NonSpace(perfScore) > 0) && (Number(perfScore) > 0))
+	|| ((NonSpace(perfWeighting) > 0) && (Number(perfWeighting) > 0))) 
+	{
+		var totalGoalScore = Number(goalScore) * Number(goalWeighting);
+		var totalPerfScore = Number(perfScore) * Number(perfWeighting);
+		if (Number(totalScore) != (totalGoalScore + totalPerfScore)) 
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+function openGoalScoreDetails(i) 
+{
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+	var reviewRecord = reviewRecords[i];
+	var keyVal = Number(reportSelect.options[reportSelect.selectedIndex].value) + ";" + Number(reviewRecord.seq_nbr);
+
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("RETRIEVING_RECORDS", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("RETRIEVING_RECORDS", "ESS"));
+	}
+
+	if (!goalScoreHash[keyVal]) 
+	{
+		var dmeObj 		= new DMEObject(authUser.prodline, "revgoaldtl");
+		dmeObj.out 		= "JAVASCRIPT";
+		dmeObj.index 	= "rvgset1";
+		dmeObj.field  	= "emp-objective.objective;pct-completed;weighting";
+		dmeObj.key 		= Number(authUser.company) + "=" + Number(reportSelect.options[reportSelect.selectedIndex].value) + "=" + Number(reviewRecord.seq_nbr);
+		dmeObj.debug 	= false;
+		dmeObj.otmmax  	= "1";
+		dmeObj.max		= "600";
+		dmeObj.func 	= "storeGoalScoreDetail('"+keyVal+"')";
+		setTimeout(function() { DME(dmeObj, "jsreturn"); }, 10);
+	} 
+	else 
+	{
+		goalScoreRecords = goalScoreHash[keyVal];
+		displayGoalScoreDetail();
+	}
+}
+
+function storeGoalScoreDetail(keyVal) 
+{
+	goalScoreRecords = self.jsreturn.record;
+	goalScoreHash[keyVal] = goalScoreRecords;
+	displayGoalScoreDetail();
+}
+
+function displayGoalScoreDetail() 
+{
+	var dtlRecords = goalScoreRecords;
+	var strBuffer = new Array();
+
+	strBuffer[0] = '<table id="goalScoreDtlTbl" class="plaintableborder" style="background-color:#ffffff;width:100%;text-align:center;margin-left:auto;margin-right:auto" border="0" cellspacing="0" cellpadding="0" align="center" styler="list">'
+	+ '<tr><th class="plaintableheaderborderlitesmall" style="text-align:center">' + getSeaPhrase("OBJECTIVE", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborderlitesmall" style="text-align:center">'+getSeaPhrase("PCT_COMPLETE", "ESS") + '</th>'
+	+ '<th class="plaintableheaderborderlitesmall" style="text-align:center">'+getSeaPhrase("WEIGHTING", "ESS") + '</th></tr>'
+
+	for (var i=0; i<dtlRecords.length; i++) 
+	{
+		var x = i + 1;
+		strBuffer[x] = '<tr><td class="plaintablecellbordersmall">'
+		strBuffer[x] += ((dtlRecords[i].emp_objective_objective) ? dtlRecords[i].emp_objective_objective : '&nbsp;')
+		strBuffer[x] += '</td><td class="plaintablecellbordersmall" style="text-align:center">'
+		strBuffer[x] += ((dtlRecords[i].pct_completed) ? dtlRecords[i].pct_completed : '&nbsp;')
+		strBuffer[x] += '</td><td class="plaintablecellbordersmall" style="text-align:center">'
+		strBuffer[x] += ((dtlRecords[i].weighting) ? dtlRecords[i].weighting : '&nbsp;')
+		strBuffer[x] += '</td></tr>'
+	}
+
+	if (dtlRecords.length == 0) 
+	{
+		strBuffer[1] = '<tr><td class="fieldlabelleft" colspan="3">'
+		+ getSeaPhrase("NO_GOAL_SCORE_DETAIL", "ESS")
+		+'</td></tr>'
+	}
+
+	strBuffer[strBuffer.length] = '<tr><td class="plaintablecell" colspan="3">'
+	+ uiButton(getSeaPhrase("CLOSE", "ESS"), "parent.hideGoalScoreDetails();return false")
+	+ '</td></tr>'
+	+ '</table>';
+
+	self.rightdetail.document.getElementById("paneBody").innerHTML = strBuffer.join("");
+	self.rightdetail.stylePage();
+	self.rightdetail.setLayerSizes();
+
+	positionGoalScoreDetail();
+	showGoalScoreDetails();
+	if (fromTask) 
+	{
+		parent.removeWaitAlert();
+	} 
+	else 
+	{
+		removeWaitAlert();
+	}
+	fitToScreen();
+}
+
+function showGoalScoreDetails() 
+{
+	document.getElementById("rightdetail").style.visibility = "visible";
+	// hide the schedule dropdown after display the goal score details frame, otherwise it bleeds through if the frame is scrolled
+	try 
+	{
+		var formData = self.right.document.forms["detailform"];
+		formData.elements["schedule"].style.visibility = "hidden";
+	} catch(e) {}
+}
+
+function hideGoalScoreDetails() 
+{
+	// re-display the schedule dropdown before hiding the goal score details frame
+	try 
+	{
+		var formData = self.right.document.forms["detailform"];
+		formData.elements["schedule"].style.visibility = "visible";
+	} catch(e) {}
+	document.getElementById('rightdetail').style.visibility = "hidden";
+}
+
+function positionGoalScoreDetail() 
+{
+	// resize the Goal Score Detail frame
+	try 
+	{
+		var goalScoreDetailWidth = Number(document.getElementById("right").clientWidth) - 20;
+		var goalScoreDetailHeight = Number(document.getElementById("rightdetail").clientHeight);
+
+		if (navigator.appName.indexOf("Microsoft") == -1) 
+		{
+			goalScoreDetailWidth -= 5;
+		}
+
+		// Turn the goal score detail frame into a layer "dialog"; remove all outer margins
+		document.getElementById("rightdetail").style.width = goalScoreDetailWidth + "px";
+		self.rightdetail.document.body.style.margin = "0px";
+		self.rightdetail.document.body.style.padding = "0px";
+		self.rightdetail.document.getElementById("paneBorder").style.top = "0px";
+		self.rightdetail.document.getElementById("paneBorder").style.margin = "0px";
+		self.rightdetail.document.getElementById("paneBorder").style.width = Number(goalScoreDetailWidth) + "px";
+		self.rightdetail.document.getElementById("paneBorder").style.height = Number(goalScoreDetailHeight) + "px";
+		self.rightdetail.document.getElementById("paneBodyBorder").style.width = (Number(goalScoreDetailWidth) - 7) + "px";
+		self.rightdetail.document.getElementById("paneBodyBorder").style.height = (Number(goalScoreDetailHeight) - 2) + "px";
+	} catch(e) {}
+
+	// reposition the Goal Score Detail frame
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}	
+	try 
+	{
+		var frameLeft = document.getElementById("right").offsetLeft;
+		if (window.styler && window.styler.textDir == "rtl")
+			frameLeft += 17;
+		var frameTop = document.getElementById("right").offsetTop;
+		var elm = self.right.document.getElementById("goalScoreCell");
+		var elmDiv = self.right.document.getElementById("paneBodyBorder");
+
+		var topPos = (frameTop - elmDiv.scrollTop + elm.offsetTop + (elm.offsetHeight * 2) + 7) + "px";
+		var leftPos = (frameLeft + 3) + "px";
+		document.getElementById("rightdetail").style.left = leftPos;
+		document.getElementById("rightdetail").style.top = topPos;
+	} catch(e) {}
+}
+
+function doDeleteReview(i)
+{
+	var reviewRecord = reviewRecords[i];
+	var isChg = (typeof(i) != "undefined") ? true : false;
+	var formData = self.right.document.forms["detailform"];
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+
+	var agsObj = new AGSObject(authUser.prodline, "PA26.1")
+	agsObj.event = "CHG";
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.field = "FC=D"
+		+ "&USER-ID=W" 			+ Number(authUser.employee)
+		+ "&REV-COMPANY="       + Number(authUser.company)
+	   	+ "&REV-EMPLOYEE="      + Number(reportSelect.options[reportSelect.selectedIndex].value)
+	   	+ "&REV-SEQ-NBR=" 		+ Number(reviewRecord.seq_nbr)
+	   	+ "&REV-SCHED-DATE="    + formjsDate(reviewRecord.sched_date)
+	   	+ "&REV-CODE="          + escape(reviewRecord.code, 1)
+	agsObj.func = "parent.purgeDeletedReviewComments(" + i + ", true)";
+	agsObj.debug = false;
+	updatetype = "REV";
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	}
+
+	setTimeout(function() { AGS(agsObj, "jsreturn"); }, 10);
+}
+
+function deleteReview(i)
+{
+	reviewIndex = i;
+	if (seaConfirm(getSeaPhrase("DELETE_REVIEW_WARNING", "ESS"), "", handleConfirmResponse))
+	{
+		doDeleteReview(i);
+	}
+}
+
+// Firefox will call this function
+function handleConfirmResponse(confirmWin)
+{
+	if (confirmWin.returnValue == "ok" || confirmWin.returnValue == "continue")
+	{
+		doDeleteReview(reviewIndex);
+	}
+}
+
+function updateReview(i) 
+{
+	var reviewRecord;
+	var isChg = (typeof(i) != "undefined") ? true : false;
+	var formDoc = self.right.document;
+	var formData = self.right.document.forms["detailform"];
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+
+	if (isChg) 
+	{
+		reviewRecord = reviewRecords[i];
+	}
+
+	clearRequiredField(formData.elements["reviewType"]);
+	clearRequiredField(formData.elements["description"]);
+	clearRequiredField(formData.elements["scheduleDate"]);
+	clearRequiredField(formData.elements["reviewDate"]);
+	clearRequiredField(formData.elements["reviewer"]);
+	clearRequiredField(formData.elements["modelName"]);
+	clearRequiredField(formData.elements["rating"]);
+	clearRequiredField(formDoc.getElementById("scheduleCell"));
+	clearRequiredField(formData.elements["nextReviewDate"]);
+	clearRequiredField(formData.elements["nextReviewType"]);
+	clearRequiredField(formDoc.getElementById("scheduleNextReviewCell"));
+	clearRequiredField(formData.elements["perfRanking"]);
+	clearRequiredField(formData.elements["perfScore"]);
+	clearRequiredField(formData.elements["perfWeighting"]);
+	clearRequiredField(formData.elements["goalScore"]);
+	clearRequiredField(formData.elements["goalWeighting"]);
+	clearRequiredField(formData.elements["overallPerfScore"]);
+
+	if (NonSpace(formData.elements["reviewType"].value) == 0)
+	{
+		setRequiredField(formData.elements["reviewType"]);
+		seaAlert(getSeaPhrase("REVIEW_TYPE_REQUIRED","ESS"));
+		formData.elements["reviewType"].focus();
+		return;
+	}
+
+	if (NonSpace(formData.elements["scheduleDate"].value) == 0) 
+	{
+		setRequiredField(formData.elements["scheduleDate"]);
+		seaAlert(getSeaPhrase("SCHEDULED_DATE_REQUIRED","ESS"));
+		formData.elements["scheduleDate"].focus();
+		formData.elements["scheduleDate"].select();
+		return;
+	}
+
+	if (ValidDate(formData.elements["scheduleDate"]) == false) 
+	{
+		setRequiredField(formData.elements["scheduleDate"]);
+		formData.elements["scheduleDate"].focus();
+		formData.elements["scheduleDate"].select();
+		return;
+	}
+
+	if ((NonSpace(formData.elements["reviewDate"].value) > 0) && (ValidDate(formData.elements["reviewDate"]) == false)) 
+	{
+		setRequiredField(formData.elements["reviewDate"]);
+		formData.elements["reviewDate"].focus();
+		formData.elements["reviewDate"].select();
+		return;
+	}
+
+	if ((NonSpace(formData.elements["nextReviewDate"].value) > 0) && (ValidDate(formData.elements["nextReviewDate"]) == false)) 
+	{
+		setRequiredField(formData.elements["nextReviewDate"]);
+		formData.elements["nextReviewDate"].focus();
+		formData.elements["nextReviewDate"].select();
+		return;
+	}
+
+	if (NonSpace(formData.elements["perfRanking"].value) > 0) 
+	{
+		// do not validate the TalentView score; it is view-only on the display
+		//if (validateNumeric(formData.elements["perfRanking"], 3, 0) == false) {
+		//	return;
+		//}
+	} 
+	else 
+	{
+		formData.elements["perfRanking"].value = "0.00";
+	}
+
+	if (NonSpace(formData.elements["reviewer"].value) > 0) 
+	{
+		if (validateNumeric(formData.elements["reviewer"], 9, 0) == false) {
+			return;
+		}
+	} 
+	else 
+	{
+		formData.elements["reviewer"].value = "0";
+	}
+
+	if (NonSpace(formData.elements["perfScore"].value) > 0) 
+	{
+		// do not validate the performance score; it is view-only on the display
+		//if (validateNumeric(formData.elements["perfScore"], 6, 2) == false) {
+		//	return;
+		//}
+	} 
+	else 
+	{
+		formData.elements["perfScore"].value = "0.00";
+	}
+
+	if (NonSpace(formData.elements["perfWeighting"].value) > 0) 
+	{
+		// do not validate the performance score; it is view-only on the display
+		//if (validateNumeric(formData.elements["perfWeighting"], 6, 2) == false) {
+		//	return;
+		//}
+	} 
+	else 
+	{
+		formData.elements["perfWeighting"].value = "0.00";
+	}
+
+	if (NonSpace(formData.elements["goalScore"].value) > 0) 
+	{
+		// do not validate the performance score; it is view-only on the display
+		//if (validateNumeric(formData.elements["goalScore"], 6, 2) == false) {
+		//	return;
+		//}
+	} 
+	else 
+	{
+		formData.elements["goalScore"].value = "0.00";
+	}
+
+	if (NonSpace(formData.elements["goalWeighting"].value) > 0) 
+	{
+		// do not validate the performance score; it is view-only on the display
+		//if (validateNumeric(formData.elements["goalWeighting"], 6, 2) == false) {
+		//	return;
+		//}
+	} 
+	else 
+	{
+		formData.elements["goalWeighting"].value = "0.00";
+	}
+
+	if (NonSpace(formData.elements["overallPerfScore"].value) > 0) 
+	{
+		if (validateNumeric(formData.elements["overallPerfScore"], 6, 2) == false) 
+		{
+			return;
+		}
+	} 
+	else 
+	{
+		formData.elements["overallPerfScore"].value = "0.00";
+	}
+
+	storeComments();
+	//perfScoreNeedsCalculate = doesPerfScoreNeedCalculate();
+
+	var agsObj = new AGSObject(authUser.prodline, "PA26.1")
+	agsObj.event = ((isChg) ? "CHG" : "ADD");
+	agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.lfn = "ALL";
+	agsObj.tds = false;
+	agsObj.field = "FC=" + ((isChg) ? "C" : "A")
+	agsObj.field += "&USER-ID=W" + Number(authUser.employee)
+		+ "&REV-COMPANY="       + Number(authUser.company)
+	   	+ "&REV-EMPLOYEE="      + Number(reportSelect.options[reportSelect.selectedIndex].value)
+	   	+ "&REV-SCHED-DATE="    + formjsDate(formData.elements["scheduleDate"].value)
+	   	+ "&REV-CODE="          + escape(formData.elements["reviewType"].value, 1)
+	   	+ "&REV-DESCRIPTION="   + escape(formData.elements["description"].value, 1)
+	   	+ "&REV-ACTUAL-DATE="   + ((NonSpace(formData.elements["reviewDate"].value) > 0) ? formjsDate(formData.elements["reviewDate"].value) : "00000000")
+	   	+ "&REV-RATING="        + ((NonSpace(formData.elements["rating"].value) > 0) ? escape(formData.elements["rating"].value, 1): "%20")
+	   	+ "&REV-BY-EMPLOYEE="   + Number(formData.elements["reviewer"].value)
+	   	+ "&REV-REV-SCHEDULE="  + escape(formData.elements["schedule"].value, 1)
+	   	+ "&REV-NEXT-REVIEW="   + ((NonSpace(formData.elements["nextReviewDate"].value) > 0) ? formjsDate(formData.elements["nextReviewDate"].value) : "00000000")
+	   	+ "&REV-NEXT-REV-CODE=" + escape(formData.elements["nextReviewType"].value, 1)
+	   	+ "&SCHED-NEXT-REV="	+ escape(formData.elements["scheduleNextReview"].value, 1)
+	   	+ "&REV-MODEL-NAME="	+ escape(formData.elements["modelName"].value, 1)
+	   	+ "&REV-PERCENTILE="	+ Number(formData.elements["perfRanking"].value)
+		+ "&REV-PERF-SCORE="	+ Number(formData.elements["perfScore"].value)
+		+ "&REV-PERF-WEIGHTING=" + Number(formData.elements["perfWeighting"].value)
+		+ "&REV-GOAL-SCORE="	+ Number(formData.elements["goalScore"].value)
+		+ "&REV-GOAL-WEIGHTING=" + Number(formData.elements["goalWeighting"].value)
+		+ "&REV-TOTAL-SCORE=" 	+ Number(formData.elements["overallPerfScore"].value)
+	if (isChg) 
+	{
+		agsObj.field += "&REV-SEQ-NBR=" + Number(reviewRecord.seq_nbr)
+		if (typeof(reviewRecord.Rel_em_comments) != "undefined") 
+		{
+			agsObj.func = "parent.deleteReviewComments(" + i + ", 0)";
+		} 
+		else 
+		{
+			if (NonSpace(formData.elements["reviewComments"].value) > 0) 
+			{
+				agsObj.func = "parent.updateReviewComments(" + i + ", 0)";
+			} 
+			else 
+			{
+				agsObj.func = "parent.checkReviewUpdate()";
+			}
+		}
+	} 
+	else 
+	{
+		if (NonSpace(formData.elements["reviewComments"].value) > 0) 
+		{
+			agsObj.func = "parent.updateReviewComments(-1, 0)";
+		} 
+		else 
+		{
+			agsObj.func = "parent.checkReviewUpdate()";
+		}
+	}
+	agsObj.debug = false;
+	updatetype = "REV";
+	if (fromTask) 
+	{
+		parent.showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	} 
+	else 
+	{
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT", "ESS"));
+	}
+
+	setTimeout(function () { AGS(agsObj, "jsreturn"); }, 10);
+}
+
+function checkReviewUpdate() 
+{
+	if (Number(self.lawheader.gmsgnbr) != 0) 
+	{
+		finishReviewUpdate(true);
+	} 
+	else 
+	{
+		finishReviewUpdate(false);
+	}
+}
+
+function storeComments() 
+{
+	var formData = self.right.document.forms["detailform"];
+
+	// comments to add
+	commentDtlLines = new Array();
+	var commentText = formData.elements["reviewComments"].value;
+
+	//  Parse carriage returns and split the lines into manageable strings
+	// for HR90.
+	parseCommentText(commentText);
+
+}
+
+// The next two functions handle parsing of user-entered comments.
+// Parse the user-entered review comment text and prepare it for update on HR90.
+// Append each line to the global commentDtlLines array.  It is assumed that
+// the commentText parameter is an unescaped string.
+function parseCommentText(commentText) 
+{
+	// If the literal text %0A or %0D is found in the unescaped comment text, replace each
+	// with escaped literal characters.  If we don't do this, when inquiring on this data,
+	// the Javascript output from DME will insert a carriage return before ending the string,
+	// causing an 'unterminated string constant' error.
+	if ((commentText.indexOf("%0D") != -1) || (commentText.indexOf("%0A") != -1)) 
+	{
+		commentText = commentText.replace(/%0D/g,"\\%\\0\\D");
+		commentText = commentText.replace(/%0A/g,"\\%\\0\\A");
+	}
+
+	var tmpText = escape(commentText, 1);
+
+	var newLineComments = new Array(); // Splits the comment text by carriage returns
+	var tmpLines;
+
+	// First, check to see if this line has any carriage returns in it.  If so, create a
+	// new blank line for each one.  Handle operating system specific encodings.  If a
+	// carriage return exists, the line will be split into two lines.
+	// Windows encodes carriage returns as \r\n, or %0D%0A
+	if (tmpText.indexOf("%0D%0A") != -1) {
+		tmpLines = tmpText.split("%0D%0A");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// Unix encodes carriage returns as \r, or %0D
+	else if (tmpText.indexOf("%0D") != -1) 
+	{
+		tmpLines = tmpText.split("%0D");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// Macintosh encodes carriage returns as \n, or %0A
+	else if (tmpText.indexOf("%0A") != -1) 
+	{
+		tmpLines = tmpText.split("%0A");
+		for (var i=0; i<tmpLines.length; i++) 
+		{
+			newLineComments[newLineComments.length] = unescape(tmpLines[i]);
+			if ((i < tmpLines.length - 1) && (NonSpace(tmpLines[i]) > 0)) 
+			{
+				newLineComments[newLineComments.length] = ""; // represent a carriage return on HR90 as a blank line
+			}
+		}
+	}
+	// If this line does not contain any carriage returns, then pass it directly
+	// to the chunkUupCommentString() function.
+	else 
+	{
+		newLineComments[0] = commentText;
+	}
+
+	// Now that the carriage returns are removed, chunk up each string so we are left
+	// with lines that can be updated on HR90.
+	for (var k=0; k<newLineComments.length; k++) 
+	{
+		chunkUpCommentString(newLineComments[k]);
+	}
+}
+
+// Chunk up the parameter string into lines which are the right size for HR90.
+// Check to see if the string is less than a full HR90 line size.  If it is,
+// or the string takes up the full HR90 line and contains no white space, then
+// add it as it is.  Otherwise, trim the string at the word before the last space
+// character.  If the string is longer than the maximum character size for a
+// detail line on HR90, then chunk it up into multiple lines, using the rules
+// listed above for each line.
+function chunkUpCommentString(commentText) 
+{
+	// Keep a count of what character we are at as we break up the comments string
+	// into lines for update on HR90.
+	var charCnt = 0;
+
+	if (commentText == "") 
+	{
+		commentDtlLines[commentDtlLines.length] = "";
+		return;
+	}
+
+	while (charCnt < commentText.length) 
+	{
+		var truncatedLine = false; // true if we trim the end of the comment line
+		var cmtLine;
+
+		// HR90 can handle up to HR90_DTL_FIELD_SIZE characters on one line.  Grab that many
+		// characters and process that string to see if we need to trim the end so we do not
+		// get any words split on two lines.
+		if ((charCnt + HR90_DTL_FIELD_SIZE) > commentText.length) 
+		{
+			cmtLine = commentText.substring(charCnt, (charCnt + commentText.length));
+		} 
+		else 
+		{
+			cmtLine = commentText.substring(charCnt, (charCnt + HR90_DTL_FIELD_SIZE));
+		}
+
+		if (cmtLine.length < HR90_DTL_FIELD_SIZE) {
+			// this string is less than a full HR90 line; add it as is.
+			truncatedLine = true;
+			commentDtlLines[commentDtlLines.length] = cmtLine;
+			charCnt += cmtLine.length;
+		} 
+		else 
+		{
+			if (cmtLine.charAt(cmtLine.length - 1) != " ") 
+			{
+				var j = cmtLine.length - 1;
+				while ((j >= 0) && (cmtLine.charAt(j) != " ")) 
+				{
+					j--;
+				}
+				if (j < 0) 
+				{
+					// this string fills the whole HR90 line and contains no white space;
+					// add it as is.
+					commentDtlLines[commentDtlLines.length] = cmtLine;
+				} 
+				else 
+				{
+					// break this string at the last available space character
+					truncatedLine = true;
+					commentDtlLines[commentDtlLines.length] = cmtLine.substring(0, j + 1);
+					charCnt += (j + 1);
+				}
+			} 
+			else 
+			{
+				// this string fills the whole HR90 line but ends in a space character;
+				// add it as is.
+				commentDtlLines[commentDtlLines.length] = cmtLine;
+			}
+		}
+
+		// If this line was not trimmed, then move the character count up to the next block of
+		// text to process.
+		if (!truncatedLine) 
+		{
+			charCnt += HR90_DTL_FIELD_SIZE;
+		}
+	}
+}
+
+function deleteReviewComments(i, dtlLineCounter) 
+{
+	// if an error was returned, abort the update
+	if (Number(self.lawheader.gmsgnbr) != 0) 
+	{
+		finishReviewUpdate(true);
+		return;
+	}
+
+	var reviewRecord = reviewRecords[i];
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+
+	var agsObj = new AGSObject(authUser.prodline, "HR90.1");
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.event = "CHG";
+	agsObj.field = "FC=D"
+		+ "&PAC-COMPANY=" + Number(authUser.company)
+		+ "&PAC-EMP-APP=0"
+		+ "&PAC-EMPLOYEE=" + Number(reportSelect.options[reportSelect.selectedIndex].value)
+		+ "&PAC-CMT-TYPE=RV"
+		+ "&PAC-LN-NBR=" + Number(reviewRecord.seq_nbr)
+
+	if (commentDtlLines.length > 0) 
+	{
+		agsObj.func = "parent.purgeDeletedReviewComments(" + i + ", false)";
+	} 
+	else 
+	{
+		agsObj.func = "parent.purgeDeletedReviewComments(" + i + ", true)";
+	}
+
+	agsObj.debug = false;
+	updatetype = "PAC";
+	AGS(agsObj, "jsreturn");
+}
+
+function purgeDeletedReviewComments(i, reviewDeleteFlag) 
+{
+	// Ignore the delete error if someone deleted the comments manually on HR90
+	// (the error will be message number 12, "No More Records To View")--in that case, we
+	// can just add new comments. If any other error was returned while deleting comments,
+	// abort the update.
+	if (Number(self.lawheader.gmsgnbr) != 0 && Number(self.lawheader.gmsgnbr) != 12) 
+	{
+		finishReviewUpdate(true);
+		return;
+	}
+
+	// In case we got message number 12, reset the AGS message number back to 0,
+	// so execution can proceed without alerting the user.
+	self.lawheader.gmsgnbr = "000";
+	var reviewRecord = reviewRecords[i];
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+	var keyVal = Number(reportSelect.options[reportSelect.selectedIndex].value) + ";" + Number(reviewRecord.seq_nbr);
+	commentHash[keyVal] = null;
+
+	if (reviewDeleteFlag) 
+	{
+		finishReviewUpdate();
+	} 
+	else 
+	{
+		updateReviewComments(i, 0);
+	}
+}
+
+function updateReviewComments(i, dtlLineCounter) 
+{
+	// if an error was returned or no new comments exist, abort the update
+	if ((Number(self.lawheader.gmsgnbr) != 0) || (commentDtlLines.length == 0)) 
+	{
+		finishReviewUpdate(true);
+		return;
+	}
+
+	var reviewRecord;
+	var isChg = ((typeof(i) != "undefined") && (i != -1)) ? true : false;
+	reportSelect = self.top1.document.forms["topForm"].elements["directReport"];
+	var lineFc;
+
+	if (isChg) 
+	{
+		reviewRecord = reviewRecords[i];
+	} 
+	else 
+	{
+		reviewRecord = self.lawheader.reviewRecord;
+	}
+
+	var agsObj = new AGSObject(authUser.prodline, "HR90.1");
+	agsObj.rtn = "MESSAGE";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.event = "ADD";
+	agsObj.field = "FC=A"
+		+ "&PAC-COMPANY=" + Number(authUser.company)
+		+ "&PAC-EMP-APP=0"
+		+ "&PAC-EMPLOYEE=" + Number(reportSelect.options[reportSelect.selectedIndex].value)
+		+ "&PAC-CMT-TYPE=RV"
+		+ "&PAC-LN-NBR=" + Number(reviewRecord.seq_nbr)
+
+	var lineNbr = 0;
+	var j;
+	for (j = dtlLineCounter; ((j < commentDtlLines.length) && (lineNbr < HR90_NBR_DETAIL_LINES)); j++) 
+	{
+		lineNbr++;
+		agsObj.field += "&LINE-FC" + lineNbr + "=A"
+			+ "&PAC-CMT-TEXT" + lineNbr + "=" + escape(commentDtlLines[j], 1)
+			+ "&PAC-PRINT-CODE" + lineNbr + "=Y";
+	}
+
+	if ((commentDtlLines.length - dtlLineCounter) > HR90_NBR_DETAIL_LINES) 
+	{
+		agsObj.func = "parent.updateReviewComments(" + i + "," + j + ")";
+	} 
+	else 
+	{
+		agsObj.func = "parent.finishReviewUpdate()";
+	}
+
+	agsObj.debug = false;
+	updatetype = "PAC";
+	AGS(agsObj, "jsreturn");
+}
+
+function finishReviewUpdate(errorReturned) 
+{
+	if (!errorReturned) 
+	{
+		var reviewTypeSelect = self.top1.document.forms["topForm"].elements["reviewType"];
+		var whichView = "current";
+
+		if (reviewTypeSelect.selectedIndex > 0) 
+		{
+			whichView = reviewTypeSelect.options[reviewTypeSelect.selectedIndex].value;
+		}
+
+		openView(whichView);
+		//if (perfScoreNeedsCalculate) {
+		//	seaAlert(getSeaPhrase("PERF_SCORE_NEEDS_CALCULATE", "ESS"));
+		//} else {
+		//	seaAlert(getSeaPhrase("UPDATE_COMPLETE", "ESS"));
+		//}
+		seaAlert(self.lawheader.gmsg);
+	} 
+	else 
+	{
+		if (fromTask) 
+		{
+			parent.removeWaitAlert();
+		} 
+		else 
+		{
+			removeWaitAlert();
+		}
+		highlightFieldInError(self.lawheader.gfldnbr);
+	}
+}
+
+function lockedOutReview(actualDate) 
+{
+	if (lockOutFlag == null) {
+		// if no SYSRULES record exists for the supervisor's company, do not lock out any review
+		return false;
+	} else if (Number(actualDate) == 0) {
+		// a review that does not have an actual-date is not completed, and should not be locked out
+		return false;
+	} else if (Number(lockOutFlag) == 2) {
+		// a completed review should be locked out if the SYSRULES lock out flag is 2
+		return true;
+	} else if (Number(lockOutFlag) == 1) {
+
+		var actualDateFormatted = fromDMEtoStandard(actualDate);
+		actualDateFormatted = fromStandardtoAGS(actualDateFormatted);
+
+		if ((lockOutFromDate != null) && (Number(lockOutFromDate) != 0)) {
+			var lockOutFromDateFormatted = fromDMEtoStandard(lockOutFromDate);
+			lockOutFromDateFormatted = fromStandardtoAGS(lockOutFromDateFormatted);
+
+			// a completed review that was completed before the lock out date range should be locked out
+			if (actualDateFormatted < lockOutFromDateFormatted) {
+				return true;
+			}
+		}
+
+		if ((lockOutToDate != null) && (Number(lockOutToDate) != 0)) {
+			var lockOutToDateFormatted = fromDMEtoStandard(lockOutToDate);
+			lockOutToDateFormatted = fromStandardtoAGS(lockOutToDateFormatted);
+
+			// a completed review that was completed after the lock out date range should be locked out
+			if (actualDateFormatted > lockOutToDateFormatted) {
+				return true;
+			}
+		}
+	}
+
+	// a completed review that was completed within the lock out date range should not be locked out
+	return false;
+}
+
+function overDueReview(actualDate, schedDate) 
+{
+	schedDateFormatted = fromDMEtoStandard(schedDate);
+	schedDateFormatted = fromStandardtoAGS(schedDateFormatted);
+	return (((NonSpace(actualDate) == 0) || (Number(actualDate) == 0)) && (schedDateFormatted < authUser.date))
+}
+
+function closeView(whichPane) 
+{
+	undoRowFormatting();
+	document.getElementById(whichPane).style.visibility = "hidden";
+	if (whichPane == "right")
+	{
+		self.left.addHelpIcon();
+	}
+}
+
+function ReturnDate(date) 
+{
+	try 
+	{
+   		self.right.document.forms["detailform"].elements[date_fld_name].value = date;
+	} catch(e) {}
+}
+function fitToScreen()
+{	
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var winWidth = 1024;	
+	var winHeight = 768;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentLeftWidth;
+	var contentLeftBorderWidth;
+	var contentRightWidth;
+	var contentRightBorderWidth;
+	var contentTopHeight;
+	var contentTopBorderHeight;
+	var contentMiddleHeight;
+	var contentMiddleBorderHeight;
+	var contentBottomHeight;
+	var contentBottomBorderHeight;
+	var contentRightHeight;
+	var contentRightBorderHeight;
+	
+	if (window.styler && window.styler.showInfor)
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 10;
+		var elmPad = 2;
+		if ((navigator.appName.indexOf("Microsoft") >= 0) && (!document.documentMode || document.documentMode < 8))
+			elmPad = 7;		
+		contentLeftBorderWidth = contentLeftWidth + elmPad;
+		contentRightWidth = parseInt(winWidth*.40,10) - 10;
+		contentRightBorderWidth = contentRightWidth + elmPad;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentTopHeight + 30 : contentTopHeight + 25;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 30;
+		}
+		else if (fromTask && (parentTask != "")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 55;
+		}		
+		else
+		{		
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 55;
+		}
+		contentMiddleBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentMiddleHeight + 30 : contentMiddleHeight + 25;	
+		contentBottomHeight = parseInt(winHeight*.25,10) - 35;
+		contentBottomBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentBottomHeight + 30 : contentBottomHeight + 25;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentRightHeight = winHeight - 40;
+		}
+		else
+		{		
+			contentRightHeight = winHeight - 70;
+		}
+		contentRightBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightHeight + 30 : contentRightHeight + 25;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 20;
+		contentLeftBorderWidth = contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.40,10) - 20;
+		contentRightBorderWidth = contentRightWidth + 17;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentTopHeight + 30 : contentTopHeight + 25;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 30;
+		}
+		else if (fromTask && (parentTask != "")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 55;
+		}			
+		else
+		{		
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 55;
+		}
+		contentMiddleBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentMiddleHeight + 30 : contentMiddleHeight + 25;
+		contentBottomHeight = parseInt(winHeight*.25,10) - 35;
+		contentBottomBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentBottomHeight + 30 : contentBottomHeight + 25;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentRightHeight = winHeight - 40;
+		}
+		else
+		{		
+			contentRightHeight = winHeight - 70;
+		}
+		contentRightBorderHeight = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightHeight + 30 : contentRightHeight + 25;				
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.60,10) - 10;
+		contentLeftBorderWidth = contentLeftWidth;
+		contentRightWidth = parseInt(winWidth*.40,10) - 10;
+		contentRightBorderWidth = contentRightWidth;
+		contentTopHeight = parseInt(winHeight*.25,10) - 35;
+		contentTopBorderHeight = contentTopHeight + 24;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 30;
+		}
+		else if (fromTask && (parentTask != "")) 
+		{
+			contentMiddleHeight = parseInt(winHeight*.75,10) - 55;
+		}		
+		else
+		{		
+			contentMiddleHeight = parseInt(winHeight*.50,10) - 55;
+		}
+		contentMiddleBorderHeight = contentMiddleHeight + 24;
+		contentBottomHeight = parseInt(winHeight*.25,10) - 40;
+		contentBottomBorderHeight = contentBottomHeight + 24;
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			contentRightHeight = winHeight - 42;
+		}
+		else
+		{		
+			contentRightHeight = winHeight - 72;
+		}
+		contentRightBorderHeight = contentRightHeight + 24;				
+	}		
+	if (self.top1.onresize && self.top1.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.top1.onresize = null;
+	}
+	try
+	{
+		document.getElementById("top1").style.height = parseInt(winHeight*.25,10) + "px";
+		self.top1.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.top1.document.getElementById("paneBorder").style.height = contentTopBorderHeight + "px";		
+		self.top1.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.top1.document.getElementById("paneBodyBorder").style.height = contentTopHeight + "px";
+		self.top1.document.getElementById("paneBody").style.width = contentLeftWidth + "px";		
+		self.top1.document.getElementById("paneBody").style.height = contentTopHeight + "px";
+		self.top1.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e)
+	{}	
+	if (self.left.onresize && self.left.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.left.onresize = null;
+	}	
+	try
+	{
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			document.getElementById("left").style.top = "0px";
+			document.getElementById("left").style.height = parseInt(winHeight*.75,10) + "px";
+		}
+		else if	(document.getElementById("relatedlinks").style.visibility == "hidden")
+		{
+			document.getElementById("left").style.top = (parseInt(winHeight*.25,10) + 25) + "px";
+			document.getElementById("left").style.height = parseInt(winHeight*.75,10) + "px";	
+		}			
+		else
+		{
+			document.getElementById("left").style.top = (parseInt(winHeight*.25,10) + 25) + "px";
+			document.getElementById("left").style.height = parseInt(winHeight*.50,10) + "px";
+		}
+		self.left.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.left.document.getElementById("paneBorder").style.height = contentMiddleBorderHeight + "px";		
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = contentMiddleHeight + "px";
+		self.left.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBody").style.height = contentMiddleHeight + "px";
+		self.left.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e)
+	{}	
+	if (self.relatedlinks.onresize && self.relatedlinks.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.relatedlinks.onresize = null;
+	}	
+	try
+	{	
+		document.getElementById("relatedlinks").style.top = parseInt(winHeight*.75,10) + "px";
+		document.getElementById("relatedlinks").style.height = parseInt(winHeight*.25,10) + "px";
+		self.relatedlinks.document.getElementById("paneBorder").style.width = contentLeftBorderWidth + "px";
+		self.relatedlinks.document.getElementById("paneBorder").style.height = contentBottomBorderHeight + "px";		
+		self.relatedlinks.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.relatedlinks.document.getElementById("paneBodyBorder").style.height = contentBottomHeight + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.height = contentBottomHeight + "px";
+		self.relatedlinks.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e)
+	{}	
+	if (self.right.onresize && self.right.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.right.onresize = null;
+	}	
+	try
+	{
+		if (fromTask && (parentTask == "directreports")) 
+		{
+			document.getElementById("right").style.top = "0px";
+		}
+		else
+		{	
+			document.getElementById("right").style.top = "32px";
+		}	
+		document.getElementById("right").style.height = winHeight + "px";		
+		self.right.document.getElementById("paneBorder").style.width = contentRightBorderWidth + "px";
+		self.right.document.getElementById("paneBorder").style.height = contentRightBorderHeight + "px";		
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = contentRightHeight + "px";
+		self.right.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBody").style.height = contentRightHeight + "px";
+		self.right.document.getElementById("paneBody").style.overflow = "auto";		
+	}
+	catch(e)
+	{}
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		document.getElementById("top1").style.left = "";
+		document.getElementById("top1").style.right = "0px";
+		document.getElementById("left").style.left = "";
+		document.getElementById("left").style.right = "0px";
+		document.getElementById("relatedlinks").style.left = "";
+		document.getElementById("relatedlinks").style.right = "0px";
+		document.getElementById("right").style.left = "0px";
+	}
+	else
+	{
+		document.getElementById("right").style.left = parseInt(winWidth*.60,10) + "px";
+	}		
+}
+</script>
+</head>
+<body style="width:100%;height:100%;overflow:hidden" onload="loadPerformanceMgmt()" onresize="fitToScreen();positionGoalScoreDetail()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="top1" name="top1" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;left:0px;width:60%;top:32px;height:160px;" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="left" name="left" src="/lawson/xhrnet/ui/headerpanehelp.htm" style="padding:0px;margin:0px;visibility:hidden;position:absolute;left:0px;width:60%;top:187px;height:300px" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="relatedlinks" name="relatedlinks" src="/lawson/xhrnet/ui/headerpane.htm" style="padding:0px;margin:0px;visibility:hidden;position:absolute;left:0px;width:60%;top:487px;height:100px" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" src="/lawson/xhrnet/ui/headerpanehelplite.htm" style="padding:0px;margin:0px;visibility:hidden;position:absolute;left:60%;width:40%;top:32px;height:455px;" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="rightdetail" name="rightdetail" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;position:absolute;left:20%;width:298px;top:20px;height:219px;" allowtransparency="true" frameborder="0" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;position:absolute;border:black 1px solid; " src="/lawson/xhrnet/dot.htm" marginwidth="7" marginheight="7" frameborder="1" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/perflawheader.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/performancemanagement.html,v 1.1.2.63 2012/06/29 17:12:05 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+

@@ -1,0 +1,133 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/forms/wizard.css,v 1.6.4.4.28.2 2012/08/08 12:37:26 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+.wizArrow
+{
+	position: absolute;
+}
+.wizArrowImg
+{
+	width: 12px;
+	height: 13px;
+}
+.wizButton
+{
+	background-color: #FFFFC5;
+	color: #004068;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: Verdana, Arial, sans-serif;
+	text-align: center;
+	text-decoration: none;
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 2px;
+	padding-bottom: 1px;
+	cursor: hand;
+	border: #FFFFC5 solid 1px;
+}
+.wizButtonHighlight
+{
+	background-color: #FFFFC5;
+	color: #004068;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: Verdana, Arial, sans-serif;
+	text-align: center;
+	text-decoration: underline;
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 2px;
+	padding-bottom: 1px;
+	cursor: hand;
+	border: #FFFFC5 solid 1px;
+}
+.wizButtonSelected
+{
+	background-color: #FFFFC5;
+	color: #004068;
+	font-weight: normal;
+	font-size: 8pt;
+	font-family: Verdana, Arial, sans-serif;
+	text-align: center;
+	text-decoration: none;
+	padding-right: 10px;
+	padding-left: 10px;
+	padding-top: 2px;
+	padding-bottom: 1px;
+	cursor: hand;
+	border: black dotted 1px;
+}
+.wizCont
+{
+	background-color: #FFFFC5;
+	color: black;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	border: #FFF04D solid 1px;
+	position: absolute;
+	display: block;
+	width: 280px;
+}
+.wizDiv
+{
+	position: absolute;
+	display: block;
+	width: 300px;
+	visibility: hidden;
+}
+.wizImage
+{
+	width: 15px;
+	height: 15px;
+}
+.wizInstr
+{
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	color: black;
+	overflow: auto;
+	padding: 4px;
+	display: block;
+}
+.wizLabel
+{
+	padding-left: 4px;
+	vertical-align: top;
+}
+.wizList
+{
+	padding-left: 15px;
+	padding-top: 5px;
+}
+.wizNav
+{
+	color: black;
+	font-weight: bold;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: 8pt;
+	display: block;
+	text-align: center;
+	padding-top: 5px;
+	padding-bottom: 2px;
+}

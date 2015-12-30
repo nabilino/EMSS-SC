@@ -1,0 +1,413 @@
+<html>
+<head>
+<title>Spouse Employment</title>
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/empinfo.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script>
+var dateneeded = (window.location.search)?getVarFromString("date",unescape(window.location.search)):"";
+var SpouseEmploymentEvents = new Array();
+var Benefits = new Array();
+var EmpInfo = new Array();
+EmpInfo.employee_work_country = "";
+// Default all access to "Deny" except for Life Events Benefits Enrollment
+var autodeposit = false;
+var withholding = false;
+var benefits = true;
+
+function OpenSpouseEmployment()
+{
+	authUser = null;
+	try
+	{
+		// Check if a parent or opener document has already done an authenticate,
+		// otherwise go get the webuser info.
+		if (parent && typeof(parent.authUser) != "undefined" && parent.authUser != null)
+		{
+			authUser = parent.authUser;
+			if (typeof(parent.EmpInfo) != "undefined" && parent.EmpInfo != null)
+				EmpInfo = parent.EmpInfo;
+		}
+		else if (opener && typeof(opener.authUser) != "undefined" && opener.authUser != null)
+		{
+			authUser = opener.authUser;
+			if (typeof(opener.EmpInfo) != "undefined" && opener.EmpInfo != null)
+				EmpInfo = opener.EmpInfo;
+		}
+	}
+	catch(e)
+	{
+		authUser = null;
+		EmpInfo = new Array();
+		CalledEmpInfo = false;		
+	}
+	if (!authUser)
+	{
+		authenticate("frameNm='jsreturn'|funcNm='GetBenefits()'|officeObjects=true|desiredEdit='EM'");
+		return;
+	}
+	GetBenefits();
+}
+
+function GetBenefits()
+{
+	document.title = parent.getSeaPhrase("DEP_43","ESS");
+
+ 	var dmeObj    	= new DMEObject(authUser.prodline, "BENEFIT");
+  	dmeObj.out   	= "JAVASCRIPT";
+   	dmeObj.index 	= "benset3";
+   	dmeObj.field 	= "plan-type;employee.work-country";
+   	dmeObj.key   	= parseFloat(authUser.company)+"="+parseFloat(authUser.employee);
+   	dmeObj.func  	= "CreateTaskList()";
+   	dmeObj.max		= "1";
+ 	DME(dmeObj, "jsreturn");
+}
+
+function CreateTaskList()
+{
+	Benefits = Benefits.concat(self.jsreturn.record);
+
+	if (Benefits.length > 0) EmpInfo.employee_work_country = Benefits[0].employee_work_country;
+
+    if (typeof(authUser) != "undefined" && authUser.OfficeObject)
+	{
+		var Bookmarks = authUser.OfficeObject;
+
+		for (var i=0; i<authUser.NbrOfOfficeObj; i++)
+		{
+			var bkName = Bookmarks[i].name.toUpperCase(); // the Lawson-assigned task name
+			var bkLawName = (Bookmarks[i].lawnm) ? Bookmarks[i].lawnm.toUpperCase() : "";	// the Lawson-assigned Lawson name
+
+			if (bkLawName!=""){
+
+				if (bkLawName == "XMLHRAUTODEPOSIT1" || bkLawName == "XMLHRAUTODEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkLawName == "XMLHRWITHHOLDING1" || bkLawName == "XMLHRWITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+			}
+			else{
+
+				if (bkName == "DIRECT DEPOSIT")
+				{
+					// grant access to direct deposit
+					autodeposit = true;
+				}
+				else if (bkName == "TAX WITHHOLDING")
+				{
+					// grant access to tax withholding
+					withholding = true;
+				}
+		 	}
+		}
+	}
+
+   	VerifyAutoDeposit();
+}
+
+function VerifyAutoDeposit()
+{
+	// If there is an AUTODEPOSIT task set to "I" ("Include"), verify the employee's
+	// work country before displaying in the list of items the employee can update.
+    if (autodeposit)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) ||
+			(Benefits.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+		{
+			autodeposit = (EmpInfo.employee_work_country!="US"&&EmpInfo.employee_work_country!="CA")?false:true;
+		}
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",
+				"employee.work-country;","CheckEmpWorkCountry(\"autodeposit\",true)");
+			return;
+		}
+	}
+
+	VerifyWithholding()
+}
+
+function VerifyWithholding()
+{
+	// If there is a WITHHOLDING task set to "I" ("Include"), verify the employee's
+	// work country before displaying in the list of items the employee can update.
+    if (withholding)
+	{
+		if ((typeof(EmpInfo.employee_work_country) != "undefined" && NonSpace(EmpInfo.employee_work_country)) ||
+			(Benefits.length > 0 && NonSpace(EmpInfo.employee_work_country) == 0) || CalledEmpInfo)
+		{
+			withholding = (EmpInfo.employee_work_country!="US")?false:true;
+		}
+		else
+		{
+			GetEmpInfo(authUser.prodline,authUser.company,authUser.employee,"paemployee",
+				"employee.work-country;","CheckEmpWorkCountry(\"withholding\",true)");
+			return;
+		}
+	}
+
+	FinishTaskList();
+}
+
+function CheckEmpWorkCountry(taskdesc, next)
+{
+	switch(taskdesc)
+	{
+		case "autodeposit":
+			autodeposit = (EmpInfo.employee_work_country!="US"&&EmpInfo.employee_work_country!="CA")?false:true;
+			if (next) VerifyWithholding();
+			break;
+		case "withholding":
+			withholding = (EmpInfo.employee_work_country!="US")?false:true;
+			if (next) FinishTaskList();
+			break;
+	}
+}
+
+function FinishTaskList()
+{
+	// Don't require current benefits--enable Benefits Enrollment to verify eligibility
+    // and allow an add of a new benefit.
+	if (benefits)
+     	SpouseEmploymentEvents[SpouseEmploymentEvents.length] = new EventsArray(parent.getSeaPhrase("BENEFITS","ESS"),"benefits");
+
+   	if (autodeposit)
+      	SpouseEmploymentEvents[SpouseEmploymentEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_1","ESS"),"directdeposit");
+
+	if (withholding)
+     	SpouseEmploymentEvents[SpouseEmploymentEvents.length] = new EventsArray(parent.getSeaPhrase("LIFE_EVENTS_2","ESS"),"w4form");
+
+   	DrawSpouseEmploymentScreen();
+}
+
+function DrawSpouseEmploymentScreen()
+{
+  	var SpouseEmploymentContent = '<table border="0" cellspacing="0" cellpadding="0" styler="list">'
+  	+ '<tr><th>&nbsp;</th><th>&nbsp;</th></tr>'
+
+  	for (var i=0; i<SpouseEmploymentEvents.length; i++)
+  	{
+        SpouseEmploymentContent += '<tr><td class="fieldlabel" valign="top">'
+		SpouseEmploymentContent += uiCheckmarkIcon(SpouseEmploymentEvents[i].param_name+"_checkmark","visibility:hidden")
+     	SpouseEmploymentContent += '</td><td class="fieldlabelleft"><a href=javascript:parent.Process("' + SpouseEmploymentEvents[i].param_name +'")>'
+     	SpouseEmploymentContent += SpouseEmploymentEvents[i].text+'</a></td></tr>'
+  	}
+
+	SpouseEmploymentContent += '</table>'
+
+	self.MAIN.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("ADDL_CHANGES","ESS")
+	self.MAIN.document.getElementById("paneBody").innerHTML = '<div style="padding-left:20px;padding-right:20px;padding-top:20px;padding-bottom:20px">'
+	+'<div class="fieldlabelboldleft">'+parent.getSeaPhrase("SPOUSE_EMPLOYMENT_INFO_CHANGED","ESS")+'</div>'
+	+'</div><div style="padding-left:20px;padding-right:20px">'+SpouseEmploymentContent+'</div>';
+
+	self.MAIN.stylePage();
+	self.MAIN.setLayerSizes();
+	fitToScreen();
+
+	// if this task has been launched as a related link, remove any processing message
+	try {
+		parent.removeWaitAlert();
+	}
+	catch(e) {}
+}
+
+function CloseSpouseEmployment()
+{
+	try {
+		parent.location.replace("/lawson/xhrnet/ui/logo.htm");
+	}
+	catch(e) {}
+}
+
+function setImageVisibility(imgID,visibleState)
+{
+	var imgs = window.MAIN.document.images;
+	var i=0;
+	var found = false;
+	while (i<imgs.length && !found)
+	{
+		if(imgs[i].id == imgID)
+		{
+			found = true;
+			imgs[i].style.visibility = visibleState;
+		}
+		i++;
+	}
+}
+
+function Process(eventname)
+{
+  	if (eventname == "w4form")
+   	{
+		//force reload to check for payroll lockout
+   		if (parent.emssObjInstance.emssObj.payrollLockout || parent.fullrelatedtask.location.href.indexOf("w4.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/w4/w4.htm?from=spouse");
+   		}
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	else if (eventname == "directdeposit")
+   	{
+		//force reload to check for payroll lockout
+   		if (parent.emssObjInstance.emssObj.payrollLockout || parent.fullrelatedtask.location.href.indexOf("directdeposit.htm")==-1)
+   		{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xhrnet/directdeposit/directdeposit.htm?from=spouse");
+   		}
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	else if (eventname == "benefits")
+   	{
+   		//if (parent.fullrelatedtask.location.href.indexOf("benleenroll.htm")==-1)
+   		//{
+   			parent.showWaitAlert(parent.getSeaPhrase("GATHERING_INFO","ESS"));
+   			parent.fullrelatedtask.location.replace("/lawson/xbnnet/benleenroll.htm?event=SC&date="+escape(dateneeded,1));
+   		//}
+   		parent.document.getElementById("left").style.visibility = "hidden";
+   		parent.document.getElementById("right").style.visibility = "hidden";
+   		parent.document.getElementById("relatedtask").style.visibility = "hidden";
+   		parent.document.getElementById("fullrelatedtask").style.visibility = "visible";
+   	}
+   	parent.fitToScreen();
+}
+
+function EventsArray(text, paramname)
+{
+    this.text = text;
+    this.param_name = paramname;
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("MAIN");
+	var winHeight = 768;
+	var winWidth = 1024;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;		
+
+	if (window.styler && window.styler.showInfor)
+	{	
+		contentWidth = winWidth - 12;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 7 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && window.styler.showLDS)
+	{
+		contentWidth =  winWidth - 23;
+		contentWidthBorder =  winWidth - 2;		
+		contentHeight = winHeight - 60;	
+		contentHeightBorder = winHeight - 30;		
+	}
+	else
+	{
+		contentWidth = (navigator.appName.indexOf("Microsoft") >= 0) ? winWidth - 17 :winWidth - 12;
+		contentWidthBorder = contentWidth;		
+		contentHeight = winHeight - 65;
+		contentHeightBorder = winHeight - 41;		
+	}
+
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+		{
+			self.MAIN.onresize = null;
+		}			
+	}
+	catch(e)
+	{}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e)
+	{}	
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();OpenSpouseEmployment()" onresize="fitToScreen()">
+	<iframe id="MAIN" name="MAIN" src="/lawson/xhrnet/ui/headerpane.htm" style="position:absolute;left:0%;top:0px;width:100%;height:464px" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/errmsg.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/spouse1.htm,v 1.13.2.28 2012/07/26 15:50:33 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

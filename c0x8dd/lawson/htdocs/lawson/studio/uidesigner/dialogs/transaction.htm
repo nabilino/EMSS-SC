@@ -1,0 +1,60 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/transaction.htm,v 1.2.28.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="keyhandlers.js"></script>
+<script language="javascript" src="transaction.js"></script>
+<title>Transaction Field Selection</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="msgSelReq">Please selection at least one field.</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="trnInit()" style="background-color:buttonface;visibility:hidden" onkeydown="trnOnKeyPress()">
+	<table border="0" width="95%" cellspacing="4" style="margin-left:6px;">
+	<tr>
+		<td colspan="2">
+			<label id="lblFields" class="dsLabel" style="position:relative;text-align:left;">Available Fields:</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2">
+			<div id="flddiv" style="border-style:inset;border-width:2px;background-color:white;border-color:grey;height:280px;overflow:auto;">&nbsp;</div>
+		</td>
+	</tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="trnOK()" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+</BODY>
+</HTML>

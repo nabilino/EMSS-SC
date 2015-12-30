@@ -1,0 +1,278 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/dialogs/propsform.htm,v 1.2.2.2.26.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>More Document Properties</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../../studio.css"></link>
+<SCRIPT language="javascript" src="../../servenv.js"></SCRIPT>
+<script language="javascript" src="propsform.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgPleaseEnterReq">Please enter required value.</phrase>
+		<phrase id="msgActionSelected">You have selected action</phrase>
+		<phrase id="msgDataSourceInUse">Selected data source is assigned to an element.</phrase>
+		<phrase id="msgFormXmlModifed">Document properties have been modified. Save Changes?</phrase>
+		<phrase id="msgNewPhrasePrompt">Please enter new phrase:</phrase>
+		<phrase id="msgPhraseInUse">Selected phrase is assigned to an element.</phrase>
+		<phrase id="msgTransferSelected">You have selected transfer</phrase>
+		<phrase id="msgPleaseSelectFields">Please select transaction fields.</phrase>
+		<phrase id="msgUnableToUpdate">Transaction fields not selected: unable to update.</phrase>
+		<phrase id="msgOkToDelete">OK to delete?</phrase>
+		<phrase id="msgFormIdOverwrite">Form ID is not unique for token. OK to continue?</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="ppgInit()" onkeydown="ppgOnKeyDown()" 
+	style="background-color:buttonface;visibility:hidden;cursor:wait;" >
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGeneral" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="ppgSwitchTab(this)">General</span>
+		<span id="tabData" class="dsTabButtonInactive" style="top:10;left:70;width:70px;" tabind="1" onclick="ppgSwitchTab(this)">Data</span>
+		<span id="tabActions" class="dsTabButtonInactive" style="top:10;left:140;width:70px;" tabind="2" onclick="ppgSwitchTab(this)">Actions</span>
+		<span id="tabTransfers" class="dsTabButtonInactive" style="top:10;left:210;width:70px;" tabind="3" onclick="ppgSwitchTab(this)">Transfers</span>
+	</div>
+
+	<!-- General tab pane -->
+	<div id="divGeneral" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2">
+				<label class="dsLabel" style="position:relative;">Title: </label>
+				<label id="lblTitle" class="dsLabel" style="position:relative;">Title unknown</label>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2"><HR></td>
+		</tr>
+		<tr>
+			<td align="right" width="30%" valign="top">
+				<label id="lblFormId" class="dsLabel" for="txtFormId" style="position:relative;">
+					Custom Id:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<input type="text" id="txtFormId" class="dsTextBox" onchange="ppgEnableApply()" 
+					style="position:relative;width:140px;text-transform:uppercase;">
+				</input>
+				</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">
+				<label id="lblInitialAction" class="dsLabel" for="selInitialAction" style="position:relative;">
+					Initial form action:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<select id="selInitialAction" class="dsTextBox" style="position:relative;width:120px;"
+					onchange="genOnActionChange()">
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">
+				<label id="lblDefaultAction" class="dsLabel" for="selDefaultAction" style="position:relative;">
+					Default form action:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<select id="selDefaultAction" class="dsTextBox" style="position:relative;width:120px;"
+					onchange="genOnActionChange()">
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">
+				<label id="lblNoTknXfer" class="dsLabel" for="cbxNoTknXfer" style="position:relative;">
+					Allow direct access:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<input type="checkbox" id="cbxNoTknXfer" style="position:relative;" onclick="ppgEnableApply()"></input>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">
+				<label id="lblDefaultUI" class="dsLabel" for="cbxDefaultUI" style="position:relative;">
+					Default presentation:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<input type="checkbox" id="cbxDefaultUI" style="position:relative;" onclick="ppgEnableApply()"></input>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" valign="top">
+				<label id="lblXmlAttributes" class="dsLabel" style="position:relative;">
+					XML Attributes:&nbsp;
+				</label>
+			</td>
+			<td align="top">
+				<span style="height:150px;width:300px;overflow:auto;border:1px inset;">
+					<table id="tblProperties" width="100%" cellspacing="1">
+						<colgroup><col width="40%"/><col width="60%"/></colgroup>
+					</table>
+				</span>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- data tab pane -->
+	<div id="divData" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="3">&nbsp;</td></tr>
+		<tr>
+			<td valign="top" align="left">
+				<input type="checkbox" id="cbxEVT" style="position:relative;" onclick="ppgEnableApply()"></input>
+ 				<label id="lblEVT" for="cbxEVT" class="dsLabel" style="margin-top:3px;">Use Change EVT</label>
+			</td>
+			<td valign="top" align="left">
+				<input type="radio" id="rbAll" name="radio" onclick="daOnRadioClick()"></input>
+				<label id="lblAll" for="rbAll" class="dsLabel" style="margin-top:3px;">Send All Fields</label>
+				<BR>
+				<input type="radio" id="rbSelected" name="radio" onclick="daOnRadioClick()"></input>
+				<label id="lblSelected" for="rbSelected" class="dsLabel" style="margin-top:3px;">Send Selected</label>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnSelFields" type="button" class="dsDlgButton" disabled style="width:70px;" onclick="daSelectFields()" value="Select"></input>
+			</td>
+		</tr>
+		<tr><td colspan="3"><HR></td></tr>
+		<tr>
+			<td colspan="3">
+				<div id="lblFieldList" class="dsLabel" style="position:relative;text-align:left;">Data field list:</div>
+		    </td>
+		</tr>
+		<tr>
+		   <td colspan="2">
+				<select id="selFieldList" class="dsListText" size="13" ondblclick="daFieldProperty()"
+					style="font-family:courier new;width:340px;height:expression(this.size*17);" >
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnFieldProps" type="button" class="dsDlgButton" style="width:70px;" onclick="daFieldProperty()" value="Properties"></input>
+				<input id="btnFieldSortId" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="daFieldSort('id')" value="Sort IDs"></input>
+				<input id="btnFieldSortName" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="daFieldSort('name')" value="Sort Names"></input>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- Actions tab pane -->
+	<div id="divActions" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2" valign="top">
+				<input type="checkbox" id="cbxWorkflowEnabled" style="position:relative;" onclick="ppgEnableApply()"></input>
+				<label id="lblWorkflowEnabled" class="dsLabel" for="cbxWorkflowEnabled" style="position:relative;">
+					Work Flow Enabled
+				</label>
+			</td>
+		</tr>
+		<tr><td colspan="3"><HR></td></tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblAssignedAction" class="dsLabel" style="position:relative;text-align:left;">Assigned actions:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selActionAssigned" class="dsListText" size="7" style="width:340px;height:expression(this.size*17);" 
+						ondblclick="acActionProperty()" onchange="acOnAssignedChange()">
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnActionProps" type="button" class="dsDlgButton" style="width:70px;" onclick="acActionProperty()" value="Properties"></input>
+				<input id="btnUnassignAction" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="acUnassignAction()" value="Unassign"></input>
+				<input id="btnUpAction" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="acMoveAction('up')" value="Up"></input>
+				<input id="btnDownAction" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="acMoveAction('dn')" value="Down"></input>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblAvailableAction" class="dsLabel" style="position:relative;text-align:left;">Available actions:</div>
+		    </td>
+		</tr>
+		<tr>
+		   <td>
+				<select id="selActionAvailable" class="dsListText" size="6" style="width:340px;height:expression(this.size*17);">
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnAssignAction" type="button" class="dsDlgButton" style="width:70px;" onclick="acAssignAction()" value="Assign"></input>
+			</td>
+		</tr>
+	</table>
+	</div>
+
+	<!-- Transfers tab pane -->
+	<div id="divTransfers" class="dsTabPaneActive" style="top:30px;display:none;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td colspan="2">
+				<div id="lblAssignedTrans" class="dsLabel" style="position:relative;text-align:left;">Assigned transfers:</div>
+		    </td>
+		</tr>
+		<tr>
+		   	<td>
+				<select id="selTransAssigned" class="dsListText" size="15" style="width:340px;height:expression(this.size*17);" 
+						ondblclick="trTransProperty('assigned')" onchange="trOnAssignedChange()">
+				</select>
+			</td>
+			<td valign="top" align="left">
+				<input id="btnTransProps" type="button" class="dsDlgButton" style="width:70px;" onclick="trTransProperty('assigned')" value="Properties"></input>
+				<input id="btnNewTrans" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="trTransProperty('new')" value="New"></input>
+				<input id="btnDeleteTrans" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="trDeleteTrans()" value="Delete"></input>
+				<input id="btnUpTrans" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="trMoveTrans('up')" value="Up"></input>
+				<input id="btnDownTrans" type="button" class="dsDlgButton" style="width:70px;margin-top:4px;" onclick="trMoveTrans('dn')" value="Down"></input>
+			</td>
+		</tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="ppgOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="ppgUpdate()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

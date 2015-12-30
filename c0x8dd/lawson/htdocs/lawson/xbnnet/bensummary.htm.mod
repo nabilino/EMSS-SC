@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Benefit Enrollment Summary</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xbnnet/updatedb.js"></script>
+<script src="/lawson/xbnnet/le_updatedb.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Transaction.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ProcessFlow.js"></script>
+<script>
+var _Processed = true;
+var head = "";
+var bod = "";
+var bod2 = "";
+var payperiod = parent.BenefitRules[6];
+var payDesc = "";
+var depsExist = false;
+var depHash = new Array();
+var appObj;
+var messageDialog;
+parent.flg = 0;
+parent.flexFlag = false;
+parent.Ycost = 0;
+parent.Fcost = 0;
+parent.Ccost = 0;
+parent.Pcost = 0;
+parent.flexflag = 0;
+parent.empflag = 0;
+parent.compflag = 0;
+parent.empcost = 0;
+parent.empprecost = 0;
+parent.empaftcost = 0;
+parent.compcost = 0;
+parent.flexcost = 0;
+parent.taxable = "";
+function initProgram()
+{
+    stylePage();
+    self.printScreen.stylePage();
+    setWinTitle(getSeaPhrase("ENROLLMENT_SUMMARY","BEN"));
+	parent.startProcessing(getSeaPhrase("PROCESSING_WAIT","ESS"), startProgram);
+}
+function startProgram()
+{
+	if (!parent.GotNewFlex && parent.BenefitRules[8] == "Y")
+		FlexDollars("I");
+	else
+		DspSummary();
+}
+function FlexDollars(fc)
+{	
+	if (fc == "+")
+		fc = "%2B";
+	parent.lawheader.count = 0;
+	NbrRecs = 0;
+	TC_val = "";
+	HK_val = "";
+	parent.updatetype = "FLX2";
+	if (parent.rule_type != "N")
+		parent.FlexDate = parent.BenefitRules[2];
+	var obj = new parent.AGSObject(parent.prodline,"BS11.1");
+	obj.event = "ADD";
+	obj.rtn = "DATA";
+	obj.longNames = true;
+	obj.tds = false;
+	obj.field = "FC="+fc
+	+ "&EFD-COMPANY="+escape(parent.company)
+	+ "&EFD-EMPLOYEE="+escape(parent.employee)
+	+ "&BAE-DATE="+escape(parent.FlexDate)
+	+ "&BAE-COST-DIVISOR="+escape(parent.BenefitRules[6]);
+	obj.func = "parent.main.DspSummary()";
+	if (fc == "%2B")
+		obj.field += "&_f2="+escape(TC_val)+"&_f288="+escape(HK_val);
+	obj.debug = false;
+	parent.AGS(obj,"jsreturn");
+}
+function GetHeader()
+{
+	var hdr ='<table border="0" cellspacing="0" cellpadding="0" role="presentation">';
+	hdr += '<tr><td class="plaintablecellbold">'+getSeaPhrase("NEW_BENS","BEN");
+	if (parent.event=="annual" || parent.rule_type=="A")
+		hdr += " "+getSeaPhrase("AS_OF","BEN").toLowerCase()+" "+parent.newdate;
+	hdr += '</td></tr></table>';
+	return hdr;
+}
+function GetPlanDetails(arr,index)
+{
+	var eligdate = arr[5];
+	if (eligdate.indexOf("/") == -1)
+		eligdate = parent.FormatDte4(arr[5]);
+	bod += parent.getCoverage(arr[2],arr[0],arr[1],eligdate,arr[6],arr.isflex);
+}
+function DspSummary()
+{
+	parent.GotNewFlex = true;
+	if (_Processed) 
+	{
+		_Processed = false;
+		for (var i=1; i<parent.EligPlans.length; i++)
+			parent.enrollError[i] = false;
+		parent.removeStoppedElections();
+		parent.InitSummaryTotals();
+		for (var i=0; i<parent.ElectedPlans.length; i++)
+		{
+			var plan_type = "";
+			var plan_code = "";
+			if (parseInt(parent.ElectedPlans[i][0],10)==1)
+			{
+				plan_type = parent.ElectedPlans[i][2][11]
+				plan_code = parent.ElectedPlans[i][2][12]
+			}
+			else if ((parseInt(parent.ElectedPlans[i][0],10)>1 && parseInt(parent.ElectedPlans[i][0],10)<6) || parseInt(parent.ElectedPlans[i][0],10)==13)
+			{
+				plan_type = parent.ElectedPlans[i][2][37]
+				plan_code = parent.ElectedPlans[i][2][38]
+			}
+			else if (parseInt(parent.ElectedPlans[i][0],10)>5 && parseInt(parent.ElectedPlans[i][0],10)<11)
+			{
+				plan_type = parent.ElectedPlans[i][2][38]
+				plan_code = parent.ElectedPlans[i][2][39]
+			}
+			else if (parseInt(parent.ElectedPlans[i][0],10)==12)
+			{
+				plan_type = parent.ElectedPlans[i][2][1]
+				plan_code = parent.ElectedPlans[i][2][2]
+			}
+			if (parent.ElectedPlans[i][2]) 
+			{
+				for (var k=1; k<parent.EligPlans.length; k++)
+				{
+					parent.ElectedPlans[i].isflex = false;
+					if (parent.EligPlans[k][1] == plan_type && parent.EligPlans[k][2] == plan_code && parent.EligPlans[k][22] == "Y")
+					{
+						parent.ElectedPlans[i].isflex = true;
+						break;
+					}
+				}
+				GetPlanDetails(parent.ElectedPlans[i],i);
+				if (parent.DependentBens[i]) 
+				{
+					for (var x=0; x<parent.DependentBens[i][1].length; x++) 
+					{
+						if (parent.DependentBens[i][1][x].first_name && parent.DependentBens[i][1][x].last_name)
+						{
+							depHash[i] = true;
+							depsExist = true;
+// MOD BY BILAL 
+								bod += '<tr><td colspan=7><span style="margin-left:30px"><i>' + parent.DependentBens[i][1][x].first_name +" "+ parent.DependentBens[i][1][x].last_name + '</i></span></td></tr>'
+//								break;
+// END OF MOD				
+						}
+					}
+				}
+			}
+		}
+		// dependents table
+		if (depsExist) 
+		{
+			var NbrCoveredDeps=0;
+			bod2+='<br/><table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_4","BEN")+'">'
+			bod2+='<caption class="offscreen">'+getSeaPhrase("TCAP_3","BEN")+'</caption>'
+			bod2+='<tr><th scope="col" class="plaintableheaderborder" style="width:50%;text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>'
+			bod2+='<th scope="col" class="plaintableheaderborder" style="width:50%;text-align:center">'+getSeaPhrase("COVERED_DEP","BEN")+'</th></tr>'
+			for (var i=0; i<parent.ElectedPlans.length; i++) 
+			{
+				NbrCoveredDeps=0;
+				if (parent.ElectedPlans[i][2]) 
+				{
+					if (parent.DependentBens[i] && depHash[i]) 
+					{
+						bod2+='<tr><td class="plaintablecellborder">'+parent.ElectedPlans[i][1]+'&nbsp;</td>'
+						bod2+='<td class="plaintablecellborder">'
+						bod2+='<table border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">'
+						for (var x=0; x<parent.DependentBens[i][1].length; x++) 
+						{
+							if (parent.DependentBens[i][1][x].first_name && parent.DependentBens[i][1][x].last_name)
+							{
+								for (var y=0; y<parent.dependents.length; y++) 
+								{
+									if (parent.dependents[y].seq_nbr == parent.DependentBens[i][1][x].dependent) 
+									{
+										if (NbrCoveredDeps % 2 == 0)
+											bod2+='<tr styler="skip">'
+										bod2+='<td class="plaintablecell" style="border:0px;white-space:nowrap" nowrap>'+parent.dependents[y].label_name_1+'</td>'
+										NbrCoveredDeps++
+										if (NbrCoveredDeps % 2 == 0)
+											bod2+='</tr>'
+										break;
+									}
+								}
+							}
+						}
+						bod2+='</table></td></tr>'
+					}
+				}
+			}
+			bod2+='</table>'
+		}  
+// MOD BY BILAL
+    if (parent.rule_type != "N")
+	{
+		head+='<table border="0" styler="list">'
+		head+='<tr><td class="plaintableheaderborder" style="font-size:14px;font-weight:bold">'
+		head+='Once you select "Save Benefits" below, these will be your benefits as of April 1, 2014. Please review your pending elections below (all elections include employee).'
+		head+='</td></tr>'
+		head+='</table><br>'
+	 }
+// END OF MOD
+		head+='<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto" styler="list" summary="'+getSeaPhrase("TSUM_5","BEN")+'">'
+		head+='<caption class="offscreen">'+getSeaPhrase("TCAP_4","BEN")+'</caption>'
+		head+='<tr><th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("PLAN","BEN")+'</th>'
+		head+='<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("COVERAGE","BEN")+'</th>'
+		if (parent.rule_type!="A")
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("START_DATE","BEN")+'</th>'
+		if (parent.flexflag==1)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder">&nbsp;</th>'
+		// Add a spacer column for display
+		head+='<th scope="col" class="plaintableheaderborder">&nbsp;</th>'
+		if (parent.empflag==1)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" colspan="2">'+getSeaPhrase("YOUR_COST","BEN")+'</th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center" colspan="2">&nbsp;</th>'
+		if (parent.compflag==1)
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("CO_COST","BEN")+'</th>'
+		else
+			head+='<th scope="col" class="plaintableheaderborder" style="text-align:center">&nbsp;</th>'
+		head+='</tr>'	
+		var html = '<div style="padding:0px">';
+		html+=head
+		html+=bod
+		html+='</table>'
+		if (parent.changedPlan) 
+		{
+			html+='<table border="0" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto" role="presentation">'
+			html+='<tr><td class="plaintablecell">*&nbsp;'+getSeaPhrase("ELECT_CHG","BEN")+'</td></tr></table>'
+		}  
+// MOD BY BILAL	- Hiding the Dependents Section
+		//html+=bod2 
+// END OF MOD
+		html+='<br/>'+parent.GetSummaryTable()
+		html+='<p class="textAlignRight">'	
+// MOD BY BILAL	  
+		html+='<br>'
+		// CGL 1/19/2011 - Add Healthy U credit notice in box to  screen.
+			html+='<div style="font-size:0.9em;width:400px;border-style:solid;border-width:1px;border-color:#ff0000;color:#ff0000;padding:5px;">';
+			html+='<b>Complete the Healthy U requirements to earn credits to reduce your medical premiums!</b><br/>';
+			html+='</div><br>';
+		// ~CGL
+// END OF MOD
+		if (parent.errorPlans.length==0 && (parent.errorGroups.length==0 || !parent.verifyPlanGrps))
+		{
+			if (parent.alreadyElect!="Y" || parent.changedPlan)	 
+// MOD BY BILAL	- Changing Button Style
+				//html+=uiButton(getSeaPhrase("CONTINUE","BEN"),"parent.start_update_process();return false", "margin-right:5px;margin-top:10px", null, 'aria-haspopup="true"')
+				html+=uiButton("Save Benefits","parent.start_update_process();return false", "font-size:14px;font-weight:bold;color:#FFFFFF;width:100;background-color:#6699cc;margin-top:10px;margin-right:10px", null, 'aria-haspopup="true"')
+		} 
+		else 
+		{
+			var msg = "";
+			if (parent.errorPlans.length>0 && parent.errorGroups.length>0 && parent.verifyPlanGrps)
+				msg = getSeaPhrase("SUMBEN_3","BEN");
+			else if (parent.errorPlans.length>0)
+				msg = getSeaPhrase("SUMBEN_4","BEN");
+			else if (parent.errorGroups.length>0 && parent.verifyPlanGrps)
+				msg = getSeaPhrase("SUMBEN_5","BEN");
+			parent.seaAlert(msg, null, null, "alert");
+		}
+		html+=uiButton(getSeaPhrase("MAKE_CHANGES","BEN"),"parent.no();return false", "margin-right:5px;margin-top:10px")
+		if (parent.LastDoc[parent.currentdoc])	
+			html+=uiButton(getSeaPhrase("PREVIOUS","BEN"), "parent.back();return false", "margin-right:5px;margin-top:10px")
+		if (parent.errorPlans.length==0 && (parent.errorGroups.length==0 || !parent.verifyPlanGrps))
+			//html+=uiButton(getSeaPhrase("EXIT","BEN"),"parent.show_choice_win(true);return false", "margin-right:5px;margin-top:10px", null, 'aria-haspopup="true"')
+			html+=uiButton(getSeaPhrase("EXIT","BEN"),"parent.show_choice_win(true);return false", "font-size:14px;font-weight:bold;color:#FFFFFF;width:100;background-color:#6699cc;margin-top:10px", null, 'aria-haspopup="true"')
+// MOD BY BILAL
+		html+= '<table width=95%><tr><td class="plaintablecell"><b>Important:</b></td><tr>'
+		html+= '<tr><td class="plaintablecell"><p>Please review the above benefits carefully before continuing.</p>'
+		html+= '<p>If the above information is not correct, please choose "Make Changes". You will then be prompted to select the plan(s) in which you want to make changes.</p>'
+		if(parent.errorPlans.length==0 && (parent.errorGroups.length==0 || !parent.verifyPlanGrps) && (parent.alreadyElect!="Y" || parent.changedPlan)) 
+		{
+		    html+= '<p>You must both choose your benefit options and select "Save Benefits" by the end of the enrollment period or your benefit selections will not be valid.</p>'
+			if(parent.rule_type != "N") 
+			{
+				html +='<p>If you elect to keep these benefits choose "Save Benefits". If at a later date you decide you want to make changes, you will be able to log back in and make changes <u>before the end of the enrollment period</u>.</p>'
+			}
+		    html+= '<p>If you choose not to keep these benefits and would like to come back at a later time, select <font color=red>"Exit". <b>This option will NOT SAVE</b></font> but will give you the opportunity to print the page for your reference before exiting. It will not save any of your elections.</p>'
+		}
+		else
+		{
+			html+= '<p>You have previously selected benefits, if you choose not to make any additional changes and would like to come back at a later time, select <font color=#FF0000><u> Exit. </u></font></p>'
+		}
+		html+= '</td></tr></table>'
+// END OF MOD
+		html+='</p></div>'
+		self.summary.document.getElementById("paneBody").innerHTML = html;
+		self.summary.document.getElementById("paneHeader").innerHTML = getSeaPhrase("ELECTIONS_AS_OF","BEN")+' '+parent.newdate;
+		self.summary.stylePage();
+		document.getElementById("summary").style.visibility = "visible";
+		parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[self.summary.getWinTitle()]));
+		parent.fitToScreen();
+	}
+}
+function back()
+{
+	parent.document.getElementById("main").src = parent.LastDoc[parent.currentdoc];
+	parent.currentdoc--;	
+}
+function no()
+{
+	parent.document.getElementById("main").src = parent.baseurl+"besschange.htm";
+}
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var summaryFrame = document.getElementById("summary");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;	
+	}
+	summaryFrame.style.width = winWidth + "px";
+	summaryFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.summary.onresize && self.summary.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.summary.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.summary.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.summary.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.summary.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.summary.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.summary.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.summary.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="initProgram();fitToScreen()" onresize="fitToScreen()">
+	<iframe id="summary" name="summary" title="Main Content" level="2" tabindex="0" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:0px;left:0px;width:721px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="printScreen" name="printScreen" title="Empty" src="/lawson/xhrnet/ui/pane.htm" style="visibility:hidden;width:0px;height:0px;" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe name="bnreturn" title="Empty" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+	<iframe name="lawheader" title="Empty" src="/lawson/xbnnet/besslawheader.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/bensummary.htm,v 1.26.2.60 2014/02/24 22:02:28 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

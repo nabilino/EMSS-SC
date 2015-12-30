@@ -1,0 +1,46 @@
+<!--    Proprietary Program Material -->
+<!--    This material is proprietary to Lawson Software, and is not to be -->
+<!--    reproduced or disclosed except in accordance with software contract -->
+<!--    provisions, or upon written authorization from Lawson Software. -->
+<!--    Copyright (C) 2001-2007 by Lawson Software. All Rights Reserved. -->
+<!--    Saint Paul, Minnesota -->
+<HTML>
+  <HEAD>
+        <TITLE>Lawson Java Enterprise Desktop</TITLE>
+  </HEAD>
+<SCRIPT LANGUAGE="JAVASCRIPT">
+prmPassed=unescape(window.location.hash)
+prmPassed=prmPassed.substring(1)
+arrayPassed = prmPassed.split("|")
+var prodline = arrayPassed[0]
+var tokenid = arrayPassed[1]
+var formKeys = arrayPassed[2]
+var functionCode = arrayPassed[3]
+
+function invokeJed() {
+
+        var str = '<html>'
+				+ '<APPLET CODEBASE=/lawson/java ARCHIVE=jed.jar CODE=lawson.jed.LapmApplet.class WIDTH=240 HEIGHT=150 MAYSCRIPT=true>'
+          		+ '<PARAM NAME="image" VALUE="jed.jpg">'
+      			+ '<PARAM NAME="tranmapURL" VALUE="/cgi-lawson/ags">'
+      			+ '<PARAM NAME="databaseURL" VALUE="/cgi-lawson/ags">'
+				+ '<PARAM NAME="jedRunURL" VALUE="/cgi-lawson/jedrun">'
+			    + '<PARAM NAME="helpURL" VALUE="/cgi-lawson/objpropxls">'
+		      	+ '<PARAM NAME="preferences" VALUE="chamois,cloudy,exec,golfing,granite,ice,marble,big,bigger,seashore,suede,teal">'
+      			+ '<PARAM NAME="productLine" VALUE="' + prodline + '">'
+      			+ '<PARAM NAME="formName" VALUE="' + tokenid + '">'
+      			+ '<PARAM NAME="formKeys" VALUE="' + formKeys + '">'
+      			+ '<PARAM NAME="functionCode" VALUE="' + functionCode + '">'
+        		+ '</APPLET>'
+				+ '</html>'
+
+	window.document.write(str)
+	window.document.close()
+}
+
+
+
+</script>
+<body onLoad=invokeJed()>
+</body>
+</HTML>

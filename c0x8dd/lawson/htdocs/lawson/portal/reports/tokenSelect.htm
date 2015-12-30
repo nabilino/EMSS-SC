@@ -1,0 +1,49 @@
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/reports/tokenSelect.htm,v 1.7.2.4.18.1.2.2 2012/08/08 12:37:18 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<head>
+<title>Token Select</title>
+<script language="javascript" src="../servenv.js"></script>
+<script language="javascript" src="../dropdown.js"></script>
+<script language="javascript" src="tokenSelect.js"></script>
+<script language="javascript" src="../objects/table.js"></script>
+<link id="StyleLink" type="text/css" href="../portal.css" rel="stylesheet">
+<link id="StyleLink" type="text/css" href="../drill/drill.css" rel="stylesheet">
+<link id="StyleLink" type="text/css" href="../objects/table.css" rel="stylesheet">
+<link id="StyleLink" type="text/css" href="../dropdown.css" rel="stylesheet">
+</head>
+<body onload="init()" tabIndex="-1" onkeydown="handleKeyDown(event)" onresize="onTokenResize()" onunload="unloadFunc()">
+<div id="toolBarDiv" class="DrillInvisible" style="height:30px">&nbsp;</div>
+<div id="parameterDiv" class="drlTitleBar">
+<nobr>
+	<span id="txtSystemcode" class="DrillTitle">&nbsp;</span>&nbsp;
+	<button id="selSystemCode" class="DrillInvisible" onclick="buildSystemCodeMenu();"/>&nbsp;</button>
+</nobr>
+</div>
+<div id="tokenDiv"></div>
+<br>
+<nobr><div id="messageDiv" class="DrillInvisible">&nbsp;</div></nobr>
+</body>
+</html>
+

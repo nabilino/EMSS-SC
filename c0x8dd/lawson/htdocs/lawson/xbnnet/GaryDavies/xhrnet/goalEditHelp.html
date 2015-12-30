@@ -1,0 +1,68 @@
+<HTML>
+<HEAD>
+<TITLE>Edit Objective Help</TITLE>
+<meta name="viewport" content="width=device-width" />
+<SCRIPT>
+// Dynamically write the contents of the Home Address tips window.
+// This can be fully customized by placing content in the body of this document and
+// removing this function.
+function writeContents() {
+
+	document.title = opener.getSeaPhrase("EMPLOYEE_DATE_HELP","ESS");
+
+	self.main.document.getElementById("paneHeader").innerHTML = '<div class="dialoglabel">'
+	+ opener.getSeaPhrase("HELP","ESS")
+	+ '</div>'
+
+	var editHelpContent = '<p class="helpwindowtableheader">'+opener.getSeaPhrase("GOAL_EDIT_HELP","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP1","ESS")+'</p>'
+						+ '<p class="helpwindowtableheader">'+opener.getSeaPhrase("GOAL_EDIT_HELP2","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP3","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("PERF_EDIT_HELP_08","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("PERF_EDIT_HELP_09","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("PERF_EDIT_HELP_10","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("PERF_EDIT_HELP_11","ESS")+'</p>'
+						+ '<p class="helpwindowtableheader">'+opener.getSeaPhrase("GOAL_EDIT_HELP8","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP9","ESS")+'</p>'
+						+ '<p class="helpwindowtableheader">'+opener.getSeaPhrase("GOAL_EDIT_HELP10","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP11","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP12","ESS")+'</p>'
+						+ '<p>'+opener.getSeaPhrase("GOAL_EDIT_HELP13","ESS")+'</p>'
+
+	self.main.document.getElementById("paneBody").innerHTML = editHelpContent;
+	self.main.stylePage();
+}
+
+function fitToScreen()
+{
+	var mainFrame = document.getElementById("main");
+	var winHeight = 0;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+	}
+
+	if (winHeight >= 35)
+	{
+		try
+		{
+			self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		}
+		catch(e)
+		{}
+	}
+}
+</SCRIPT>
+</HEAD>
+<frameset rows="100%" frameborder="no" border="0" onload="fitToScreen();writeContents()" onresize="fitToScreen()">
+	<frame src="/lawson/xhrnet/ui/helpheaderpane.htm" name="main" id="main" marginwidth="0" marginheight="0" scrolling="no">
+</frameset>
+</HTML>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/goalEditHelp.html,v 1.1.2.10 2011/05/04 21:10:11 brentd Exp $ -->

@@ -1,0 +1,222 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/users/subscriptions/subscriptions.css,v 1.6.4.1.18.1.2.2 2012/08/08 12:37:28 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+
+.btnCon
+{
+	background-color:#ffffff;
+	background-image:url("../../images/spacer.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	margin-right:2px;
+	vertical-align:middle;
+}
+
+.btnConEmptyBk
+{
+	background-color:#ffffff;
+	background-image:url("../../images/ico_bookmark_no-children.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:18px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:18px;
+}
+
+.btnConClosedBk
+{
+	background-color:#ffffff;
+	background-image:url("../../images/ico_bookmark_collapsed.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:18px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:18px;
+}
+
+.btnConDelete
+{
+	background-color:#ffffff;
+	background-image:url("../../images/ico_delete.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:18px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:18px;
+}
+
+.btnConMinus
+{
+	background-color:#ffffff;
+	background-image:url("../../images/minus.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:10px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:10px;
+}
+
+.btnConPlus
+{
+	background-color:#ffffff;
+	background-image:url("../../images/plus.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:10px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:10px;
+}
+
+.btnConOpenBk
+{
+	background-color:#ffffff;
+	background-image:url("../../images/ico_bookmark_children.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:18px;
+	margin-right:2px;
+	vertical-align:middle;
+	width:18px;
+}
+
+.btnConVis
+{
+	cursor:default;
+	margin-right:2px;
+	text-align:center;
+	vertical-align:middle;
+}
+
+.btnConVisLocked
+{
+	background-color:#ffffff;
+	background-image:url("../../images/ico_lock_closed.gif");
+	background-positionX:center;
+	background-positionY:center;
+	background-repeat:no-repeat;
+	border:none;
+	cursor:default;
+	height:18px;
+	margin-right:2px;
+	text-align:center;
+	vertical-align:middle;
+	width:18px;
+}
+
+.conNode
+{
+	cursor:move;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 8pt;
+	vertical-align:middle;
+	white-space:nowrap;
+	width:100%;
+}
+
+.conNodeText
+{
+	background-color:#ffffff;
+	border:none;
+	cursor:move;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 8pt;
+	margin-right:2px;
+	text-align:left;
+	vertical-align:middle;
+	white-space:nowrap;
+}
+
+.conLet
+{
+	background-color:#FFFFFF;
+	border-style:solid;
+	border-top-color:#CCCCCC;
+	border-left-color:#CCCCCC;
+	border-bottom-color:#000000;
+	border-right-color:#000000;
+	border-width:1px;
+	color:#000000;
+	cursor:move;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:8pt;
+	height:22px;
+	margin-right:1px;
+	margin-bottom:1px;
+	padding-left:1px;
+	padding-top:1px;
+	padding-right:1px;
+	padding-bottom:1px;
+	text-align:left;
+	white-space:nowrap;
+	width:100%;
+}
+
+.conLetHot {  
+	background-color:#FFFFFF;
+	border-style:solid;
+	border-top-color:#CCCCCC;
+	border-left-color:#CCCCCC;
+	border-bottom-color:#000000;
+	border-right-color:#000000;
+	border-width:1px;
+	color:#0000FF;
+	cursor:move;
+	font-family:Arial,Helvetica,sans-serif;
+	font-size:8pt;
+	height:22px;
+	margin-right:1px;
+	margin-bottom:1px;
+	padding-left:1px;
+	padding-top:1px;
+	padding-right:1px;
+	padding-bottom:1px;
+	text-align:left;
+	white-space:nowrap;
+	width:100%;
+}

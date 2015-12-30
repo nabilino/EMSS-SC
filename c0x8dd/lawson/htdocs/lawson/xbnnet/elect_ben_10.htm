@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<title>Enroll in Benefit Plan</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+var head=""
+var bod=""
+var flexflag=0
+var empflag=0
+var compflag=0
+function startProgram()
+{
+	setWinTitle(getSeaPhrase("ENROLL_PLAN","BEN"));
+	var html = '<div class="plaintablecell" style="padding:0px">'
+	html += parent.header(parent.planMessages(parent.parent.SelectedPlan[26],parent.parent.SelectedPlan[26]));
+    var flexCostExists = (parent.parent.SelectedPlan[18]!="" && parent.parent.SelectedPlan[18]!=null) ? true : false;
+    var empCostExists = (parent.parent.SelectedPlan[16]!="" && parent.parent.SelectedPlan[16]!=null) ? true : false;
+    var compCostExists = (parent.parent.SelectedPlan[22]!="" && parent.parent.SelectedPlan[22]!=null) ? true : false;
+    var costExists = (flexCostExists || empCostExists || compCostExists) ? true : false;
+	head += '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" style="width:100%;margin-left:auto;margin-right:auto"'
+	if (costExists)
+	{
+		head += ' styler="list" summary="'+getSeaPhrase("TSUM_15","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'">'
+		head += '<caption class="offscreen">'+getSeaPhrase("TCAP_11","BEN",[parent.parent.EligPlans[parent.parent.CurrentEligPlan][4]])+'</caption>'
+	}	
+	else
+		head += ' role="presentation">'
+	head += '<tr>'
+	bod += '<tr>'
+	if (flexCostExists)
+	{
+		head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("FLEX_CR","BEN")+'</th>'
+		bod += '<td class="plaintablecellborder" style="text-align:center" nowrap>'+parent.parent.formatCont2(parent.parent.SelectedPlan[18])
+		if (parent.parent.SelectedPlan[24]=="P")
+			bod += getSeaPhrase("PER","BEN")
+		bod += '</td>'
+	}
+	if (empCostExists)
+	{
+		head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("YOUR_COST","BEN")+'</th>'
+		bod += '<td class="plaintablecellborder" style="text-align:center" nowrap>'+parent.parent.formatCont2(parent.parent.SelectedPlan[16])
+		if (parent.parent.SelectedPlan[24]=="P")
+			bod += getSeaPhrase("PER","BEN")
+		bod += '</td>'
+	}
+	if (compCostExists)
+	{
+		head += '<th scope="col" class="plaintableheaderborder" style="text-align:center" nowrap>'+getSeaPhrase("CO_COST","BEN")+'</th>'
+		bod += '<td class="plaintablecellborder" style="text-align:center" nowrap>'+parent.parent.formatCont2(parent.parent.SelectedPlan[22])
+		if (parent.parent.SelectedPlan[24]=="P")
+			bod += getSeaPhrase("PER","BEN")
+		bod += '</td>'
+	}
+	html += head+'</tr>'
+	html += bod+'</tr>'
+	html += '</table><br/>'
+	html += parent.footer(parent.parent.SelectedPlan[26],parent.parent.SelectedPlan[28])
+	html += '</div>'
+	document.getElementById("paneBody").innerHTML = html;
+	document.getElementById("paneHeader").innerHTML = getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8];
+	stylePage();
+	document.body.style.visibility = "visible";
+	parent.parent.stopProcessing(getSeaPhrase("CNT_UPD_FRM","SEA",[getWinTitle()]));
+	parent.fitToScreen();
+}
+
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader" role="heading" aria-level="2">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody" tabindex="0"></div></div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_10.htm,v 1.12.2.31 2014/02/25 22:49:14 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

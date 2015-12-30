@@ -1,0 +1,85 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/foldersel.htm,v 1.2.28.2 2012/08/08 12:48:47 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<TITLE>Select a Directory</TITLE>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="foldersel.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="msgInvalidLocalProv">Local file services unavailable: provider object is null.</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="dlgInit()" onunload="dlgOnUnload()" onkeydown="dlgOnKeyDown()" style="background-color:buttonface;visibility:hidden">
+
+	<table width="95%" cellspacing="4" style="margin-left:8px;">
+	<tr>
+		<td>
+			<div id="lblCurrentDirectory" class="dsLabel"  style="position:relative;text-align:left;">Current Directory</div>
+		</td>
+	</tr>
+	<tr>
+		<td valign="middle">
+			<input id="txtDirectory" type="text" disabled class="dsTextBox" style="position:relative;width:220px;"></input>
+			<input type="button" id="btnHome" class="dsDlgButton" onclick="dlgOnGoHome()" title="Go to root directory"
+				style="position:relative;width:22px;font-size:7pt;background-position:center;background-repeat:no-repeat;">
+			</input>
+			<input type="button" id="btnUpLevel" class="dsDlgButton" onclick="dlgOnUpOneLevel()" title="Move up one directory"
+				style="position:relative;width:22px;font-size:7pt;background-position:center;background-repeat:no-repeat;">
+			</input>
+			<input type="button" id="btnNewDrive" class="dsDlgButton" onclick="dlgOnNewDrive()" title="Click to select new volume"
+				onkeydown="dlgDriveKeyDown()" style="position:relative;width:22px;font-size:7pt;background-position:center;background-repeat:no-repeat;background-image:url(../images/icodrive.gif);">
+			</input>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div id="lblFolders" class="dsLabel" style="position:relative;text-align:left;">Available Directories</div>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<div id="folderdiv"
+				style="background-color:white;border-style:inset;border-width:2px;border-color:grey;height:220px;overflow:auto;">&nbsp;
+			</div>
+		</td>
+	</tr>
+	</table>
+	<table width="95%" cellspacing="4" style="margin-left:8px;">
+	<tr>
+		<td align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="dlgOK()" style="position:relative;" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" style="position:relative;" value="Cancel"></input>
+		</td>
+	</tr>
+	</table>
+
+<!-- drive popup menu container -->
+<DIV id="oDrivePopup" style="display:none"></DIV>
+
+</BODY>
+</HTML>

@@ -1,0 +1,60 @@
+/* $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/inbasket/inbasket.css,v 1.4.4.1.28.2 2012/08/08 12:37:26 jomeli Exp $ */
+/* $NoKeywords: $ */
+/* LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 */
+/*		*************************************************************** */
+/*		*                                                             * */
+/*		*                           NOTICE                            * */
+/*		*                                                             * */
+/*		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * */
+/*		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * */
+/*		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * */
+/*		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * */
+/*		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * */
+/*		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * */
+/*		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * */
+/*		*                                                             * */
+/*		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * */
+/*		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * */
+/*		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * */
+/*		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * */
+/*		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * */
+/*		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * */
+/*		*                                                             * */
+/*		*************************************************************** */ 
+.cellText
+{
+	color: black;
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+	padding-right:10px;
+}
+
+.button
+{
+	background-color: transparent;
+	color: blue;
+	font-family: arial;
+	font-size: 8pt;
+	padding: 1px;
+	border: 0px;
+	text-align: center;
+	text-decoration: underline;
+	cursor: pointer;
+	cursor: hand;
+	height: 20px;
+}
+
+.label
+{
+    color: black;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+    font-size: 8pt;
+    text-align: right;
+	z-index: 1;
+}
+
+.textbox
+{
+	font-size: 8pt;
+	font-family: Verdana, Tahoma, Arial, sans-serif;
+}

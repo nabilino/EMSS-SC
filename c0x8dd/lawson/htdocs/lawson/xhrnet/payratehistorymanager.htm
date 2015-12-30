@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Manager Pay Rate History</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script type="text/javascript" src="/lawson/xhrnet/waitalert.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/esscommon80.js"></script>
+<script type="text/javascript" src="/lawson/webappjs/user.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script type="text/javascript">
+// starting point of this program
+function startProgram()
+{
+	clearTimeout(timer);
+	// do authentication
+	authenticate("frameNm='jsreturn'|funcNm='initProgram()'|desiredEdit='EM'");
+}
+
+function initProgram()
+{
+	stylePage();
+	var title = getSeaPhrase("MGR_PAY_RATE_HISTORY","ESS");
+	setWinTitle(title);
+	// set the task title.
+	setTaskHeader("header",title,"Manager");
+	// to initialize fmttoday
+	StoreDateRoutines();
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), main);
+}
+
+// main function of this program
+function main()
+{
+	// get direct reports
+	getDirectReports();
+}
+
+// draw direct report and date select frame
+function drawDirectReportDateSelect()
+{
+	var toolTip;
+	var htmlStr = uiRequiredFooter();
+	htmlStr += '<form onsubmit="parent.validateChange(1);return false">';
+	htmlStr += '<table style="padding-left:5px" border="0" cellspacing="0" cellpadding="0" role="presentation">';
+	htmlStr += '<tr><td class="fieldlabelboldleft" colspan="4" style="vertical-align:top">'+getSeaPhrase("SELECT_EE_AND_THROUGH_DATE","ESS")+'</td>';
+	htmlStr += '<td class="fieldlabel" style="vertical-align:top;padding-right:5px;padding-left:5px;padding-top:5px">&nbsp;</td></tr>';
+	htmlStr += '<tr><td class="fieldlabelbold" style="vertical-align:top"><label for="DirectReport">'+getSeaPhrase("EMP","ESS")+'</label></td>';
+	htmlStr += '<td id="empSelect" class="plaintablecell" style="vertical-align:top"><select class="inputbox" id="DirectReport" name="DirectReport" onchange="parent.clearHistoryTableInFrame()">';
+	htmlStr += '<option value="" selected="selected"></option>';
+	var len = directReportArray.length;
+	for (var i=0; i<len; i++)
+		htmlStr += '<option value="'+directReportArray[i].employeeNbr+'">'+directReportArray[i].fullName+'</option>';
+	htmlStr += '</select>'+uiRequiredIcon()+'</td>';
+	toolTip = uiDateToolTip(getSeaPhrase("THROUGH_DATE","ESS"));
+	htmlStr += '<td class="fieldlabelbold" style="vertical-align:top"><label id="ThroughDateLbl" for="ThroughDate">'+getSeaPhrase("THROUGH_DATE","ESS")+'</label></td>';
+	htmlStr += '<td class="plaintablecell" style="vertical-align:top"><input class="inputbox" id="ThroughDate" name="ThroughDate" type="text" value="'+fmttoday+'" size="12" maxlength="10" onchange="parent.validateChange(3)" aria-labelledby="ThroughDateLbl ThroughDateFmt">';
+	htmlStr += '<a href="javascript:parent.DateSelect(\'ThroughDate\');" title="'+toolTip+'" aria-label="'+toolTip+'">'+uiCalendarIcon()+'</a>'+uiRequiredIcon()+'<br/>';
+	htmlStr += uiDateFormatSpan("ThroughDateFmt")+'</td><td class="plaintablecellright" style="padding-right:5px;vertical-align:top">';
+	htmlStr += uiButton(getSeaPhrase("CONTINUE","ESS"),"parent.validateChange(2);return false","margin-right:5px");
+	htmlStr += '</td></tr></table></form>';
+	htmlStr += '<div id="payHistDtl" style="margin-top:5px;width:100%;height:auto;padding-bottom:5px">&nbsp;</div>';
+	try
+	{
+		self.SelectsFrm.document.getElementById("paneHeader").innerHTML = getSeaPhrase("HISTORY","ESS");
+		self.SelectsFrm.document.getElementById("paneBody").innerHTML = htmlStr;
+	}
+	catch(e) {}
+	self.SelectsFrm.stylePage();
+	self.SelectsFrm.setLayerSizes();
+	document.getElementById("SelectsFrm").style.visibility = "visible";
+	removeWaitAlert();
+	fitToScreen();
+}
+
+var employeeIsValid = false;
+var throughDateIsValid = false;
+
+// validate data if changed, if valid, draw the pay rate history
+function validateChange(source)
+{
+	clearRequiredField(self.SelectsFrm.document.getElementById("empSelect"));
+	clearRequiredField(self.SelectsFrm.document.forms[0].elements["ThroughDate"]);
+	if (source == 1 || source == 2) 
+	{
+		// coming from form onsubmit or continue button 
+		if (!validateEmployee())
+			employeeIsValid = false;
+		else
+			employeeIsValid = true;
+		if (!validateDate())
+			throughDateIsValid = false;
+		else
+			throughDateIsValid = true;
+	} 
+	else if (source == 3) 
+	{
+		// coming from date select
+		if (!validateDate())
+			throughDateIsValid = false;
+		else
+			throughDateIsValid = true;
+	}
+	if (source != 3 && employeeIsValid && throughDateIsValid) 
+	{
+		// draw pay rate history if valid employee and through date
+		var selectObj = self.SelectsFrm.document.forms[0].elements["DirectReport"];
+		var inputObj = self.SelectsFrm.document.forms[0].elements["ThroughDate"];
+		var nextFunc = function()
+		{
+			drawHistory(selectObj.options[selectObj.selectedIndex].value, selectObj.options[selectObj.selectedIndex].text, inputObj.value);
+		};
+		showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), nextFunc);
+	}
+}
+
+// validate employee change
+function validateEmployee()
+{
+	var selectObj = self.SelectsFrm.document.forms[0].elements["DirectReport"];
+	clearRequiredField(self.SelectsFrm.document.getElementById("empSelect"));
+	if (NonSpace(selectObj.options[selectObj.selectedIndex].value) == 0) 
+	{
+		// employee is empty
+		setRequiredField(self.SelectsFrm.document.getElementById("empSelect"), getSeaPhrase("MUST_SELECT_EMPLOYEE","ESS"), selectObj);
+		return false;
+	} 
+	else
+		return true;
+}
+
+// validate date change
+function validateDate()
+{
+	var inputObj = self.SelectsFrm.document.forms[0].elements["ThroughDate"];
+	clearRequiredField(inputObj);
+	if (NonSpace(inputObj.value) == 0) 
+	{
+		// date is empty
+		setRequiredField(inputObj, getSeaPhrase("MUST_ENTER_DATE","ESS"));
+		return false;
+	} 
+	else if (!ValidateDate(inputObj)) 
+	{
+		// date is invalid
+		return false;
+	} 
+	else 
+	{
+		// format the date
+		var dteParams = dateIsValid(inputObj.value);
+		var dte = dteParams[0];
+		var errMsg = dteParams[1];
+		if (dte)
+			inputObj.value = dte;
+		else if (errMsg)
+		{
+			setRequiredField(inputObj, getSeaPhrase("CAL_1","ESS"));
+			return false;
+		}
+		return true;
+	}
+}
+
+// set the selected date in calendar window to date input object
+function ReturnDate(throughDate)
+{
+	try { self.SelectsFrm.document.forms[0].elements["ThroughDate"].value = throughDate; } catch(e) {}
+	// we believe calendar window returns correct date
+	throughDateIsValid = true;
+	// remove any old history records
+	clearHistoryTableInFrame();
+}
+
+// remove any old history records in the frame if the user changes a key value
+function clearHistoryTableInFrame()
+{
+	try { self.SelectsFrm.document.getElementById("payHistDtl").innerHTML = '&nbsp;'; } catch(e) {}
+}
+
+// draw pay rate history frame given employee number and through date
+function drawHistory(employeeNbr, employeeName, throughDate)
+{
+	// first we need to get corresponding history data
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"));
+	getHistoryTableData(employeeNbr, employeeName, throughDate);
+}
+
+// draw history table in frame
+function drawHistoryTableInFrame(employeeNbr, employeeName, throughDate)
+{
+	var htmlStr = '';
+	if (historyArray.length == 0) 
+	{
+		// no pay rate history with this through date
+		htmlStr += '<div class="fieldlabelboldleft" style="padding-left:5px">'+getSeaPhrase("NO_PAY_RATE_HISTORY_FOR_THIS_DATE","ESS")+'</div>';
+	} 
+	else 
+	{
+		// got some data
+		htmlStr += '<table class="plaintableborder" border="0" cellspacing="0" cellpadding="0" width="100%" styler="list" summary="'+getSeaPhrase("TSUM_62","SEA",[employeeName,throughDate])+'">'
+		htmlStr += '<caption class="offscreen">'+getSeaPhrase("TCAP_40","SEA",[employeeName,throughDate])+'</caption>'
+		htmlStr += '<tr><th scope="col" class="plaintableheaderborder" style="width:20%;text-align:center">'+getSeaPhrase("EFFECTIVE","ESS")+'</th>';
+		htmlStr += '<th scope="col" class="plaintableheaderborder" style="width:20%;text-align:center">'+getSeaPhrase("PAY_RATE_2","ESS")+'</th>';
+		htmlStr += '<th scope="col" class="plaintableheaderborder" style="width:20%;text-align:center">'+getSeaPhrase("ANNUAL_SALARY","ESS")+'</th>';
+		htmlStr += '<th scope="col" class="plaintableheaderborder" style="width:20%;text-align:center">'+getSeaPhrase("PERCENT_CHANGE","ESS")+'</th>';
+		htmlStr += '<th scope="col" class="plaintableheaderborder" style="width:20%;text-align:center">'+getSeaPhrase("QUAL_16","ESS")+'</th></tr>';
+		for (var i=0; i<historyArray.length; i++) 
+		{
+			htmlStr += '<tr><td class="plaintablecellborder" style="text-align:center" nowrap>'+FormatDte4(historyArray[i].effective)+'</td>';
+			htmlStr += '<td class="plaintablecellborderright" nowrap>'
+			if (historyArray[i].rate == null || historyArray[i].rate == 0 || historyArray[i].rate == "undefined")
+				 htmlStr += '0.00</td>';
+			else
+				htmlStr += roundToDecimal(deleteLeadingZeros(historyArray[i].rate),2)+'</td>';
+			htmlStr += '<td class="plaintablecellborderright" nowrap>'
+			if (historyArray[i].annualSalary == 0)
+				 htmlStr += '0.00</td>';
+			else
+				htmlStr += roundToDecimal(deleteLeadingZeros(historyArray[i].annualSalary),2)+'</td>';
+			htmlStr += '<td class="plaintablecellborderright" nowrap>'
+			if (historyArray[i].percentChange == null || historyArray[i].percentChange == 0 || historyArray[i].percentChange == "undefined")
+				 htmlStr += '0.00</td>';
+			else
+				htmlStr += historyArray[i].percentChange+'</td>';
+			htmlStr += '<td class="plaintablecellborder" style="padding-left:35px" nowrap>'+((historyArray[i].currency)?historyArray[i].currency:'&nbsp;')+'</td></tr>';
+		}
+		htmlStr += '</table>';
+	}
+	try 
+	{ 
+		self.SelectsFrm.document.getElementById("payHistDtl").innerHTML = htmlStr;
+	} 
+	catch(e) {}
+	self.SelectsFrm.stylePage();
+	self.SelectsFrm.setLayerSizes();
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.SelectsFrm.getWinTitle()]));
+	fitToScreen();
+}
+
+// storage of direct reports
+var directReportArray = new Array();
+
+function getDirectReports()
+{
+	callHS101("", "", "", "");
+}
+
+var UpdateType = "";
+// ags call for direct reports
+function callHS101(FC, nextEmployee, HSUCode, HSUOpCode)
+{
+	UpdateType = "HS10";
+	self.lawheader.FC = "";
+	self.lawheader.nextEmployee = "";
+	self.lawheader.HSUCode = "";
+	self.lawheader.HSUOpCode = "";
+	var agsObj = new AGSObject(authUser.prodline, "HS10.1");
+	agsObj.event = "ADD";
+	agsObj.out = "JAVASCRIPT";
+	agsObj.rtn = "DATA";
+	agsObj.longNames = true;
+	agsObj.tds = false;
+	agsObj.field = "FC=I" +
+	"&HSU-COMPANY=" + parseInt(authUser.company,10) +
+	"&HSU-EMPLOYEE=" + parseInt(authUser.employee,10);
+	if (FC != "" && (nextEmployee != "" || HSUCode != "" || HSUOpCode != "")) 
+	{
+		// subsequent ags call
+		agsObj.field += "&PT-FC=" + FC ;
+		if (nextEmployee != "")
+			agsObj.field += "&PT-PTF-EMPLOYEE=" + nextEmployee ;
+		if (HSUCode != "")
+			agsObj.field += "&PT-HSU-CODE=" + HSUCode ;
+		if (HSUOpCode != "")
+			agsObj.field += "&PT-HSU-OP-CODE=" + HSUOpCode;
+	}
+	// we will be getting XML formatted data back
+	agsObj.rtnScript = false;
+	agsObj.debug = false;
+	agsObj.func = "parent.getCallHS101ReturnData()";
+	return AGS(agsObj, "jsreturn");
+}
+
+// retrieve data in this ags call return
+function getCallHS101ReturnData()
+{
+	if (self.lawheader.FC != "" && (self.lawheader.nextEmployee != "" || self.lawheader.HSUCode != "" || self.lawheader.HSUOpCode != ""))
+		callHS101(self.lawheader.FC, self.lawheader.nextEmployee, self.lawheader.HSUCode, self.lawheader.HSUOpCode);
+	else
+	{
+		// set through date to today's date
+		ReturnDate(fmttoday);		
+		// draw direct report and date select for only one time
+		drawDirectReportDateSelect();
+	}
+}
+
+// direct reports object having only interested fields
+function DirectReportObject()
+{
+	this.employeeNbr = null;
+	this.fullName = null;
+}
+
+// storage of pay rate history
+var historyArray = new Array();
+var seqNbr = "";
+var begnDate = "";
+var moreRecs = false;
+// get pay rate history for selected through date
+function getHistoryTableData(employeeNbr, employeeName, throughDate)
+{
+	// need to empty this global variable
+	historyArray = new Array();
+	callPA671(employeeNbr, employeeName, throughDate, "", "");
+}
+
+// ags call for pay rate history
+function callPA671(employeeNbr, employeeName, throughDate, seqNbr, begnDate)
+{
+	UpdateType = "PA67";
+	self.lawheader.seqNbr = "";
+	self.lawheader.begnDate = "";
+	var agsObj = new AGSObject(authUser.prodline, "PA67.1");
+	agsObj.event = "ADD";
+	agsObj.rtn = "DATA";
+	agsObj.out = "JAVASCRIPT";
+	agsObj.longNames = "ALL";
+	agsObj.tds = false;
+	if (seqNbr == "" || begnDate == "")
+	{	
+		// first ags call
+		agsObj.field = "FC=I";
+	}	
+	else 
+	{
+		// subsequent ags call
+		agsObj.field = "FC=%2B" +
+		"&PT-PRH-SEQ-NBR=" + seqNbr +
+		"&PT-PRH-BEG-DATE=" + begnDate;
+	}
+	agsObj.field += "&PRH-COMPANY=" + parseInt(authUser.company,10) +
+	"&PRH-EMPLOYEE=" + employeeNbr +
+	"&THRU-DATE=" + formjsDate(formatDME(throughDate)) +
+	"&HISTORY-ERRORS=1" +
+	"&PRH-POS-LEVEL=01";
+	// we will be getting XML formatted data back
+	agsObj.rtnScript = false;
+	agsObj.debug = false;
+	agsObj.func = "parent.getCallReturnData('"+employeeNbr+"','"+employeeName+"','"+throughDate+"')";
+	return AGS(agsObj, "jsreturn");
+}
+
+function getCallReturnData(employeeNbr, employeeName, throughDate)
+{
+	if (self.lawheader.seqNbr != "" && self.lawheader.begnDate != "")
+		callPA671(employeeNbr, employeeName, throughDate, self.lawheader.seqNbr, self.lawheader.begnDate);
+	else
+		drawHistoryTableInFrame(employeeNbr, employeeName, throughDate);
+}
+
+// history object having only interested fields
+function HistoryObject()
+{
+	this.effective = null;
+	this.rate = null;
+	this.annualSalary = null;
+	this.percentChange = null;
+	this.currency = null;
+	this.fldHash = new Array();
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("SelectsFrm");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentWidth;
+	var contentWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;
+	if (window.styler && window.styler.showInfor)
+	{			
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;
+		contentHeight = winHeight - 65;
+		contentHeightBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentHeight + 30 : contentHeight + 25;
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;
+		contentHeight = winHeight - 75;
+		contentHeightBorder = contentHeight + 30;
+	}
+	else
+	{
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentWidth;
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		if (self.SelectsFrm.onresize && self.SelectsFrm.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.SelectsFrm.onresize = null;		
+	}
+	catch(e) {}
+	try
+	{
+		self.SelectsFrm.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.SelectsFrm.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.SelectsFrm.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.SelectsFrm.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.SelectsFrm.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.SelectsFrm.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+}
+var timer = setTimeout("startProgram()",3000);
+</script>
+</head>
+<body style="overflow:hidden" onload="startProgram()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="SelectsFrm" name="SelectsFrm" title="Main Content" level="2" tabindex="0" style="visiblity:hidden;position:absolute;left:0px;width:640px;height:464px;top:32px" src="/lawson/xhrnet/ui/headerpane.htm" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="lawheader" name="lawheader" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/payratelawheader.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.27 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/payratehistorymanager.htm,v 1.18.2.61.2.2 2014/08/05 04:38:26 kevinct Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

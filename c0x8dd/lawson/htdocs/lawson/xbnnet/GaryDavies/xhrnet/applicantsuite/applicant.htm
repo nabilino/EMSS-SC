@@ -1,0 +1,174 @@
+<html>
+<head>
+<title>Initial Application</title>
+<meta name="viewport" content="width=device-width" />
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/webappjs/transaction.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/common.js"></script>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/xhrnet/statesuscan.js"></script>
+<script src="/lawson/xhrnet/hrctrycodeselect.js"></script>
+<script src="/lawson/xhrnet/fica.js"></script>
+<script src="/lawson/xhrnet/applicantsuite/applicantlib.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmldateroutines.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var alphadata11=alphadata12=alphadata13=alphadata14=alphadata3=alphadata4=
+firstname=midlename=lastname=nickname=addr1=addr2=addr3=city=state=zip=ficanbr=
+hmphonenbr=wrkphonenbr=position1=position2=position3=jobs1=jobs2=jobs3=country=''
+var prevapply=prevlocation=prevdate=prevemploy=prevempnbr=prevbegdate=
+prevenddate=prevlocwork=formerfstname=formermi=formerlstname=firstnamepe=
+midlenamepe=lastnamepe=datebegin=findabout=paybase1=paybase2=schedule=nbrfte=
+eeoclass=gender=ageflag=veteran=handicapId=currency='';
+var auto_app=copname=gmsgnbr=gmsg=ficabckp=doneflag=Pajobreq=Paposition=
+JobCode=Pcodes=Applicant=todaydate=valpay1=valpay2=
+prevapply0=prevapply1=prevdate1=prevemploy0=prevemploy1=prevbegdate1=prevenddate1=
+datebegin1=AppKnowlgd=open1=open2=open3=faxnbr=emailaddress=pcavail=travavail0=
+travavail1=otavail0=otavail1=relocavail0=relocavail1=otavail=relocavail=travavail=
+gender0=gender1=ageflag0=ageflag1=veteran0=veteran1=handicapId0=handicapId1='';
+
+var lastnameprefix = "";
+var lastnamesuffix = "";
+var hmphonecntry = "";
+var extension = "";
+var wrkphonecntry = "";
+var hoursIndex = "";
+
+var user;
+jbreq = false;
+processing = false;
+var todaydate;
+var appObj;
+
+function RunApplicant()
+{
+	authenticate("frameNm='jsreturn'|funcNm='StartApplicant()'|desiredEdit='EM'")
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var mainFrame = document.getElementById("main");
+	var subFrame = document.getElementById("subtask");
+	var linkFrame = document.getElementById("links");
+	var winHeight = 464;
+	var winWidth = 800;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? winWidth - 12 : winWidth - 17;
+	var fullPaneContentWidth = (window.styler && window.styler.showLDS) ? fullContentWidth - 20 : fullContentWidth;
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.main.onresize && self.main.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.main.onresize = null;
+	}
+	mainFrame.style.width = winWidth + "px";
+	mainFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.main.document.getElementById("paneBorder").style.width = fullContentWidth + "px";
+		self.main.document.getElementById("paneBorder").style.height = (winHeight - 35) + "px";
+		self.main.document.getElementById("paneBodyBorder").style.width = (fullPaneContentWidth + 5) + "px";
+		self.main.document.getElementById("paneBodyBorder").style.height = (winHeight - 60) + "px";
+		self.main.document.getElementById("paneBody").style.width = fullPaneContentWidth + "px";
+		self.main.document.getElementById("paneBody").style.height = (winHeight - 60) + "px";
+	}
+	catch(e)
+	{}
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.subtask.onresize && self.subtask.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.subtask.onresize = null;
+	}
+	subFrame.style.width = winWidth + "px";
+	subFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.subtask.document.getElementById("paneBorder").style.width = fullContentWidth + "px";
+		self.subtask.document.getElementById("paneBorder").style.height = (winHeight - 35) + "px";
+		self.subtask.document.getElementById("paneBodyBorder").style.width = (fullPaneContentWidth + 5) + "px";
+		self.subtask.document.getElementById("paneBodyBorder").style.height = (winHeight - 60) + "px";
+		self.subtask.document.getElementById("paneBody").style.width = fullPaneContentWidth + "px";
+		self.subtask.document.getElementById("paneBody").style.height = (winHeight - 60) + "px";
+	}
+	catch(e)
+	{}
+
+	// disable the onresize window event if it exists - we don't want the elements in the frame to resize themselves
+	if (self.links.onresize && self.links.onresize.toString().indexOf("setLayerSizes") >= 0)
+	{
+		self.links.onresize = null;
+	}
+	linkFrame.style.width = parseInt(winWidth*.5,10) + "px";
+	linkFrame.style.height = (winHeight - 30) + "px";
+
+	fullPaneContentWidth = (window.styler && window.styler.showLDS) ? parseInt(fullPaneContentWidth*.5,10) - 20 : parseInt(fullPaneContentWidth*.5,10);
+	try
+	{
+		self.links.document.getElementById("paneBorder").style.width = parseInt(fullContentWidth*.5,10) + "px";
+		self.links.document.getElementById("paneBorder").style.height = (winHeight - 35) + "px";
+		self.links.document.getElementById("paneBodyBorder").style.width = (fullPaneContentWidth + 5) + "px";
+		self.links.document.getElementById("paneBodyBorder").style.height = (winHeight - 60) + "px";
+		self.links.document.getElementById("paneBody").style.width = fullPaneContentWidth + "px";
+		self.links.document.getElementById("paneBody").style.height = (winHeight - 60) + "px";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="RunApplicant();fitToScreen()" onresize="fitToScreen()">'
+	<iframe id="header" name="header" src="/lawson/xhrnet/ui/header.htm" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="main" name="main" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:721px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="links" name="links" src="/lawson/xhrnet/ui/headerpane.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:375px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe id="subtask" name="subtask" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;position:absolute;top:32px;left:0px;width:803px;height:464px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no"></iframe>
+	<iframe name="jsreturn" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+	<iframe name="lawheader" src="/lawson/xhrnet/applicantsuite/applicantlaw.htm" style="visibility:hidden;height:0px;width:0px;"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/applicantsuite/applicant.htm,v 1.10.2.14 2011/05/04 21:10:21 brentd Exp $ -->

@@ -1,0 +1,71 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/ui/portal/utility/bldindex.htm,v 1.7.2.2.4.1.14.2.2.2 2012/08/08 12:37:21 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<TITLE>Rebuild Forms Index</TITLE>
+
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<SCRIPT language="javascript" src="../objects/FeedBack.js"></SCRIPT>
+<SCRIPT language="javascript" src="bldindex.js"></SCRIPT>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../portal.css"></link>
+
+</HEAD>
+
+<BODY tabIndex="-1" onload="bldInit()" onunload="bldOnUnload()" style="visibility:hidden" 
+			onkeydown="bldOnKeyDown(event)" onresize="bldOnResize()">
+	<table id="tblFolders" border="0" cellspacing="8" style="width:400px;margin:10px;">
+	<tr>
+		<td>
+			<label class="xTLabel" id="lblSelectFormsFolder" for="txtfolder"
+				style="position:relative;text-align:left;">Select Custom Forms Folder:
+			</label>
+		<br/>
+			<input type="text" class="xTTextBox" id="txtfolder" disabled="true"
+				style="position:relative;width:80%;">
+			</input>
+			<input type="button" id="btnUpDir" onclick="bldOnUpDir()"
+				style="position:relative;height:20px;width:20px;background-color:transparent;background-image: url('../images/folderupgray.gif');background-position:center;background-repeat:no-repeat;">
+			</input>
+			<br/>
+			<div id="listFiles" class="xTListText"
+				style="position:relative;width:90%;height:180px;margin-top:4px;border-style:inset;border-width:2px;border-color:grey;overflow:auto;">
+			</div>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			<input type="checkbox" id="cbxSubFolders" checked></input>
+			<label class="xTLabelForm" id="lblSubFolders" for="cbxSubFolders" style="text-align:left;">
+				Iterate Sub-folders
+			</label>
+		</td>
+	</tr>
+	</table>
+
+	<!-- analysis output div -->
+	<iframe id="frmAnalysis" frameborder="no" scrolling="no" src="../blank.htm" style="position:absolute;display:none;top:0;left:0;width:100%;height:100%;">
+	</iframe>
+
+</BODY>
+</HTML>

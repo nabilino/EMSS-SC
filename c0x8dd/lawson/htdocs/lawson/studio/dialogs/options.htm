@@ -1,0 +1,143 @@
+<html xmlns:LWSN>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/options.htm,v 1.2.28.2 2012/08/08 12:48:47 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Design Studio Options</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="options.js"></SCRIPT>
+<XML id="pageXLT">
+	<Translate language="English">
+		<phrase id="msgPleaseEnterReq">Please enter required value.</phrase>
+	</Translate>
+</XML>
+</head>
+
+<body onload="optInit()" style="background-color:buttonface;visibility:hidden;cursor:wait;" onkeydown="optOnKeyDown()">
+
+	<div id="divTabs" style="position:absolute;top:0px;width:100%;height:24px;padding-top:10px;z-index:99;">
+		<span id="tabGeneral" class="dsTabButtonActive" style="top:10;left:0;width:70px;" tabind="0" onclick="optSwitchTab(this)">General</span>
+	</div>
+
+	<!-- General tab pane -->
+	<div id="divGeneral" class="dsTabPaneActive" style="top:30px;display:block;height:80%;width:100%;">
+	<table border="0" width="100%">
+		<tr><td colspan="2">&nbsp;</td></tr>
+		<tr>
+			<td align="right" width="30%" valign="top">
+				<label id="lblPortal" class="dsLabel" for="txtPortal" style="position:relative;">
+					Portal Location:&nbsp;
+				</label>
+			</td>
+			<td valign="top">
+				<input type="text" id="txtPortal" class="dsTextBox" onchange="optPortalChange()" 
+					style="position:relative;width:240px;">
+				</input>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" width="30%" valign="top">
+				<label id="lblWorkspace" class="dsLabel" for="txtWorkspace" style="position:relative;">
+					Local Workspace:&nbsp;
+				</label>
+			</td>
+			<td valign="top">
+				<input type="text" id="txtWorkspace" class="dsTextBox" onchange="optWkspChange()" 
+					style="position:relative;width:240px;">
+				</input>
+			<input id="btnBrowseWksp" type="button" class="dsDlgButton" onclick="optWkspBrowse()"  value="" 
+				style="position:relative;width:20px;background-image:url(../images/3dots.gif);background-position:center;background-repeat:no-repeat;" >
+			</input>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" width="30%" valign="top">
+				<label id="lblRecentMax" class="dsLabel" for="txtRecentMax" style="position:relative;">
+					Recent Files:&nbsp;
+				</label>
+			</td>
+			<td valign="top">
+				<input type="text" id="txtRecentMax" class="dsTextBox" onchange="ppgEnableApply()" 
+					onkeypress="optNbrKeyPress()" maxlength="1" style="position:relative;width:24px;">
+				</input>
+				&nbsp;&nbsp;
+				<input type="checkbox" id="cbxOpenRecent" onclick="ppgEnableApply()" style="position:relative;height:16px;width:16px;"></input>
+				<label id="lblOpenRecent" class="dsLabel" for="cbxOpenRecent" style="position:relative;">
+					Open Most Recent at Startup&nbsp;
+				</label>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" width="30%" valign="top">
+				<label id="lblLeftBar" class="dsLabel" for="selLeftBar" style="position:relative;">
+					Left Bar Size:&nbsp;
+				</label>
+			</td>
+			<td valign="top">
+				<select id="selLeftBar" class="dsListText" onchange="ppgEnableApply()">
+					<option value=15>15</option>
+					<option value=20>20</option>
+					<option value=25>25</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td align="right" width="30%" valign="center">
+				<label id="lblRightBar" class="dsLabel" for="selRightBar" style="position:relative;">
+					Right Bar Size:&nbsp;
+				</label>
+			</td>
+			<td valign="top">
+				<select id="selRightBar" class="dsListText" style="margin-top:2px;" onchange="ppgEnableApply()">
+					<option value=15>15</option>
+					<option value=20>20</option>
+					<option value=25>25</option>
+				</select>
+			</td>
+		</tr>
+		<tr><td colspan="2">&nbsp;</td></tr>
+	</table>
+	</div>
+	
+	<!-- OK, cancel buttons -->
+	<div id="divButtons" style="position:absolute;top:expression(document.body.clientHeight-40);height:10%;width:100%;">
+	<table border="0" width="100%" height="100%">
+	<tr>
+		<td colspan="2" align="right">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="optOK()" 
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnApply" type="button" class="dsDlgButton" onclick="optApply()" 
+				style="position:relative;width:70px;" disabled value="Apply">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="optCancel()" 
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+	</tr>
+	</table>
+	</div>
+
+</body>
+</html>

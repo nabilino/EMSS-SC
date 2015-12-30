@@ -1,0 +1,75 @@
+<html>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/default.htm,v 1.2.28.2 2012/08/08 12:48:47 jomeli Exp $NoKeywords: $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<head>
+<title>Select Default Value</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script language="javascript" src="default.js"></script>
+</head>
+<body onload="defInit()" onkeydown="defOnKeyDown()" style="background-color:buttonface;visibility:hidden;cursor:wait;">
+	<table width="100%" height="100%">
+
+		<tr height="25px">
+			<td colspan="2" align="left">
+			&nbsp;
+			<input type="radio" id="rdLiteral" name="rdDef"  style="position:relative;" checked onclick="defRadioClicked()"></input>
+			<span id="lblLit" for="rdLiteral" class="dsLabel" style="position:relative;">Literal</span>
+			<input type="radio" id="rdUserdef" name="rdDef"  style="position:relative;" onclick="defRadioClicked()"></input>
+			<span id="lblUsr" for="rdUserdef" class="dsLabel" style="position:relative;">User Definition</span>
+		</tr>
+		<tr height="25px">
+			<td align="right"><span id="lblValue" class="dsLabel" style="position:relative;">Value</span></td>
+			<td><input id="txtValue" class="dsTextBox" style="position:relative;width:170;"></input></td>
+		</tr>
+		<tr height="125px" valign="center" align="center">
+		<td colspan="2">
+			<select id="lstUserDef" class="dsListText" size="8" style="height:expression(this.size*17);width:240px;"
+					onchange="defChgUserDefSel()" ondblclick="defDblClickUserDef()"></select>
+		</td>
+		</tr>
+		<tr height = "25px">
+			<td colspan="2" align="center">
+				<input type="text" class="dsTextBox" id="txtFind" onkeypress="defOnTextKeyPress()" disabled
+					style="position:relative;width:180px;border-style:inset;border-width:2px;border-color:white;">
+				</input>
+				<input id="btnFind" type="button" class="dsDlgButton" onclick="defFind()" style="width:50px" disabled value="Find"></input>
+			</td>
+		</tr>
+		<tr><td colspan="2">
+		<hr size="0" noshade="1" style="width:100%"></hr>
+		</td></tr>
+		<tr height="25px">
+		<td colspan="2" align="right">
+			<input id="btnSelect" type="button" class="dsDlgButton" onclick="defSelect()"
+				style="position:relative;width:70px;" value="OK">
+			</input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()"
+				style="position:relative;width:70px;" value="Cancel">
+			</input>
+		</td>
+		</tr>
+	</table>
+</body>
+</html>

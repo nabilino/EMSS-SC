@@ -1,0 +1,215 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/css/drill.css,v 1.5.2.8.2.3 2014/01/10 14:29:57 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/ 
+body button div span table td tr th a
+{
+	font-size:		11px;
+	font-family:	Arial;
+}
+
+button.drillAround
+{
+	background-color:	transparent;
+	background:			url("../images/htmldoc.gif") no-repeat;
+	border:				0px;
+	width:				16px;
+	height:				16px;
+	overflow:			hidden;
+	cursor:				pointer;
+}
+
+button.drillAroundInfor
+{
+	background-image:	url("../infor/images/btn_drilldown_enabled.png");
+	width:				14px;
+	height:				14px;
+	border:				0px;
+	margin:				0px;
+	padding:			0px;
+	overflow:			hidden;
+	cursor:				pointer;
+}
+
+button.drillAroundOverInfor
+{
+	background-image:	url("../infor/images/btn_drilldown_over.png");
+	width:				14px;
+	height:				14px;
+	border:				0px;
+	margin:				0px;
+	padding:			0px;
+	overflow:			hidden;
+	cursor:				pointer;
+}
+button.drillAroundPressInfor
+{
+	background-image:	url("../infor/images/btn_drilldown_press.png");
+	width:				14px;
+	height:				14px;
+	border:				0px;
+	margin:				0px;
+	padding:			0px;
+	overflow:			hidden;
+	cursor:				pointer;
+}
+
+button.alphabetBtn
+{
+	font-size:			xx-small;
+	font-weight:		normal;
+	font-family:		Arial;	
+}
+
+div.buttonBar
+{
+	color:				#000000;
+	background-color:	#DFDFDF;
+	position:			absolute;
+	top:				0px;
+	left:				0px;
+	height:				31px;
+	padding:			0px;
+	z-index:			85;
+	border-top:			0px;
+	border-left:		0px;
+	border-right:		0px;
+	border-bottom:		1px solid #646464;
+}
+
+.itemBodyDrill
+{
+	background-color:	#FFFFFF;
+	position:			absolute;
+	top:				44px;
+	left:				0px;
+	padding:			10px;
+	border:				0px;
+	text-align:			center;
+	overflow:			auto;
+}
+
+.fieldlabel2
+{
+	font-family:		Arial;
+	font-weight:		normal;
+	color:				#000000;
+	font-size: 			11px;
+}
+
+table.listTable tbody td
+{
+	color:			#000000;
+	font-size:		xx-small;
+	font-family:	Arial;
+	font-weight:	normal;
+	padding:		2px;
+}
+/* *********************************************************** */
+table thead th
+{
+	font-size:		xx-small;
+	font-weight:	bold;
+	font-family:	Tahoma, Verdana, Arial, Sans-Serif;
+	color:			#000000;
+	text-align:		left;
+	white-space:	nowrap;
+}
+
+table thead th.columnhead
+{
+	background:		url('../images/tab_bg.gif') 0% 0%;
+	padding:		5px 5px 5px 1px;
+	border-bottom:	1px solid #DFDFDF;
+}
+
+table thead th.columnheadcenter
+{
+	background:		url('../images/tab_bg.gif') 0% 0%;
+	padding:		5px 5px 5px 1px;
+	border-bottom:	1px solid #DFDFDF;
+	text-align:		center;
+}
+
+table thead th.columnheadright
+{
+	background:	url('../images/tab_rt.gif') no-repeat 100% 0%;
+	padding:		5px 5px 5px 1px;
+	border-bottom:	1px solid #DFDFDF;
+}
+
+table thead th.columnheadleft
+{
+	background:		url('../images/tab_lt.gif') no-repeat 0% 0%;
+	padding:		5px 5px 5px 8px;
+	border-bottom:	1px solid #DFDFDF;
+}
+
+table tbody tr.emptyMsg td
+{
+	color:			#666666;
+	font-size:		x-small;
+	font-family:	verdana, sans-serif;
+	font-weight:	normal;
+	font-style:		italic;
+	text-align:		center;
+}
+
+table.dataTable tbody tr.emptyMsg td
+{
+	color:			#666666;
+	font-size:		xx-small;
+	font-family:	verdana, sans-serif;
+	font-weight:	normal;
+	font-style:		italic;
+	text-align:		center;
+	border-bottom:	1px solid #DFDFDF;
+}
+
+table.dataTable tbody tr
+{
+	background-color:	#FFFFFF;
+	padding:			0;
+}
+
+table.dataTable tbody td.singleCol
+{
+	border-left: 1px solid #646464;
+	border-right: 1px solid #646464;
+}
+
+table.dataTable tbody td.leftCol
+{
+	border-left: 1px solid #646464;
+}
+
+table.dataTable tbody td.rightCol
+{
+	border-right: 1px solid #646464;
+}
+
+table.dataTable tbody td.rightColAlignRight
+{
+	border-right: 1px solid #646464;
+	text-align: right;
+}
+

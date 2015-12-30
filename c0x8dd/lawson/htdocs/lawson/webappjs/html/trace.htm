@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!-- $Header: /cvs/cvs_archive/applications/webtier/webappjs/html/trace.htm,v 1.5.2.3.2.4 2014/02/18 16:42:34 brentd Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->
+<html lang="en">
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+	<meta charset="utf-8">
+	<title>TRACE - Lawson SEA Products</title>
+	<script src="../javascript/trace.js"></script>
+	<script src="../javascript/events.js"></script>
+	<link href="../css/trace.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body onload="trace_init(1)" onkeydown="trace_keydown(event)" onunload="trace_unload()">
+	<div id="navigation">
+		<form onsubmit="return false;">
+			<button onclick="clearTrace()" accessKey="c"><u>C</u>lear</button>
+			<button onclick="printTrace()" accessKey="p"><u>P</u>rint</button>
+			<button onclick="stopTrace()" accessKey="s"><u>S</u>top Trace</button>
+		</form>
+	</div>
+	<div id="messages">
+	</div>
+</body>
+</html>
+

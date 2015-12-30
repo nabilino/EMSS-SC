@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/pagedesigner/controls/pglocaltrans.xml,v 1.2.34.2 2012/08/08 12:48:49 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="transfer" phraseId="lblLocalTransfer" img="path.gif" host="leftbar">
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="TITLE" phraseId="lblTitle" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="windowoption" phraseId="lblWindowOption" readonly="0" init="ptr" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblNewWin" value="win"/>
+			<OPTION phraseId="lblPassUrl" value="ptr"/>
+			<OPTION phraseId="lblReplacePar" value="rtr"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="track" readonly="0" init="0" draw="hide" edit="X" type="simple"/>
+	<PROPERTY id="src" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="tp" readonly="0" init="transfer" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="nm" readonly="0" init="Transfer" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="interval" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="dseq" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="ahide" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="border" readonly="0" init="0" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="host" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTY id="PDL" readonly="0" init="" edit="X" draw="hide" type="simple"/>
+	<PROPERTYSET id="menudata" draw="page" type="object"/>
+	<PROPERTYPAGE id="proppage" htm="pagedesigner/dialogs/proppgnavlet.htm" height="360" width="720" />
+	<EVENT id="oninit" label="OnInit" parms="" returns="" />
+	<EVENT id="onbeforetransfer" label="OnBeforeTransfer" parms="" returns="" />
+	<RULES>
+		<RULE id="isParent" value="0"/>
+		<RULE id="isChild" value="1"/>
+		<RULE id="isResizable" value="0"/>
+		<RULE id="isMoveable" value="0"/>
+	</RULES>
+</CONTROL>

@@ -1,0 +1,22 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<script>
+// Replace this file with your English Policy Manual document (user language = ""),
+// or define an HTML handbook for another language with the name policy_manual_[language].htm
+function writeContent()
+{
+	self.main.document.getElementById("paneHeader").innerHTML = parent.getSeaPhrase("POLICIES","ESS");
+	self.main.document.getElementById("paneBody").innerHTML = '<div class="fieldlabelbold" style="text-align:left;padding-left:10px;padding-right:10px;padding-top:10px">'
+	+parent.getSeaPhrase("POLICYMANUAL","ESS")+'</div>'
+
+	self.main.stylePage();
+}
+</script>
+</head>
+<body onload="writeContent()">
+	<iframe id="main" name="main" style="left:0%;width:100%;height:100%" src="/lawson/xhrnet/ui/headerpane.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/xml/manuals/policy_manual.htm,v 1.5.2.2 2011/05/04 21:10:17 brentd Exp $ -->

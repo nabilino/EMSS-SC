@@ -1,0 +1,326 @@
+<html>
+<head>
+<script>
+var gmsg = "";
+var gmsgnbr = "";
+var gfldnbr = "";
+var bncount = 0;
+var count = 0;
+var exitAgs = false;
+var updatetype = "BS10";
+var BS10 = {};
+BS10.EMP_LABEL_NAME = "";
+BS10.BAE_COST_DIVISOR = "";
+BS10.BAE_CURRENT_DATE = "";
+function initBS10()
+{
+	BS10.PT_COMPANY = "";
+	BS10.PT_EMPLOYEE = "";
+	BS10.PT_PROCESS_LEVEL = "";
+	BS10.PT_FAMILY_STATUS = "";
+	BS10.PT_GROUP_NAME = "";
+	BS10.PT_PROCESS_ORDER = "";
+	BS10.PT_PLAN_TYPE = "";
+	BS10.PT_PLAN_CODE = "";
+	BS10.PT_BEN_START_DATE = "";
+	BS10.PT_FIELDS_SET = "";
+}
+initBS10();
+
+function FormatDecimalField(fldval, decimals)
+{
+	if (fldval.charAt(fldval.length - 1) == "+" || fldval.charAt(fldval.length - 1) == "-")
+		fldval = fldval.substring(0,fldval.length - 1);
+	var fmtval = "";
+	var nonzero = false;
+	for (var i=0; i<fldval.length; i++)
+	{
+		if (fldval.charAt(i) >= 0 && fldval.charAt(i) <= 9)
+		{
+			if (nonzero)
+				fmtval += fldval.charAt(i);
+			else if (fldval.charAt(i) != "0")
+			{
+				nonzero = true;
+				fmtval += fldval.charAt(i);
+			}
+		}
+	}
+	if (fmtval.length > 0)
+	{
+		if (decimals == 4)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+			if (fmtval.length == 2)
+				fmtval = "00" + fmtval;
+			if (fmtval.length == 3)
+				fmtval = "0" + fmtval;
+		}
+		if (decimals == 3)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+			if (fmtval.length == 2)
+				fmtval = "00" + fmtval;
+		}
+		if (decimals == 2)
+		{
+			if (fmtval.length == 1)
+				fmtval = "000" + fmtval;
+		}
+	}
+	if (fmtval.length > 0)
+	{
+		var x = fmtval.length - decimals;
+		fmtval = fmtval.substring(0,x) + "." + fmtval.substring(x,fmtval.length);
+	}
+	if (decimals == 0)
+		fmtval += "00";
+	return fmtval;
+}
+
+function setValues(nbr, dec)
+{
+	var num = nbr;
+	var negative = false;
+	if ((num+'').indexOf('-') != -1 && (num+'').indexOf('-') != 0)
+		negative = true;
+	if((num+'').indexOf('.') == -1)
+    {
+		num = parseFloat(num);
+		num += '';
+		nbr = FormatDecimalField(num, dec);
+    }
+    else
+    	nbr = parseFloat(num);
+	if (negative)
+		nbr = '-' + nbr;
+	return nbr;
+}
+
+function V(fldnbr, fldval)
+{
+	if (updatetype == "BS10")
+	{
+		if (count == 0) exitAgs = false
+		if (exitAgs) return;
+		if (fldnbr == "PT-COMPANY")
+		{
+			BS10.PT_COMPANY = fldval;
+		}
+		else if (fldnbr == "PT-EMPLOYEE")
+		{
+			BS10.PT_EMPLOYEE = fldval;
+		}
+		else if (fldnbr == "PT-PROCESS-LEVEL")
+		{
+			BS10.PT_PROCESS_LEVEL = fldval;
+		}
+		else if (fldnbr == "PT-FAMILY-STATUS")
+		{
+			BS10.PT_FAMILY_STATUS = fldval;
+		}
+		else if (fldnbr == "PT-GROUP-NAME")
+		{
+			BS10.PT_GROUP_NAME = fldval;
+		}
+		else if (fldnbr == "PT-PROCESS-ORDER")
+		{
+			BS10.PT_PROCESS_ORDER = fldval;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-TYPE")
+		{
+			BS10.PT_PLAN_TYPE = fldval;
+		}
+		else if (fldnbr == "PT-PLN-PLAN-CODE")
+		{
+			BS10.PT_PLAN_CODE = fldval;
+		}
+		else if (fldnbr == "PT-BEN-START-DATE")
+		{
+			BS10.PT_BEN_START_DATE = fldval;
+		}
+		else if (fldnbr == "PT-FIELDS-SET")
+		{
+			BS10.PT_FIELDS_SET = fldval;
+		}	
+		else if (fldnbr == "EMP-SHORT-NAME")
+		{
+			BS10.EMP_LABEL_NAME = fldval;
+		}	
+		else if (fldnbr == "BAE-COST-DIVISOR")
+		{
+			BS10.BAE_COST_DIVISOR = fldval;
+		}
+		else if (fldnbr == "BAE-CURRENT-DATE")
+		{
+			BS10.BAE_CURRENT_DATE = fldval;
+		}
+		else if (fldnbr == "PLN-PLAN-TYPE"+(count+1))
+		{
+			if (fldval.length > 2)
+				return;
+			count++;
+			bncount = parent.currentBens.length;
+			if (fldval == "")
+			{
+				exitAgs = true;
+				return;
+			}
+			parent.currentBens[bncount] = new Object();
+			parent.currentBens[bncount].plan_type = fldval;
+			parent.currentBens[bncount].employee_label_name_1 = BS10.EMP_LABEL_NAME;
+		}
+		else if (fldnbr == "PLN-PLAN-TYPE-XLT"+count)
+		{
+			parent.currentBens[bncount].plan_type_xlt = fldval;
+		}
+		else if (fldnbr == "PLN-PLAN-CODE"+count)
+		{
+			parent.currentBens[bncount].plan_code = fldval;
+		}
+		else if (fldnbr == "BEN-START-DATE"+count)
+		{
+			parent.currentBens[bncount].start_date = fldval;
+		}
+		else if (fldnbr == "PLN-DESC"+count)
+		{
+			parent.currentBens[bncount].plan_desc = fldval;
+		}
+		else if (fldnbr == "BEN-COVER-AMT"+count)
+		{
+			parent.currentBens[bncount].cover_amt = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-MULTIPLE"+count)
+		{
+			parent.currentBens[bncount].multiple = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-NBR-HOURS"+count)
+		{
+			parent.currentBens[bncount].nbr_hours = setValues(fldval,2);
+		}		
+		else if (fldnbr == "BEN-PCT-AMT-FLAG"+count)
+		{
+			parent.currentBens[bncount].pct_amt_flag = fldval;
+		}
+		else if (fldnbr == "BEN-COMP-CONT"+count)
+		{
+			parent.currentBens[bncount].comp_cont = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-PRE-AFT-FLAG"+count)
+		{
+			parent.currentBens[bncount].pre_aft_flag = fldval;
+		}
+		else if (fldnbr == "BEN-STOP-DATE"+count)
+		{
+			parent.currentBens[bncount].stop_date = fldval;
+		}
+		else if (fldnbr == "BEN-COV-OPTION"+count)
+		{
+			parent.currentBens[bncount].cov_option = fldval;
+		}
+		else if (fldnbr == "BEN-EMP-PRE-CONT"+count)
+		{
+			parent.currentBens[bncount].emp_pre_cont = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-EMP-AFT-CONT"+count)
+		{
+			parent.currentBens[bncount].emp_aft_cont = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-CMP-FLX-CONT"+count)
+		{
+			parent.currentBens[bncount].cmp_flx_cont = setValues(fldval,2);
+		}
+		else if (fldnbr == "RECORD-TYPE"+count)
+		{
+			if (fldval.length == 1) fldval = "0" + fldval;
+			parent.currentBens[bncount].record_type = fldval;
+		}
+		else if (fldnbr == "COP-COVER-DESC"+count)
+		{
+			parent.currentBens[bncount].bncovopt_cov_desc = fldval;
+		}
+		else if (fldnbr == "BEN-DEP-COVER-AMT"+count)
+		{
+			parent.currentBens[bncount].dep_cover_amt = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-BOND-DED-AMT"+count)
+		{
+			parent.currentBens[bncount].bond_ded_amt = setValues(fldval,2);
+		}
+		else if (fldnbr == "BEN-ANNUAL-AMT"+count)
+		{
+			parent.currentBens[bncount].annual_amt = setValues(fldval,2);
+		}		
+		else if (fldnbr == "BEN-MTCH-UP-TO"+count)
+		{
+			parent.currentBens[bncount].mtch_up_to = fldval;
+		}
+		else if (fldnbr == "BEN-COMP-MATCH"+count)
+		{
+			parent.currentBens[bncount].comp_match = fldval;
+		}
+		else if (fldnbr == "CVR-SALARY-PCT"+count)
+		{
+			parent.currentBens[bncount].salary_pct = setValues(fldval,2);
+		}		
+		else if (fldnbr == "CVR-LIFE-ADD-FLG"+count)
+		{
+			parent.currentBens[bncount].life_add_flg = fldval;
+		}		
+		else if (fldnbr == "BCC-REMAIN-CYCLES"+count)
+		{
+			parent.currentBens[bncount].remain_cycles = fldval;
+		}
+		else if (fldnbr == "BEN-PLAN-OPTION"+count)
+		{
+			parent.currentBens[bncount].plan_option = fldval;
+		}
+		else if (fldnbr == "PLN-CMP-DED-CODE-P"+count)
+		{
+			parent.currentBens[bncount].plan_cmp_ded_code_p = fldval;
+		}
+		else if (fldnbr == "PLN-WAIVE-FLAG"+count)
+		{
+			parent.currentBens[bncount].plan_waive_flag = fldval;
+		}
+		else if (fldnbr == "HDB-DEPENDENT"+count)
+		{
+			parent.currentBens[bncount].dependents_dependent = fldval;
+		}
+	}
+}
+
+function DataReturned(fldnbr, msgnbr, msg)
+{
+	gfldnbr = fldnbr;
+	gmsgnbr = msgnbr;
+	gmsg = msg;
+}
+</script>
+</head>
+<body></body>
+</html>
+<!-- Version: 8-)@(#)@10.00.02.00.29 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/Attic/benefitslawheader.htm,v 1.1.2.8 2012/06/29 17:11:59 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

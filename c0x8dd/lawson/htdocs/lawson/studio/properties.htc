@@ -1,0 +1,1194 @@
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/properties.htc,v 1.4.2.5.4.3.12.1.6.2 2012/08/08 12:48:50 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<PUBLIC:COMPONENT id="proparea" tagName=PROPERTIES>
+<PUBLIC:DEFAULTS viewLinkContent/>
+<PUBLIC:METHOD name="getProperty"/>
+<PUBLIC:METHOD name="setProperty"/>
+<PUBLIC:METHOD name="doSetPropertyVal"/>
+<PUBLIC:METHOD name="getElement"/>
+<PUBLIC:METHOD name="setElementValue"/>
+<PUBLIC:METHOD name="paint"/>
+<PUBLIC:METHOD name="paintMultipleControls"/>
+<PUBLIC:METHOD name="addPropertyRow"/>
+<PUBLIC:METHOD name="createDefaultPropCtl"/>
+<PUBLIC:METHOD name="createSelectPropCtl"/>
+<PUBLIC:METHOD name="createTextBrowsePropCtl"/>
+<PUBLIC:METHOD name="clearAll"/>
+<PUBLIC:METHOD name="clearValues"/>
+<PUBLIC:METHOD name="updateValues"/>
+<PUBLIC:METHOD name="updateBrowseValue"/>
+<PUBLIC:METHOD name="addId"/>
+<PUBLIC:METHOD name="addAllIds"/>
+<PUBLIC:METHOD name="changeId"/>
+<PUBLIC:METHOD name="removeId"/>
+<PUBLIC:METHOD name="removeAllIds"/>
+<PUBLIC:METHOD name="showIdProperties"/>
+<PUBLIC:METHOD name="clearIdSelection"/>
+<PUBLIC:METHOD name="enable"/>
+<PUBLIC:METHOD name="disable"/>
+<PUBLIC:METHOD name="setFocusPA"/>
+<PUBLIC:METHOD name="enablePA"/>
+<PUBLIC:METHOD name="disablePA"/>
+<PUBLIC:PROPERTY name="enabled" get="isEnabled"/>
+<link type="text/css" id="StyleLink" rel="stylesheet" href="studio.css" />
+
+<SCRIPT language="javascript" src="servenv.js"></SCRIPT>
+<SCRIPT language="javascript">
+proparea.enabled = true;
+
+function addPropertyRow(oTable, rowId, bClick, c0Id, c0Name, c0Text, c1Id, c1Name, c1HTML)
+{
+	var row = oTable.insertRow();
+	row.id = "pa_row" + rowId;
+
+	if (bClick)
+		row.onclick = setCurrentProperty;
+
+	cell = row.insertCell(0);
+	cell.className = "dsProperty";
+	cell.width = "40%";
+
+	if (c0Id != null)
+		cell.id = c0Id;
+
+	if (c0Name != null)
+		cell.name = c0Name;
+
+	cell.innerText = c0Text;
+
+	cell = row.insertCell(1);
+	cell.className = "dsProperty";
+	cell.width = "60%";
+
+	if (c1Id != null)
+		cell.id = c1Id;
+
+	if (c1Name != null)
+		cell.name = c1Name;
+
+	cell.innerHTML = c1HTML;
+}
+
+function createDefaultPropCtl(propId, strDisabled, strValue, blnHasKeyDown, strBlur)
+{
+	return "<INPUT type='text' class='dsProperty' " +
+			"style='left:0px;top:0px;height:99%;width:100%;border:0px;' onfocus='setCurrentProperty()' " +
+			"id='" + propId + "' " + ((blnHasKeyDown) ? "onkeydown='textKeyDown(event)' " : "") +
+			"onblur='" + strBlur + "' " + strDisabled + 
+			((strValue == null) ? "" : "value='" + strValue + "'") + " />";
+}
+
+function createSelectPropCtl(oProperty, strDisabled, strValue)
+{
+	var strHTML = "<SELECT class='dsProperty' style='left:0px;top:0px;height:99%;width:100%;border:0px;' id='" +
+			oProperty.id +"' onfocus='setCurrentProperty()' onchange='setPropertyVal(event)' " + 
+			strDisabled + ">";
+
+	var len = oProperty.options.length;
+	for (var j=0; j<len; j++)
+		strHTML += "<OPTION value='" + oProperty.options[j][1] + "' " + 
+				((strValue == oProperty.options[j][1]) ? "SELECTED" : "") + ">" +
+				oProperty.options[j][0] + "</OPTION>";
+
+	strHTML += "</SELECT>"
+	return strHTML;
+}
+
+function createTextBrowsePropCtl(propId, strDisabled, strValue, blnHasEvents)
+{
+	var strHTML = "<INPUT type='text' class='dsProperty' style='left:0px;top:0px;height:99%;width:80%;border:0px;' " +
+			strDisabled + " value='" + strValue + "' id='" + propId + "' ";
+
+	if (blnHasEvents)
+		strHTML += "onfocus='setCurrentProperty()' onkeydown='textKeyDown(event)' onblur='setPropertyVal(event)' ";
+
+	strHTML += "/><INPUT type='button' class='dsButton' style='" +
+			"left:81%;top:0;height:16px;width:16px;background-position:center;background-repeat:no-repeat;" +
+			"background-image:url(images/3dots.gif);' onclick='onClickBrowseButton(this)' " +
+			"onfocus='setCurrentProperty()' id='btn_" + propId + "' />";
+	return strHTML;
+}
+
+function getProperty(propId)
+{
+	var propElement = document.getElementById(propId);
+	var value = "";
+	if(propElement)
+	{
+		if(propElement.nodeName == "SELECT")
+			value = propElement.options[propElement.selectedIndex].value;
+		else if(propElement.nodeName == "INPUT")
+			value = propElement.value;
+	}
+	return value;
+}
+
+function setProperty(propId, value)
+{
+	var propElement = document.getElementById(propId);
+	if (!propElement) return;
+
+	if(propElement.nodeName == "SELECT")
+	{
+		var len = propElement.options.length;
+		for(var i=0; i<len; i++)
+		{
+			if(value == propElement.options[i].value)
+			{
+				propElement.selectedIndex = i;
+				break;
+			}
+		}
+		if(i == len)propElement.selectedIndex = -1;
+	}
+	else if(propElement.nodeName == "INPUT")
+		propElement.value = value;
+}
+
+function getEnabled()
+{
+	return proparea.enabled;
+}
+
+function getFromId(strWhat, strId)
+{
+	if (!designStudio.activeDesigner
+	|| !designStudio.activeDesigner.activeDocument)
+		return null;
+
+	var ctlInst = designStudio.activeDesigner.activeDocument.controls.item(strId);
+	if(!ctlInst)return null;
+
+	var ctl = designStudio.activeDesigner.toolBox.getControlObject(ctlInst.ctlId);
+
+	switch (strWhat)
+	{
+		case "Properties":
+			if(!ctl) return null;
+			return ctl.properties;
+		case "PropertyBag":
+			return ctlInst.propertyBag;
+		case "PropertyPage":
+			if(!ctl) return null;
+			return ctl.propPage;
+	}
+}
+
+function onMouseOverBtn()
+{
+	if(!proparea.enabled)return;
+	var btn=window.event.srcElement
+	if (btn.className=="dsViewButtonActive") return
+	btn.className="dsViewButtonHover"
+}
+function onMouseOutBtn()
+{
+	if(!proparea.enabled)return;
+	var btn=window.event.srcElement
+	if (btn.className=="dsViewButtonActive") return
+	btn.className="dsViewButton"
+}
+
+function showPropertyPage()
+{
+	if(!proparea.enabled)return;
+	var btn=document.getElementById("btn_proppage")
+	if (!btn) return;
+	btn.focus()
+	btn.click()
+}
+
+function setPropertiesOrder(btn)
+{
+	if (!designStudio.activeDesigner)return;
+	if(!proparea.enabled)return;
+
+	var btn1=document.getElementById("btn_sortAZ");
+	var btn2=document.getElementById("btn_group");
+	if(btn.id == "btn_sortAZ")
+	{
+		btn2.className = "dsViewButton";
+		btn1.className = "dsViewButtonActive";
+	}
+	else
+	{
+		btn1.className = "dsViewButton";
+		btn2.className = "dsViewButtonActive";
+	}
+	paintPropertyWindow();
+	setFocusPA();
+}
+
+function getPropertiesOrder()
+{
+	var btn=document.getElementById("btn_sortAZ")
+	if (btn.className == "dsViewButtonActive")
+		return ("sortAZ");
+	else
+		return ("group");
+}
+
+function paint(properties, propertyBag, propPage)
+{
+	// Paints a single control
+	if (!properties) return null;
+
+	clearAll();				// clear property table rows
+
+	// disable property pages button
+	var btnPP=document.getElementById("btn_proppages")
+	btnPP.className="dsViewButtonDisabled";
+	btnPP.disabled=true;
+
+	var oTable = document.getElementById("tblProperties");
+	var property = null;
+	var strValue;
+	var strDisabled;
+	var strHtml = "";
+	var count = properties.count;
+
+	// set the order of the properties
+	var propArray=new Array()
+	var dsProps=new top.DataStorage()
+	for (var i=0; i < count; i++)
+	{
+		propArray[i]=properties.item(i).name
+		dsProps.add(properties.item(i).name, properties.item(i).id)
+	}
+	switch (getPropertiesOrder())
+	{
+		case "sortAZ":
+			propArray.sort()
+			break;
+		case "group":
+			break;
+	}
+
+	// build the properties display
+	for (var i=0; i<count; i++)
+	{
+		property = properties.item(dsProps.getItem(propArray[i]).value);
+		if (property.draw == "hide") continue;
+
+		strDisabled = (propertyBag && propertyBag.getElementROF(property.id)) ? "disabled='true'" : ""
+		strValue = (propertyBag) ? propertyBag.getElement(property.id) : property.init;
+		if (!strValue) strValue = "";
+
+		switch (property.draw)
+		{
+			case "select":
+				strHtml = createSelectPropCtl(property, strDisabled, strValue);
+				break;
+
+			case "textbrowse":
+				strHtml = createTextBrowsePropCtl(property.id, strDisabled, strValue, true);
+				break;
+
+			default:
+				strHtml = createDefaultPropCtl(property.id, strDisabled, strValue, true, "setPropertyVal(event)");
+				break;
+		}
+		addPropertyRow(oTable, i, true, "lbl_" + property.id, property.name, property.name, 
+				"cell_" + property.id, property.name, strHtml);
+	}
+
+	// do we have a property page?
+	if(propPage && typeof(propPage) != "undefined")
+	{
+		// enable property pages button
+		btnPP.className="dsViewButton";
+		btnPP.disabled=false;
+
+		strDisabled = (propertyBag && propertyBag.getElementROF(property.id)) ? "disabled='true'" : ""
+		strHtml = createTextBrowsePropCtl("proppage", strDisabled, "", false);
+		addPropertyRow(oTable, i, false, null, "proppage0", "(Custom)", "cell_proppage", "proppage1", strHtml);
+	}
+
+	// set the current row and notify the designer
+	if (oTable.rows.length) oTable.currentRow = 0;
+	var propInfo = new Object();
+	propInfo.ctlInstId = propertyBag.getElement("id");
+	propInfo.propertyBag = propertyBag;
+	var eventObj = designStudio.createEventObject(ON_PROPERTYAREA_PAINTED, null, null, propInfo);
+	designStudio.activeDesigner.eventHandler.processEvent(eventObj);
+}
+
+function paintMultipleControls()
+{
+	// Paints multiple controls of same or different types
+	var ctlInstId = designStudio.activeDesigner.activeDocument.selectedControls.item(0).id;
+	var properties = getFromId("Properties", ctlInstId);
+	if (!properties) return null;
+	var propPage = getFromId("PropertyPage", ctlInstId);
+
+	// clear property table rows
+	clearAll();
+
+	// disable property pages button
+	var btnPP = document.getElementById("btn_proppages");
+	btnPP.className = "dsViewButtonDisabled";
+	btnPP.disabled = true;
+
+	var oTable = document.getElementById("tblProperties");
+	var property = null;
+	var strHTML = "";
+	var dsProps = matchProperties();
+
+	// build the properties display
+	var count = dsProps.properties.length;
+	for (var i=0; i<count; i++)
+	{
+		property = dsProps.properties.getItem(dsProps.sortOrder[i]).value;
+
+		switch (property.draw)
+		{
+			case "select":
+				strHTML = createSelectPropCtl(property, "", property.value);
+				break;
+
+			default:
+				strHTML = createDefaultPropCtl(property.id, "", property.value, 
+						true, "setPropertyValMultiple(event)");
+				break;
+		}
+		addPropertyRow(oTable, i, true, "lbl_" + property.id, property.name, 
+				property.name, "cell_" + property.id, property.name, strHTML);
+
+		// make sure nothing is displayed where values didn't match for a select element
+		if (property.draw == "select" && property.value == "")
+			setProperty(property.id, property.value);			
+	}
+
+	clearIdSelection();
+
+	// do we have a property page? use first item of selected controls
+	if (propPage && typeof(propPage) != "undefined")
+	{
+		// enable property pages button
+		btnPP.className = "dsViewButton";
+		btnPP.disabled = false;
+	}
+
+	// set the current row and notify the designer
+	if (oTable.rows.length) oTable.currentRow = 0;
+	var propInfo = new Object();
+	propInfo.ctlInstId = "";
+	propInfo.propertyBag = null;
+	var eventObj = designStudio.createEventObject(ON_PROPERTYAREA_PAINTED, null, null, propInfo);
+	designStudio.activeDesigner.eventHandler.processEvent(eventObj);
+}
+
+function matchProperties()
+{
+	var selectedControls = designStudio.activeDesigner.activeDocument.selectedControls;
+	var ctlInstId = selectedControls.item(0).id;
+	var properties = getFromId("Properties", ctlInstId);
+	var propertyBag = getFromId("PropertyBag", ctlInstId);
+	var dsPropsKeep = new top.DataStorage();
+	var dsProps = null;
+	var propsItem = null;
+	var strValue = "";
+	var oMatch = new Match();
+
+	// populate dsPropsKeep with first control
+	var count = properties.count;
+	for (var i=0; i<count; i++)
+	{
+		var property = properties.item(i);
+		if (property.draw == "hide" || property.draw == "textbrowse" 
+				|| property.id == "id"
+				|| propertyBag && propertyBag.getElementROF(property.id)) continue;
+		strValue = (propertyBag) ? propertyBag.getElement(property.id) : "";
+		dsPropsKeep.add(properties.item(i).id, new MatchProps(property, strValue));
+	}
+
+	// loop through rest of controls
+	var len = selectedControls.count;
+	for (var x=1; x<len; x++)
+	{
+		dsProps = new top.DataStorage();
+		ctlInstId = selectedControls.item(x).id;
+		properties = getFromId("Properties", ctlInstId);
+		propertyBag = getFromId("PropertyBag", ctlInstId);
+
+		// loop through all properties on control and keep the matched items
+		count = properties.count;
+		for (var i=0; i<count; i++)
+		{
+			// check if item exists; if it doesn't, continue
+			propsItem = oMatch.matchItems(dsPropsKeep, properties.item(i).id);
+			if (!propsItem) continue;
+
+			propsItem = propsItem.value;
+			property = properties.item(i);
+			if (!property) continue;
+
+			// check if valid for display; if not, continue
+			if (property.draw == "hide" || property.draw == "textbrowse" 
+					|| property.id == "id"
+					|| propertyBag && propertyBag.getElementROF(property.id)) continue;
+
+			// make sure the draw properties are the same
+			if (property.draw != propsItem.draw) continue;
+
+			// if values are the same, keep for display; otherwise, an empty string
+			strValue = (!propertyBag) ? "" :
+					(propertyBag.getElement(property.id) == propsItem.value)
+							? propsItem.value : "";
+
+			dsProps.add(properties.item(i).id, new MatchProps(property, strValue));
+		}
+		dsPropsKeep = dsProps;
+	}
+	oMatch.properties = dsPropsKeep;
+	oMatch.sortOrder = sortPropertyArray(dsPropsKeep);
+	return oMatch;
+}
+
+function sortPropertyArray(dsProps)
+{
+	var aryProps = new Array();
+	var len = dsProps.length;
+
+	for (var x=0; x<len; x++)
+		aryProps.push(dsProps.children(x).name);
+
+	switch (getPropertiesOrder())
+	{
+		case "sortAZ":
+			aryProps.sort()
+			break;
+		case "group":
+			break;
+	}
+
+	return aryProps;
+}
+
+function MatchProps(property, strValue)
+{
+	this.id = property.id;
+	this.name = property.name;
+	this.draw = property.draw;
+	this.init = property.init;
+	this.value = strValue;
+	this.options = property.options;						  
+}
+
+function Match()
+{
+	this.properties = null;
+	this.sortOrder = new Array();
+	this.items = new top.DataStorage();
+	this.items.add("left", "col");
+	this.items.add("col", "left");
+	this.items.add("top", "row");
+	this.items.add("row", "top");
+	this.items.add("width", "sz");
+	this.items.add("sz", "width");
+}
+
+Match.prototype.matchItems = function(dsProps, name)
+{
+	var propsItem = dsProps.getItem(name);
+
+	if (!propsItem)
+	{
+		var alternate = this.items.getItem(name);
+		if (!alternate)
+			return null;
+		else
+			return dsProps.getItem(alternate.value);
+	}
+	else
+		return propsItem;
+}
+
+function clearAll()
+{
+	var tblProp = document.getElementById("tblProperties");
+	if(!tblProp)return;
+	var len = tblProp.rows.length;
+	for(var i=len; i > 0; i--)
+		tblProp.deleteRow(i-1);
+}
+
+function setCurrentProperty()
+{
+	var row = event.srcElement;
+	while(row.id.indexOf("pa_row") == -1)
+		row = row.parentNode;
+	var oTable = document.getElementById("tblProperties");
+	oTable.rows[oTable.currentRow].cells[0].style.backgroundColor="window";
+	oTable.rows[oTable.currentRow].cells[0].style.color="windowtext";
+	row.cells[0].style.backgroundColor = "highlight";
+	row.cells[0].style.color = "highlighttext";
+	oTable.currentRow=row.rowIndex;
+}
+
+function textKeyDown(evt)
+{
+	if (evt.keyCode == 13)
+		setPropertyVal(evt)
+}
+
+function setPropertyVal(evt)
+{
+	var src = evt.srcElement;
+	setTimeout("dsPropArea.doSetPropertyVal('"+src.id+"')",10);
+}
+function doSetPropertyVal(id)
+{
+	var srcElement=document.getElementById(id);
+	var value="", prevVal, len;
+	if(srcElement.nodeName == "SELECT")
+		value = srcElement.options[srcElement.selectedIndex].value;
+	else if(srcElement.nodeName == "INPUT")
+		value = srcElement.value;
+	var propId = srcElement.id;
+
+	if (!designStudio.activeDesigner.activeDocument.bMultipleSelection
+	&& designStudio.activeDesigner.activeDocument.activeControl
+	&& value == designStudio.activeDesigner.activeDocument.activeControl.get(propId))
+		return;
+
+	if(propId == "id")
+	{
+		prevVal = designStudio.activeDesigner.activeDocument.activeControl.get(propId)
+		if(value == "")
+		{
+			setProperty(propId, prevVal);
+			return;
+		}
+		if(prevVal != value && !designStudio.activeDesigner.activeDocument.acceptableId(prevVal, value))
+		{
+			srcElement.value = prevVal;
+			srcElement.focus();
+			srcElement.select();
+			return;
+		}
+	}
+	designStudio.activeDesigner.workSpace.views.item("PROPERTYAREA").bUpdatedProperty = true;
+
+	var stateObj = new LawCollection();
+	var propInfo=new Object();
+	propInfo.propertyId = propId;
+	propInfo.selectedElements = new LawCollection();
+
+	if (designStudio.activeDesigner.activeDocument
+	&& designStudio.activeDesigner.activeDocument.bMultipleSelection)
+	{
+		if(value == "") return;
+		var id, ctlId;
+		len = designStudio.activeDesigner.activeDocument.selectedControls.count;
+		for(var i=0; i<len; i++)
+		{
+			designStudio.activeDesigner.workSpace.views.item("PROPERTYAREA").bUpdatedProperty = true;
+			id = designStudio.activeDesigner.activeDocument.selectedControls.item(i).id
+			prevVal = designStudio.activeDesigner.activeDocument.controls.item(id).get(propId);
+			value = checkRules(id, propId, value);
+			var dsc = new DataStorage();
+			dsc.add(propId,value);
+			designStudio.activeDesigner.activeDocument.updateProperty(propId, value, id);
+			propInfo.selectedElements.add(id, dsc);
+			if(prevVal != value)
+			{
+				var dsp = new DataStorage();
+				dsp.add(propId,prevVal);
+				stateObj.add(id, new PAState(id, dsp, dsc));
+			}
+		}
+	}
+	else if(designStudio.activeDesigner.activeDocument.activeControl)
+	{
+		prevVal = designStudio.activeDesigner.activeDocument.activeControl.get(propId);
+		value = checkRules(designStudio.activeDesigner.activeDocument.activeControl.id, propId, value);
+		var dsc = new DataStorage();
+		dsc.add(propId,value);
+		designStudio.activeDesigner.activeDocument.updateProperty(propId, value,
+				designStudio.activeDesigner.activeDocument.activeControl.id);
+		propInfo.selectedElements.add(designStudio.activeDesigner.activeDocument.activeControl.id, dsc);
+		if(prevVal != value)
+		{
+			var dsp = new DataStorage();
+			dsp.add(propId,prevVal);
+			var bIdChange = (propId == "id")?true:false;
+			stateObj.add(designStudio.activeDesigner.activeDocument.activeControl.id,
+				new PAState(designStudio.activeDesigner.activeDocument.activeControl.id, dsp, dsc, bIdChange));
+		}
+	}
+	var commandObj = new PACommand("propChange", stateObj, true,
+						designStudio.activeDesigner.workSpace.editor.mode,
+						designStudio.activeDesigner.workSpace.editor.currentCanvas.id);
+	designStudio.activeDesigner.activeDocument.commandHistory.add(commandObj);
+	propId = propId.toLowerCase();
+	var evtObj = designStudio.createEventObject(ON_PROPERTY_CHANGE, null, null, propInfo);
+	designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+}
+
+function checkRules(ctlInstId, propId, value)
+{
+	var rules = designStudio.activeDesigner.activeDocument.getControlRules(ctlInstId);
+	if (!rules) return value;
+
+	var newVal=null;
+	var bIsMetric=false;
+	switch (propId.toLowerCase())
+	{
+		case "height":
+			bIsMetric=true;
+			value = (isNaN(parseInt(value)) ? 0 : parseInt(value));
+			var minHt = rules.item("minHeight") 
+					? parseInt(rules.item("minHeight").value)
+					: null;
+			var maxHt = rules.item("maxHeight")
+					? parseInt(rules.item("maxHeight").value)
+					: null;
+			if (minHt && value < minHt) newVal= minHt;
+			if (maxHt && value > maxHt) newVal= maxHt;
+			break;
+		case "width":
+		case "sz":
+			bIsMetric=true;
+			value = (isNaN(parseInt(value)) ? 0 : parseInt(value));
+			var minWd = rules.item("minWidth") 
+					? parseInt(rules.item("minWidth").value)
+					: null;
+			var maxWd = rules.item("maxWidth")
+					? parseInt(rules.item("maxWidth").value)
+					: null;
+			if (minWd && value < minWd) newVal = minWd;
+			if (maxWd && value > maxWd) newVal = maxWd;
+			break;
+	}
+
+	// allow designer chance to inspect and set value of metric
+	if (bIsMetric)
+	{
+		var propInfo=new Object();
+		propInfo.instId = ctlInstId;
+		propInfo.propId = propId.toLowerCase();
+		propInfo.value = value;
+		propInfo.newVal = newVal;
+		var evtObj = designStudio.createEventObject(ON_BEFORE_METRIC_RULE_CHANGE, null, null, propInfo);
+		var useVal=designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+
+		// boolean return value means event not implemented (should return string/number)
+		newVal = (typeof(useVal) == "boolean" ? newVal : useVal);
+	}
+
+	if (newVal && value != newVal)
+	{
+		setElementValue(document.getElementById(propId), newVal);
+		value = newVal;
+	}
+	return value;
+}
+
+function updateValues(ctlInst, name)
+{
+	var propInfo=new Object();
+	propInfo.propertyId = "";
+	propInfo.selectedElements = new LawCollection();
+	var dsVals=new DataStorage();
+	var strChgId=""
+	var dsPropsKeep = null;
+
+	// from a drag/drop or move with arrow keys
+	if (typeof(name) == "undefined")
+	{
+		if (designStudio.activeDesigner.activeDocument
+		&& designStudio.activeDesigner.activeDocument.bMultipleSelection)
+			dsPropsKeep = matchProperties();
+
+		var ctl=designStudio.activeDesigner.toolBox.getControlObject(ctlInst.ctlId, ctlInst.ctlGrpId);
+		strChgId = ctlInst.id;
+		var len = ctl.properties.count;
+		for (var i=0; i < len; i++)
+		{
+			var nm = ctl.properties.item(i).id;
+			var val = ctlInst.get(nm);
+			var elem = document.getElementById(nm);
+			var prev = getElementValue(elem);
+			var bBypass = false;
+
+			// if multiple selection, check for different values for properties
+			if (dsPropsKeep)
+			{
+				// don't update display value if values are different or blank
+				var keepItem = dsPropsKeep.properties.getItem(nm);
+				if (keepItem && keepItem.value.value == "")
+					bBypass = true;
+			}
+			// display blank if multiple selection and values are different
+			setElementValue(elem,(bBypass ? "" : val));
+			dsVals.add(nm,val)
+		}
+	}
+	// from a value change on the property window
+	else
+	{
+		val = ctlInst.get(name);
+		strChgId=ctlInst.id
+		var elem = document.getElementById(name);
+		var prev=getElementValue(elem);
+		if (val != prev)
+		{
+			setElementValue(elem,val);
+			dsVals.add(name,val)
+		}
+	}
+
+	// notify designer?
+	if (dsVals.length != 0)
+	{
+		propInfo.selectedElements.add(strChgId,dsVals)
+		var evtObj = designStudio.createEventObject(ON_PROPERTY_CHANGE, null, null, propInfo);
+		designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+	}
+}
+
+function setElementValue(elem, v)
+{
+	if(!elem) return;
+
+	if(elem.nodeName == "SELECT")
+	{
+		var len = elem.options.length;
+		for (var j=0; j<len; j++)
+		{
+			if(elem.options[j].value == v)
+			{
+				elem.selectedIndex = j;
+				break;
+			}
+		}
+		if (j == len)
+			elem.selectedIndex = -1;
+	}
+	else if(elem.nodeName == "INPUT")
+		elem.value = v;
+}
+
+function getElementValue(elem)
+{
+	if(!elem) return;
+
+	if(elem.nodeName == "SELECT")
+	{
+		var selIndex=elem.selectedIndex
+		return ( (selIndex == -1) ? "" : elem.options[selIndex].value );
+	}
+	else if(elem.nodeName == "INPUT")
+		return (elem.value);
+	else
+		return ("");
+}
+
+function getElement(elemId)
+{
+	if(!elemId) return null;
+
+	var elem=document.getElementById(elemId)
+	return (elem);
+}
+
+function clearValues(ctlId)
+{
+	var ctl=designStudio.activeDesigner.toolBox.getControlObject(ctlId);
+	var len = ctl.properties.count;
+	for(var i=0; i<len; i++)
+	{
+		var nm = ctl.properties.item(i).id;
+		var elem = document.getElementById(nm);
+		if(elem)
+		{
+			if(elem.nodeName == "SELECT")
+				elem.selectedIndex = -1;
+			else if(elem.nodeName == "INPUT")
+				elem.value = "";
+		}
+	}
+}
+
+function setPropertyValMultiple()
+{
+	var propertyId = event.srcElement.id;
+	if (event.srcElement.value == "") return;
+	if (designStudio.activeDesigner.activeDocument
+	&& designStudio.activeDesigner.activeDocument.bMultipleSelection)
+	{
+		var len = designStudio.activeDesigner.activeDocument.selectedControls.count;
+		for (var i=0; i<len; i++)
+		{
+			designStudio.activeDesigner.workSpace.views.item("PROPERTYAREA").bUpdatedProperty = true;
+			designStudio.activeDesigner.activeDocument.updateProperty(propertyId, event.srcElement.value,
+				designStudio.activeDesigner.activeDocument.selectedControls.item(i).id);
+		}
+	}
+}
+
+function onClickBrowseButton(btnObj)
+{
+	var selId = document.getElementById("selectId");
+	var id = selId.options[selId.selectedIndex].value;
+	var propId, prop, ctl, propPg;
+	propId = btnObj.id.substr(4);
+	ctl = designStudio.activeDesigner.toolBox.getControlObject(
+				designStudio.activeDesigner.activeDocument.activeControl.ctlId);
+	if(propId == "proppage")
+		propPg = ctl.propPage
+	else
+		prop = ctl.properties.item(propId);
+
+	if(prop && prop.dialog == "")
+	{
+		var ds = new DataStorage()
+		ds.add("ctlName",id)
+		ds.add("propName",propId)
+		var eventObj = designStudio.createEventObject(ON_CLICK_PROPAREA_BROWSEBTN, null, null, ds);
+		designStudio.activeDesigner.eventHandler.processEvent(eventObj);
+		return;
+	}
+	if(propPg && propPg.dialog == "")
+	{
+		var eventObj = designStudio.createEventObject(ON_CLICK_PROPPAGE, null, null, id);
+		designStudio.activeDesigner.eventHandler.processEvent(eventObj);
+		return;
+	}
+	// open the dialog
+	var dialogArgs = new Array();
+	var dialogHtm, dialogStyle;
+	dialogArgs[0] = window;
+	dialogArgs[2] = designStudio.activeDesigner.source;
+	dialogArgs[3] = designStudio.activeDesigner.workSpace.editor.cwDoc.getElementById(id);
+	if(prop)
+	{
+		dialogArgs[1] = document.getElementById(propId).value;
+		dialogHtm = prop.dialog;
+		dialogStyle = "dialogHeight:"+prop.dialogHeight+"px;dialogWidth:"+prop.dialogWidth+
+			"px;dialogTop:px;dialogLeft:px;center:yes;help:no;scroll:no;status:no;";
+	}
+	else if(propPg)
+	{
+		dialogArgs[1] = getFromId("PropertyBag", id)
+		dialogHtm = propPg.dialog;
+		dialogStyle = "dialogHeight:"+propPg.dialogHeight+ "px;dialogWidth:"+propPg.dialogWidth+
+			"px;dialogTop:px;dialogLeft:px;center:yes;help:no;scroll:no;status:no;";
+	}
+	else
+		return;
+
+	var returnVal = window.showModalDialog(studioPath+"/"+dialogHtm, dialogArgs, dialogStyle);
+
+	if(typeof(returnVal) != "undefined" && prop)
+		updateBrowseValue(id,propId,returnVal)
+	else if(propPg)
+	{
+		// notify the designer
+		var propInfo=null;
+		if(typeof(returnVal) != "undefined")
+		{
+			propInfo=new Object();
+			propInfo.propertyId = propId;
+			propInfo.selectedElements = new LawCollection();
+			var dataStorage=new DataStorage();
+			dataStorage.add(id,returnVal)
+			propInfo.selectedElements.add(id, dataStorage);
+		}
+		var evtObj = designStudio.createEventObject(ON_PROPERTYPAGE_RETURN, null, null, propInfo);
+		designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+	}
+}
+
+function updateBrowseValue(ctlId, propId, newValue)
+{
+	// move the value to the screen
+	var objText = document.getElementById(propId);
+	var	prevVal = objText.value
+	if (prevVal == newValue) return;
+
+	objText.value = newValue;
+	objText.select();
+
+	// update the control instance
+	var ctlInst=null
+	ctlInst=designStudio.activeDesigner.activeDocument.getControlInstance(ctlId)
+	ctlInst.set(propId,newValue)
+
+	// notify the designer
+	var propInfo=new Object();
+	propInfo.propertyId = propId;
+	propInfo.selectedElements = new LawCollection();
+	var dataStorage=new DataStorage();
+	dataStorage.add(propId,newValue)
+	propInfo.selectedElements.add(ctlId, dataStorage);
+	var evtObj = designStudio.createEventObject(ON_PROPERTY_CHANGE, null, null, propInfo);
+	designStudio.activeDesigner.eventHandler.processEvent(evtObj);
+}
+
+function addId(strId)
+{
+	var option = document.createElement("OPTION");
+	option.value = strId;
+	option.text = strId;
+
+	var selId = document.getElementById("selectId");
+	selId.add(option);
+	if (selId.options[0].value == "")
+		selId.removeChild(selId.children(0))
+}
+
+function changeId(oldId, newId)
+{
+	var selId = document.getElementById("selectId");
+	var len = selId.options.length;
+	for (var i=0; i<len; i++)
+	{
+		if (selId.options[i].value == oldId)
+		{
+			selId.options[i].text = newId;
+			selId.options[i].value = newId;
+			break;
+		}
+	}
+}
+
+function removeId(strId)
+{
+	var selId = document.getElementById("selectId");
+	var len = selId.options.length;
+	for (var i=0; i<len; i++)
+	{
+		if (selId.options[i].value == strId)
+			break;
+	}
+	if(i > len)return;
+	var option = selId.options[i];
+	if(option)
+	{
+		selId.removeChild(option);
+		if(designStudio.activeDesigner.activeDocument.activeControl
+		  && strId != designStudio.activeDesigner.activeDocument.activeControl.id)
+			return;
+		var host=designStudio.activeDesigner.activeDocument.mainHost;
+		designStudio.activeDesigner.activeDocument.selectControlInstance(host);
+	}
+}
+
+function removeAllIds()
+{
+	var selId = document.getElementById("selectId");
+	var len = selId.options.length;
+	for (var i=len-1; i>=0; i--)
+	{
+		selId.removeChild(selId.options[i]);
+	}
+}
+
+function addAllIds()
+{
+	if (!designStudio.activeDesigner 
+	|| !designStudio.activeDesigner.activeDocument)
+		return;
+
+	var ctl = null;
+	var len = designStudio.activeDesigner.activeDocument.controls.count;
+	for(var i=0; i<len; i++)
+	{
+		ctl = designStudio.activeDesigner.activeDocument.controls.item(i);
+		if(!ctl.deleted)
+			addId(ctl.id);
+	}
+}
+
+function showIdProperties(strId)
+{
+	try {
+		if (designStudio.activeDesigner.activeDocument
+				&& designStudio.activeDesigner.activeDocument.bMultipleSelection)
+		{
+			paintMultipleControls();
+		}
+		else
+		{
+			var selId = document.getElementById("selectId");
+			var len = selId.options.length;
+			for(var i=0; i<len; i++)
+			{
+				if(strId == selId.options[i].value)
+				{
+					selId.selectedIndex = i;
+					break;
+				}
+			}
+
+			var properties = getFromId("Properties", selId.options[selId.selectedIndex].value);
+			var propertyBag = getFromId("PropertyBag", selId.options[selId.selectedIndex].value);
+			var propPage = getFromId("PropertyPage", selId.options[selId.selectedIndex].value);
+			paint(properties, propertyBag, propPage);
+		}
+		
+	} catch (e) { }
+}
+
+function onChangeSelectId()
+{
+	if (!designStudio.activeDesigner 
+	|| !designStudio.activeDesigner.activeDocument)
+		return;
+
+	var selId = document.getElementById("selectId");
+	var value=selId.options[selId.selectedIndex].value;
+	var view=designStudio.activeDesigner.workSpace.view;
+	var doc = designStudio.activeDesigner.workSpace.editors.item(view).cwDoc;
+	var elem = doc.getElementById(value);
+	if (elem)
+	{
+		elem.fireEvent("oncontrolselect");
+		elem.setActive();
+	}
+	else
+		designStudio.activeDesigner.activeDocument.selectControlInstance(value);
+}
+
+function clearIdSelection()
+{
+	var selId = document.getElementById("selectId");
+	selId.selectedIndex = -1;
+}
+
+function enable(propId)
+{
+	var elem = document.getElementById(propId);
+	if(elem)
+		elem.disabled = false;
+}
+
+function disable(propId)
+{
+	var elem = document.getElementById(propId);
+	if(elem)
+		elem.disabled = true;
+}
+
+function setFocusPA(propId)
+{
+	var oTable = document.getElementById("tblProperties");
+	if (!oTable) return;
+	var len = oTable.rows.length;
+	if(len == 0)
+	{
+		var selId = document.getElementById("selectId");
+		selId.focus();
+	}
+	else
+	{
+		if(typeof(propId) != "undefined")
+		{
+			var elm = document.getElementById(propId);
+			if(elm)elm.focus();
+		}
+		else
+		{
+			for (var i=0; i < len; i++)
+			{
+				if(!oTable.rows[i].cells[1].children[0].disabled)
+				{
+					oTable.rows[i].cells[1].children[0].focus();
+					break;
+				}
+			}
+		}
+	}
+}
+function enablePA()
+{
+	var tblHead = document.getElementById("tblPropertiesHead");
+	tblHead.disabled = false;
+	var selId = document.getElementById("selectId");
+	selId.disabled = false;
+	var tblProp = document.getElementById("tblProperties");
+	tblProp.disabled = false;
+	proparea.enabled = true;
+}
+
+function disablePA()
+{
+	var tblHead = document.getElementById("tblPropertiesHead");
+	tblHead.disabled = true;
+	var selId = document.getElementById("selectId");
+	selId.disabled = true;
+	var tblProp = document.getElementById("tblProperties");
+	tblProp.disabled = true;
+	clearAll();
+	clearIdSelection();
+	proparea.enabled = false;
+}
+
+</SCRIPT>
+</PUBLIC:COMPONENT>
+<BODY style="background-color:threedface;">
+	<table id="tblPropertiesHead" bgColor="threedface"
+			style="width:100%;table-layout:fixed;" cellspacing="1px">
+		<colgroup><col width="40%"/><col width="60%"/></colgroup>
+		<tr>
+			<td colspan="2" style="height:20px;width:100%;padding:0;">
+				<span id="pa_title" class="dsActiveControlGroup"
+						style="top:0;left:0;height:20px;width:100%;text-align:left;padding-left:5px;padding-top:2px;" onselectstart="return false;">
+					Properties
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" style="height:20px;width:100%;">
+				<select id="selectId" class="dsProperty" style="left:0px;top:0px;height:99%;width:100%;"
+					onchange="onChangeSelectId()">
+					<option value=""></option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2" valign="center" class="dsButtonBar" style="height:24px;width:100%;padding:0;">
+ 				<INPUT type="button" id="btn_sortAZ" class="dsViewButton"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(images/sortAZ.gif);"
+ 					title="Alphabetic" onmouseover="onMouseOverBtn()" onmouseout="onMouseOutBtn()" onclick="setPropertiesOrder(this)" >
+ 				</INPUT>
+	 			<INPUT type="button" id="btn_group" class="dsViewButtonActive"
+ 					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(images/group.gif);"
+ 					title="Categorized" onmouseover="onMouseOverBtn()" onmouseout="onMouseOutBtn()" onclick="setPropertiesOrder(this)" >
+ 				</INPUT>
+				<IMG src="images/vertline.gif" style="position:relative;left:0;top:2;width:13px;">
+				<INPUT type="button" id="btn_proppages" class="dsViewButtonDisabled" disabled="true"
+					style="height:20px;width:20px;background-position:center;background-repeat:no-repeat;background-image:url(images/proppage.gif);"
+					title="Property Pages" onmouseover="onMouseOverBtn()" onmouseout="onMouseOutBtn()" onclick="showPropertyPage()" >
+				</INPUT>
+			</td>
+		</tr>
+	</table>
+	<table id="tblProperties" bgColor="threedface"
+			style="width:100%;table-layout:fixed;" cellspacing="1px">
+		<colgroup><col width="40%"/><col width="60%"/></colgroup>
+	</table>
+</BODY>

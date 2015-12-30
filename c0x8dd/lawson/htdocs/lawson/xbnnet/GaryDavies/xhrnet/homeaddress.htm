@@ -1,0 +1,178 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width" />
+<META HTTP-EQUIV="Pragma" CONTENT="No-Cache">
+<META HTTP-EQUIV="Expires" CONTENT="Mon, 01 Jan 1990 00:00:01 GMT">
+<title>Home Address</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var fromTask = (window.location.search)?unescape(window.location.search):"";
+var EmpInfo = new Object()
+EmpInfo.employee_work_country = ""
+
+function LoadHomeAddress()
+{
+	// Force the program to recall authen only if we haven't called authen before or if
+	// we don't have the bookmarks.
+    if (top && top.authUser && !top.authUser.OfficeObject) {
+		top.authUser = null;
+	}
+	if (opener && opener.top && opener.top.authUser && !opener.top.authUser.OfficeObject) {
+		opener.top.authUser = null;
+	}
+
+	authenticate("frameNm='jsreturn'|funcNm='HomeAddressContent()'|officeObjects=true|sysenv=true|desiredEdit='EM'");
+}
+function HomeAddressContent()
+{
+	stylePage();
+	setLayerSizes();
+	// Netscape 6.2+ does not properly size the iframes by percentages at load time
+	if (!document.all) {
+		document.getElementById("left").style.width = parseInt(window.innerWidth*.49,10)+"px";
+		document.getElementById("right").style.left = parseInt(window.innerWidth*.49,10)+"px";
+		document.getElementById("right").style.width = parseInt(window.innerWidth*.51,10)+"px";
+		document.getElementById("relatedtask").style.width = parseInt(window.innerWidth*.49,10)+"px";
+		document.getElementById("fullrelatedtask").style.width = parseInt(window.innerWidth,10)+"px";
+	}
+
+	// Set the task title.
+	if (fromTask && getVarFromString("from",fromTask) == "lifeevents") {
+		setTaskHeader("header",getSeaPhrase("HOME_ADDR_49","ESS"),"LifeEvents");
+	}
+	else {
+		setTaskHeader("header",getSeaPhrase("HOME_ADDR_0","ESS"),"Personal");
+	}
+
+	// Placing this document in the frameset causes Netscape to spin.
+	self.left.location.replace("/lawson/xhrnet/empaddress.htm?from=main");
+	document.getElementById("left").style.visibility = "visible";
+}
+function OpenHelpDialog()
+{
+    try
+    {
+    	self.left.OpenHelpDialog.apply(this, arguments);;
+    }
+    catch(e)
+    {}
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+	{
+		window.stylerWnd = findStyler(true);
+	}
+
+	if (!window.stylerWnd)
+	{
+		return;
+	}
+
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+	{
+		window.styler = new window.stylerWnd.StylerEMSS();
+	}
+	else
+	{
+		window.styler = window.stylerWnd.styler;
+	}
+
+	var leftFrame = document.getElementById("left");
+	var rightFrame = document.getElementById("right");
+	var relatedTaskFrame = document.getElementById("relatedtask");
+	var fullRelatedTaskFrame = document.getElementById("fullrelatedtask");
+	var winHeight = 464;
+	var winWidth = 400;
+
+	// resize the table frame to the screen dimensions
+	if (document.body.clientHeight)
+	{
+		winHeight = document.body.clientHeight;
+		winWidth = document.body.clientWidth;
+	}
+	else if (window.innerHeight)
+	{
+		winHeight = window.innerHeight;
+		winWidth = window.innerWidth;
+	}
+
+	var contentLeftWidth = (window.styler && window.styler.showLDS) ? (parseInt(winWidth*.49,10) - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winWidth*.49,10) - 12) : (parseInt(winWidth*.49,10) - 7));
+	var contentRightWidth = (window.styler && window.styler.showLDS) ? (parseInt(winWidth*.51,10) - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (parseInt(winWidth*.51,10) - 12) : (parseInt(winWidth*.51,10) - 7));
+	var fullContentWidth = (window.styler && window.styler.showLDS) ? (winWidth - 17) : ((navigator.appName.indexOf("Microsoft") >= 0) ? (winWidth - 12) : (winWidth - 7));
+
+	leftFrame.style.width = parseInt(winWidth*.49,10) + "px";
+	leftFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.left.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.left.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.left.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}
+	try
+	{
+		setTabContentSizes("addrTabs", self.left.addrTabs.frame, contentLeftWidth, winHeight - 35);
+	}
+	catch(e)
+	{}
+	rightFrame.style.left = parseInt(winWidth*.49,10) + "px";
+	rightFrame.style.width = parseInt(winWidth*.51,10) + "px";
+	rightFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.right.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.right.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.right.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}
+	relatedTaskFrame.style.width = parseInt(winWidth*.49,10) + "px";
+	relatedTaskFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.relatedtask.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.relatedtask.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.relatedtask.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}
+	fullRelatedTaskFrame.style.width = winWidth + "px";
+	fullRelatedTaskFrame.style.height = (winHeight - 30) + "px";
+	try
+	{
+		self.fullrelatedtask.document.getElementById("paneBodyBorder").style.width = fullContentWidth + "px";
+		self.fullrelatedtask.document.getElementById("paneBodyBorder").style.height = (winHeight - 35) + "px";
+		self.fullrelatedtask.document.getElementById("paneBody").style.width = "100%";
+	}
+	catch(e)
+	{}
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="fitToScreen();LoadHomeAddress()" onresize="fitToScreen()">
+	<iframe id="header" name="header" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="left" name="left" class="contentframe" src="/lawson/xhrnet/dot.htm" style="position:absolute;top:32px;height:555px;left:0%;width:49%" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="right" name="right" class="contentframe" src="/lawson/xhrnet/dot.htm" style="visibility:hidden;position:absolute;top:32px;height:555px;left:49%;width:51%" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="relatedtask" name="relatedtask" class="contentframe" style="position:absolute;top:32px;height:555px;left:0%;width:49%;visibility:hidden" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="fullrelatedtask" name="fullrelatedtask" class="contentframe" style="position:absolute;top:32px;height:555px;width=803px;left:0%;visibility:hidden" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="jsreturn" name="jsreturn" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/homeaddress.htm,v 1.9.2.18 2011/05/04 21:10:12 brentd Exp $ -->

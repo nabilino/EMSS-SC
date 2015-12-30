@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/uidesigner/controls/cotextarea.xml,v 1.1.4.2.4.3.22.3 2012/08/08 12:48:52 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<CONTROL id="textarea" phraseId="lblTextarea" img="textarea.gif" host="form1" >
+	<PROPERTY id="id" phraseId="lblName" readonly="0" init="" edit="X" draw="text" type="simple"/>
+	<PROPERTY id="nbr" phraseId="lblFieldNbr" readonly="1" init="" edit="X" draw="text" type="simple" />
+	<PROPERTY id="row" phraseId="lblTop" readonly="0" init="2" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="col" phraseId="lblLeft" readonly="0" init="4" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="height" phraseId="lblHeight" readonly="0" init="3" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="width" phraseId="lblWidth" readonly="0" init="12" edit="999" draw="text" type="simple"/>
+	<PROPERTY id="nm" phraseId="lblDataSrc" readonly="1" init="" edit="X" draw="textbrowse" type="simple">
+		<BUTTON id="openDatasrc" htm="" />
+	</PROPERTY>
+	<PROPERTY id="font" phraseId="lblFont" readonly="0" init="" edit="X" draw="textbrowse" type="simple">
+		<BUTTON id="openFont" htm="" />
+	</PROPERTY>
+	<PROPERTY id="color" phraseId="lblColor" readonly="0" init="" edit="X" draw="textbrowse" type="simple">
+		<BUTTON id="openColor" htm=""/>
+	</PROPERTY>
+	<PROPERTY id="border" phraseId="lblBorder" readonly="0" init="1" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="1"/>
+			<OPTION phraseId="lblNo" value="0"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="overflow" phraseId="lblOverflow" readonly="0" init="auto" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblAuto" value="auto"/>
+			<OPTION phraseId="lblHidden" value="hidden"/>
+			<OPTION phraseId="lblScroll" value="scroll"/>
+			<OPTION phraseId="lblVisible" value="visible"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="readonly" phraseId="lblReadonly" readonly="0" init="false" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="true"/>
+			<OPTION phraseId="lblNo" value="false"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="wrap" phraseId="lblWordWrap" readonly="0" init="on" draw="select" type="simple">
+		<OPTIONS>
+			<OPTION phraseId="lblYes" value="on"/>
+			<OPTION phraseId="lblNo" value="off"/>
+		</OPTIONS>
+	</PROPERTY>
+	<PROPERTY id="par" phraseId="" readonly="1" init="" edit="X" draw="hide" type="simple" />
+	<EVENT id="onblur" label="OnBlur" parms="id" returns="" />
+	<EVENT id="onfocus" label="OnFocus" parms="id" returns="" />
+	<RULES>
+		<RULE id="minHeight" value="2"/>
+		<RULE id="minWidth" value="10"/>
+		<RULE id="isParent" value="0"/>
+		<RULE id="isChild" value="1"/>
+		<RULE id="isObject" value="0"/>
+		<RULE id="singleUse" value="0"/> 
+		<RULE id="useInDetail" value="0"/> 
+		<!--RULE id="nodeName" value="TEXTAREA"/--> 
+		<RULE id="nodeName" value="fld"/>
+		<RULE id="nodeTp" value="textArea"/> 
+		<RULE id="allowDataBind" value="1"/> 
+	</RULES>
+</CONTROL>

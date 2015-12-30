@@ -1,0 +1,1393 @@
+/* $Header: /cvs/cvs_archive/applications/webtier/webappjs/lds/css/emss/lds.css,v 1.28.2.11.2.25 2014/02/24 22:05:24 brentd Exp $ */
+/* $NoKeywords: $
+ * LaVersion=8-)@(#)@10.00.05.00.12 Mon Mar 31 10:17:31 Central Daylight Time 2014 */
+/***************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ***************************************************************/
+/* **** Used for LDS styling ***********************************/
+html
+{
+	overflow : visible;
+}
+body
+{
+  background-color : #ffffff;
+  background-attachment : fixed;
+  overflow : hidden;
+  color : #000000;
+  font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+  font-weight : normal;
+  font-size : 12px;
+  margin : 0px;
+  scrollbar-base-color : #c7dbe7;
+}
+body.panecontents
+{
+	background-color : transparent !important;	
+}
+/* --- Print styling --- */
+@media print 
+{
+  table.listStyler, table.listStyler td, table.listStyler th
+  { 
+    border : 1px solid #707070;
+  }
+  .listHeaderLeftBorderStyler, .listHeaderRightBorderStyler, 
+  .listLeftBorderStyler, .listRightBorderStyler, 
+  .listBottomBorderStyler
+  {
+    display : none;
+  }   
+  button.pushButtonStyler, .pushButtonLeftSideStyler,
+  .pushButtonRightSideStyler, .pushButtonLeftSideStylerHover,
+  .pushButtonRightSideStylerHover, .pushButtonLeftSideStylerActive,
+  .pushButtonRightSideStylerActive, .pushButtonLeftSideStylerPress,
+  .pushButtonRightSideStylerPress, .pushButtonSecondaryLeftSideStyler,
+  .pushButtonSecondaryRightSideStyler, .pushButtonSecondaryLeftSideStylerHover,
+  .pushButtonSecondaryRightSideStylerHover, .pushButtonSecondaryLeftSideStylerActive,
+  .pushButtonSecondaryRightSideStylerActive, .pushButtonSecondaryLeftSideStylerPress,
+  .pushButtonSecondaryRightSideStylerPress, .pushButtonContentStyler
+  {
+    display : none;
+  }
+  .checkBoxStyler, .checkBoxActiveStyler
+  {
+    display : none;
+  }
+  input.hiddenElementStyler
+  {
+  	display : -moz-inline-stack;
+  	display : inline-block;
+  }  	
+}
+a
+{
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    	font-size : 12px;
+}
+a.columnsort
+{
+	color : #ffffff;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+   	text-decoration : underline;
+}
+a img
+{
+	border : 0px;
+	border-width : 0px;
+}
+form
+{
+	display : inline;
+}
+.taskheader
+{
+	background-color : #ffffff;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 16px;
+	font-weight : normal;
+	height : 26px;
+	overflow : hidden;
+	margin-left : 6px;
+	width : auto;	
+}
+.progressbar
+{	
+	display : none;
+}
+.progressmsg
+{
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 16px;
+	font-weight : normal;
+	left : 0px;
+	padding-left : 30px;
+	top : 0px;
+}
+.paneborder
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	height : 100%;
+	padding-bottom : 5px;
+	padding-left : 5px;	
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+	scrollbar-base-color : #c7dbe7;	
+	height : auto;	
+}
+.paneborderlite
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	height : 100%;	
+	padding-bottom : 5px;
+	padding-left : 5px;	
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+	scrollbar-base-color : #c7dbe7;
+	height : auto;	
+}
+.helppaneborder
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	height : 100%;	
+	<!--[if !IE]>
+		height : 100%;
+	<![endif]-->
+	padding-bottom : 5px;
+	padding-left : 5px;
+	overflow : hidden;
+	width : 100%;
+	z-index : 5;
+}
+.paneheader, .paneheaderlite, .paneheader2, .helppaneheader, .paneheadertimeentry
+{
+	background-color : transparent;
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	width : 100%;
+	z-index : 9;
+	white-space : nowrap;
+}
+.dialoglabel
+{
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	height : 16px;
+	margin-bottom : 4px;
+	margin-left : 7px;
+	margin-right : 5px;
+	margin-top : 4px;
+	z-index : 9;
+}
+.helpwindowtableheader
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+  	display : -moz-inline-box;
+  	display : inline-block;
+}
+.panebodyborder, .panebodybordernested
+{
+	height : 100%;
+	overflow : hidden;
+	width : 100%;
+    z-index : 7; 
+    padding-bottom : 5px;
+    <!--[if IE]>
+    padding-bottom : 0px;
+    <![endif]--> 
+}
+.panebodyborder2, .panebodyborder3
+{
+	height : 100%;
+	overflow : hidden;
+	width : 100%;
+    z-index : 7;    	
+    padding-bottom : 5px;
+    <!--[if IE]>
+    padding-bottom : 0px;
+    <![endif]-->
+}
+.panebody, .panebodynested, .panebodylite
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	position : relative;
+	width : 100%;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #c7dbe7;
+}
+.helppanebody
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow-y : auto;
+	overflow-x : hidden;
+	position : relative;
+	width : 100%;
+	padding : 5px;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #c7dbe7;
+}
+.panebodylite2
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+    height : 100%;
+	overflow : auto;
+	width : 49%;
+    z-index : 10;
+    float : left;
+    scrollbar-base-color : #c7dbe7;
+}
+#paneBody1, #paneBody2
+{
+	position : relative;
+}
+.noborderright, .borderright
+{
+}
+.helpicon
+{
+	cursor : pointer;
+	left : 0px;	
+	position : absolute;
+	z-index : 12;
+	display : none;
+}
+.calendaricon, .searchicon
+{
+	cursor : pointer;
+	position :relative;
+	text-align : left;
+	z-index : 10;
+	display : none;
+}
+.helpwindowicon
+{
+	height : 18px;
+	left : 5px;
+	position : absolute;
+	top : 5px;
+	width : 18px;
+	z-index : 12;
+	display : none;
+}
+.fieldlabelboldleft, .fieldlabelboldliteleft, .fieldlabelboldliteunderlineleft
+{
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelbold, .fieldlabelboldlite, .fieldlabelboldliteunderline
+{
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+}
+.fieldlabelboldwhiteblue, .fieldlabelboldwhitegreen
+{
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0px;
+}
+.fieldlabelbolddialog
+{
+    color : #004e96;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 14px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+}
+.fieldlabelgovt
+{
+	background-color : transparent;
+    color : #000000;
+	font-family : Sans-serif;
+    font-size : 10px;
+	font-weight : normal;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovtbold
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 10px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovtboldred
+{
+	background-color : transparent;
+    color : red;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovt1reditalic
+{
+	background-color : transparent;
+    color : red;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : normal;
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovt1bold
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : bold;	
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovt1italic
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 12px;
+	font-weight : normal;	
+	font-style :  italic;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+}
+.fieldlabelgovt1
+{
+	background-color : transparent;
+    color : #000000;
+	font-family : Sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	text-align : left;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+}
+.fieldlabelgovt4
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif;
+    font-size : 20px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	text-align : left;
+	margin : 0;
+}
+.fieldlabelgovt5
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 28px;
+	font-weight : bold;
+	text-align : left;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+}
+.fieldlabelgovt6
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Sans-serif; 
+    font-size : 36px;
+	font-weight : bold;
+	text-align : left;
+	padding-bottom : 1px;
+	padding-left : 0px;
+	padding-right : 0px;
+	padding-top : 1px;
+	margin : 0;
+}
+.plaintableborder, .tableborderbox
+{
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+}
+.plaintablerowheaderborderbottomblue
+{
+	background-color : transparent;
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+}
+.plaintableheaderbordersidesonly2
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+}
+.plaintablecellboldborderright, .plaintableheadertallwhiteright, .plaintableheaderborderright,
+.plaintablecellboldright, .plaintableheaderwhiteright
+{
+	background-color : transparent;
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintableheaderborder, .plaintableheaderbordergreytop, .plaintableheaderbordergrey, .plaintableheaderbordergreybluetop,
+.plaintableheaderborderdarkgreybluetop, .plaintableheaderbordergreywhite, .plaintableheaderbordertall, .plaintableheader, 
+.plaintableheaderwhite, .plaintableheadertall, .plaintableheadertallwhite, .plaintableheaderborderlite, 
+.plaintableheaderborderactive, .plaintableheaderbordertalllite, .plaintableheaderlite, .plaintableheaderactive, 
+.plaintableheadertalllite, .plaintablecellbold, .plaintablecellboldnopadding, .plaintablecellboldborder,
+.plaintableheaderbordersidesbold
+{
+	background-color : transparent;
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+	text-align : left;
+}
+.plaintablecellborderright, .plaintablecellright, .plaintablecellsmallright
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.plaintablecellborderlite, .plaintablecellborderactive, .plaintablecellborderactive2,
+.plaintablecellborder, .plaintablecellborder2, .plaintablecellborderredfont, .plaintablecellbordertall, 
+.plaintablecellborderleft, .plaintablecellborderyellowbg, .plaintablecellbordergreenbg, .plaintablecell, 
+.plaintablecellnopadding, .plaintablecellsmall, .plaintablecelllite, .plaintablecellactive, .plaintablecelltall, 
+.plaintablecellborderyellowbg, plaintablecellbordergreenbg, .plaintableheaderbordersides
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;	
+	z-index : 10;
+}
+.plaintablecelldisplayright, .plaintablecellborderdisplayright
+{
+	background-color : transparent;
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;
+	z-index : 10;
+}
+.fieldlabel, .fieldlabelleft, .plaintablecellborderdisplay, .plaintablecelldisplay, 
+.plaintablecellbordertalldisplay, .plaintablerowheaderdisplay, .plaintablerowheaderborderbottomdisplay,
+.plaintablerowheaderborderbottomleft
+{
+	background-color : transparent;
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellred, .plaintablecellredactive
+{
+	background-color : transparent;
+	color : #c71407;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablecellredright
+{
+	background-color : transparent;
+	color : #c71407;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	z-index : 10;
+	text-align : right;
+}
+.plaintablecellborder2
+{
+	border-bottom : #dddddd 1px solid;
+	border-right : #dddddd 1px solid;
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.plaintablerowheaderbold
+{		
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : bold;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : right;	
+	z-index : 10;
+}
+.plaintablerowheader, .plaintablerowheaderborder, .plaintablerowheaderborderbottom, .plaintablerowheaderborderwhite, 
+.plaintablerowheaderborderwhiteOverDue, .plaintablerowheaderborderlite, .plaintablerowheaderlite, 
+.plaintablerowheaderbordertall, .plaintablerowheaderborderlitewhite
+{		
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;	
+	z-index : 10;
+	text-align : right;
+}
+.tableborder
+{
+	border-left : 1px solid #ced0cf;
+	border-top : 1px solid #ced0cf;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+}
+.tablecellborder
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.tablecellborderyellowbg
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	background-color : #bdd2e1;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.tablecellbordergreenbg
+{
+	border-bottom : 1px solid #ced0cf;
+	border-right : 1px solid #ced0cf;
+	background-color : #e0dee1;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	overflow : hidden;
+	padding-bottom : 1px;
+	padding-left : 5px;
+	padding-right : 5px;
+	padding-top : 1px;
+	text-align : left;
+	z-index : 10;
+}
+.datestring
+{
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+    font-weight : normal;
+    font-style : italic;
+	text-align : left;
+	padding-bottom : 3px;
+	padding-left: 3px;
+	z-index : 10;
+	display : inline-block;	
+}
+.panefooter
+{
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+    font-weight : normal;
+    position : relative;
+	float : none;
+	left : 0px;
+	padding-left : 2px;
+	padding-top : 2px;
+	padding-bottom : 10px;
+	z-index : 10;
+	width : auto;
+	display : block;
+	text-align : left;
+}
+.balanceinnertotals
+{
+	background-color : transparent;
+	text-align : left;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;	
+	width : auto;
+}
+.balanceinnertotals hr
+{
+	text-align : center;
+	width : 82%;
+	height : 1px;
+	color : #999999;
+	background-color : #999999;
+	padding : 0px;
+}
+.balanceinnertotals span /*Misc*/
+{
+	color : #62a3cc;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+}
+.balanceinnertotals h2, .balanceinnertotals li.carryover /*carryover*/
+{
+	color : #e6552b;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+	margin : 0px;
+	padding-left : 10px;
+}
+.balanceinnertotals li
+{
+	color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+	font-weight : normal;
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balanceinnertotals ul
+{
+	list-style-type : none;
+	margin : 0px;
+	padding : 0px;
+}
+.balanceinnerdetails
+{
+	background-color : transparent;
+	text-align : left;
+	color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;	
+	width : auto;
+}
+.balanceinnerdetails hr
+{
+	text-align : left;
+	width : 90%;
+	height : 1px;
+	color : #999999;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;	
+	background-color : #999999;
+	padding : 0px;
+}
+.balanceinnerdetails li span /*Misc*/
+{
+	color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+}
+.balanceinnerdetails li span span /*Misc*/
+{
+	color : #62a3cc;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+}
+.balanceinnerdetails h2, .balanceinnerdetails li.carryover /*carryover*/
+{
+	color : #e6552b;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : normal;
+	margin : 0px;
+	padding-left : 10px;
+}
+.balanceinnerdetails li
+{
+	padding-top : 5px;
+	padding-bottom : 5px;
+	padding-right : 5px;
+	padding-left : 10px;
+}
+.balanceinnerdetails ul
+{
+	margin : 0px;
+	padding : 0px;
+}
+.balancetotals
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : bold;
+	padding-top: 10px;
+	padding-left : 10px;
+	padding-right : 10px;
+	text-align : left;
+    margin : 0;
+}
+.balancedetails
+{
+	background-color : transparent;
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : bold;
+	padding-left : 15px;
+	padding-right : 10px;
+	text-align : left;
+    margin : 0;
+}
+.balancedetails h3 /*Group*/
+{
+	color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+    font-weight : bold;
+	padding-top : 10px;
+	padding-bottom : 0px;
+	margin-bottom : 2px;
+}
+li span.listItem
+{
+	background-color : transparent;
+}
+.filterBar
+{
+    background-color : transparent;
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+}
+td.filterButton span
+{
+	display : inline-block;
+}
+.filterButton
+{
+    background-color : transparent;
+    color : #000000;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 12px;
+    height : 18px;
+    cursor : pointer;
+}
+.filterRecordNbrs
+{
+	color : #0065a4;
+	display : inline-block;
+}
+table.filterTable
+{
+    width : 100%;
+}
+table.filterTable thead
+{
+    background-color : #6699CC;
+    color : white;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterTable th
+{
+    background-color : #6699CC;
+    color : white;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterTableRow
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterTableRow:hover
+{
+    background-color : #D4DFF0;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+a.filterTable:link, a.filterTable:visited, a.filterTable:active
+{
+	background-color : #9DC0E3;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+a.filterTable:hover, a.filterTable:visited:hover
+{
+	background-color : #9DC0E3;
+    color : white;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterList
+{
+	background : transparent;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    margin : 0px;
+    padding : 0px;
+}
+.filterListBody
+{
+	background-color : transparent;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    width : 100%;
+}
+table.filterListTable
+{
+    width : 100%;
+}
+table.filterListTable thead
+{
+    background-color : #CCCCCC;
+    color : white;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+table.filterListTable th
+{
+    background-color :#CCCCCC;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : bold;
+    font-size : 11px;
+    text-align : left;
+    height : 20px;
+	padding-left : 2px;
+}
+.filterListTableRow
+{
+	text-decoration : underline;
+	background-color : transparent;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterListTableRow2
+{
+	background-color : transparent;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+.filterListTableRow:hover
+{
+	text-decoration : underline;
+    background-color : #EEEEEE;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    cursor : pointer;
+}
+a.filterListTable:link, a.filterListTable:visited, a.filterListTable:active
+{
+	background-color : #62a3cc;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+}
+a.filterListTable:hover, a.filterListTable:visited:hover
+{
+	background-color : transparent;
+    color : white;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    text-decoration : underline;
+}
+td.filterListButton span
+{
+	display : inline-block;
+}
+.filterListButton
+{
+    background-color : transparent;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : pointer;
+}
+.filterListButtonDisabled
+{
+    background-color : transparent;
+    color : gray;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : none;
+}
+.filterListButton:hover, .filterListButton:focus
+{
+    background-color : #EEEEEE;
+    color : black;
+    font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-weight : normal;
+    font-size : 8pt;
+    height : 18px;
+    cursor : pointer;
+}
+.nophotoicon
+{
+	height : 18px;
+	width : 18px;
+}
+.splashheader
+{
+	color : #0065a4;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 38px;
+	font-weight : bold;
+	position : absolute;
+}
+.splashlink
+{
+	color : #62a3cc;
+	cursor : pointer;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 26px;
+	font-weight : normal;
+	position : absolute;
+	white-space : nowrap;
+}
+.splashlink:focus 
+{
+	border : 1px dotted #62a3cc;
+}
+.splashicon
+{
+	display : none;
+}
+.panewrapperCM
+{
+	height : 100%;
+	width : 100%;
+}
+.panepaddingCM
+{
+	padding-top : 3px;
+	padding-bottom : 3px;
+	padding-right : 3px;
+	padding-left : 3px;
+	height : 100%;
+	width : 100%;
+}
+.panebackgroundCM
+{
+	background-color : transparent;
+	height : 100%;
+	width : 100%;
+}
+.panebackgroundliteCM
+{
+	background-color : transparent;
+	height : 100%;
+	width : 100%;
+}
+.paneouterborderCM
+{
+	height : 100%;
+	width : 100%;
+	overflow : hidden;
+}
+.paneframeCM
+{
+	padding-top : 26px;
+	padding-bottom : 0px;
+	padding-right : 0px;
+	padding-left : 0px;
+	height : 100%;
+	width : 100%;
+}
+.paneinnerborderCM
+{
+	background-color : transparent;
+	height : 100%;
+	width : 100%;
+}
+.titleCM
+{
+	color : #ffffff;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12pt;
+	font-weight : bold;
+}
+.titlesmallCM
+{
+	color : #ffffff;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+}
+.layertitleCM
+{
+	color : #0065a4;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : bold;
+}
+.contentlabelCM, .contentlabelCM label
+{
+   	color : #000000;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.contenttextCM
+{
+   	color : #000000;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.contenttextheaderCM, .contenttextheaderCM label
+{
+   	color : #0065a4;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.tablerowhighlightCM
+{
+   	background-color : transparent;
+}
+a.contenttextCM
+{
+	color : #62a3cc;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+    font-size : 12px;
+}
+td.contenttextCM
+{
+   	color : #0065a4;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : normal;
+}
+th.contentlabelCM, th.contentlabelCM label
+{
+   	color : #0065a4;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : bold;
+}
+.contenttextdisplayCM
+{
+   	color : #0065a4;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : normal;
+	padding : 1px;
+}
+.buttonCM, .button2CM
+{
+   	color : #000000;
+   	cursor : pointer;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+   	font-weight : normal;
+}
+.tabbordercolorCM
+{
+	background-color : #828282;
+}
+.tabbackgroundcolorCM
+{
+	background-color : transparent;
+}
+.tabupCM
+{
+	cursor : pointer;
+	background-color : transparent;
+   	color : #000000;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : bold;
+	text-decoration : none;
+	display : block;
+}
+.tabdownCM
+{
+	cursor : pointer;
+	text-decoration : none;
+	background-color : #cacaca;
+   	color : #000000;
+   	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+   	font-size : 12px;
+	font-weight : bold;
+	display : block;
+	padding-bottom : 3px;
+	padding-top: 3px;
+}
+.popuphelptextCM
+{
+	background-color :#fffdd3;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+}
+.offscreen
+{
+	position : absolute;
+	width : auto;
+	left : -9999px;
+}
+#paneInnerTabs
+{
+	padding-right : 5px;
+}
+.dataDiv
+{
+	width : 100%;
+	overflow : auto;
+	padding-bottom : 5px;
+}
+.buttonBar
+{
+	float : right;
+	padding-right : 15px;
+}
+.textAlignLeft
+{
+	text-align : left;
+}
+.textAlignRight
+{
+	text-align : right;
+}
+.floatLeft
+{
+	float : left;
+}
+.floatRight
+{
+	float : right;
+}
+.inputbox
+{
+	background-color : transparent;
+	color : #000000;
+	font-family : Segoe UI,Tahoma,Verdana,Arial,Helvetica,sans-serif;
+	font-size : 12px;
+	font-weight : normal;
+}

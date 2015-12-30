@@ -1,0 +1,84 @@
+<HTML>
+<!-- $Header: /cvs/cvs_archive/LawsonPlatform/toolkit/studio/dialogs/imgsel.htm,v 1.2.28.2 2012/08/08 12:48:47 jomeli Exp $ -->
+<!-- $NoKeywords: $ -->
+<!-- LaVersion=8-)@(#)@9.0.1.11.231 2012-09-05 04:00:00 -->
+<!--		*************************************************************** -->
+<!--		*                                                             * -->
+<!--		*                           NOTICE                            * -->
+<!--		*                                                             * -->
+<!--		*   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             * -->
+<!--		*   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              * -->
+<!--		*   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     * -->
+<!--		*   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  * -->
+<!--		*   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         * -->
+<!--		*   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       * -->
+<!--		*   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     * -->
+<!--		*                                                             * -->
+<!--		*   (c) COPYRIGHT 2012 INFOR.  ALL RIGHTS RESERVED.           * -->
+<!--		*   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            * -->
+<!--		*   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          * -->
+<!--		*   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               * -->
+<!--		*   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  * -->
+<!--		*   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  * -->
+<!--		*                                                             * -->
+<!--		*************************************************************** -->
+<HEAD>
+<SCRIPT language="javascript" src="../servenv.js"></SCRIPT>
+<script src="imgsel.js"></script>
+<script src="keyhandlers.js"></script>
+<title>Image Selector</title>
+<link id="StyleLink" type="text/css" rel="stylesheet" href="../studio.css"></link>
+<XML id=pageXLT>
+	<Translate language="English">
+		<phrase id="btnOK">OK</phrase>
+		<phrase id="btnCancel">Cancel</phrase>
+		<phrase id="lblImageSelector">Image Selector</phrase>
+		<phrase id="optNone">None</phrase>
+	</Translate>
+</XML>
+</HEAD>
+
+<BODY onload="imgInit()" onkeypress="imgOnKeyPress()" style="background-color:buttonface;visibility:hidden;">
+
+<table border="0" width="95%" cellspacing="2" style="margin-left:5px;margin-right:5px;">
+	<tr>
+		<td colspan="2" valign="bottom">
+			<label class="dsLabel" style="position:relative;text-align:left;">Image Folder:</label>
+		</td>
+	</tr>
+	<tr>
+		<td colspan="2" valign="top">
+			<label id="lblImageFolder" class="dsLabel" style="position:relative;text-align:left;">&nbsp;</label>
+		</td>
+	</tr>
+	<tr>
+		<td>
+			<label id="lblImageList" class="dsLabel" style="position:relative;text-align:left;">Image List:</label>
+		</td>
+		<td>
+			<label id="lblImageList" class="dsLabel" style="position:relative;text-align:left;">Selected Image:</label>
+		</td>
+	</tr>
+	<tr>
+		<td valign="top">
+			<select class="dsListText" id="selImages" size="10" onchange="imgOnChange()" ondblclick="imgSelected()" 
+				style="position:static;width:100px;height:expression(this.size*20);">
+			</select>
+		</td>
+		<td valign="top">
+			<span style="overflow:auto;height:190px;width:180;border-color:grey;border-width:2px;border-style:inset;">
+				<div style="position:absolute;top:10;left:10;"><img id="imgTag" src=""></img></div>
+			</span>
+		</td>
+	</tr>
+	<tr><td colspan="2">&nbsp;</td></tr>
+	<tr>
+		<td colspan="2" align="center">
+			<input id="btnOK" type="button" class="dsDlgButton" onclick="imgSelected()" value="OK"></input>
+			<input id="btnCancel" type="button" class="dsDlgButton" onclick="window.close()" value="Cancel"></input>
+		</td>
+	</tr>
+</table>
+
+</BODY>
+</HTML>

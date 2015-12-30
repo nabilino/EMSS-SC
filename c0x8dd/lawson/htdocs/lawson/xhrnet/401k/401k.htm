@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=IE8">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width" />
+<title>Savings Plan Modeling</title>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<script src="/lawson/webappjs/commonHTTP.js"></script>
+<script src="/lawson/xhrnet/waitalert.js"></script>
+<script src="/lawson/xhrnet/esscommon80.js"></script>
+<script src="/lawson/webappjs/data.js"></script>
+<script src="/lawson/webappjs/user.js"></script>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/xhrnet/401k/401kfiles/401k.js"></script>
+<script src="/lawson/webappjs/javascript/objects/StylerBase.js?emss"></script>
+<script src="/lawson/webappjs/javascript/objects/emss/StylerEMSS.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script src="/lawson/webappjs/javascript/objects/ActivityDialog.js"></script>
+<script src="/lawson/webappjs/javascript/objects/OpaqueCover.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Dialog.js"></script>
+<script>
+var Scenerios;
+var Frequency = new Array();
+
+function Start401K()
+{
+	Scenerios = new Array(0);
+	authenticate("frameNm='jsreturn'|funcNm='Init()'|desiredEdit='EM'");
+}
+
+function InitFrequency()
+{
+	Frequency = new Array(new FrequencyObject("MO", getSeaPhrase("MONTHLY","ESS"), "12"), new FrequencyObject("QU", getSeaPhrase("QUARTERLY","ESS"), "4"),
+		new FrequencyObject("SA", getSeaPhrase("SEMI_ANNUALLY","ESS"), "2"), new FrequencyObject("AN", getSeaPhrase("ANNUALLY","ESS"), "1"));
+}
+
+function Init()
+{
+	stylePage();
+	var title = getSeaPhrase("SAVINGS_PLAN_MODELING","ESS");
+	setWinTitle(title);
+	setTaskHeader("header",title,"Retirement");
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), GetSalaryInformation);
+}
+
+function GetSalaryInformation()
+{
+	InitFrequency();
+	var dmeObj = new DMEObject(authUser.prodline, "PRRATEHIST");
+	dmeObj.out = "JAVASCRIPT";
+	dmeObj.index = "prhset2";
+	dmeObj.field = "employee.work-country;company;employee;pos-level;annual-hours;beg-date;pay-rate;annual-salary;salary-class;nbr-fte";
+	dmeObj.key = parseInt(authUser.company,10)+"="+parseInt(authUser.employee,10);
+	dmeObj.max = "1";
+	dmeObj.debug = false;
+	dmeObj.func = "Paint()"
+	DME(dmeObj, "jsreturn");
+}
+
+function Paint()
+{
+	if (!self.jsreturn.NbrRecs) 
+	{
+		removeWaitAlert();
+		seaAlert(getSeaPhrase("NO_SALARY_INFO","ESS"), null, null, "error");
+		return;
+	}
+	if (self.jsreturn.record[0].employee_work_country != "US") 
+	{
+		removeWaitAlert();
+		seaAlert(getSeaPhrase("NOT_AVAILABLE_LOCATION","ESS"), null, null, "error");
+		return;
+	}
+	var html = '<form name="savingModel">'
+	+ '<table border="0" cellspacing="0" cellpadding="0" style="width:100%" role="presentation">'
+	+ '<tr><td class="plaintablerowheader" style="width:50%"><label for="beg_bal">'+getSeaPhrase("BEGINNING_BALANCE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" id="beg_bal" name="bb" type="text" size="15" maxlength="15" onchange="parent.ActionTaken(\'savingModel\',this.name,2);" onfocus="this.select()"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader"><label id="empContLbl">'+getSeaPhrase("ANNUAL_EMPLOYEE_CONTRIBUTION","ESS")+'</label><span id="amtPctLbl" class="offscreen">'+getSeaPhrase("AMT_PCT","SEA")+'</span></td><td>&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="empAmtLbl" for="emp_amt">'+getSeaPhrase("AMOUNT","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text"  id="emp_amt" name="employeeamount" size="15" maxlength="15" onchange="parent.ActionTaken(\'savingModel\',this.name,2);parent.SetPctAmt(\'savingModel\',this.name,\'employeepercent\')" onfocus="this.select()" aria-labelledby="empContLbl amtPctLbl empAmtLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal;height:5px">'+getSeaPhrase("OR","ESS")+'</td><td>&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="empSalLbl" for="emp_pct">'+getSeaPhrase("PERCENT_SALARY","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="emp_pct" name="employeepercent" size="10" maxlength="10" onchange="parent.ActionTaken(\'savingModel\',this.name,1);parent.SetPctAmt(\'savingModel\',this.name,\'employeeamount\')" onfocus="this.select()" aria-labelledby="empContLbl amtPctLbl empSalLbl"></td></tr>'
+	if (self.jsreturn.record[0].salary_class == "S")
+		html += SalaryFields(getSeaPhrase("SALARY","ESS"), self.jsreturn.record[0].annual_salary, '');
+	else
+		html += SalaryFields(getSeaPhrase("PAY_RATE","ESS"), self.jsreturn.record[0].pay_rate, getSeaPhrase("PER_HOUR","ESS"));
+	html += '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader"><label id="cmpContLbl">'+getSeaPhrase("ANNUAL_COMPANY_CONTRIBUTION","ESS")+'<span class="offscreen"> '+getSeaPhrase("AMT_PCT_2","SEA")+'</span></label></td><td class="plaintablecell">&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="cmpAmtLbl" for="cmp_amt">'+getSeaPhrase("AMOUNT","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="cmp_amt" name="companyamount" size="15" maxlength="15" onchange="parent.ActionTaken(\'savingModel\',this.name,2);parent.SetPctAmt(\'savingModel\',this.name,\'companypercent\')" onfocus="this.select()" aria-labelledby="cmpContLbl cmpAmtLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal;height:5px">'+getSeaPhrase("OR","ESS")+'</td><td>&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="cmpPctLbl" for="cmp_pct">'+getSeaPhrase("PERCENT_OF_EE_CONT","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="cmp_pct" name="companypercent" size="10" maxlength="10" onchange="parent.ActionTaken(\'savingModel\',this.name,1);parent.SetPctAmt(\'savingModel\',this.name,\'companyamount\')" onfocus="this.select()" aria-labelledby="cmpContLbl cmpPctLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="height:20px">&nbsp;</td><td class="plaintablecell" style="height:20px">&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader"><label id="investLbl">'+getSeaPhrase("INVEST_FACTOR","ESS")+'<label></td><td class="plaintablecell">&nbsp;</td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="cpdIntLbl" for="cpd_int">'+getSeaPhrase("COMPOUND_INTEREST","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><select class="inputbox" id="cpd_int" name="compoundInterest" aria-labelledby="investLbl cpdIntLbl">'
+	for (var i=0; i<Frequency.length; i++) 
+	{
+		html += '<option ';
+		if (Frequency[i].description == "Annually")
+			html += 'selected';
+		html += '>'+Frequency[i].description+'</option>';
+	}
+	html += '</select></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="yearsLbl" for="years">'+getSeaPhrase("YEARS","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="years" name="years" size="2" maxlength="2" onchange="parent.checkYears(this.name)" onfocus="this.select()" aria-labelledby="investLbl yearsLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="intRateLbl" for="int_rate">'+getSeaPhrase("INTEREST_RATE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" id="int_rate" name="anticipatedInterestRate" type="text" size="10" onchange="parent.ActionTaken(\'savingModel\',this.name,1)" onfocus="this.select()" aria-labelledby="investLbl intRateLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheaderborderbottom" style="font-weight:normal"><label id="infRateLbl" for="inf_rate">'+getSeaPhrase("ESTIMATED_INFLATION_RATE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="inf_rate" name="estimatedInflationRate" size="10" onchange="parent.ActionTaken(\'savingModel\',this.name,1)" onfocus="this.select()" aria-labelledby="investLbl infRateLbl"></td></tr>'
+	+ '<tr><td class="plaintablecell">&nbsp;</td>'
+	+ '<td class="plaintablecell">'
+	+ uiButton(getSeaPhrase("CALCULATE","ESS"), "parent.CalculateScenario();return false;", "margin-top:5px")
+	+ uiButton(getSeaPhrase("RESET","ESS"), "parent.Reset();return false;", "margin-top:5px;margin-left:5px")
+	+ '</td></tr></table></form>'
+	self.MAIN.document.getElementById("paneHeader").innerHTML = getSeaPhrase("CALCULATOR","ESS");
+	self.MAIN.document.getElementById("paneBody").innerHTML = html;
+	self.MAIN.stylePage();
+	self.document.getElementById("MAIN").style.visibility = "visible";
+	removeWaitAlert(getSeaPhrase("CNT_UPD_FRM","SEA",[self.MAIN.getWinTitle()]));
+	fitToScreen();
+}
+
+function SalaryFields(labelBefore, payRate, labelAfter)
+{
+	var arg = '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="salLbl" for="salary">'+labelBefore+'&nbsp;'+FormatNumber(payRate)+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="salary" name="salary" size="15" maxlength="15" value=""'
+	+ ' onchange="parent.ActionTaken(\'savingModel\',this.name,2);" onfocus="this.select()" aria-labelledby="empContLbl salLbl"></td></tr>'
+	+ '<tr><td class="plaintablerowheader" style="font-weight:normal"><label id="projIncLbl" for="proj_inc">'+getSeaPhrase("PROJECTED_INCREASE","ESS")+'</label></td>'
+	+ '<td class="plaintablecell"><input class="inputbox" type="text" id="proj_inc" name="projectedIncrease" size="10" maxlength="10" value="" onchange="parent.ActionTaken(\'savingModel\',this.name,3);" onfocus="this.select()" aria-labelledby="empContLbl projIncLbl" aria-describedby="projIncLbl2">&nbsp;'
+	if (labelAfter)
+		arg += '<label id="projIncLbl2">'+labelAfter+'</label>'
+	arg += '</td></tr>'
+	return arg;
+}
+
+function ActionTaken(theForm, myObj, formatFlag)
+{
+	var Frm = self.MAIN.document.forms[theForm];
+	var Field = Frm.elements[myObj];
+	var parentTd = Field.parentNode;
+	clearRequiredField(Field);
+	var fldVal = CheckField(Field.value,Field,formatFlag);
+	if (fldVal != 0 && !fldVal)
+	{
+		setRequiredField(parentTd, getSeaPhrase("INVALID_FIELD","ESS"), Field);
+		return false;
+	}
+	return true;
+}
+
+function CheckField(val, obj, flag)
+{
+	var charBalance = val;
+    if (flag==2 || (flag==3 && (self.jsreturn.record[0].salary_class=="H" || self.jsreturn.record[0].salary_class=="")))
+    {
+        charBalance = FormatNumber(val);
+        obj.value = charBalance;
+    }
+    else if (flag==1 || (flag==3 && self.jsreturn.record[0].salary_class=="S"))
+    {
+        charBalance = FormatPercent(val);
+        obj.value = charBalance;
+    }
+    return charBalance;
+}
+
+function SetPctAmt(theForm, myObj1, myObj2)
+{
+	var Frm = self.MAIN.document.forms[theForm];
+	var Field1 = Frm.elements[myObj1];
+	var Field2 = Frm.elements[myObj2];
+	if (NonSpace(Field1.value) > 0 && parseFloat(Field1.value) != 0)
+		Field2.value = 0;
+	else if (NonSpace(Field2.value) > 0 && parseFloat(Field2.value) != 0 && (NonSpace(Field1.value) == 0 || parseFloat(Field1.value) == 0))
+		Field1.value = 0;
+}
+
+function Reset()
+{
+	self.MAIN.document.savingModel.reset();
+}
+
+function ClearAll()
+{
+	Scenerios = new Array(0);
+}
+
+function CalculateScenario()
+{
+	var formObj = self.MAIN.document.forms["savingModel"];
+	// Check required fields
+	clearRequiredField(formObj.bb);
+	clearRequiredField(formObj.employeeamount);
+	clearRequiredField(formObj.employeepercent);
+	clearRequiredField(formObj.salary);
+	clearRequiredField(formObj.projectedIncrease);
+	clearRequiredField(formObj.companyamount);
+	clearRequiredField(formObj.companypercent);
+	clearRequiredField(formObj.anticipatedInterestRate);
+	clearRequiredField(formObj.estimatedInflationRate);
+	if (!ActionTaken("savingModel","bb",2)) return;
+	if (!ActionTaken("savingModel","employeeamount",2)) return;
+	if (!ActionTaken("savingModel","employeepercent",1)) return;
+	if (!ActionTaken("savingModel","salary",2)) return;
+	if (!ActionTaken("savingModel","projectedIncrease",3)) return;
+	if (!ActionTaken("savingModel","companyamount",2)) return;
+	if (!ActionTaken("savingModel","companypercent",1)) return;
+	if (!ActionTaken("savingModel","anticipatedInterestRate",1)) return;
+	if (!ActionTaken("savingModel","estimatedInflationRate",1)) return;
+	var sal = breakdown(formObj.elements["salary"].value);
+	var AnnualSalary = self.jsreturn.record[0].annual_salary;
+	var SalaryClass = self.jsreturn.record[0].salary_class
+	var AnnualHours = self.jsreturn.record[0].annual_hours;
+	var FTE = self.jsreturn.record[0].nbr_fte;
+	var payRate = (sal) ? sal : self.jsreturn.record[0].pay_rate
+	var	WithFTE = payRate * AnnualHours * FTE;
+	var	WithoutFTE = payRate * AnnualHours;
+   	var mySal = (SalaryClass=="S") ? ((sal) ? sal : AnnualSalary) : ((FTE) ? WithFTE : WithoutFTE);
+	if (!mySal)
+		mySal = payRate * 2080 * 1.0;
+	showWaitAlert(getSeaPhrase("PROCESSING_WAIT","ESS"), function(){CreateNewScenerio(mySal);});
+}
+
+function CreateNewScenerio(s)
+{
+	var formObj = self.MAIN.document.forms["savingModel"];
+	if ((!breakdown(formObj.employeepercent.value) && !breakdown(formObj.employeeamount.value)) && (breakdown(formObj.companypercent.value) || breakdown(formObj.companyamount.value))) 
+	{
+		removeWaitAlert();
+		setRequiredField(formObj.employeepercent, getSeaPhrase("ENTER_EMPLOYEE_CONTRIBUTION","ESS"));
+		return;
+	}
+	try 
+	{
+		index = Scenerios.length;
+	} 
+	catch(e) 
+	{
+		ClearAll();
+	}
+	index = Scenerios.length;
+	Scenerios[index] = new Object();
+	Scenerios[index].beginningBalance = breakdown(self.MAIN.document.savingModel.bb.value);
+	Scenerios[index].employeeAmount = breakdown(formObj.employeeamount.value);
+	Scenerios[index].employeePercent = breakdown(formObj.employeepercent.value);
+	Scenerios[index].Salary	= s;
+	Scenerios[index].projectedIncrease = breakdown(formObj.projectedIncrease.value);
+	Scenerios[index].companyAmount = breakdown(formObj.companyamount.value);
+	Scenerios[index].companyPercent = breakdown(formObj.companypercent.value);
+	Scenerios[index].Frequency = Frequency[formObj.compoundInterest.selectedIndex];
+	Scenerios[index].Years = breakdown(formObj.years.value);
+	Scenerios[index].anticipatedInterestRate = breakdown(formObj.anticipatedInterestRate.value);
+	Scenerios[index].estimatedInflationRate = breakdown(formObj.estimatedInflationRate.value);
+	Scenerios[index].Year = 0;
+	Scenerios[index].employeeContributionTotal = 0;
+	Scenerios[index].companyContributionTotal = 0;
+	Scenerios[index].interestEarned = 0;
+	Scenerios[index].Total = 0;
+	Scenerios[index].inflationAdjustedTotal = 0;
+	Scenerios[index].payRate = (parseFloat(formObj.salary.value)) ? parseFloat(formObj.salary.value) : self.jsreturn.record[0].pay_rate;
+	Scenerios[index].contrib = new Array(0);
+	Scenerios[index].match = new Array(0);
+	Scenerios[index].total = new Array(0);
+	Scenerios[index].inftotal = new Array(0);
+	Scenerios[index].Class = self.jsreturn.record[0].salary_class;
+	Scenerios[index].AnnualHours = self.jsreturn.record[0].annual_hours;
+	Scenerios[index].FTE = (parseFloat(self.jsreturn.record[0].nbr_fte)) ? self.jsreturn.record[0].nbr_fte : 1;
+	if (Scenerios[index].employeeAmount)
+		Scenerios[index].employeeContribution = Scenerios[index].employeeAmount;
+	else
+		Scenerios[index].employeeContribution = Scenerios[index].employeePercent;
+	if (Scenerios[index].companyAmount)
+		Scenerios[index].companyContribution = Scenerios[index].companyAmount;
+	else
+		Scenerios[index].companyContribution = Scenerios[index].companyPercent;
+	prepareResults();
+}
+
+function OpenHelpDialog()
+{
+	openHelpDialogWindow("/lawson/xhrnet/401k/401ktips.htm");
+}
+
+function fitToScreen()
+{
+	if (typeof(window["styler"]) == "undefined" || window.styler == null)
+		window.stylerWnd = findStyler(true);
+	if (!window.stylerWnd)
+		return;
+	if (typeof(window.stylerWnd["StylerEMSS"]) == "function")
+		window.styler = new window.stylerWnd.StylerEMSS();
+	else
+		window.styler = window.stylerWnd.styler;
+	var mainFrame = document.getElementById("MAIN");
+	var resultsFrame = document.getElementById("RESULTS");
+	var graphFrame = document.getElementById("GRAPH");
+	var winObj = getWinSize();
+	var winWidth = winObj[0];	
+	var winHeight = winObj[1];
+	var contentLeftWidth;
+	var contentLeftWidthBorder;
+	var contentRightWidth;
+	var contentRightWidthBorder;
+	var contentHeightBorder;
+	var contentHeight;	
+	var contentWidthBorder;
+	var contentWidth;
+	if (window.styler && window.styler.showInfor)
+	{		
+		contentLeftWidth = parseInt(winWidth*.40,10) - 10;
+		contentLeftWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentLeftWidth + 5 : contentLeftWidth + 2;
+		contentRightWidth = parseInt(winWidth*.60,10) - 10;
+		contentRightWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentRightWidth + 5 : contentRightWidth + 2;	
+		contentWidth = winWidth - 10;
+		contentWidthBorder = (navigator.appName.indexOf("Microsoft") >= 0) ? contentWidth + 5 : contentWidth + 2;				
+		contentHeight = winHeight - 65;
+		contentHeightBorder = contentHeight + 30;	
+	}
+	else if (window.styler && (window.styler.showLDS || window.styler.showInfor3))
+	{
+		contentLeftWidth = parseInt(winWidth*.40,10) - 20;
+		contentLeftWidthBorder = (window.styler.showInfor3) ? contentLeftWidth + 7 : contentLeftWidth + 17;
+		contentRightWidth = parseInt(winWidth*.60,10) - 20;
+		contentRightWidthBorder = (window.styler.showInfor3) ? contentRightWidth + 7 : contentRightWidth + 17;
+		contentWidth = winWidth - 20;
+		contentWidthBorder = (window.styler.showInfor3) ? contentWidth + 7 : contentWidth + 17;		
+		contentHeight = winHeight - 75;	
+		contentHeightBorder = contentHeight + 30;		
+	}
+	else
+	{
+		contentLeftWidth = parseInt(winWidth*.40,10) - 10;
+		contentLeftWidthBorder = contentLeftWidth;
+		contentRightWidth = parseInt(winWidth*.60,10) - 10;
+		contentRightWidthBorder = contentRightWidth;
+		contentWidth = winWidth - 10;
+		contentWidthBorder = contentRightWidth;		
+		contentHeight = winHeight - 60;
+		contentHeightBorder = contentHeight + 24;		
+	}
+	mainFrame.style.width = parseInt(winWidth*.40,10) + "px";
+	mainFrame.style.height = winHeight + "px";
+	try
+	{
+		if (self.MAIN.onresize && self.MAIN.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.MAIN.onresize = null;
+	}
+	catch(e) {}
+	try
+	{
+		self.MAIN.document.getElementById("paneBorder").style.width = contentLeftWidthBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.MAIN.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.MAIN.document.getElementById("paneBody").style.width = contentLeftWidth + "px";
+		self.MAIN.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	resultsFrame.style.width = parseInt(winWidth*.60,10) + "px";
+	resultsFrame.style.height = winHeight + "px";	
+	try
+	{
+		if (self.RESULTS.onresize && self.RESULTS.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.RESULTS.onresize = null;
+	}
+	catch(e) {}
+	try
+	{
+		self.RESULTS.document.getElementById("paneBorder").style.width = contentRightWidthBorder + "px";
+		self.RESULTS.document.getElementById("paneBodyBorder").style.width = contentRightWidth + "px";
+		self.RESULTS.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.RESULTS.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.RESULTS.document.getElementById("paneBody").style.width = contentRightWidth + "px";
+		self.RESULTS.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}
+	graphFrame.style.left = "0px";
+	graphFrame.style.width = winWidth + "px";
+	graphFrame.style.height = winHeight + "px";	
+	try
+	{
+		if (self.GRAPH.onresize && self.GRAPH.onresize.toString().indexOf("setLayerSizes") >= 0)
+			self.GRAPH.onresize = null;
+	}
+	catch(e) {}
+	try
+	{
+		self.GRAPH.document.getElementById("paneBorder").style.width = contentWidthBorder + "px";
+		self.GRAPH.document.getElementById("paneBodyBorder").style.width = contentWidth + "px";
+		self.GRAPH.document.getElementById("paneBorder").style.height = contentHeightBorder + "px";
+		self.GRAPH.document.getElementById("paneBodyBorder").style.height = contentHeight + "px";
+		self.GRAPH.document.getElementById("paneBody").style.width = contentWidth + "px";
+		self.GRAPH.document.getElementById("paneBody").style.height = contentHeight + "px";
+	}
+	catch(e) {}	
+	if (window.styler && window.styler.textDir == "rtl")
+	{
+		mainFrame.style.left = "";
+		mainFrame.style.right = "0px";	
+		resultsFrame.style.left = "0px";
+	}
+	else
+		resultsFrame.style.left = parseInt(winWidth*.40,10) + "px";
+}
+</script>
+</head>
+<body style="overflow:hidden" onload="Start401K()" onresize="fitToScreen()">
+	<iframe id="header" name="header" title="Header" level="1" tabindex="0" style="visibility:hidden;position:absolute;height:32px;width:803px;left:0px;top:0px" src="/lawson/xhrnet/ui/header.htm" frameborder="no" marginwidth="0" marginheight="0" scrolling="no"></iframe>
+	<iframe id="MAIN" name="MAIN" title="Main Content" level="2" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:0px;width:400px;height:505px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpanehelp.htm"></iframe>
+	<iframe id="RESULTS" name="RESULTS" title="Secondary Content" level="3" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:400px;width:392px;height:505px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe id="GRAPH" name="GRAPH" title="Content" level="4" tabindex="0" style="visibility:hidden;position:absolute;top:32px;left:0px;width:800px;height:505px" marginwidth="0" marginheight="0" frameborder="no" scrolling="no" src="/lawson/xhrnet/ui/headerpane.htm"></iframe>
+	<iframe name="jsreturn" title="Empty" style="visibility:hidden;height:0px;width:0px;" src="/lawson/xhrnet/dot.htm"></iframe>
+</body>
+</html>
+<!-- Version: 8-)@(#)@10.00.05.00.12 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xhrnet/401k/401k.htm,v 1.16.2.43 2014/02/24 22:02:31 brentd Exp $ -->
+<!--************************************************************
+ *                                                             *
+ *                           NOTICE                            *
+ *                                                             *
+ *   THIS SOFTWARE IS THE PROPERTY OF AND CONTAINS             *
+ *   CONFIDENTIAL INFORMATION OF INFOR AND/OR ITS              *
+ *   AFFILIATES OR SUBSIDIARIES AND SHALL NOT BE DISCLOSED     *
+ *   WITHOUT PRIOR WRITTEN PERMISSION. LICENSED CUSTOMERS MAY  *
+ *   COPY AND ADAPT THIS SOFTWARE FOR THEIR OWN USE IN         *
+ *   ACCORDANCE WITH THE TERMS OF THEIR SOFTWARE LICENSE       *
+ *   AGREEMENT. ALL OTHER RIGHTS RESERVED.                     *
+ *                                                             *
+ *   (c) COPYRIGHT 2014 INFOR.  ALL RIGHTS RESERVED.           *
+ *   THE WORD AND DESIGN MARKS SET FORTH HEREIN ARE            *
+ *   TRADEMARKS AND/OR REGISTERED TRADEMARKS OF INFOR          *
+ *   AND/OR ITS AFFILIATES AND SUBSIDIARIES. ALL               *
+ *   RIGHTS RESERVED.  ALL OTHER TRADEMARKS LISTED HEREIN ARE  *
+ *   THE PROPERTY OF THEIR RESPECTIVE OWNERS.                  *
+ *                                                             *
+ ************************************************************-->

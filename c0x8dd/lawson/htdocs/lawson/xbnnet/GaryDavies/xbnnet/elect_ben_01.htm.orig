@@ -1,0 +1,141 @@
+<html>
+<head>
+<link rel="stylesheet" type="text/css" id="default" title="default" href="/lawson/xhrnet/ui/default.css"/>
+<link rel="alternate stylesheet" type="text/css" id="ui" title="classic" href="/lawson/xhrnet/ui/ui.css"/>
+<link rel="alternate stylesheet" type="text/css" id="uiLDS" title="lds" href="/lawson/webappjs/lds/css/ldsEMSS.css"/>
+<script src="/lawson/xhrnet/xml/xmlcommon.js"></script>
+<script type="text/javascript" src="/lawson/xhrnet/ui/ui.js"></script>
+<script src="/lawson/webappjs/javascript/objects/Sizer.js"></script>
+<script>
+function startProgram()
+{
+	REC_TYPE=parent.parent.EligPlans[parent.parent.CurrentEligPlan][6]
+	parent.flexflag=0
+	parent.empflag=0
+	parent.compflag=0
+	var html=""
+	var head=""
+	var bod=""
+
+	// PT 145479. Fix issue where radio button appears under wrong column.
+	for(var i=1; i<parent.parent.SelectedPlan.length; i++) {
+		if(parent.parent.SelectedPlan[i][6]!="" && parent.parent.SelectedPlan[i][6]!=null && parent.parent.SelectedPlan[i][6]!=0) {
+			parent.flexflag=1
+		}
+		if(parent.parent.SelectedPlan[i][5]!="" && parent.parent.SelectedPlan[i][5]!=null && parent.parent.SelectedPlan[i][5]!=0) {
+			parent.empflag=1
+		}
+		if(parent.parent.SelectedPlan[i][8]!="" && parent.parent.SelectedPlan[i][8]!=null && parent.parent.SelectedPlan[i][8]!=0) {
+			parent.compflag=1
+		}
+	}
+
+	for(var i=1; i<parent.parent.SelectedPlan.length; i++) {
+		bod+='<tr>'
+		bod+='<td class="plaintablecellborder">&nbsp;'+parent.parent.SelectedPlan[i][2]+'</td>'
+
+		// flex column
+		if(parent.parent.SelectedPlan[i][6]!="" && parent.parent.SelectedPlan[i][6]!=null && parent.parent.SelectedPlan[i][6]!=0) {
+			bod+='<td class="plaintablecellborder" style="text-align:right" nowrap>&nbsp;'
+			bod+=parent.parent.formatCont(parent.parent.SelectedPlan[i][6])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'
+		}
+		else if (parent.flexflag == 1)
+			bod+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+
+		// employee cost column
+		if(parent.parent.SelectedPlan[i][5]!="" && parent.parent.SelectedPlan[i][5]!=null && parent.parent.SelectedPlan[i][5]!=0) {
+			bod+='<td class="plaintablecellborder" style="text-align:right" nowrap>&nbsp;'
+			bod+=parent.parent.formatCont(parent.parent.SelectedPlan[i][5])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'
+		}
+		else if (parent.empflag == 1)
+			bod+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+
+		// company cost column
+		if(parent.parent.SelectedPlan[i][8]!="" && parent.parent.SelectedPlan[i][8]!=null && parent.parent.SelectedPlan[i][8]!=0) {
+			bod+='<td class="plaintablecellborder" style="text-align:right" nowrap>&nbsp;'
+			bod+=parent.parent.formatCont(parent.parent.SelectedPlan[i][8])
+			if(parent.parent.EMP_CONT_TYPE=="P")
+				bod+=getSeaPhrase("PER","BEN")
+			bod+='</td>'
+		}
+		else if (parent.compflag == 1)
+			bod+='<td class="plaintablecellborder" style="text-align:center">&nbsp;</td>'
+
+		bod+='<td class="plaintablecellborder" style="text-align:center">'
+		bod+='<input class="inputbox" type=radio name=one onClick=parent.parent.choice='+i+'></td>'
+		bod+='</tr>'
+	}
+	bod+='</table></form>'
+
+	html += '<table border="0" cellpadding="0" cellspacing="0">'
+	html += '<tr><td class="plaintablecell" valign="top">'
+
+    head += '<form onsubmit="return false;">'
+	head +='<table class="plaintableborder" border="0" cellpadding="0" cellspacing="0" styler="list">'
+	head += '<tr>'
+	head += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("COVERAGE","BEN")+'</th>'
+	if(parent.flexflag==1) {
+		head += '<th class="plaintableheaderborder style="text-align:center" nowrap>'
+		head += getSeaPhrase("FLEX_CR","BEN")
+		head += '</th>'
+	}
+	if(parent.empflag==1) {
+		head += '<th class="plaintableheaderborder" style="text-align:center" nowrap>'
+		head += getSeaPhrase("COST","BEN")
+		head += '</th>'
+	}
+	if(parent.compflag==1) {
+		head += '<th class="plaintableheaderborder" style="text-align:center" nowrap>'
+		head += getSeaPhrase("CO_COST","BEN")
+		head += '</th>'
+	}
+	head += '<th class="plaintableheaderborder" style="text-align:center">'+getSeaPhrase("SELECT","BEN")+'</th>'
+	head += '</tr>'
+
+	var docHeader = parent.header('<br>'+parent.planMessages(parent.parent.SelectedPlan[1][3],parent.parent.SelectedPlan[1][4])+'<p>'+getSeaPhrase("SELECT_COVERAGE_OPTION","BEN"));
+	var docFooter = parent.footer(parent.parent.SelectedPlan[1][3],parent.parent.SelectedPlan[1][4])
+
+	html += head + bod + docFooter
+
+	html += '</td><td class="plaintablecell" valign="top">'
+
+	html += docHeader
+
+	html += '</td></tr>'
+	html += '</table>'
+
+	parent.parent.removeWaitAlert();
+	if (typeof(parent.parent.parent.removeWaitAlert) != "undefined") {
+		parent.parent.parent.removeWaitAlert();
+	}
+	document.getElementById("paneBody").innerHTML = '<div style="padding:10px">'
+		+ html
+		+ '</div>'
+	document.getElementById("paneHeader").innerHTML = '<span>'+getSeaPhrase("BEN_ELECT","BEN")+' - '+parent.parent.EligPlans[parent.parent.CurrentEligPlan][8]+'</span>';
+	stylePage();
+	document.body.style.visibility = "visible";
+}
+</script>
+</head>
+<body onload="setLayerSizes();startProgram()" style="visibility:hidden">
+<div id="paneBorder" class="paneborder">
+	<table id="paneTable" border="0" height="100%" width="100%" cellpadding="0" cellspacing="0">
+	<tr><td style="height:16px">
+		<div id="paneHeader" class="paneheader">&nbsp;</div>
+	</td></tr>
+	<tr><td>
+		<div id="paneBodyBorder" class="panebodyborder" styler="groupbox"><div id="paneBody" class="panebody"></div>
+		</div>
+	</td></tr>
+	</table>
+</div>
+</body>
+</html>
+<!-- Version: 8-)@(#)@(201111) 09.00.01.06.00 -->
+<!-- $Header: /cvs/cvs_archive/applications/webtier/shr/src/xbnnet/elect_ben_01.htm,v 1.20.2.12 2010/10/06 02:42:43 juanms Exp $ -->
